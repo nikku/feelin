@@ -4,9 +4,8 @@ a**'s
 
 Script "a**'s"
   ArithmeticExpression "a**'s"
-    SimplePositiveUnaryTest "a"
-      QualifiedName "a"
-        Name "a"
+    QualifiedName "a"
+      Name "a"
     ArithOp "**"
     ⚠ "'"
     QualifiedName "s"

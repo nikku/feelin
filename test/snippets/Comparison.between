@@ -4,9 +4,8 @@ a between b and c
 
 Script "a between b and c"
   Comparison "a between b and c"
-    SimplePositiveUnaryTest "a"
-      QualifiedName "a"
-        Name "a"
+    QualifiedName "a"
+      Name "a"
     between "between"
     QualifiedName "b"
       Name "b"

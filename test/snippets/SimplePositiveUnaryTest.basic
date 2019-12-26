@@ -3,6 +3,6 @@
 ----------
 
 Script ">= 10"
-  SimplePositiveUnaryTest ">= 10"
+  SuperSimplePositiveUnaryTest ">= 10"
     CompareOp ">="
     NumericLiteral "10"

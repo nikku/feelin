@@ -3,7 +3,7 @@
 ----------
 
 Script ">= a.b"
-  SimplePositiveUnaryTest ">= a.b"
+  SuperSimplePositiveUnaryTest ">= a.b"
     CompareOp ">="
     QualifiedName "a.b"
       Name "a"

@@ -16,11 +16,12 @@
   compare @left,
   and @left,
   or @left,
-  in,
   unaryTest @cut
 }
 
-@top[name=Script] { expression+ }
+@top[name=Script] {
+  expression+
+}
 
 expression {
   textualExpression |
@@ -41,8 +42,12 @@ textualExpression {
   QuantifiedExpression {
     (kw<"some"> | kw<"every">) commaSep1<InExpression<expression>> kw<"satisfies"> expression
   } |
-  Disjunction |
-  Conjunction |
+  Disjunction {
+    expression !or kw<"or"> expression
+  } |
+  Conjunction {
+    expression !and kw<"and"> expression
+  } |
   Comparison |
   ArithmeticExpression |
   UnaryExpression |
@@ -50,16 +55,16 @@ textualExpression {
     expression !instanceOf instanceOf Type
   } |
   PathExpression {
-    expression !path Path { "." Name }
+    expression !path "." Name
   } |
   FilterExpression {
-    expression !filter Filter { "[" expression "]" }
+    expression !filter "[" expression "]"
   } |
   FunctionInvocation |
   literal |
   QualifiedName ~qname /* TODO(nikku): should be name according to spec */ |
   kw<"?"> |
-  SimplePositiveUnaryTest |
+  SuperSimplePositiveUnaryTest |
   "(" textualExpression ")"
 }
 
@@ -70,7 +75,7 @@ boxedExpression {
 }
 
 InExpression<Expr> {
-  Name !in kw<"in"> Expr
+  Name kw<"in"> Expr
 }
 
 IterationContext {
@@ -80,14 +85,6 @@ IterationContext {
 UnaryExpression {
   !prefix ArithOp<"+"> expression |
   !prefix Minus expression
-}
-
-Disjunction {
-  expression !or kw<"or"> expression
-}
-
-Conjunction {
-  expression !and kw<"and"> expression
 }
 
 ArithmeticExpression {
@@ -103,6 +100,17 @@ Comparison {
   expression !compare kw<"between"> expression kw<"and"> expression |
   expression !compare kw<"in"> PositiveUnaryTest |
   expression !compare kw<"in"> !unaryTest "(" PositiveUnaryTests ")"
+}
+
+SuperSimplePositiveUnaryTest {
+  (CompareOp<Gt | Gte | Lt | Lte>) endpoint |
+  Interval
+}
+
+SimplePositiveUnaryTests {
+  SimplePositiveUnaryTests |
+  kw<"not"> "(" SimplePositiveUnaryTests ")" |
+  "-"
 }
 
 SimplePositiveUnaryTest {

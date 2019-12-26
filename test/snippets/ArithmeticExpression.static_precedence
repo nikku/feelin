@@ -1,0 +1,18 @@
+1 + 1 * 4 / 10 ^ 5
+
+----------
+
+Script "1 + 1 * 4 / 10 ^ 5"
+  ArithmeticExpression "1 + 1 * 4 / 10 ^ 5"
+    NumericLiteral "1"
+    ArithOp "+"
+    ArithmeticExpression "1 * 4 / 10 ^ 5"
+      ArithmeticExpression "1 * 4"
+        NumericLiteral "1"
+        ArithOp "*"
+        NumericLiteral "4"
+      ArithOp "/"
+      ArithmeticExpression "10 ^ 5"
+        NumericLiteral "10"
+        ArithOp "^"
+        NumericLiteral "5"

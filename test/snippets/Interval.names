@@ -3,7 +3,7 @@
 ----------
 
 Script "[numB..numC]"
-  SimplePositiveUnaryTest "[numB..numC]"
+  SuperSimplePositiveUnaryTest "[numB..numC]"
     Interval "[numB..numC]"
       QualifiedName "numB"
         Name "numB"

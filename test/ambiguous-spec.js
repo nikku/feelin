@@ -120,8 +120,6 @@ describe('ambiguous', function() {
 
       const serializedTree = treeToString(tree, example);
 
-      console.log(serializedTree);
-
       // then
       expect(serializedTree).not.to.include('⚠');
     });

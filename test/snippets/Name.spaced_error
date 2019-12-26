@@ -3,5 +3,7 @@ a b
 ----------
 
 Script "a b"
-  Name "a"
-  Name "b"
+  QualifiedName "a"
+    Name "a"
+  QualifiedName "b"
+    Name "b"

@@ -3,8 +3,9 @@
 ----------
 
 Script "[numB..numC]"
-  List "[numB..numC]"
-    Comparison "numB..numC"
-      Name "numB"
-      ⚠ ".."
-      Name "numC"
+  SimplePositiveUnaryTest "[numB..numC]"
+    Interval "[numB..numC]"
+      QualifiedName "numB"
+        Name "numB"
+      QualifiedName "numC"
+        Name "numC"

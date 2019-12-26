@@ -4,7 +4,8 @@ a instance of b
 
 Script "a instance of b"
   InstanceOf "a instance of b"
-    Name "a"
+    QualifiedName "a"
+      Name "a"
     Type "b"
       QualifiedName "b"
         Name "b"

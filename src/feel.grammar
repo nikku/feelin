@@ -1,12 +1,9 @@
 @skip { whitespace }
 
 @precedence {
-  dots @cut,
   else @left,
   then @left,
-  qname,
   name,
-  value,
   call,
   filter @left,
   qnamePath @left,
@@ -60,10 +57,10 @@ textualExpression {
   } |
   FunctionInvocation |
   literal |
-  !name Name |
+  QualifiedName ~qname /* TODO(nikku): should be name according to spec */ |
   kw<"?"> |
   SimplePositiveUnaryTest |
-  "(" ~interval textualExpression ")"
+  "(" textualExpression ")"
 }
 
 boxedExpression {
@@ -167,7 +164,7 @@ PositionalParameters {
 }
 
 endpoint {
-  !qname QualifiedName |
+  QualifiedName ~qname |
   simpleLiteral ~literal
 }
 
@@ -188,7 +185,7 @@ QualifiedName {
 }
 
 Interval {
-  ( "]" | "(" | "[" ) ~interval endpoint !dots ".." endpoint ( ")" | "[" | "]" )
+  ( "]" | "(" | "[" ) ~interval endpoint ".." endpoint ( ")" | "[" | "]" )
 }
 
 List {
@@ -199,13 +196,11 @@ kw<Term> {
   @specialize[name={Term}]<Name, Term>
 }
 
+/*
 ckw<Term> {
   @extend[name={Term}]<Name, Term>
 }
-
-dotSep1<Expr> {
-  Expr ("." Expr)*
-}
+*/
 
 commaSep1<Expr> {
   Expr ("," Expr)*

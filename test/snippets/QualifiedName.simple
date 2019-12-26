@@ -3,7 +3,6 @@ a.B
 ----------
 
 Script "a.B"
-  PathExpression "a.B"
+  QualifiedName "a.B"
     Name "a"
-    Path ".B"
-      Name "B"
+    Name "B"

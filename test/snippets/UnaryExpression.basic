@@ -5,4 +5,5 @@
 Script "-x"
   UnaryExpression "-x"
     ArithOp "-"
-    Name "x"
+    QualifiedName "x"
+      Name "x"

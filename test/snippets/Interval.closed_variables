@@ -3,8 +3,9 @@
 ----------
 
 Script "[a..b]"
-  List "[a..b]"
-    Comparison "a..b"
-      Name "a"
-      ⚠ ".."
-      Name "b"
+  SimplePositiveUnaryTest "[a..b]"
+    Interval "[a..b]"
+      QualifiedName "a"
+        Name "a"
+      QualifiedName "b"
+        Name "b"

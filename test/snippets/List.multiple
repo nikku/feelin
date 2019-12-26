@@ -4,5 +4,9 @@
 
 Script "[a, b]"
   List "[a, b]"
-    Name "a"
-    Name "b"
+    SimplePositiveUnaryTest "a"
+      QualifiedName "a"
+        Name "a"
+    SimplePositiveUnaryTest "b"
+      QualifiedName "b"
+        Name "b"

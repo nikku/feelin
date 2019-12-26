@@ -1,0 +1,10 @@
+(a ..
+
+----------
+
+Script "(a .."
+  SimplePositiveUnaryTest "(a .."
+    Interval "(a .."
+      QualifiedName "a"
+        Name "a"
+      ⚠ ""

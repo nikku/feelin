@@ -4,9 +4,9 @@ a+b.c
 
 Script "a+b.c"
   ArithmeticExpression "a+b.c"
-    Name "a"
+    QualifiedName "a"
+      Name "a"
     ArithOp "+"
-    PathExpression "b.c"
+    QualifiedName "b.c"
       Name "b"
-      Path ".c"
-        Name "c"
+      Name "c"

@@ -4,5 +4,6 @@ a()
 
 Script "a()"
   FunctionInvocation "a()"
-    Name "a"
+    QualifiedName "a"
+      Name "a"
     Parameters "()"

@@ -3,4 +3,5 @@ a
 ----------
 
 Script "a"
-  Name "a"
+  QualifiedName "a"
+    Name "a"

@@ -4,6 +4,8 @@ a or b
 
 Script "a or b"
   Disjunction "a or b"
-    Name "a"
+    QualifiedName "a"
+      Name "a"
     or "or"
-    Name "b"
+    QualifiedName "b"
+      Name "b"

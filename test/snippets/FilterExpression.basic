@@ -4,6 +4,10 @@ a[c]
 
 Script "a[c]"
   FilterExpression "a[c]"
-    Name "a"
+    SimplePositiveUnaryTest "a"
+      QualifiedName "a"
+        Name "a"
     Filter "[c]"
-      Name "c"
+      SimplePositiveUnaryTest "c"
+        QualifiedName "c"
+          Name "c"

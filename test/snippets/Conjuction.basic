@@ -4,6 +4,8 @@ a and b
 
 Script "a and b"
   Conjunction "a and b"
-    Name "a"
+    QualifiedName "a"
+      Name "a"
     and "and"
-    Name "b"
+    QualifiedName "b"
+      Name "b"

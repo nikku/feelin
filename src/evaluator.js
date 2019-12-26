@@ -26,7 +26,6 @@ function Evaluator(parser) {
 
     tree.iterate({
       enter(type, start, end) {
-
         stack.push({ args: [] });
       },
 
@@ -36,87 +35,150 @@ function Evaluator(parser) {
 
         const parent = stack[stack.length - 1];
 
-        parent.args.push(evalNode(type, input.slice(start, end), current.args, context));
+        parent.args.push(evalNode(type, input.slice(start, end), current.args));
 
       }
     });
 
-    return root.args[root.args.length - 1];
+    return root.args[root.args.length - 1](context);
   };
 
 }
 
 
-function evalNode(type, input, args, context) {
+function evalNode(type, input, args) {
+
+  // console.log(type.name, input, args);
 
   switch (type.name) {
-    case 'ArithOp':
+    case 'ArithOp': return (context) => {
       switch (input) {
-        case '+': return (a, b) => a + b;
-        case '-': return (a, b) => a - b;
-        case '*': return (a, b) => a * b;
-        case '/': return (a, b) => a / b;
+        case '+': return (a, b) => a(context) + b(context);
+        case '-': return (a, b) => a(context) - b(context);
+        case '*': return (a, b) => a(context) * b(context);
+        case '/': return (a, b) => a(context) / b(context);
         case '**':
-        case '^': return (a, b) => a ^ b;
+        case '^': return (a, b) => a(context) ^ b(context);
       }
+    };
 
-    case 'CompareOp':
+    case 'CompareOp': return (context) => {
+
       switch (input) {
-        case '>': return (b) => (a) => a > b;
-        case '>=': return (b) => (a) => a >= b;
-        case '<': return (b) => (a) => a < b;
-        case '<=': return (b) => (a) => a <= b;
-        case '=': return (b) => (a) => a == b;
-        case '!=': return (b) => (a) => a != b;
+        case '>': return (b) => (a) => a(context) > b(context);
+        case '>=': return (b) => (a) => a(context) >= b(context);
+        case '<': return (b) => (a) => a(context) < b(context);
+        case '<=': return (b) => (a) => a(context) <= b(context);
+        case '=': return (b) => (a) => a(context) == b(context);
+        case '!=': return (b) => (a) => a(context) != b(context);
       }
+    };
 
-    case 'Name': return getFromContext(input, context);
+    case 'QualifiedName': return (context) => getFromContext(args.join('.'), context);
+
+    case 'Name': return input;
 
     case 'and': return null;
 
-    case 'in': return (expr, values) => (Array.isArray(values) ? values : [ values ]).every(valOrFn => compareValOrFn(valOrFn, expr));
+    /*
+      expression !compare kw<"in"> PositiveUnaryTest |
+      expression !compare kw<"in"> !unaryTest "(" PositiveUnaryTests ")"
+     */
+    case 'in': return (context) => (b) => (a) => {
 
-    case 'between': return (expr, start, end) => expr >= start && expr >= end;
+      const tests = b(context);
 
-    case 'Literal': return args[0] === 'null' ? null : args[0];
+      return (Array.isArray(tests) ? tests : [ tests ]).every(test => compareValOrFn(test, a));
+    };
 
-    case 'NumericLiteral': return input.includes('.') ? parseFloat(input) : parseInt(input);
+    case 'between': return (context) => (expr, start, end) => start(context) <= expr(context) <= end(context);
 
-    case 'BooleanLiteral': return input === 'true' ? true : false;
+    case 'NumericLiteral': return (context) => input.includes('.') ? parseFloat(input) : parseInt(input);
 
-    case 'StringLiteral': return input.slice(1, -1);
+    case 'BooleanLiteral': return (context) => input === 'true' ? true : false;
 
-    case 'Comparison':
+    case 'StringLiteral': return (context) => input.slice(1, -1);
+
+    case 'PositionalParameters': return (context) => args;
+
+    case 'FunctionInvocation': return (context) => args[0](context)(...args[1](context).map(fn => fn(context)));
+
+    case 'IfExpression': return (context) => {
+      const [ _if, ifCondition, _then, thenValue, _else, elseValue ] = args;
+
+      if (ifCondition(context)) {
+        return thenValue(context);
+      } else {
+        return elseValue(context);
+      }
+    };
+
+    case 'Parameters': return args[0];
+
+    case 'Comparison': return (context) => {
+
       // between
       if (args.length === 5) {
         return null;
       }
 
-      const [ a1, fn, b1 ] = args;
+      const [ compA, compFn, compB ] = args;
 
-      return fn(a1, b1);
+      return compFn(context)(compB)(compA);
+    };
 
-    case 'ArithmeticExpression':
+    case 'ArithmeticExpression': return (context) => {
       const [ a, op, b ] = args;
 
-      return op(a, b);
+      return op(context)(a, b);
+    };
 
     case 'PositiveUnaryTest': return args[0];
-    case 'PositiveUnaryTests': return args;
 
-    case 'SimplePositiveUnaryTest':
+    case 'PositiveUnaryTests': return (context) => args.map(a => a(context));
+
+    case 'PathExpression': return (context) => {
+
+      const pathTarget = args[0](context);
+      const pathProp = args[1];
+
+      if (Array.isArray(pathTarget)) {
+        return pathTarget.map(el => el[pathProp]);
+      } else {
+        return pathTarget[pathProp];
+      }
+    };
+
+    case 'FilterExpression': return (context) => {
+
+      const filterTarget = args[0](context);
+
+      return filterTarget.filter(el => {
+
+        const filter = args[1]({
+          ...context,
+          ...el
+        });
+
+        return filter;
+      });
+    };
+
+    case 'UnaryExpression': return (context) => args[0](context)(() => 0, args[1]);
+
+    case 'SuperSimplePositiveUnaryTest': return (context) => {
 
       if (args.length === 1) {
-        return wrapTest(args[0]);
+        return wrapTest(args[0](context));
       }
 
-      return args[0](args[1]);
+      return args[0](context)(args[1]);
+    };
 
     case 'Interval':
       return new Interval(args[0], args[1], args[3], args[4]);
 
-    case 'Script':
-      return args[args.length - 1];
+    case 'Script': return (context) => args[args.length - 1](context);
   }
 }
 
@@ -131,7 +193,7 @@ function compareValOrFn(valOrFn, expr) {
     return valOrFn(expr);
   }
 
-  return valOrFn == expr;
+  return (context) => valOrFn == expr(context);
 }
 
 function wrapTest(value) {

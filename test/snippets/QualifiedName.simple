@@ -1,0 +1,9 @@
+a.B
+
+----------
+
+Script "a.B"
+  PathExpression "a.B"
+    Name "a"
+    Path ".B"
+      Name "B"

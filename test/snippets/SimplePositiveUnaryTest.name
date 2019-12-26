@@ -1,0 +1,9 @@
+>= a
+
+----------
+
+Script ">= a"
+  SimplePositiveUnaryTest ">= a"
+    CompareOp ">="
+    QualifiedName "a"
+      Name "a"

@@ -1,0 +1,16 @@
+if if a then d else e then c
+
+----------
+
+Script "if if a then d else e then c"
+  IfExpression "if if a then d else e then c"
+    if "if"
+    IfExpression "if a then d else e"
+      if "if"
+      Name "a"
+      then "then"
+      Name "d"
+      else "else"
+      Name "e"
+    then "then"
+    Name "c"

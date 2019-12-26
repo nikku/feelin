@@ -1,0 +1,11 @@
+a between b and c
+
+----------
+
+Script "a between b and c"
+  Comparison "a between b and c"
+    Name "a"
+    between "between"
+    Name "b"
+    and "and"
+    Name "c"

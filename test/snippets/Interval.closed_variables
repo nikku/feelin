@@ -1,0 +1,10 @@
+[a..b]
+
+----------
+
+Script "[a..b]"
+  List "[a..b]"
+    Comparison "a..b"
+      Name "a"
+      ⚠ ".."
+      Name "b"

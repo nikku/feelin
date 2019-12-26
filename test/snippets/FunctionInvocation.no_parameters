@@ -1,0 +1,8 @@
+a()
+
+----------
+
+Script "a()"
+  FunctionInvocation "a()"
+    Name "a"
+    Parameters "()"

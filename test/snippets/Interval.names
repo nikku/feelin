@@ -1,0 +1,10 @@
+[numB..numC]
+
+----------
+
+Script "[numB..numC]"
+  List "[numB..numC]"
+    Comparison "numB..numC"
+      Name "numB"
+      ⚠ ".."
+      Name "numC"

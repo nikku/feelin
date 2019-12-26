@@ -1,0 +1,15 @@
+function(a, b) external a
+
+----------
+
+Script "function(a, b) external a"
+  FunctionDefinition "function(a, b) external a"
+    function "function"
+    FormalParameter "a"
+      ParameterName "a"
+        Name "a"
+    FormalParameter "b"
+      ParameterName "b"
+        Name "b"
+    external "external"
+    Name "a"

@@ -1,0 +1,15 @@
+x + x * y ^ c
+
+----------
+
+Script "x + x * y ^ c"
+  ArithmeticExpression "x + x * y ^ c"
+    Name "x"
+    ArithOp "+"
+    ArithmeticExpression "x * y ^ c"
+      Name "x"
+      ArithOp "*"
+      ArithmeticExpression "y ^ c"
+        Name "y"
+        ArithOp "^"
+        Name "c"

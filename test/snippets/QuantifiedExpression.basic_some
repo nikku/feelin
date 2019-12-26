@@ -1,0 +1,13 @@
+some a in b satisfies c
+
+----------
+
+Script "some a in b satisfies c"
+  QuantifiedExpression "some a in b satisfies c"
+    some "some"
+    InExpression "a in b"
+      Name "a"
+      in "in"
+      Name "b"
+    satisfies "satisfies"
+    Name "c"

@@ -1,0 +1,16 @@
+a in ([ a .. 5 ])
+
+----------
+
+Script "a in ([ a .. 5 ])"
+  Comparison "a in ([ a .. 5 ])"
+    Name "a"
+    in "in"
+    PositiveUnaryTests "[ a .. 5 ]"
+      PositiveUnaryTest "[ a .. 5 ]"
+        List "[ a .. 5 ]"
+          Comparison "a .. 5"
+            Name "a"
+            ⚠ ".."
+            SimplePositiveUnaryTest "5"
+              NumericLiteral "5"

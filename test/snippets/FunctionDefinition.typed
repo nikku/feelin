@@ -1,0 +1,20 @@
+function(a: Foo, b: bar) a
+
+----------
+
+Script "function(a: Foo, b: bar) a"
+  FunctionDefinition "function(a: Foo, b: bar) a"
+    function "function"
+    FormalParameter "a: Foo"
+      ParameterName "a"
+        Name "a"
+      Type "Foo"
+        QualifiedName "Foo"
+          Name "Foo"
+    FormalParameter "b: bar"
+      ParameterName "b"
+        Name "b"
+      Type "bar"
+        QualifiedName "bar"
+          Name "bar"
+    Name "a"

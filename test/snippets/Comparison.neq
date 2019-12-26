@@ -1,0 +1,9 @@
+a != b
+
+----------
+
+Script "a != b"
+  Comparison "a != b"
+    Name "a"
+    CompareOp "!="
+    Name "b"

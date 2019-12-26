@@ -1,0 +1,11 @@
+a(foo, bar)
+
+----------
+
+Script "a(foo, bar)"
+  FunctionInvocation "a(foo, bar)"
+    Name "a"
+    Parameters "(foo, bar)"
+      PositionalParameters "foo, bar"
+        Name "foo"
+        Name "bar"

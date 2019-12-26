@@ -1,0 +1,9 @@
+1 + 1
+
+----------
+
+Script "1 + 1"
+  ArithmeticExpression "1 + 1"
+    NumericLiteral "1"
+    ArithOp "+"
+    NumericLiteral "1"

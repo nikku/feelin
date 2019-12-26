@@ -1,0 +1,11 @@
+a instance of b.C
+
+----------
+
+Script "a instance of b.C"
+  InstanceOf "a instance of b.C"
+    Name "a"
+    Type "b.C"
+      QualifiedName "b.C"
+        Name "b"
+        Name "C"

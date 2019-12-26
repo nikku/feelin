@@ -1,0 +1,10 @@
+INPUT in 10
+
+----------
+
+Script "INPUT in 10"
+  Comparison "INPUT in 10"
+    Name "INPUT"
+    in "in"
+    PositiveUnaryTest "10"
+      NumericLiteral "10"

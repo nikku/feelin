@@ -1,0 +1,12 @@
+a+b.c
+
+----------
+
+Script "a+b.c"
+  ArithmeticExpression "a+b.c"
+    Name "a"
+    ArithOp "+"
+    PathExpression "b.c"
+      Name "b"
+      Path ".c"
+        Name "c"

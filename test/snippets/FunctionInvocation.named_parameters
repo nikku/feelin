@@ -1,0 +1,15 @@
+a(foo: f, bar: b)
+
+----------
+
+Script "a(foo: f, bar: b)"
+  FunctionInvocation "a(foo: f, bar: b)"
+    Name "a"
+    Parameters "(foo: f, bar: b)"
+      NamedParameters "foo: f, bar: b"
+        ParameterName "foo"
+          Name "foo"
+        Name "f"
+        ParameterName "bar"
+          Name "bar"
+        Name "b"

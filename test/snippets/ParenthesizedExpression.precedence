@@ -1,0 +1,12 @@
+(a + b) * c
+
+----------
+
+Script "(a + b) * c"
+  ArithmeticExpression "(a + b) * c"
+    ArithmeticExpression "a + b"
+      Name "a"
+      ArithOp "+"
+      Name "b"
+    ArithOp "*"
+    Name "c"

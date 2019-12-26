@@ -1,0 +1,12 @@
+((a).b).c
+
+----------
+
+Script "((a).b).c"
+  PathExpression "((a).b).c"
+    PathExpression "(a).b"
+      Name "a"
+      Path ".b"
+        Name "b"
+    Path ".c"
+      Name "c"

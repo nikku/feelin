@@ -1,0 +1,17 @@
+every a in b, c in d satisfies c
+
+----------
+
+Script "every a in b, c in d satisfies c"
+  QuantifiedExpression "every a in b, c in d satisfies c"
+    every "every"
+    InExpression "a in b"
+      Name "a"
+      in "in"
+      Name "b"
+    InExpression "c in d"
+      Name "c"
+      in "in"
+      Name "d"
+    satisfies "satisfies"
+    Name "c"

@@ -1,0 +1,16 @@
+a between b() and c-d
+
+----------
+
+Script "a between b() and c-d"
+  Comparison "a between b() and c-d"
+    Name "a"
+    between "between"
+    FunctionInvocation "b()"
+      Name "b"
+      Parameters "()"
+    and "and"
+    ArithmeticExpression "c-d"
+      Name "c"
+      ArithOp "-"
+      Name "d"

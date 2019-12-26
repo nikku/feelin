@@ -1,0 +1,11 @@
+-x ** y
+
+----------
+
+Script "-x ** y"
+  ArithmeticExpression "-x ** y"
+    UnaryExpression "-x"
+      ArithOp "-"
+      Name "x"
+    ArithOp "**"
+    Name "y"

@@ -1,0 +1,9 @@
+(a..b)
+
+----------
+
+Script "(a..b)"
+  Disjunction "a..b"
+    Name "a"
+    ⚠ ".."
+    Name "b"

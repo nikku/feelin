@@ -1,0 +1,12 @@
+a[c].b
+
+----------
+
+Script "a[c].b"
+  PathExpression "a[c].b"
+    FilterExpression "a[c]"
+      Name "a"
+      Filter "[c]"
+        Name "c"
+    Path ".b"
+      Name "b"

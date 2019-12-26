@@ -1,0 +1,9 @@
+x + x
+
+----------
+
+Script "x + x"
+  ArithmeticExpression "x + x"
+    Name "x"
+    ArithOp "+"
+    Name "x"

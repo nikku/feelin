@@ -1,0 +1,15 @@
+a and b or c and d
+
+----------
+
+Script "a and b or c and d"
+  Disjunction "a and b or c and d"
+    Conjunction "a and b"
+      Name "a"
+      and "and"
+      Name "b"
+    or "or"
+    Conjunction "c and d"
+      Name "c"
+      and "and"
+      Name "d"

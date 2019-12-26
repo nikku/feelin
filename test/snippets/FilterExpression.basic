@@ -1,0 +1,9 @@
+a[c]
+
+----------
+
+Script "a[c]"
+  FilterExpression "a[c]"
+    Name "a"
+    Filter "[c]"
+      Name "c"

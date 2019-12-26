@@ -1,0 +1,13 @@
+if a != b then c
+
+----------
+
+Script "if a != b then c"
+  IfExpression "if a != b then c"
+    if "if"
+    Comparison "a != b"
+      Name "a"
+      CompareOp "!="
+      Name "b"
+    then "then"
+    Name "c"

@@ -1,0 +1,14 @@
+{ a: a, b: b }
+
+----------
+
+Script "{ a: a, b: b }"
+  Context "{ a: a, b: b }"
+    ContextEntry "a: a"
+      Key "a"
+        Name "a"
+      Name "a"
+    ContextEntry "b: b"
+      Key "b"
+        Name "b"
+      Name "b"

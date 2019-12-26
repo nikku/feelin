@@ -1,0 +1,9 @@
+x * y
+
+----------
+
+Script "x * y"
+  ArithmeticExpression "x * y"
+    Name "x"
+    ArithOp "*"
+    Name "y"

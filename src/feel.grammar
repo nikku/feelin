@@ -250,7 +250,7 @@ commaSep<Expr> {
 
   /* 35. string literal = """, { character – (""" | vertical space) | string escape sequence}, """ ; */
   StringLiteral {
-    '"' !["] '"'
+    '"' !["]* '"'
   }
 
   NumericLiteral {

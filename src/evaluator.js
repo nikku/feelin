@@ -48,7 +48,7 @@ function Evaluator(parser) {
 
 function evalNode(type, input, args) {
 
-  // console.log(type.name, input, args);
+  console.log(type.name, input, args);
 
   switch (type.name) {
     case 'ArithOp': return (context) => {
@@ -84,11 +84,51 @@ function evalNode(type, input, args) {
       expression !compare kw<"in"> PositiveUnaryTest |
       expression !compare kw<"in"> !unaryTest "(" PositiveUnaryTests ")"
      */
-    case 'in': return (context) => (b) => (a) => {
+    case 'InTester': return (context) => (b) => (a) => {
 
       const tests = b(context);
 
       return (Array.isArray(tests) ? tests : [ tests ]).every(test => compareValOrFn(test, a));
+    };
+
+    case 'InExtractor': return (context) => {
+
+      return (prop, _target) => {
+
+        const target = _target(context);
+
+        if (!Array.isArray(target)) {
+          throw new Error('<a> in <b> must target <b> : Collection');
+        }
+
+        return target.map(el => (
+          { [prop] : el[prop] }
+        ));
+      };
+
+    };
+
+    case 'InExpression': return (context) => {
+
+      const [ prop, extractor, target ] = args;
+
+      return extractor(context)(prop, target);
+    };
+
+    case 'every': return (context) => {
+
+      return (_contexts, _condition) => {
+        const contexts = _contexts(context);
+        return contexts.every(ctx => _condition(ctx));
+      };
+
+    };
+
+    case 'some': return (context) => {
+      return (_contexts, _condition) => {
+        const contexts = _contexts(context);
+        return contexts.some(ctx => _condition(ctx));
+      };
     };
 
     case 'between': return (context) => (expr, start, end) => start(context) <= expr(context) <= end(context);
@@ -117,14 +157,25 @@ function evalNode(type, input, args) {
 
     case 'Comparison': return (context) => {
 
+      const [ compA, compFn, compB, _compareAnd, compC ] = args;
+
       // between
       if (args.length === 5) {
-        return null;
+        return compFn(context)(compA, compB, compC);
       }
 
-      const [ compA, compFn, compB ] = args;
-
       return compFn(context)(compB)(compA);
+    };
+
+    case 'QuantifiedExpression': return (context) => {
+
+      const testFn = args[0](context);
+
+      const contexts = args[1];
+
+      const condition = args[3];
+
+      return testFn(contexts, condition);
     };
 
     case 'ArithmeticExpression': return (context) => {
@@ -173,6 +224,10 @@ function evalNode(type, input, args) {
       }
 
       return args[0](context)(args[1]);
+    };
+
+    case 'List': return (context) => {
+      return args.map(arg => arg(context));
     };
 
     case 'Interval':

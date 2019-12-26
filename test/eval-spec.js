@@ -44,6 +44,47 @@ describe('eval', function() {
   });
 
 
+  describe('QuantifiedExpression', function() {
+
+    evaluate('every b in a satisfies b < 10', true, {
+      a: [
+        { b: 9 },
+        { b: 5 }
+      ]
+    });
+
+    evaluate('every b in a satisfies b < 10', false, {
+      a: [
+        { b: 12 },
+        { b: 5 }
+      ]
+    });
+
+    evaluate('every b in a satisfies b < 10', true, {
+      a: [ ]
+    });
+
+    evaluate('some b in a satisfies b < 10', true, {
+      a: [
+        { b: 12 },
+        { b: 5 }
+      ]
+    });
+
+  });
+
+
+  describe('Comparison', function() {
+
+    evaluate('1 between -1 and 5', true);
+
+    evaluate('5 in > 3', true);
+
+    evaluate('5 in < 0', false);
+
+  });
+
+
   describe('IfExpression', function() {
 
     evaluate('if a > 10 then 15 else 5', 15, {
@@ -88,6 +129,28 @@ describe('eval', function() {
         { b: 15 }
       ]
     });
+
+  });
+
+
+  describe('Literals', function() {
+
+    evaluate('"foo"', 'foo');
+
+    evaluate('-1', -1);
+
+    evaluate('false', false);
+
+    evaluate('true', true);
+
+    evaluate('.5', .5);
+
+  });
+
+
+  describe('List', function() {
+
+    evaluate('[1, a, 5 * 3]', [ 1, 2, 15 ], { a: 2 });
 
   });
 

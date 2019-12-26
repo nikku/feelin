@@ -15,7 +15,7 @@ import { parser as Parser } from '../src/parser';
 const snippetsCwd = __dirname + '/snippets';
 
 
-describe.only('parse', function() {
+describe('parse', function() {
 
   testAll({
     write: true

@@ -1,4 +1,8 @@
-import nodeResolve from 'rollup-plugin-node-resolve';
+import nodeResolve from '@rollup/plugin-node-resolve';
+
+import commonjs from '@rollup/plugin-commonjs';
+
+import { terser } from 'rollup-plugin-terser';
 
 export default {
   input: './src/parser.js',
@@ -8,6 +12,8 @@ export default {
   },
   external(id) { return !/^[\.\/]/.test(id) },
   plugins: [
-    nodeResolve()
+    process.env.NODE_ENV === 'production' && terser(),
+    nodeResolve(),
+    commonjs()
   ]
 }

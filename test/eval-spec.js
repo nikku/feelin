@@ -44,19 +44,33 @@ describe('eval', function() {
   });
 
 
+  describe('ForExpression', function() {
+
+    evaluate('for a in b return (a).c', [1, 2], {
+      b: [
+        { c: 1 },
+        { c: 2 }
+      ]
+    });
+
+    evaluate('for a in 1 .. 3 return a', [1, 2, 3]);
+
+  });
+
+
   describe('QuantifiedExpression', function() {
 
     evaluate('every b in a satisfies b < 10', true, {
       a: [
-        { b: 9 },
-        { b: 5 }
+        9,
+        5
       ]
     });
 
     evaluate('every b in a satisfies b < 10', false, {
       a: [
-        { b: 12 },
-        { b: 5 }
+        12,
+        5
       ]
     });
 
@@ -66,8 +80,8 @@ describe('eval', function() {
 
     evaluate('some b in a satisfies b < 10', true, {
       a: [
-        { b: 12 },
-        { b: 5 }
+        12,
+        5
       ]
     });
 
@@ -93,6 +107,18 @@ describe('eval', function() {
 
     evaluate('if a > 10 then 15 else 5', 5, {
       a: 8
+    });
+
+  });
+
+
+  describe('InstanceOf', function() {
+
+    function B() { }
+
+    evaluate('a instance of B', true, {
+      a: new B(),
+      B
     });
 
   });

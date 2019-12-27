@@ -101,12 +101,30 @@ function evalNode(type, input, args) {
           throw new Error('<a> in <b> must target <b> : Collection');
         }
 
-        return target.map(el => (
-          { [prop] : el[prop] }
+        return target.map(t => (
+          { [prop]: t }
         ));
+
       };
 
     };
+
+    // expression
+    // expression ".." expression
+    case 'IterationContext': return (context) => {
+
+      const a = args[0](context);
+
+      const b = args[1] && args[1](context);
+
+      if (!b) {
+        return a;
+      }
+
+      return createRange(a, b);
+    };
+
+    case 'Type': return args[0];
 
     case 'InExpression': return (context) => {
 
@@ -115,8 +133,15 @@ function evalNode(type, input, args) {
       return extractor(context)(prop, target);
     };
 
-    case 'every': return (context) => {
+    case 'InstanceOf': return (context) => {
 
+      const a = args[0](context);
+      const b = args[1](context);
+
+      return a instanceof b;
+    };
+
+    case 'every': return (context) => {
       return (_contexts, _condition) => {
         const contexts = _contexts(context);
         return contexts.every(ctx => _condition(ctx));
@@ -178,6 +203,19 @@ function evalNode(type, input, args) {
       return testFn(contexts, condition);
     };
 
+    // DMN 1.2 - 10.3.2.14
+    // kw<"for"> commaSep1<InExpression<IterationContext>> kw<"return"> expression
+    case 'ForExpression': return (context) => {
+      const contexts = args[1](context);
+
+      return contexts.map(ctx => args[3](ctx));
+    };
+
+    case 'UnaryExpression': return (context) => {
+      const operator = args[0](context);
+      return operator(() => 0, args[1]);
+    };
+
     case 'ArithmeticExpression': return (context) => {
       const [ a, op, b ] = args;
 
@@ -215,8 +253,6 @@ function evalNode(type, input, args) {
       });
     };
 
-    case 'UnaryExpression': return (context) => args[0](context)(() => 0, args[1]);
-
     case 'SuperSimplePositiveUnaryTest': return (context) => {
 
       if (args.length === 1) {
@@ -249,6 +285,26 @@ function compareValOrFn(valOrFn, expr) {
   }
 
   return (context) => valOrFn == expr(context);
+}
+
+function range(size, startAt = 0) {
+  const r = [...Array(size).keys()].map(i => i + startAt);
+
+  r.__isRange = true;
+
+  return r;
+}
+
+function createRange(start, end) {
+
+  if (typeof start === 'number' && typeof end === 'number') {
+
+    const steps = end - start;
+
+    return range(steps + 1, start);
+  }
+
+  throw new Error('unsupported range');
 }
 
 function wrapTest(value) {

@@ -91,10 +91,32 @@ describe('eval', function() {
       a: [ ]
     });
 
+    evaluate('every w in widths, h in heights satisfies w * h < 100', true, {
+      widths: [
+        2,
+        4
+      ],
+      heights: [
+        10,
+        20
+      ]
+    });
+
     evaluate('some b in a satisfies b < 10', true, {
       a: [
         12,
         5
+      ]
+    });
+
+    evaluate('some w in widths, h in heights satisfies w * h < 30', true, {
+      widths: [
+        2,
+        4
+      ],
+      heights: [
+        10,
+        20
       ]
     });
 

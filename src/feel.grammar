@@ -34,13 +34,13 @@ textualExpressions {
 
 textualExpression {
   ForExpression {
-    kw<"for"> commaSep1<InExpression<IterationContext>> kw<"return"> expression
+    kw<"for"> InExpressions<IterationContext> kw<"return"> expression
   } |
   IfExpression {
     kw<"if"> expression !then kw<"then"> expression (!else kw<"else"> expression)?
   } |
   QuantifiedExpression {
-    (kw<"some"> | kw<"every">) commaSep1<InExpression<expression>> kw<"satisfies"> expression
+    (kw<"some"> | kw<"every">) InExpressions<expression> kw<"satisfies"> expression
   } |
   Disjunction {
     expression !or kw<"or"> expression
@@ -72,6 +72,10 @@ boxedExpression {
   List |
   FunctionDefinition |
   Context
+}
+
+InExpressions<Expr> {
+  commaSep1<InExpression<Expr>>
 }
 
 InExpression<Expr> {

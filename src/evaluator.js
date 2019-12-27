@@ -126,6 +126,14 @@ function evalNode(type, input, args) {
 
     case 'Type': return args[0];
 
+    case 'InExpressions': return (context) => {
+
+      const iterationContexts = args.map(ctx => ctx(context));
+
+      return cartesianProduct(iterationContexts)
+        .map(ctx => Array.isArray(ctx) ? Object.assign({}, ...ctx) : ctx);
+    };
+
     case 'InExpression': return (context) => {
 
       const [ prop, extractor, target ] = args;
@@ -208,10 +216,10 @@ function evalNode(type, input, args) {
     case 'ForExpression': return (context) => {
       const extractor = args[args.length - 1];
 
-      const iterationContexts = args.slice(1, -2).map(ctx => ctx(context));
+      const iterationContexts = args[1](context);
 
-      return cartesianProduct(iterationContexts).map(
-        ctx => extractor(Array.isArray(ctx) ? Object.assign({}, ...ctx) : ctx)
+      return iterationContexts.map(
+        ctx => extractor(ctx)
       );
     };
 

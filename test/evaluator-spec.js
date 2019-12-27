@@ -134,6 +134,25 @@ describe('evaluator', function() {
   });
 
 
+  describe('Disjunction', function() {
+
+    evaluate('null or true', true);
+
+    evaluate('false or 1', true);
+
+    evaluate('a or b', true, {
+      a: null,
+      b: 1
+    });
+
+    evaluate('a or b', false, {
+      a: false,
+      b: false
+    });
+
+  });
+
+
   describe('IfExpression', function() {
 
     evaluate('if a > 10 then 15 else 5', 15, {

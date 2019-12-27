@@ -134,6 +134,27 @@ describe('evaluator', function() {
   });
 
 
+  describe('Conjunction', function() {
+
+    evaluate('null and true', false);
+
+    evaluate('[] and 1', true);
+
+    evaluate('false and 1', false);
+
+    evaluate('a and b', false, {
+      a: null,
+      b: 1
+    });
+
+    evaluate('a and b', true, {
+      a: true,
+      b: 1
+    });
+
+  });
+
+
   describe('Disjunction', function() {
 
     evaluate('null or true', true);

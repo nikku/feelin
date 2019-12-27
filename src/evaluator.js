@@ -87,6 +87,15 @@ function evalNode(type, input, args) {
       return !!(a || b);
     };
 
+    case 'Conjunction': return (context) => {
+
+      const a = args[0](context);
+
+      const b = args[2](context);
+
+      return !!(a && b);
+    };
+
     case 'QualifiedName': return (context) => getFromContext(args.join('.'), context);
 
     case 'Name': return input;

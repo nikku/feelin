@@ -1,18 +1,9 @@
 import { expect } from 'chai';
 
-import { sync as glob } from 'fast-glob';
-
-import {
-  readFileSync as readFile,
-  writeFileSync as writeFile
-} from 'fs';
-
-import { evaluator as Evaluator } from '../src/evaluator';
-
-const snippetsCwd = __dirname + '/snippets';
+import { interpreter } from '../src/interpreter';
 
 
-describe('evaluator', function() {
+describe('interpreter', function() {
 
   describe('ArithmeticExpression', function() {
 
@@ -203,6 +194,7 @@ describe('evaluator', function() {
 
   });
 
+
   describe('PathExpression', function() {
 
     evaluate('(a).b', 1, {
@@ -271,23 +263,23 @@ describe('evaluator', function() {
 
   describe('SimplePositiveUnaryTests', function() {
 
-    // test(5, '[4..6]', true);
+    // unaryTest(5, '[4..6]', true);
 
-    test(5, '>= 10', false);
+    unaryTest(5, '>= 10', false);
 
-    test(5, '5', true);
+    unaryTest(5, '5', true);
 
-    test(5, 'a', true, { a: 5 });
+    unaryTest(5, 'a', true, { a: 5 });
 
-    test(-5.312, '-5.312', true);
+    unaryTest(-5.312, '-5.312', true);
 
-    test(-5.312, '>-5.312', false);
+    unaryTest(-5.312, '>-5.312', false);
 
-    test(-5.312, '<-5.312', false);
+    unaryTest(-5.312, '<-5.312', false);
 
-    test(5, '(>= 3, < 10)', true);
+    unaryTest(5, '(>= 3, < 10)', true);
 
-    test(5, '(>= 3, < -1)', false);
+    unaryTest(5, '(>= 3, < -1)', false);
 
   });
 
@@ -312,37 +304,35 @@ function createEvalVerifier(options) {
   const name = `${expression}${context ? ' { ' + Object.keys(context).join(', ') + ' }' : ''}`;
 
   it(name, function() {
-    const output = Evaluator.eval(expression, context || {});
+    const output = interpreter.evaluate(expression, context || {});
 
     expect(output).to.eql(expectedOutput);
   });
 
 }
 
-
-function createTestVerifier(options) {
+function createUnaryTestVerifier(options) {
 
   const {
     args,
     it
   } = options;
 
-  const [ input, test, expectedOutput ] = args;
+  const [ inputOrContext, test, expectedOutput ] = args;
 
-  const context = typeof input === 'object' ? input : null;
+  const context = typeof inputOrContext === 'object' ? inputOrContext : null;
 
-  const actualInput = context ? context.input : input;
+  const input = context ? context.input : inputOrContext;
 
-  const name = `${actualInput} in ${test}${context ? ' { ' + Object.keys(context).join(', ') + ' }' : ''}`;
+  const name = `${input} in ${test}${context ? ' { ' + Object.keys(context).join(', ') + ' }' : ''}`;
 
   it(name, function() {
-    const output = Evaluator.test(actualInput, test, context || {});
+    const output = interpreter.unaryTest(input, test, context || {});
 
     expect(output).to.eql(expectedOutput);
   });
 
 }
-
 
 function evaluate(...args) {
 
@@ -359,16 +349,16 @@ function evaluateOnly(...args) {
   });
 }
 
-function testOnly(...args) {
-  return createTestVerifier({
+function unaryTestOnly(...args) {
+  return createUnaryTestVerifier({
     args,
     it: it.only
   });
 }
 
-function test(...args) {
+function unaryTest(...args) {
 
-  return createTestVerifier({
+  return createUnaryTestVerifier({
     args,
     it
   });

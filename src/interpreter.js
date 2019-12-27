@@ -1,22 +1,20 @@
 import { parser } from './parser';
 
-function Evaluator(parser) {
+function Interpreter(parser) {
 
   this.parser = parser;
 
-  this.test = (input, test, context) => {
+  this.unaryTest = (input, test, context) => {
 
     context = {
       ...context,
       INPUT: input
     };
 
-    const actualInput = `INPUT in ${test}`;
-
-    return this.eval(actualInput, context);
+    return this.evaluate(`INPUT in ${test}`, context);
   };
 
-  this.eval = (input, context) => {
+  this.evaluate = (input, context) => {
 
     const tree = parser.parse(input);
 
@@ -405,8 +403,8 @@ function Interval(start, startValue, endValue, end) {
   };
 }
 
-const evaluator = new Evaluator(parser);
+const interpreter = new Interpreter(parser);
 
 export {
-  evaluator
+  interpreter
 };

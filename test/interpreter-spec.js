@@ -19,6 +19,7 @@ describe('interpreter', function() {
     evaluate('-(a)', -3, {
       a: 3
     });
+
   });
 
 

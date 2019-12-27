@@ -48,8 +48,6 @@ function Evaluator(parser) {
 
 function evalNode(type, input, args) {
 
-  console.log(type.name, input, args);
-
   switch (type.name) {
     case 'ArithOp': return (context) => {
       switch (input) {

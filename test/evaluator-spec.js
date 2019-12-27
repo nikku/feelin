@@ -12,7 +12,7 @@ import { evaluator as Evaluator } from '../src/evaluator';
 const snippetsCwd = __dirname + '/snippets';
 
 
-describe('eval', function() {
+describe('evaluator', function() {
 
   describe('ArithmeticExpression', function() {
 
@@ -143,6 +143,11 @@ describe('eval', function() {
     evaluate('if a > 10 then 15 else 5', 5, {
       a: 8
     });
+
+    evaluate('if a then 15 else 5', 5, {
+      a: null
+    });
+
 
   });
 

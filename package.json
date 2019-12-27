@@ -21,6 +21,10 @@
   "dependencies": {
     "lezer": "^0.5.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nikku/feelin"
+  },
   "scripts": {
     "all": "npm run build && npm run test",
     "build-parser:watch": "chokidar --initial src/feel.grammar -c \"npm run build-parser -- --names\"",

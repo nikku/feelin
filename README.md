@@ -7,15 +7,16 @@ A FEEL parser and interpreter written in JavaScript.
 
 ```javascript
 import {
-  interpreter
+  unaryTest,
+  evaluate
 } from 'feelin';
 
-interpreter.test(1, '1'); // true
-interpreter.test(1, '[1..end]', { end: 10 }); // true
+unaryTest(1, '1'); // true
+unaryTest(1, '[1..end]', { end: 10 }); // true
 
-interpreter.eval('for a in [1, 2, 3] return a * 2'); // [ 2, 4, 6 ]
+evaluate('for a in [1, 2, 3] return a * 2'); // [ 2, 4, 6 ]
 
-interpreter.eval('every rate in rates() satisfies rate < 10', {
+evaluate('every rate in rates() satisfies rate < 10', {
   rates() {
     return [ 10, 20 ];
   }
@@ -23,7 +24,7 @@ interpreter.eval('every rate in rates() satisfies rate < 10', {
 ```
 
 
-## Resources
+## Related
 
-* [feel-scala implementation reference](https://github.com/camunda/feel-scala/blob/master/feel-engine/src/main/scala/org/camunda/feel/parser/FeelParser.scala)
-* [DMN tck](https://github.com/dmn-tck/tck)
+* [feel-scala](https://github.com/camunda/feel-scala)
+* [dmn-tck](https://github.com/dmn-tck/tck)

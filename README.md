@@ -26,5 +26,13 @@ evaluate('every rate in rates() satisfies rate < 10', {
 
 ## Related
 
+Other open source FEEL interpreters:
+
 * [feel-scala](https://github.com/camunda/feel-scala)
+* [js-feel](https://github.com/EdgeVerve/feel)
+
+
+Standards related resources:
+
 * [dmn-tck](https://github.com/dmn-tck/tck)
+* [DMN 1.2 Specification](https://www.omg.org/spec/DMN/1.2/PDF)

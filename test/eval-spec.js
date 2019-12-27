@@ -53,7 +53,20 @@ describe('eval', function() {
       ]
     });
 
+    evaluate('for w in widths, h in heights return w * h', [20, 40, 40, 80], {
+      widths: [
+        2,
+        4
+      ],
+      heights: [
+        10,
+        20
+      ]
+    });
+
     evaluate('for a in 1 .. 3 return a', [1, 2, 3]);
+
+    evaluate('for a in 1 .. 2, b in 1 .. 2 return a * 10 + b', [11, 12, 21, 22]);
 
   });
 
@@ -122,7 +135,6 @@ describe('eval', function() {
     });
 
   });
-
 
   describe('PathExpression', function() {
 

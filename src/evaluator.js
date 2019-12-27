@@ -206,9 +206,13 @@ function evalNode(type, input, args) {
     // DMN 1.2 - 10.3.2.14
     // kw<"for"> commaSep1<InExpression<IterationContext>> kw<"return"> expression
     case 'ForExpression': return (context) => {
-      const contexts = args[1](context);
+      const extractor = args[args.length - 1];
 
-      return contexts.map(ctx => args[3](ctx));
+      const iterationContexts = args.slice(1, -2).map(ctx => ctx(context));
+
+      return cartesianProduct(iterationContexts).map(
+        ctx => extractor(Array.isArray(ctx) ? Object.assign({}, ...ctx) : ctx)
+      );
     };
 
     case 'UnaryExpression': return (context) => {
@@ -305,6 +309,14 @@ function createRange(start, end) {
   }
 
   throw new Error('unsupported range');
+}
+
+function cartesianProduct(arrays) {
+
+  const f = (a, b) => [].concat(...a.map(d => b.map(e => [].concat(d, e))));
+  const cartesian = (a, b, ...c) => (b ? cartesian(f(a, b), ...c) : a);
+
+  return cartesian(...arrays);
 }
 
 function wrapTest(value) {

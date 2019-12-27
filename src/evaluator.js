@@ -96,6 +96,26 @@ function evalNode(type, input, args) {
       return !!(a && b);
     };
 
+    case 'Context': return (context) => {
+
+      return args.map(entry => entry(context)).reduce((obj, [key, value]) => {
+        obj[key] = value;
+
+        return obj;
+      }, {});
+    };
+
+    case 'ContextEntry': return (context) => {
+
+      const key = typeof args[0] === 'function' ? args[0](context) : args[0];
+
+      const value = args[1](context);
+
+      return [ key, value ];
+    };
+
+    case 'Key': return args[0];
+
     case 'QualifiedName': return (context) => getFromContext(args.join('.'), context);
 
     case 'Name': return input;

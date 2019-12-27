@@ -262,6 +262,13 @@ describe('evaluator', function() {
   });
 
 
+  describe('Context', function() {
+
+    evaluate('{ a: [ { b: 1 }, { b: 2 } ].b }', { a: [ 1, 2 ] });
+
+  });
+
+
   describe('SimplePositiveUnaryTests', function() {
 
     // test(5, '[4..6]', true);

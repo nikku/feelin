@@ -28,6 +28,7 @@
     "type": "git",
     "url": "https://github.com/nikku/feelin"
   },
+  "sideEffects": false,
   "scripts": {
     "all": "npm run build-parser && npm run build && npm run test",
     "build-parser:watch": "chokidar --initial src/feel.grammar -c \"npm run build-parser -- --names\"",

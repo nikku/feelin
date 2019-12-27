@@ -5,6 +5,10 @@
   "main": "dist/index.js",
   "author": "Nico Rehwaldt <git_nikku@nixis.de>",
   "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "umd:main": "dist/feelin.umd.js",
+  "source": "src/index.js",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^11.0.0",
     "@rollup/plugin-node-resolve": "^6.0.0",

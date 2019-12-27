@@ -26,12 +26,10 @@
     "url": "https://github.com/nikku/feelin"
   },
   "scripts": {
-    "all": "npm run build && npm run test",
+    "all": "npm run build-parser && npm run build && npm run test",
     "build-parser:watch": "chokidar --initial src/feel.grammar -c \"npm run build-parser -- --names\"",
-    "build-parser": "lezer-generator src/feel.grammar -o src/parser --names",
+    "build-parser": "lezer-generator src/feel.grammar -o src/parser",
     "build": "rollup -c",
-    "prebuild": "npm run build-parser",
-    "prepare": "npm run build",
     "test": "mocha -r esm test/*.js",
     "test:watch": "npm test -- -w"
   }

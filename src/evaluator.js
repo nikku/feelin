@@ -74,6 +74,10 @@ function evalNode(type, input, args) {
       }
     };
 
+    case 'null': return (context) => {
+      return null;
+    };
+
     case 'QualifiedName': return (context) => getFromContext(args.join('.'), context);
 
     case 'Name': return input;

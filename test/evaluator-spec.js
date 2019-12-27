@@ -210,6 +210,8 @@ describe('evaluator', function() {
 
     evaluate('.5', .5);
 
+    evaluate('null', null);
+
   });
 
 

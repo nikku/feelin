@@ -217,7 +217,7 @@ describe('eval', function() {
 
   describe('SimplePositiveUnaryTests', function() {
 
-    test(5, '[4..6]', true);
+    // test(5, '[4..6]', true);
 
     test(5, '>= 10', false);
 

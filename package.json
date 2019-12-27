@@ -1,11 +1,10 @@
 {
   "name": "feelin",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A FEEL parser and interpreter",
   "main": "dist/index.js",
   "author": "Nico Rehwaldt <git_nikku@nixis.de>",
   "license": "MIT",
-  "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "umd:main": "dist/feelin.umd.js",
   "source": "src/index.js",

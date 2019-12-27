@@ -1,0 +1,18 @@
+a in (1..3)
+
+----------
+
+Script "a in (1..3)"
+  Comparison "a in (1..3)"
+    QualifiedName "a"
+      Name "a"
+    InTester "in"
+      in "in"
+    ( "("
+    PositiveUnaryTests "1..3"
+      PositiveUnaryTest "1"
+        NumericLiteral "1"
+      ⚠ ".."
+      PositiveUnaryTest "3"
+        NumericLiteral "3"
+    ) ")"

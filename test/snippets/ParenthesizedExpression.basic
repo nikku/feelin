@@ -3,5 +3,8 @@
 ----------
 
 Script "(a)"
-  QualifiedName "a"
-    Name "a"
+  ParenthesizedExpression "(a)"
+    ( "("
+    QualifiedName "a"
+      Name "a"
+    ) ")"

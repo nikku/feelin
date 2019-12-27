@@ -11,7 +11,7 @@ function Interpreter(parser) {
       INPUT: input
     };
 
-    return this.evaluate(`INPUT in ${test}`, context);
+    return this.evaluate(`INPUT in (${test})`, context);
   };
 
   this.evaluate = (input, context) => {
@@ -45,6 +45,8 @@ function Interpreter(parser) {
 
 
 function evalNode(type, input, args) {
+
+  // console.log(type.name, input, args);
 
   switch (type.name) {
     case 'ArithOp': return (context) => {
@@ -94,7 +96,7 @@ function evalNode(type, input, args) {
 
     case 'Context': return (context) => {
 
-      return args.map(entry => entry(context)).reduce((obj, [key, value]) => {
+      return args.slice(1, -1).map(entry => entry(context)).reduce((obj, [key, value]) => {
         obj[key] = value;
 
         return obj;
@@ -224,18 +226,36 @@ function evalNode(type, input, args) {
       }
     };
 
-    case 'Parameters': return args[0];
+    case 'Parameters': return args.length === 3 ? args[1] : (context) => [];
 
+    case '(': return '(';
+    case ')': return ')';
+    case '[': return '[';
+    case ']': return ']';
+    case '{': return '{';
+    case '}': return '}';
+
+    /**
+     * expression !compare CompareOp<"=" | "!="> expression |
+     * expression !compare CompareOp<Gt | Gte | Lt | Lte> expression |
+     * expression !compare InTester PositiveUnaryTest |
+     * expression !compare kw<"between"> expression kw<"and"> expression |
+     * expression !compare InTester !unaryTest "(" PositiveUnaryTests ")"
+     */
     case 'Comparison': return (context) => {
 
-      const [ compA, compFn, compB, _compareAnd, compC ] = args;
-
-      // between
       if (args.length === 5) {
-        return compFn(context)(compA, compB, compC);
+
+        // expression !compare InTester !unaryTest "(" PositiveUnaryTests ")"
+        if (args[2] === '(') {
+          return args[1](context)(args[3])(args[0]);
+        }
+
+        // expression !compare kw<"between"> expression kw<"and"> expression
+        return args[1](context)(args[0], args[2], args[4]);
       }
 
-      return compFn(context)(compB)(compA);
+      return args[1](context)(args[2])(args[0]);
     };
 
     case 'QuantifiedExpression': return (context) => {
@@ -263,6 +283,7 @@ function evalNode(type, input, args) {
 
     case 'UnaryExpression': return (context) => {
       const operator = args[0](context);
+
       return operator(() => 0, args[1]);
     };
 
@@ -274,7 +295,11 @@ function evalNode(type, input, args) {
 
     case 'PositiveUnaryTest': return args[0];
 
-    case 'PositiveUnaryTests': return (context) => args.map(a => a(context));
+    case 'PositiveUnaryTests': return (context) => {
+      return args.map(a => a(context));
+    };
+
+    case 'ParenthesizedExpression': return args[1];
 
     case 'PathExpression': return (context) => {
 
@@ -294,7 +319,7 @@ function evalNode(type, input, args) {
 
       return filterTarget.filter(el => {
 
-        const filter = args[1]({
+        const filter = args[2]({
           ...context,
           ...el
         });
@@ -306,18 +331,24 @@ function evalNode(type, input, args) {
     case 'SuperSimplePositiveUnaryTest': return (context) => {
 
       if (args.length === 1) {
-        return wrapTest(args[0](context));
+        return args[0](context);
       }
 
       return args[0](context)(args[1]);
     };
 
     case 'List': return (context) => {
-      return args.map(arg => arg(context));
+      return args.slice(1, -1).map(arg => arg(context));
     };
 
-    case 'Interval':
-      return new Interval(args[0], args[1], args[3], args[4]);
+    case 'Interval': return (context) => {
+
+      const interval = new Interval(args[0], args[1](context), args[2](context), args[3]);
+
+      return (a) => {
+        return interval.includes(a(context));
+      };
+    };
 
     case 'Script': return (context) => args[args.length - 1](context);
   }
@@ -365,23 +396,6 @@ function cartesianProduct(arrays) {
   return cartesian(...arrays);
 }
 
-function wrapTest(value) {
-
-  if (typeof value === 'function') {
-    return value;
-  }
-
-  if (typeof value === 'number') {
-    return (a) => a === value ? a : false;
-  }
-
-  if (value instanceof Interval) {
-    return (a) => value.includes(a);
-  }
-
-  throw new Error(`unexpected value: ${value}`);
-}
-
 function Interval(start, startValue, endValue, end) {
 
   this.start = start;
@@ -395,11 +409,11 @@ function Interval(start, startValue, endValue, end) {
   };
 
   this.includesFrom = (value) => {
-    [ "(", "]" ].includes(this.start) ? value >= this.start : value > this.start;
+    return [ '(', ']' ].includes(this.start) ? value > this.startValue : value >= this.startValue;
   };
 
   this.includesTo = (value) => {
-    [ ")", "[" ].includes(this.end) ? value <= this.end : value < this.end;
+    return [ ')', '[' ].includes(this.end) ? value < this.endValue : value <= this.endValue;
   };
 }
 

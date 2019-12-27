@@ -4,6 +4,7 @@
 
 Script "{ a: a, b: b }"
   Context "{ a: a, b: b }"
+    { "{"
     ContextEntry "a: a"
       Key "a"
         Name "a"
@@ -14,3 +15,4 @@ Script "{ a: a, b: b }"
         Name "b"
       QualifiedName "b"
         Name "b"
+    } "}"

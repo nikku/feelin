@@ -65,7 +65,7 @@ textualExpression {
   QualifiedName ~qname /* TODO(nikku): should be name according to spec */ |
   kw<"?"> |
   SuperSimplePositiveUnaryTest |
-  "(" textualExpression ")"
+  ParenthesizedExpression { "(" textualExpression ")" }
 }
 
 boxedExpression {
@@ -317,6 +317,8 @@ commaSep<Expr> {
   Name {
     NameStart (NamePart)*
   }
+
+  "(" ")" "[" "]" "{" "}"
 
   ArithOp<Expr> {
     Expr

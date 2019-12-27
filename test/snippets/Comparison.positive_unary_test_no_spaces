@@ -1,0 +1,17 @@
+a in [1..4]
+
+----------
+
+Script "a in [1..4]"
+  Comparison "a in [1..4]"
+    QualifiedName "a"
+      Name "a"
+    InTester "in"
+      in "in"
+    PositiveUnaryTest "[1..4]"
+      SuperSimplePositiveUnaryTest "[1..4]"
+        Interval "[1..4]"
+          [ "["
+          NumericLiteral "1"
+          NumericLiteral "4"
+          ] "]"

@@ -18,7 +18,7 @@ const snippetsCwd = __dirname + '/snippets';
 describe('parse', function() {
 
   testAll({
-    write: true
+    write: !!process.env.REBUILD
   });
 
 });

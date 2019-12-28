@@ -1,0 +1,61 @@
+I: 1 + 1  ##  {}
+I: 2 * (3 + 5)  ##  {}
+I: a * (b)  ##  {"a":3,"b":5}
+I: -(a)  ##  {"a":3}
+I: foo.bar(b, c)  ##  {"foo.bar":"FUNCTION$function(b, c) {\n          return b + c;\n        }","b":2,"c":3}
+I: foo()  ##  {"foo":"FUNCTION$function() {\n          return 5;\n        }"}
+I: for a in b return (a).c  ##  {"b":[{"c":1},{"c":2}]}
+I: for w in widths, h in heights return w * h  ##  {"widths":[2,4],"heights":[10,20]}
+I: for a in 1 .. 3 return a  ##  {}
+I: for a in 1 .. 2, b in 1 .. 2 return a * 10 + b  ##  {}
+I: every b in a satisfies b < 10  ##  {"a":[9,5]}
+I: every b in a satisfies b < 10  ##  {"a":[12,5]}
+I: every b in a satisfies b < 10  ##  {"a":[]}
+I: every w in widths, h in heights satisfies w * h < 100  ##  {"widths":[2,4],"heights":[10,20]}
+I: some b in a satisfies b < 10  ##  {"a":[12,5]}
+I: some w in widths, h in heights satisfies w * h < 30  ##  {"widths":[2,4],"heights":[10,20]}
+I: 5 > 10  ##  {}
+I: 5 >= 5  ##  {}
+I: 1 between -1 and 5  ##  {}
+I: 5 in > 3  ##  {}
+I: 5 in < 0  ##  {}
+I: 5 in (> 0, <10)  ##  {}
+I: 5 in ([0..10], [5..15])  ##  {}
+I: null and true  ##  {}
+I: [] and 1  ##  {}
+I: false and 1  ##  {}
+I: a and b  ##  {"a":null,"b":1}
+I: a and b  ##  {"a":true,"b":1}
+I: null or true  ##  {}
+I: false or 1  ##  {}
+I: a or b  ##  {"a":null,"b":1}
+I: a or b  ##  {"a":false,"b":false}
+I: if a > 10 then 15 else 5  ##  {"a":12}
+I: if a > 10 then 15 else 5  ##  {"a":8}
+I: if a then 15 else 5  ##  {"a":null}
+I: a instance of B  ##  {"a":{},"B":"FUNCTION$function B() { }"}
+I: (a).b  ##  {"a":{"b":1}}
+I: (a).b  ##  {"a":[{"b":1},{"b":2}]}
+I: a[ b > 10 ].b  ##  {"a":[{"b":5},{"b":11},{"b":15}]}
+I: "foo"  ##  {}
+I: -1  ##  {}
+I: false  ##  {}
+I: true  ##  {}
+I: .5  ##  {}
+I: null  ##  {}
+I: [1, a, 5 * 3]  ##  {"a":2}
+I: { a: [ { b: 1 }, { b: 2 } ].b }  ##  {}
+I: INPUT in ([4..6])  ##  {"INPUT":4}
+I: INPUT in ([4..6])  ##  {"INPUT":6}
+I: INPUT in (]4..6[)  ##  {"INPUT":4}
+I: INPUT in (]4..6[)  ##  {"INPUT":6}
+I: INPUT in ((4..6))  ##  {"INPUT":4}
+I: INPUT in ((4..6))  ##  {"INPUT":6}
+I: INPUT in (>= 10)  ##  {"INPUT":5}
+I: INPUT in (5)  ##  {"INPUT":5}
+I: INPUT in (a)  ##  {"INPUT":5}
+I: INPUT in (-5.312)  ##  {"INPUT":-5.312}
+I: INPUT in (>-5.312)  ##  {"INPUT":-5.312}
+I: INPUT in (<-5.312)  ##  {"INPUT":-5.312}
+I: INPUT in (>= 3, < 10)  ##  {"INPUT":5}
+I: INPUT in (>= 3, < -1)  ##  {"INPUT":5}

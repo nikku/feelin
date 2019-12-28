@@ -8,10 +8,10 @@ function Interpreter(parser) {
 
     context = {
       ...context,
-      INPUT: input
+      __INPUT: input
     };
 
-    return this.evaluate(`INPUT in (${test})`, context);
+    return this.evaluate(`__INPUT in (${test})`, context);
   };
 
   this.evaluate = (input, context) => {
@@ -24,17 +24,28 @@ function Interpreter(parser) {
 
     tree.iterate({
       enter(type, start, end) {
-        stack.push({ args: [] });
+        const nodeInput = input.slice(start, end);
+
+        stack.push({
+          nodeKey: `${type.name}-${nodeInput}`,
+          nodeInput,
+          args: []
+        });
       },
 
       leave(type, start, end) {
 
-        const current = stack.pop();
+        const {
+          nodeKey,
+          nodeInput,
+          args
+        } = stack.pop();
 
         const parent = stack[stack.length - 1];
 
-        parent.args.push(evalNode(type, input.slice(start, end), current.args));
+        const expr = evalNode(type, nodeInput, args);
 
+        parent.args.push(expr);
       }
     });
 

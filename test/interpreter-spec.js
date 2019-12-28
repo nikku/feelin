@@ -37,7 +37,7 @@ describe('interpreter', function() {
 
 
       evaluate('foo()', 5, {
-        foo() {
+        foo: function() {
           return 5;
         }
       });

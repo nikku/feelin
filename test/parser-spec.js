@@ -9,7 +9,7 @@ import {
   writeFileSync as writeFile
 } from 'fs';
 
-import { parser as Parser } from '../src/parser';
+import { parser } from '../src/parser';
 
 
 const snippetsCwd = __dirname + '/snippets';
@@ -43,7 +43,7 @@ function test(test, options={}) {
 
     const [ input, expectedTree ] = spec.split('----------').map(str => str.trim());
 
-    const tree = Parser.parse(input);
+    const tree = parser.parse(input);
 
     const serializedTree = treeToString(tree, input);
 

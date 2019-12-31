@@ -302,6 +302,10 @@ describe('interpreter', function() {
 
       evaluate('Mike\'s age + walt\'s age - average age' , 40, { 'Mike\'s age + walt\'s age': 90, 'average age': 50 });
 
+      evaluate('"šomeÚnicodeŠtriňg"', 'šomeÚnicodeŠtriňg');
+
+      evaluate('"横綱"', '横綱');
+
     });
 
   });

@@ -28,6 +28,8 @@ describe('interpreter', function() {
 
       evaluate('10^5', 100000);
 
+      evaluate('null - 3', null);
+
     });
 
 

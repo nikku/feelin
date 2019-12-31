@@ -175,13 +175,22 @@ function evalNode(type, input, args) {
 
   switch (type.name) {
     case 'ArithOp': return (context) => {
+
+      const nullable = (op) => (a, b) => {
+
+        const _a = a(context);
+        const _b = b(context);
+
+        return _a === null || _b === null ? null : op(_a, _b);
+      };
+
       switch (input) {
-        case '+': return (a, b) => a(context) + b(context);
-        case '-': return (a, b) => a(context) - b(context);
-        case '*': return (a, b) => a(context) * b(context);
-        case '/': return (a, b) => a(context) / b(context);
+        case '+': return nullable((a, b) => a + b);
+        case '-': return nullable((a, b) => a - b);
+        case '*': return nullable((a, b) => a * b);
+        case '/': return nullable((a, b) => a / b);
         case '**':
-        case '^': return (a, b) => a(context) ** b(context);
+        case '^': return nullable((a, b) => a ** b);
       }
     };
 

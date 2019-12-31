@@ -188,7 +188,7 @@ function evalNode(type, input, args) {
         case '+': return nullable((a, b) => a + b);
         case '-': return nullable((a, b) => a - b);
         case '*': return nullable((a, b) => a * b);
-        case '/': return nullable((a, b) => a / b);
+        case '/': return nullable((a, b) => !b ? null : a / b);
         case '**':
         case '^': return nullable((a, b) => a ** b);
       }

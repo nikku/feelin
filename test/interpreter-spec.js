@@ -30,6 +30,8 @@ describe('interpreter', function() {
 
       evaluate('null - 3', null);
 
+      evaluate('0.0 / 0.0', null);
+
     });
 
 

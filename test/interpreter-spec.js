@@ -22,6 +22,12 @@ describe('interpreter', function() {
         a: 3
       });
 
+      evaluate('-10--5', -5);
+
+      evaluate('10**5', 100000);
+
+      evaluate('10^5', 100000);
+
     });
 
 

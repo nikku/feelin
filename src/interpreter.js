@@ -181,7 +181,7 @@ function evalNode(type, input, args) {
         case '*': return (a, b) => a(context) * b(context);
         case '/': return (a, b) => a(context) / b(context);
         case '**':
-        case '^': return (a, b) => a(context) ^ b(context);
+        case '^': return (a, b) => a(context) ** b(context);
       }
     };
 

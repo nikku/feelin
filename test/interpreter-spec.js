@@ -293,6 +293,8 @@ describe('interpreter', function() {
 
       evaluate('{ a: [ { b: 1 }, { b: 2 } ].b }', { a: [ 1, 2 ] });
 
+      evaluate('{🐎: "😀"}', { '🐎': '😀' });
+
     });
 
 

@@ -62,6 +62,8 @@ describe('interpreter', function() {
 
     describe('ForExpression', function() {
 
+      evaluate('for i in [] return i', []);
+
       evaluate('for a in b return (a).c', [1, 2], {
         b: [
           { c: 1 },

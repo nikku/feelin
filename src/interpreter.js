@@ -14,9 +14,121 @@ function Interpreter(parser) {
     return this.evaluate(`__INPUT in (${test})`, context);
   };
 
-  this.evaluate = (input, context) => {
+  this.injectBuiltins = (context) => {
+    return context;
+  };
+
+  this.parseName = (name) => {
+
+    let match;
+
+    const pattern = /([.\/\-'+*]+)|([^\s.\/\-'+*]+)/g;
+
+    const tokens = [];
+
+    let lastName = false;
+
+    while ((match = pattern.exec(name))) {
+
+      const [ _, additionalPart, namePart ] = match;
+
+      if (additionalPart) {
+        lastName = false;
+
+        if (tokens.length) {
+          tokens.push('\\s*');
+        }
+
+        tokens.push(additionalPart.replace(/[+*]/g, '\\$&'));
+      } else {
+        if (tokens.length) {
+          if (lastName) {
+            tokens.push('\\s+');
+          } else {
+            tokens.push('\\s*');
+          }
+        }
+
+        lastName = true;
+
+        tokens.push(namePart);
+      }
+    }
+
+    return tokens;
+  };
+
+  this.findNames = (context) => {
+
+    let uid = 0;
+
+    return Object.keys(context).filter(key => /[\s.\/\-'+*]/.test(key)).map(name => {
+
+      const replacement = '_' + uid.toString(36);
+      const tokens = this.parseName(name);
+
+      const replacer = new RegExp(tokens.join(''), 'g');
+
+      return {
+        name,
+        replacement,
+        replacer
+      };
+    });
+
+  };
+
+  this.replaceNames = (input, context, names) => {
+
+    for (const { name, replacement, replacer } of names) {
+
+      input = input.replace(replacer, function(match) {
+
+        const placeholder = replacement.padEnd(match.length, '_');
+
+        if (!context[placeholder]) {
+          context = {
+            ...context,
+            [match]: context[name]
+          };
+        }
+
+        return placeholder;
+      });
+    };
+
+    return {
+      input,
+      context
+    };
+  };
+
+  this.parse = (rawInput, rawContext) => {
+
+    const injectedContext = this.injectBuiltins(rawContext);
+
+    const names = this.findNames(injectedContext);
+
+    const {
+      context,
+      input
+    } = this.replaceNames(rawInput, injectedContext, names);
 
     const tree = parser.parse(input);
+
+    return {
+      context,
+      input,
+      tree
+    };
+  };
+
+  this.evaluate = (input, context) => {
+
+    const {
+      tree,
+      context: parsedContext
+    } = this.parse(input, context);
 
     const root = { args: [] };
 
@@ -49,7 +161,7 @@ function Interpreter(parser) {
       }
     });
 
-    return root.args[root.args.length - 1](context);
+    return root.args[root.args.length - 1](parsedContext);
   };
 
 }
@@ -57,7 +169,9 @@ function Interpreter(parser) {
 
 function evalNode(type, input, args) {
 
-  // console.log(type.name, input, args);
+  if (process.env.LOG === 'evalNode') {
+    console.log(type.name, input, args);
+  }
 
   switch (type.name) {
     case 'ArithOp': return (context) => {

@@ -27,6 +27,12 @@ describe('interpreter', function() {
 
     describe('FunctionInvocation', function() {
 
+      evaluate('with spaces()', 1, {
+        'with spaces': function() {
+          return 1;
+        }
+      });
+
       evaluate('foo.bar(b, c)', 5, {
         'foo.bar': function(b, c) {
           return b + c;
@@ -34,7 +40,6 @@ describe('interpreter', function() {
         b: 2,
         c: 3
       });
-
 
       evaluate('foo()', 5, {
         foo: function() {
@@ -275,6 +280,21 @@ describe('interpreter', function() {
     describe('Context', function() {
 
       evaluate('{ a: [ { b: 1 }, { b: 2 } ].b }', { a: [ 1, 2 ] });
+
+    });
+
+
+    describe('Name', function() {
+
+      evaluate('a + b', 1, { 'a + b': 1 });
+
+      evaluate('a +', 1, { 'a +': 1 });
+
+      evaluate('a+b', 1, { 'a + b': 1 });
+
+      evaluate('a  b c*d', 1, { 'a b  c * d': 1 });
+
+      evaluate('Mike\'s age + walt\'s age - average age' , 40, { 'Mike\'s age + walt\'s age': 90, 'average age': 50 });
 
     });
 

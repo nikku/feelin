@@ -183,233 +183,233 @@ function evalNode(node, input, args) {
   }
 
   switch (node.name) {
-    case 'ArithOp': return (context) => {
+  case 'ArithOp': return (context) => {
 
-      const nullable = (op) => (a, b) => {
+    const nullable = (op) => (a, b) => {
+
+      const _a = a(context);
+      const _b = b(context);
+
+      return _a === null || _b === null ? null : op(_a, _b);
+    };
+
+    switch (input) {
+    case '+': return nullable((a, b) => a + b);
+    case '-': return nullable((a, b) => a - b);
+    case '*': return nullable((a, b) => a * b);
+    case '/': return nullable((a, b) => !b ? null : a / b);
+    case '**':
+    case '^': return nullable((a, b) => a ** b);
+    }
+  };
+
+  case 'CompareOp': return tag((context) => {
+
+    const compare = (fn) => {
+      return (b) => (a) => {
 
         const _a = a(context);
         const _b = b(context);
 
-        return _a === null || _b === null ? null : op(_a, _b);
+        return fn(_a, _b) ? _a : false;
       };
-
-      switch (input) {
-        case '+': return nullable((a, b) => a + b);
-        case '-': return nullable((a, b) => a - b);
-        case '*': return nullable((a, b) => a * b);
-        case '/': return nullable((a, b) => !b ? null : a / b);
-        case '**':
-        case '^': return nullable((a, b) => a ** b);
-      }
     };
 
-    case 'CompareOp': return tag((context) => {
+    switch (input) {
+    case '>': return compare((a, b) => a > b);
+    case '>=': return compare((a, b) => a >= b);
+    case '<': return compare((a, b) => a < b);
+    case '<=': return compare((a, b) => a <= b);
+    case '=': return compare((a, b) => a == b);
+    case '!=': return compare((a, b) => a != b);
+    }
 
-      const compare = (fn) => {
-        return (b) => (a) => {
+  }, Test('boolean'));
 
-          const _a = a(context);
-          const _b = b(context);
+  case 'null': return (context) => {
+    return null;
+  };
 
-          return fn(_a, _b) ? _a : false;
-        };
-      };
+  case 'Disjunction': return tag((context) => {
 
-      switch (input) {
-        case '>': return compare((a, b) => a > b);
-        case '>=': return compare((a, b) => a >= b);
-        case '<': return compare((a, b) => a < b);
-        case '<=': return compare((a, b) => a <= b);
-        case '=': return compare((a, b) => a == b);
-        case '!=': return compare((a, b) => a != b);
-      }
+    const a = args[0](context);
 
-    }, Test('boolean'));
+    const b = args[2](context);
 
-    case 'null': return (context) => {
-      return null;
-    };
+    return a || b;
+  }, Test('boolean'));
 
-    case 'Disjunction': return tag((context) => {
+  case 'Conjunction': return tag((context) => {
 
-      const a = args[0](context);
+    const a = args[0](context);
 
-      const b = args[2](context);
+    const b = args[2](context);
 
-      return a || b;
-    }, Test('boolean'));
+    return a && b;
+  }, Test('boolean'));
 
-    case 'Conjunction': return tag((context) => {
+  case 'Context': return (context) => {
 
-      const a = args[0](context);
+    return args.slice(1, -1).map(entry => entry(context)).reduce((obj, [key, value]) => {
+      obj[key] = value;
 
-      const b = args[2](context);
+      return obj;
+    }, {});
+  };
 
-      return a && b;
-    }, Test('boolean'));
+  case 'ContextEntry': return (context) => {
 
-    case 'Context': return (context) => {
+    const key = typeof args[0] === 'function' ? args[0](context) : args[0];
 
-      return args.slice(1, -1).map(entry => entry(context)).reduce((obj, [key, value]) => {
-        obj[key] = value;
+    const value = args[1](context);
 
-        return obj;
-      }, {});
-    };
+    return [ key, value ];
+  };
 
-    case 'ContextEntry': return (context) => {
+  case 'Key': return args[0];
 
-      const key = typeof args[0] === 'function' ? args[0](context) : args[0];
+  case 'QualifiedName': return (context) => getFromContext(args.join('.'), context);
 
-      const value = args[1](context);
+  case 'Name': return input;
 
-      return [ key, value ];
-    };
-
-    case 'Key': return args[0];
-
-    case 'QualifiedName': return (context) => getFromContext(args.join('.'), context);
-
-    case 'Name': return input;
-
-    case 'and': return null;
+  case 'and': return null;
 
     /*
       expression !compare kw<"in"> PositiveUnaryTest |
       expression !compare kw<"in"> !unaryTest "(" PositiveUnaryTests ")"
      */
-    case 'InTester': return (context) => (b) => (a) => {
+  case 'InTester': return (context) => (b) => (a) => {
 
-      const tests = b(context);
+    const tests = b(context);
 
-      const left = a(context);
+    const left = a(context);
 
-      return (Array.isArray(tests) ? tests : [ tests ]).every(
-        test => compareValOrFn(test, () => left)
-      ) ? left : false;
-    };
+    return (Array.isArray(tests) ? tests : [ tests ]).every(
+      test => compareValOrFn(test, () => left)
+    ) ? left : false;
+  };
 
-    case 'InExtractor': return (context) => {
+  case 'InExtractor': return (context) => {
 
-      return (prop, _target) => {
+    return (prop, _target) => {
 
-        const target = _target(context);
+      const target = _target(context);
 
-        if (!Array.isArray(target)) {
-          throw new Error('<a> in <b> must target <b> : Collection');
-        }
+      if (!Array.isArray(target)) {
+        throw new Error('<a> in <b> must target <b> : Collection');
+      }
 
-        return target.map(t => (
-          { [prop]: t }
-        ));
-
-      };
+      return target.map(t => (
+        { [prop]: t }
+      ));
 
     };
+
+  };
 
     // expression
     // expression ".." expression
-    case 'IterationContext': return (context) => {
+  case 'IterationContext': return (context) => {
 
-      const a = args[0](context);
+    const a = args[0](context);
 
-      const b = args[1] && args[1](context);
+    const b = args[1] && args[1](context);
 
-      if (!b) {
-        return a;
+    if (!b) {
+      return a;
+    }
+
+    return createRange(a, b);
+  };
+
+  case 'Type': return args[0];
+
+  case 'InExpressions': return (context) => {
+
+    const iterationContexts = args.map(ctx => ctx(context));
+
+    return cartesianProduct(iterationContexts)
+      .map(ctx => Array.isArray(ctx) ? Object.assign({}, ...ctx) : ctx);
+  };
+
+  case 'InExpression': return (context) => {
+
+    const [ prop, extractor, target ] = args;
+
+    return extractor(context)(prop, target);
+  };
+
+  case 'InstanceOf': return tag((context) => {
+
+    const a = args[0](context);
+    const b = args[1](context);
+
+    return a instanceof b;
+  }, Test('boolean'));
+
+  case 'every': return tag((context) => {
+    return (_contexts, _condition) => {
+      const contexts = _contexts(context);
+      return contexts.every(ctx => isTruthy(_condition(ctx)));
+    };
+
+  }, Test('boolean'));
+
+  case 'some': return tag((context) => {
+    return (_contexts, _condition) => {
+      const contexts = _contexts(context);
+      return contexts.some(ctx => isTruthy(_condition(ctx)));
+    };
+  }, Test('boolean'));
+
+  case 'between': return tag(
+    (context) => (expr, start, end) => {
+
+      const left = expr(context);
+
+      return start(context) <= left <= end(context) ? left : false;
+    },
+    'boolean'
+  );
+
+  case 'NumericLiteral': return tag((context) => input.includes('.') ? parseFloat(input) : parseInt(input), 'number');
+
+  case 'BooleanLiteral': return tag((context) => input === 'true' ? true : false, 'boolean');
+
+  case 'StringLiteral': return tag((context) => input.slice(1, -1), 'string');
+
+  case 'PositionalParameters': return (context) => args;
+
+  case 'FunctionInvocation': return (context) => args[0](context)(...args[1](context).map(fn => fn(context)));
+
+  case 'IfExpression': return (function() {
+
+    const ifCondition = args[1];
+
+    const thenValue = args[3];
+    const elseValue = args[5];
+
+    const type = coalecenseTypes(thenValue, elseValue);
+
+    return tag((context) => {
+
+      if (isTruthy(ifCondition(context))) {
+        return thenValue(context);
+      } else {
+        return elseValue ? elseValue(context) : null;
       }
+    }, type);
 
-      return createRange(a, b);
-    };
+  })();
 
-    case 'Type': return args[0];
+  case 'Parameters': return args.length === 3 ? args[1] : (context) => [];
 
-    case 'InExpressions': return (context) => {
-
-      const iterationContexts = args.map(ctx => ctx(context));
-
-      return cartesianProduct(iterationContexts)
-        .map(ctx => Array.isArray(ctx) ? Object.assign({}, ...ctx) : ctx);
-    };
-
-    case 'InExpression': return (context) => {
-
-      const [ prop, extractor, target ] = args;
-
-      return extractor(context)(prop, target);
-    };
-
-    case 'InstanceOf': return tag((context) => {
-
-      const a = args[0](context);
-      const b = args[1](context);
-
-      return a instanceof b;
-    }, Test('boolean'));
-
-    case 'every': return tag((context) => {
-      return (_contexts, _condition) => {
-        const contexts = _contexts(context);
-        return contexts.every(ctx => isTruthy(_condition(ctx)));
-      };
-
-    }, Test('boolean'));
-
-    case 'some': return tag((context) => {
-      return (_contexts, _condition) => {
-        const contexts = _contexts(context);
-        return contexts.some(ctx => isTruthy(_condition(ctx)));
-      };
-    }, Test('boolean'));
-
-    case 'between': return tag(
-      (context) => (expr, start, end) => {
-
-        const left = expr(context);
-
-        return start(context) <= left <= end(context) ? left : false;
-      },
-      'boolean'
-    );
-
-    case 'NumericLiteral': return tag((context) => input.includes('.') ? parseFloat(input) : parseInt(input), 'number');
-
-    case 'BooleanLiteral': return tag((context) => input === 'true' ? true : false, 'boolean');
-
-    case 'StringLiteral': return tag((context) => input.slice(1, -1), 'string');
-
-    case 'PositionalParameters': return (context) => args;
-
-    case 'FunctionInvocation': return (context) => args[0](context)(...args[1](context).map(fn => fn(context)));
-
-    case 'IfExpression': return (function() {
-
-      const ifCondition = args[1];
-
-      const thenValue = args[3];
-      const elseValue = args[5];
-
-      const type = coalecenseTypes(thenValue, elseValue);
-
-      return tag((context) => {
-
-        if (isTruthy(ifCondition(context))) {
-          return thenValue(context);
-        } else {
-          return elseValue ? elseValue(context) : null;
-        }
-      }, type);
-
-    })();
-
-    case 'Parameters': return args.length === 3 ? args[1] : (context) => [];
-
-    case '(': return '(';
-    case ')': return ')';
-    case '[': return '[';
-    case ']': return ']';
-    case '{': return '{';
-    case '}': return '}';
+  case '(': return '(';
+  case ')': return ')';
+  case '[': return '[';
+  case ']': return ']';
+  case '{': return '{';
+  case '}': return '}';
 
     /**
      * expression !compare CompareOp<"=" | "!="> expression |
@@ -418,170 +418,170 @@ function evalNode(node, input, args) {
      * expression !compare kw<"between"> expression kw<"and"> expression |
      * expression !compare InTester !unaryTest "(" PositiveUnaryTests ")"
      */
-    case 'Comparison': return (context) => {
+  case 'Comparison': return (context) => {
 
-      if (args.length === 5) {
+    if (args.length === 5) {
 
-        // expression !compare InTester !unaryTest "(" PositiveUnaryTests ")"
-        if (args[2] === '(') {
-          return args[1](context)(args[3])(args[0]);
-        }
-
-        // expression !compare kw<"between"> expression kw<"and"> expression
-        return args[1](context)(args[0], args[2], args[4]);
+      // expression !compare InTester !unaryTest "(" PositiveUnaryTests ")"
+      if (args[2] === '(') {
+        return args[1](context)(args[3])(args[0]);
       }
 
-      return args[1](context)(args[2])(args[0]);
-    };
+      // expression !compare kw<"between"> expression kw<"and"> expression
+      return args[1](context)(args[0], args[2], args[4]);
+    }
 
-    case 'QuantifiedExpression': return (context) => {
+    return args[1](context)(args[2])(args[0]);
+  };
 
-      const testFn = args[0](context);
+  case 'QuantifiedExpression': return (context) => {
 
-      const contexts = args[1];
+    const testFn = args[0](context);
 
-      const condition = args[3];
+    const contexts = args[1];
 
-      return testFn(contexts, condition);
-    };
+    const condition = args[3];
+
+    return testFn(contexts, condition);
+  };
 
     // DMN 1.2 - 10.3.2.14
     // kw<"for"> commaSep1<InExpression<IterationContext>> kw<"return"> expression
-    case 'ForExpression': return (context) => {
-      const extractor = args[args.length - 1];
+  case 'ForExpression': return (context) => {
+    const extractor = args[args.length - 1];
 
-      const iterationContexts = args[1](context);
+    const iterationContexts = args[1](context);
 
-      const partial = [];
+    const partial = [];
 
-      for (const ctx of iterationContexts) {
+    for (const ctx of iterationContexts) {
 
-        partial.push(extractor({
-          ...ctx,
-          partial
-        }));
-      }
+      partial.push(extractor({
+        ...ctx,
+        partial
+      }));
+    }
 
-      return partial;
-    };
+    return partial;
+  };
 
-    case 'UnaryExpression': return (function() {
-      const operator = args[0];
+  case 'UnaryExpression': return (function() {
+    const operator = args[0];
 
-      const value = args[1];
+    const value = args[1];
 
-      return tag((context) => {
+    return tag((context) => {
 
-        return operator(context)(() => 0, value);
-      }, value.type);
-    })();
+      return operator(context)(() => 0, value);
+    }, value.type);
+  })();
 
-    case 'ArithmeticExpression': return (function() {
+  case 'ArithmeticExpression': return (function() {
 
-      const [ a, op, b ] = args;
+    const [ a, op, b ] = args;
 
-      return tag((context) => {
-        return op(context)(a, b);
-      }, coalecenseTypes(a, b));
-    })();
+    return tag((context) => {
+      return op(context)(a, b);
+    }, coalecenseTypes(a, b));
+  })();
 
-    case 'PositiveUnaryTest': return args[0];
+  case 'PositiveUnaryTest': return args[0];
 
-    case 'PositiveUnaryTests': return (context) => {
-      return args.map(a => a(context));
-    };
+  case 'PositiveUnaryTests': return (context) => {
+    return args.map(a => a(context));
+  };
 
-    case 'ParenthesizedExpression': return args[1];
+  case 'ParenthesizedExpression': return args[1];
 
-    case 'PathExpression': return (context) => {
+  case 'PathExpression': return (context) => {
 
-      const pathTarget = args[0](context);
-      const pathProp = args[1];
+    const pathTarget = args[0](context);
+    const pathProp = args[1];
 
-      if (Array.isArray(pathTarget)) {
-        return pathTarget.map(el => el[pathProp]);
-      } else {
-        return pathTarget[pathProp];
-      }
-    };
+    if (Array.isArray(pathTarget)) {
+      return pathTarget.map(el => el[pathProp]);
+    } else {
+      return pathTarget[pathProp];
+    }
+  };
 
     // expression !filter "[" expression "]"
-    case 'FilterExpression': return (context) => {
+  case 'FilterExpression': return (context) => {
 
-      const filterTarget = args[0](context);
+    const filterTarget = args[0](context);
 
-      const filterFn = args[2];
+    const filterFn = args[2];
 
-      // a[1]
-      if (filterFn.type === 'number') {
-        const idx = filterFn(context);
+    // a[1]
+    if (filterFn.type === 'number') {
+      const idx = filterFn(context);
 
-        if (!Array.isArray(filterTarget)) {
-          return filterTarget;
-        }
-
-        if (idx < 0) {
-          return filterTarget[filterTarget.length + idx] || null;
-        } else {
-          return filterTarget[idx - 1] || null;
-        }
+      if (!Array.isArray(filterTarget)) {
+        return filterTarget;
       }
 
-      // a[true]
-      if (filterFn.type === 'boolean') {
-        if (filterFn(context)) {
-          return filterTarget;
-        } else {
-          return Array.isArray(filterTarget) ? [] : null;
-        }
+      if (idx < 0) {
+        return filterTarget[filterTarget.length + idx] || null;
+      } else {
+        return filterTarget[idx - 1] || null;
       }
+    }
 
-      // a[test]
-      return filterTarget.map(el => {
-
-        const iterationContext = {
-          ...context,
-          item: el,
-          ...Object.entries(el).reduce(function(itemScope, [key, value]) {
-            itemScope[ 'item.' + key ] = value;
-
-            return itemScope;
-          }, {}),
-          ...el
-        };
-
-        return filterFn(iterationContext);
-      }).filter(isTruthy);
-    };
-
-    case 'SuperSimplePositiveUnaryTest': return tag((context) => {
-
-      if (args.length === 1) {
-        return args[0](context);
+    // a[true]
+    if (filterFn.type === 'boolean') {
+      if (filterFn(context)) {
+        return filterTarget;
+      } else {
+        return Array.isArray(filterTarget) ? [] : null;
       }
+    }
 
-      return args[0](context)(args[1]);
-    }, 'test');
+    // a[test]
+    return filterTarget.map(el => {
 
-    case 'List': return (context) => {
-      return args.slice(1, -1).map(arg => arg(context));
-    };
+      const iterationContext = {
+        ...context,
+        item: el,
+        ...Object.entries(el).reduce(function(itemScope, [key, value]) {
+          itemScope[ 'item.' + key ] = value;
 
-    case 'Interval': return (context) => {
-
-      const interval = new Interval(args[0], args[1](context), args[2](context), args[3]);
-
-      return (a) => {
-        return interval.includes(a(context));
+          return itemScope;
+        }, {}),
+        ...el
       };
+
+      return filterFn(iterationContext);
+    }).filter(isTruthy);
+  };
+
+  case 'SuperSimplePositiveUnaryTest': return tag((context) => {
+
+    if (args.length === 1) {
+      return args[0](context);
+    }
+
+    return args[0](context)(args[1]);
+  }, 'test');
+
+  case 'List': return (context) => {
+    return args.slice(1, -1).map(arg => arg(context));
+  };
+
+  case 'Interval': return (context) => {
+
+    const interval = new Interval(args[0], args[1](context), args[2](context), args[3]);
+
+    return (a) => {
+      return interval.includes(a(context));
     };
+  };
 
-    case 'Script': return (function() {
+  case 'Script': return (function() {
 
-      const root = args[args.length - 1];
+    const root = args[args.length - 1];
 
-      return tag((context) => root(context), root.type);
-    })();
+    return tag((context) => root(context), root.type);
+  })();
   }
 }
 
@@ -651,7 +651,7 @@ function tag(fn, type) {
   fn.type = type;
 
   fn.toString = function() {
-    return `TaggedFunction[${type}] ${Function.prototype.toString.call(fn)}`
+    return `TaggedFunction[${type}] ${Function.prototype.toString.call(fn)}`;
   };
 
   return fn;

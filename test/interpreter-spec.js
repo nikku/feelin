@@ -295,6 +295,14 @@ describe('interpreter', function() {
 
       evaluate('null[1]', null);
 
+      evaluate('[1,2,3][item >= 2]', [2, 3]);
+
+      evaluate('[{a: 1}, {a: 2}, {a: 3}][item.a >= 2]', [2, 3]);
+
+      evaluate('[{a: 1}, {a: 2}, {a: 3}][a >= 2]', [2, 3]);
+
+      evaluate('[{item: 1}, {item: 2}, {item: 3}][item >= 2]', [2, 3]);
+
     });
 
 

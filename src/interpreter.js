@@ -510,10 +510,18 @@ function evalNode(type, input, args) {
       // a[test]
       return filterTarget.filter(el => {
 
-        const filter = filterFn({
+        const iterationContext = {
           ...context,
+          item: el,
+          ...Object.entries(el).reduce(function(itemScope, [key, value]) {
+            itemScope[ 'item.' + key ] = value;
+
+            return itemScope;
+          }, {}),
           ...el
-        });
+        };
+
+        const filter = filterFn(iterationContext);
 
         return filter;
       });
@@ -552,7 +560,12 @@ function evalNode(type, input, args) {
 
 
 function getFromContext(variable, context) {
-  return context[variable];
+
+  if (variable in context) {
+    return context[variable];
+  }
+
+  return null;
 }
 
 function compareValOrFn(valOrFn, expr) {

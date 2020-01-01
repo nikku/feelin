@@ -14,6 +14,10 @@ import {
 unaryTest(1, '1'); // true
 unaryTest(1, '[1..end]', { end: 10 }); // true
 
+evaluate("Mike's dauther.name", { 
+  'Mike's dauther.name': 'Lisa'
+}); // "Lisa"
+
 evaluate('for a in [1, 2, 3] return a * 2'); // [ 2, 4, 6 ]
 
 evaluate('every rate in rates() satisfies rate < 10', {
@@ -22,6 +26,15 @@ evaluate('every rate in rates() satisfies rate < 10', {
   }
 }); // false
 ```
+
+
+## Features
+
+* [x] Support basic FEEL operations
+* [x] Support names with spaces
+* [x] Recover on errors
+* [ ] Provides built-in functions
+* [ ] Passes FEEL tests in the [DMN TCK](https://github.com/dmn-tck/tck)
 
 
 ## Related

@@ -301,6 +301,18 @@ describe('interpreter', function() {
 
       evaluate('null[1]', null);
 
+      evaluate('true[1]', true);
+
+      evaluate('"Foo"[1]', "Foo");
+
+      evaluate('false[1]', false);
+
+      evaluate('100[1] = 100', 100);
+
+      evaluate('a[1] = a', { b: 'foo' }, {
+        a: { b: 'foo' }
+      });
+
       evaluate('[1,2,3][item >= 2]', [2, 3]);
 
       evaluate('[{a: 1}, {a: 2}, {a: 3}][item.a >= 2]', [2, 3]);
@@ -446,17 +458,9 @@ describe('interpreter', function() {
 
     evaluate('[1,2,3] = [1,2,3]', true);
 
-    evaluate('[1] = [2]', true);
-
-    evaluate('true[1] = true', true);
-
-    evaluate('100[1] = 100', true);
-
-    evaluate('"foo"[1] = "foo"', true);
+    evaluate('[1] = [2]', false);
 
     evaluate('[] = null', false);
-
-    evaluate('{a: "foo"}[1] = {a: "foo"}', true);
 
     evaluate('[] = 0', null);
 

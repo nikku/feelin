@@ -507,8 +507,8 @@ function evalNode(type, input, args) {
       if (filterFn.type === 'number') {
         const idx = filterFn(context);
 
-        if (!filterTarget) {
-          return null;
+        if (!Array.isArray(filterTarget)) {
+          return filterTarget;
         }
 
         if (idx < 0) {

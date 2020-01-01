@@ -2,7 +2,7 @@ if a != b then c
 
 ----------
 
-Script "if a != b then c"
+Expressions "if a != b then c"
   IfExpression "if a != b then c"
     if "if"
     Comparison "a != b"

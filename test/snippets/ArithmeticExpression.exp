@@ -2,7 +2,7 @@
 
 ----------
 
-Script "1 ** -5"
+Expressions "1 ** -5"
   ArithmeticExpression "1 ** -5"
     NumericLiteral "1"
     ArithOp "**"

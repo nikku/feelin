@@ -2,7 +2,7 @@ function() 3
 
 ----------
 
-Script "function() 3"
+Expressions "function() 3"
   FunctionDefinition "function() 3"
     function "function"
     ( "("

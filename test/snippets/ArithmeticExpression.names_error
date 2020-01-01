@@ -2,7 +2,7 @@ Student's name + " is " + Graduation DT + " with grade: " + Grade + " and evalua
 
 ----------
 
-Script "Student's name + " is " + Graduation DT + " with grade: " + Grade + " and evaluation: " + Teacher's Evaluation"
+Expressions "Student's name + " is " + Graduation DT + " with grade: " + Grade + " and evaluation: " + Teacher's Evaluation"
   QualifiedName "Student's"
     Name "Student"
     ⚠ "'"

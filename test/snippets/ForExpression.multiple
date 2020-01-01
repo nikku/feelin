@@ -2,7 +2,7 @@ for a in c, b in d return d
 
 ----------
 
-Script "for a in c, b in d return d"
+Expressions "for a in c, b in d return d"
   ForExpression "for a in c, b in d return d"
     for "for"
     InExpressions "a in c, b in d"

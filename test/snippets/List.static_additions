@@ -2,7 +2,7 @@
 
 ----------
 
-Script "[1 + 3, 2 * 5, 10 ** 3]"
+Expressions "[1 + 3, 2 * 5, 10 ** 3]"
   List "[1 + 3, 2 * 5, 10 ** 3]"
     [ "["
     ArithmeticExpression "1 + 3"

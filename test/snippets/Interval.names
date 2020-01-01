@@ -2,7 +2,7 @@
 
 ----------
 
-Script "[numB..numC]"
+Expressions "[numB..numC]"
   SuperSimplePositiveUnaryTest "[numB..numC]"
     Interval "[numB..numC]"
       [ "["

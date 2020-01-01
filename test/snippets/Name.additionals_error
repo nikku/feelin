@@ -2,7 +2,7 @@ a**'s
 
 ----------
 
-Script "a**'s"
+Expressions "a**'s"
   ArithmeticExpression "a**'s"
     QualifiedName "a"
       Name "a"

@@ -2,7 +2,7 @@ for i in 0..4 return if i = 0 then 1 else i * partial[-1]
 
 ----------
 
-Script "for i in 0..4 return if i = 0 then 1 else i * partial[-1]"
+Expressions "for i in 0..4 return if i = 0 then 1 else i * partial[-1]"
   ForExpression "for i in 0..4 return if i = 0 then 1 else i * partial[-1]"
     for "for"
     InExpressions "i in 0..4"

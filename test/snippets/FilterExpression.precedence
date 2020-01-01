@@ -2,7 +2,7 @@ a[c].b
 
 ----------
 
-Script "a[c].b"
+Expressions "a[c].b"
   PathExpression "a[c].b"
     FilterExpression "a[c]"
       QualifiedName "a"

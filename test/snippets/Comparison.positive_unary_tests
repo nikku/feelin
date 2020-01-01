@@ -2,7 +2,7 @@ a in (< 20, > 10)
 
 ----------
 
-Script "a in (< 20, > 10)"
+Expressions "a in (< 20, > 10)"
   Comparison "a in (< 20, > 10)"
     QualifiedName "a"
       Name "a"

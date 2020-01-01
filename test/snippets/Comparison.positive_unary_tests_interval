@@ -2,7 +2,7 @@ a in ([ a .. 5 ])
 
 ----------
 
-Script "a in ([ a .. 5 ])"
+Expressions "a in ([ a .. 5 ])"
   Comparison "a in ([ a .. 5 ])"
     QualifiedName "a"
       Name "a"

@@ -2,7 +2,7 @@
 
 ----------
 
-Script "-x"
+Expressions "-x"
   UnaryExpression "-x"
     ArithOp "-"
     QualifiedName "x"

@@ -2,7 +2,7 @@
 
 ----------
 
-Script "{ a: a, b: b }"
+Expressions "{ a: a, b: b }"
   Context "{ a: a, b: b }"
     { "{"
     ContextEntry "a: a"

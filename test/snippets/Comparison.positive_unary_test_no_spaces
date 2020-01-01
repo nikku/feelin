@@ -2,7 +2,7 @@ a in [1..4]
 
 ----------
 
-Script "a in [1..4]"
+Expressions "a in [1..4]"
   Comparison "a in [1..4]"
     QualifiedName "a"
       Name "a"

@@ -2,7 +2,7 @@ function(a, b) external a
 
 ----------
 
-Script "function(a, b) external a"
+Expressions "function(a, b) external a"
   FunctionDefinition "function(a, b) external a"
     function "function"
     ( "("

@@ -2,7 +2,7 @@
 
 ----------
 
-Script "-x ** y"
+Expressions "-x ** y"
   ArithmeticExpression "-x ** y"
     UnaryExpression "-x"
       ArithOp "-"

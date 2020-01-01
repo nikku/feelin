@@ -2,7 +2,7 @@ a b
 
 ----------
 
-Script "a b"
+Expressions "a b"
   QualifiedName "a"
     Name "a"
   QualifiedName "b"

@@ -2,7 +2,7 @@ a()
 
 ----------
 
-Script "a()"
+Expressions "a()"
   FunctionInvocation "a()"
     QualifiedName "a"
       Name "a"

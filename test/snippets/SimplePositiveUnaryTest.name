@@ -2,7 +2,7 @@
 
 ----------
 
-Script ">= a"
+Expressions ">= a"
   SuperSimplePositiveUnaryTest ">= a"
     CompareOp ">="
     QualifiedName "a"

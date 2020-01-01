@@ -2,7 +2,7 @@ every a in b satisfies c
 
 ----------
 
-Script "every a in b satisfies c"
+Expressions "every a in b satisfies c"
   QuantifiedExpression "every a in b satisfies c"
     every "every"
     InExpressions "a in b"

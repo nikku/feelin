@@ -2,7 +2,7 @@
 
 ----------
 
-Script "1 + 1"
+Expressions "1 + 1"
   ArithmeticExpression "1 + 1"
     NumericLiteral "1"
     ArithOp "+"

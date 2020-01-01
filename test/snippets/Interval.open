@@ -2,7 +2,7 @@
 
 ----------
 
-Script "(1 .. 2)"
+Expressions "(1 .. 2)"
   SuperSimplePositiveUnaryTest "(1 .. 2)"
     Interval "(1 .. 2)"
       ( "("

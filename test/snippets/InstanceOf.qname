@@ -2,7 +2,7 @@ a instance of b.C
 
 ----------
 
-Script "a instance of b.C"
+Expressions "a instance of b.C"
   InstanceOf "a instance of b.C"
     QualifiedName "a"
       Name "a"

@@ -2,7 +2,7 @@
 
 ----------
 
-Script "((a).b).c"
+Expressions "((a).b).c"
   PathExpression "((a).b).c"
     ParenthesizedExpression "((a).b)"
       ( "("

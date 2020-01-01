@@ -2,7 +2,7 @@ a != b
 
 ----------
 
-Script "a != b"
+Expressions "a != b"
   Comparison "a != b"
     QualifiedName "a"
       Name "a"

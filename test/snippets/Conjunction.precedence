@@ -2,7 +2,7 @@ a and b or c and d
 
 ----------
 
-Script "a and b or c and d"
+Expressions "a and b or c and d"
   Disjunction "a and b or c and d"
     Conjunction "a and b"
       QualifiedName "a"

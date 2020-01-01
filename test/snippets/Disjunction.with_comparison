@@ -2,7 +2,7 @@ a > b or c >= d
 
 ----------
 
-Script "a > b or c >= d"
+Expressions "a > b or c >= d"
   Disjunction "a > b or c >= d"
     Comparison "a > b"
       QualifiedName "a"

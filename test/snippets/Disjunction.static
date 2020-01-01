@@ -2,7 +2,7 @@ a > 10 or 1 != 2
 
 ----------
 
-Script "a > 10 or 1 != 2"
+Expressions "a > 10 or 1 != 2"
   Disjunction "a > 10 or 1 != 2"
     Comparison "a > 10"
       QualifiedName "a"

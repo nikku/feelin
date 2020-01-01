@@ -2,7 +2,7 @@ a and b
 
 ----------
 
-Script "a and b"
+Expressions "a and b"
   Conjunction "a and b"
     QualifiedName "a"
       Name "a"

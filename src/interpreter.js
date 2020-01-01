@@ -576,9 +576,12 @@ function evalNode(node, input, args) {
     };
   };
 
-  case 'Script': return (function() {
+  case 'Expressions': return (function() {
 
     const root = args[args.length - 1];
+
+    // TODO(nikku): return all results or drop support
+    // for multiple expressions
 
     return tag((context) => root(context), root.type);
   })();

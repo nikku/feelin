@@ -2,7 +2,7 @@
 
 ----------
 
-Script "(1 - null) * (null ^ 2)"
+Expressions "(1 - null) * (null ^ 2)"
   ArithmeticExpression "(1 - null) * (null ^ 2)"
     ParenthesizedExpression "(1 - null)"
       ( "("

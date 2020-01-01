@@ -2,7 +2,7 @@ a between b and c
 
 ----------
 
-Script "a between b and c"
+Expressions "a between b and c"
   Comparison "a between b and c"
     QualifiedName "a"
       Name "a"

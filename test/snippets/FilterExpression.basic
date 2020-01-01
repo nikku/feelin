@@ -2,7 +2,7 @@ a[c]
 
 ----------
 
-Script "a[c]"
+Expressions "a[c]"
   FilterExpression "a[c]"
     QualifiedName "a"
       Name "a"

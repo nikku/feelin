@@ -2,7 +2,7 @@
 
 ----------
 
-Script "0 in (1, 0)"
+Expressions "0 in (1, 0)"
   Comparison "0 in (1, 0)"
     NumericLiteral "0"
     InTester "in"

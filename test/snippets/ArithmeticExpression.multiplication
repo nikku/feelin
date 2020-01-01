@@ -2,7 +2,7 @@ x * y
 
 ----------
 
-Script "x * y"
+Expressions "x * y"
   ArithmeticExpression "x * y"
     QualifiedName "x"
       Name "x"

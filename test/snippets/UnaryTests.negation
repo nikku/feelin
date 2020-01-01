@@ -2,7 +2,7 @@ not(a)
 
 ----------
 
-Script "not(a)"
+Expressions "not(a)"
   FunctionInvocation "not(a)"
     QualifiedName "not"
       Name "not"

@@ -2,7 +2,7 @@ function(a: Foo, b: bar) a
 
 ----------
 
-Script "function(a: Foo, b: bar) a"
+Expressions "function(a: Foo, b: bar) a"
   FunctionDefinition "function(a: Foo, b: bar) a"
     function "function"
     ( "("

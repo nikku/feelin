@@ -2,7 +2,7 @@ a(foo, bar)
 
 ----------
 
-Script "a(foo, bar)"
+Expressions "a(foo, bar)"
   FunctionInvocation "a(foo, bar)"
     QualifiedName "a"
       Name "a"

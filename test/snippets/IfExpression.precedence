@@ -2,7 +2,7 @@ if if a then d else e then c
 
 ----------
 
-Script "if if a then d else e then c"
+Expressions "if if a then d else e then c"
   IfExpression "if if a then d else e then c"
     if "if"
     IfExpression "if a then d else e"

@@ -2,7 +2,7 @@ INPUT in 10
 
 ----------
 
-Script "INPUT in 10"
+Expressions "INPUT in 10"
   Comparison "INPUT in 10"
     QualifiedName "INPUT"
       Name "INPUT"

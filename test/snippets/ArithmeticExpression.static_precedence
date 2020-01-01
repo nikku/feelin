@@ -2,7 +2,7 @@
 
 ----------
 
-Script "1 + 1 * 4 / 10 ^ 5"
+Expressions "1 + 1 * 4 / 10 ^ 5"
   ArithmeticExpression "1 + 1 * 4 / 10 ^ 5"
     NumericLiteral "1"
     ArithOp "+"

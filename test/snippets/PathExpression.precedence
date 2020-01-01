@@ -2,7 +2,7 @@ a+b.c
 
 ----------
 
-Script "a+b.c"
+Expressions "a+b.c"
   ArithmeticExpression "a+b.c"
     QualifiedName "a"
       Name "a"

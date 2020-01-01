@@ -2,7 +2,7 @@ for a in c..e return d
 
 ----------
 
-Script "for a in c..e return d"
+Expressions "for a in c..e return d"
   ForExpression "for a in c..e return d"
     for "for"
     InExpressions "a in c..e"

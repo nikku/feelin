@@ -1,5 +1,3 @@
-@skip { whitespace }
-
 @precedence {
   name,
   call,
@@ -92,13 +90,12 @@ IterationContext {
 
 UnaryExpression {
   !prefix ArithOp<"+"> expression |
-  !prefix Minus expression
+  !prefix minus expression
 }
 
 ArithmeticExpression {
-  expression !add ArithOp<"+"> expression |
-  expression !add Minus expression |
-  expression !times ArithOp<"*" | "/"> expression |
+  expression !add (ArithOp<"+"> | minus) expression |
+  expression !times (ArithOp<"*"> | divide) expression |
   expression !exp ArithOp<"^" | "**"> expression
 }
 
@@ -230,8 +227,17 @@ commaSep<Expr> {
   "" | Expr ("," Expr)*
 }
 
+@skip { whitespace | LineComment | BlockComment }
 
 @tokens {
+
+  LineComment[skipped=true] { "//" ![\n]* }
+
+  BlockComment[skipped=true] { "/*" blockCommentRest }
+
+  blockCommentRest { ![*] blockCommentRest | "*" blockCommentAfterStar }
+
+  blockCommentAfterStar { "/" | "*" blockCommentAfterStar | ![/*] blockCommentRest }
 
   VerticalSpace {
     $[\u000A-\u000D]
@@ -249,11 +255,13 @@ commaSep<Expr> {
     Digit+
   }
 
-  Minus[name=ArithOp] { "-" }
+  divide[name=ArithOp] { "/" }
+
+  minus[name=ArithOp] { "-" }
 
   /* 35. string literal = """, { character – (""" | vertical space) | string escape sequence}, """ ; */
   StringLiteral {
-    '"' !["]* '"'
+    '"' (![\\\n"] | "\\" _)* '"'?
   }
 
   NumericLiteral {
@@ -277,6 +285,8 @@ commaSep<Expr> {
   Gte { ">=" }
   Lte { "<=" }
 
+  @precedence { BlockComment, LineComment, divide }
+
   @precedence {
     BooleanLiteral,
     DateTimeLiteral,
@@ -287,7 +297,7 @@ commaSep<Expr> {
 
   @precedence {
     NumericLiteral,
-    Minus
+    minus
   }
 
   @precedence {

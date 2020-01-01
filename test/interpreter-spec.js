@@ -410,7 +410,7 @@ describe('interpreter', function() {
   });
 
 
-  describe.skip('comments', function() {
+  describe('comments', function() {
 
     evaluate('1 + /* 1 + */ 1', 2);
 

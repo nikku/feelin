@@ -1,5 +1,7 @@
 import { parser } from './parser';
 
+import { NodeProp } from "lezer"
+
 function Interpreter(parser) {
 
   this.parser = parser;
@@ -135,17 +137,26 @@ function Interpreter(parser) {
     const stack = [ root ];
 
     tree.iterate({
-      enter(type, start, end) {
+      enter(node, start, end) {
+
+        if (node.prop(NodeProp.skipped)) {
+          return false;
+        }
+
         const nodeInput = input.slice(start, end);
 
         stack.push({
-          nodeKey: `${type.name}-${nodeInput}`,
+          nodeKey: `${node.name}-${nodeInput}`,
           nodeInput,
           args: []
         });
       },
 
-      leave(type, start, end) {
+      leave(node, start, end) {
+
+        if (node.prop(NodeProp.skipped)) {
+          return;
+        }
 
         const {
           nodeKey,
@@ -155,7 +166,7 @@ function Interpreter(parser) {
 
         const parent = stack[stack.length - 1];
 
-        const expr = evalNode(type, nodeInput, args);
+        const expr = evalNode(node, nodeInput, args);
 
         parent.args.push(expr);
       }
@@ -167,13 +178,13 @@ function Interpreter(parser) {
 }
 
 
-function evalNode(type, input, args) {
+function evalNode(node, input, args) {
 
   if (process.env.LOG === 'evalNode') {
-    console.log(type.name, input, args);
+    console.log(node.name, input, args);
   }
 
-  switch (type.name) {
+  switch (node.name) {
     case 'ArithOp': return (context) => {
 
       const nullable = (op) => (a, b) => {

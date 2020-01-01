@@ -3,3 +3,4 @@ test
 tmp
 rollup.config.js
 .eslintrc
+.travis.yml

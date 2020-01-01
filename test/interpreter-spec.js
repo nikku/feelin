@@ -414,6 +414,23 @@ describe('interpreter', function() {
   });
 
 
+  describe.skip('UnaryTests', function() {
+
+    unaryTest(5, 'not(true)', false);
+
+    unaryTest(5, 'not(false)', true);
+
+    unaryTest(5, 'not(null)', null);
+
+    unaryTest(5, 'not(0)', null);
+
+    unaryTest(5, 'not(1)', null);
+
+    unaryTest(5, 'not("true")', null);
+
+  });
+
+
   describe('comments', function() {
 
     evaluate('1 + /* 1 + */ 1', 2);

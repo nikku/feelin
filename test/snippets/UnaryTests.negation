@@ -1,0 +1,14 @@
+not(a)
+
+----------
+
+Script "not(a)"
+  FunctionInvocation "not(a)"
+    QualifiedName "not"
+      Name "not"
+    Parameters "(a)"
+      ( "("
+      PositionalParameters "a"
+        QualifiedName "a"
+          Name "a"
+      ) ")"

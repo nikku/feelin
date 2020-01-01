@@ -340,7 +340,7 @@ function evalNode(type, input, args) {
 
     case 'between': return (context) => (expr, start, end) => start(context) <= expr(context) <= end(context);
 
-    case 'NumericLiteral': return (context) => input.includes('.') ? parseFloat(input) : parseInt(input);
+    case 'NumericLiteral': return tag((context) => input.includes('.') ? parseFloat(input) : parseInt(input), 'number');
 
     case 'BooleanLiteral': return (context) => input === 'true' ? true : false;
 
@@ -447,13 +447,27 @@ function evalNode(type, input, args) {
       }
     };
 
+    // expression !filter "[" expression "]"
     case 'FilterExpression': return (context) => {
 
       const filterTarget = args[0](context);
 
+      const filterFn = args[2];
+
+      // [1, 2][1]
+      if (filterFn.type === 'number') {
+        const idx = filterFn(context);
+
+        if (idx < 0) {
+          return filterTarget[filterTarget.length + idx] || null;
+        } else {
+          return filterTarget[idx - 1] || null;
+        }
+      }
+
       return filterTarget.filter(el => {
 
-        const filter = args[2]({
+        const filter = filterFn({
           ...context,
           ...el
         });
@@ -462,14 +476,14 @@ function evalNode(type, input, args) {
       });
     };
 
-    case 'SuperSimplePositiveUnaryTest': return (context) => {
+    case 'SuperSimplePositiveUnaryTest': return tag((context) => {
 
       if (args.length === 1) {
         return args[0](context);
       }
 
       return args[0](context)(args[1]);
-    };
+    }, 'test');
 
     case 'List': return (context) => {
       return args.slice(1, -1).map(arg => arg(context));
@@ -528,6 +542,18 @@ function cartesianProduct(arrays) {
   const cartesian = (a, b, ...c) => (b ? cartesian(f(a, b), ...c) : a);
 
   return cartesian(...arrays);
+}
+
+
+function tag(fn, type) {
+
+  fn.type = type;
+
+  fn.toString = function() {
+    return `TaggedFunction[${type}] ${Function.prototype.toString.call(fn)}`
+  };
+
+  return fn;
 }
 
 function Interval(start, startValue, endValue, end) {

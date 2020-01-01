@@ -51,3 +51,8 @@ Standards related resources:
 
 * [dmn-tck](https://github.com/dmn-tck/tck)
 * [DMN 1.2 Specification](https://www.omg.org/spec/DMN/1.2/PDF)
+
+
+## License
+
+MIT

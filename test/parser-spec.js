@@ -60,6 +60,7 @@ function test(test, options={}) {
 
 }
 
+// eslint-disable-next-line no-unused-vars
 function testOnly(file, options={}) {
 
   test(file, {
@@ -97,7 +98,7 @@ function treeToString(tree, input) {
 
   tree.iterate({
     enter(type, start, end) {
-      str += `\n${"  ".repeat(indent)}${type.name} "${input.slice(start, end)}"`;
+      str += `\n${'  '.repeat(indent)}${type.name} "${input.slice(start, end)}"`;
       indent++;
     },
     leave() {
@@ -109,5 +110,5 @@ function treeToString(tree, input) {
 }
 
 function expectTree(currentTree, expectedTree) {
-  expect(currentTree.trim()).to.eql(stripIndent(expectedTree).trim())
+  expect(currentTree.trim()).to.eql(stripIndent(expectedTree).trim());
 }

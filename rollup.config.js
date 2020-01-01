@@ -18,6 +18,7 @@ const umdDist = pkg['umd:main'];
 const umdName = 'ModdleXML';
 
 export default [
+
   // browser-friendly UMD build
   {
     input: srcEntry,

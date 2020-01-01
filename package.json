@@ -13,6 +13,8 @@
     "@rollup/plugin-node-resolve": "^6.0.0",
     "chai": "^4.2.0",
     "chokidar-cli": "^2.1.0",
+    "eslint": "^6.8.0",
+    "eslint-plugin-bpmn-io": "^0.10.0",
     "esm": "^3.2.25",
     "fast-glob": "^3.1.1",
     "lezer-generator": "^0.5.0",
@@ -30,7 +32,8 @@
   },
   "sideEffects": false,
   "scripts": {
-    "all": "npm run build-parser && npm run build && npm run test",
+    "all": "npm run lint && npm run build-parser && npm run build && npm run test",
+    "lint": "eslint .",
     "build-parser:watch": "chokidar --initial src/feel.grammar -c \"npm run build-parser -- --names\"",
     "build-parser": "lezer-generator src/feel.grammar -o src/parser",
     "build": "rollup -c",

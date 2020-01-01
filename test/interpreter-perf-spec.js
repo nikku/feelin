@@ -1,14 +1,8 @@
-import { expect } from 'chai';
-
 import {
-  readFileSync as readFile,
-  writeFileSync as writeFile
+  readFileSync as readFile
 } from 'fs';
 
 import { interpreter } from '../src/interpreter';
-
-
-const snippetsCwd = __dirname + '/snippets';
 
 
 describe('interpreter', function() {

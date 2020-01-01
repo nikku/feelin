@@ -303,7 +303,7 @@ describe('interpreter', function() {
 
       evaluate('true[1]', true);
 
-      evaluate('"Foo"[1]', "Foo");
+      evaluate('"Foo"[1]', 'Foo');
 
       evaluate('false[1]', false);
 
@@ -434,7 +434,7 @@ describe('interpreter', function() {
 
   describe.skip('properties', function() {
 
-    function Duration() {};
+    function Duration() {}
 
     evaluate('time("10:30:00+05:00").time offset', new Duration('PT5H'));
 
@@ -443,7 +443,7 @@ describe('interpreter', function() {
 
   describe.skip('functions', function() {
 
-    evaluate('ends with("ASD", "D")', "ASD");
+    evaluate('ends with("ASD", "D")', 'ASD');
 
   });
 
@@ -547,6 +547,7 @@ function evaluate(...args) {
   });
 }
 
+// eslint-disable-next-line no-unused-vars
 function evaluateOnly(...args) {
   return createEvalVerifier({
     args,
@@ -554,6 +555,7 @@ function evaluateOnly(...args) {
   });
 }
 
+// eslint-disable-next-line no-unused-vars
 function unaryTestOnly(...args) {
   return createUnaryTestVerifier({
     args,

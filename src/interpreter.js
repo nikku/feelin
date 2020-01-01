@@ -1,6 +1,6 @@
 import { parser } from './parser';
 
-import { NodeProp } from "lezer"
+import { NodeProp } from 'lezer';
 
 function Interpreter(parser) {
 
@@ -24,7 +24,7 @@ function Interpreter(parser) {
 
     let match;
 
-    const pattern = /([.\/\-'+*]+)|([^\s.\/\-'+*]+)/g;
+    const pattern = /([./\-'+*]+)|([^\s./\-'+*]+)/g;
 
     const tokens = [];
 
@@ -64,7 +64,7 @@ function Interpreter(parser) {
 
     let uid = 0;
 
-    return Object.keys(context).filter(key => /[\s.\/\-'+*]/.test(key)).map(name => {
+    return Object.keys(context).filter(key => /[\s./\-'+*]/.test(key)).map(name => {
 
       const replacement = '_' + uid.toString(36);
       const tokens = this.parseName(name);
@@ -97,7 +97,7 @@ function Interpreter(parser) {
 
         return placeholder;
       });
-    };
+    }
 
     return {
       input,
@@ -146,7 +146,6 @@ function Interpreter(parser) {
         const nodeInput = input.slice(start, end);
 
         stack.push({
-          nodeKey: `${node.name}-${nodeInput}`,
           nodeInput,
           args: []
         });
@@ -159,7 +158,6 @@ function Interpreter(parser) {
         }
 
         const {
-          nodeKey,
           nodeInput,
           args
         } = stack.pop();

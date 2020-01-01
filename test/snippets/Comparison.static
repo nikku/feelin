@@ -1,0 +1,16 @@
+0 in (1, 0)
+
+----------
+
+Script "0 in (1, 0)"
+  Comparison "0 in (1, 0)"
+    NumericLiteral "0"
+    InTester "in"
+      in "in"
+    ( "("
+    PositiveUnaryTests "1, 0"
+      PositiveUnaryTest "1"
+        NumericLiteral "1"
+      PositiveUnaryTest "0"
+        NumericLiteral "0"
+    ) ")"

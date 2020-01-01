@@ -196,14 +196,25 @@ function evalNode(type, input, args) {
 
     case 'CompareOp': return tag((context) => {
 
+      const compare = (fn) => {
+        return (b) => (a) => {
+
+          const _a = a(context);
+          const _b = b(context);
+
+          return fn(_a, _b) ? _a : false;
+        };
+      };
+
       switch (input) {
-        case '>': return (b) => (a) => a(context) > b(context);
-        case '>=': return (b) => (a) => a(context) >= b(context);
-        case '<': return (b) => (a) => a(context) < b(context);
-        case '<=': return (b) => (a) => a(context) <= b(context);
-        case '=': return (b) => (a) => a(context) == b(context);
-        case '!=': return (b) => (a) => a(context) != b(context);
+        case '>': return compare((a, b) => a > b);
+        case '>=': return compare((a, b) => a >= b);
+        case '<': return compare((a, b) => a < b);
+        case '<=': return compare((a, b) => a <= b);
+        case '=': return compare((a, b) => a == b);
+        case '!=': return compare((a, b) => a != b);
       }
+
     }, Test('boolean'));
 
     case 'null': return (context) => {
@@ -216,7 +227,7 @@ function evalNode(type, input, args) {
 
       const b = args[2](context);
 
-      return !!(a || b);
+      return a || b;
     }, Test('boolean'));
 
     case 'Conjunction': return tag((context) => {
@@ -225,7 +236,7 @@ function evalNode(type, input, args) {
 
       const b = args[2](context);
 
-      return !!(a && b);
+      return a && b;
     }, Test('boolean'));
 
     case 'Context': return (context) => {
@@ -262,7 +273,11 @@ function evalNode(type, input, args) {
 
       const tests = b(context);
 
-      return (Array.isArray(tests) ? tests : [ tests ]).every(test => compareValOrFn(test, a));
+      const left = a(context);
+
+      return (Array.isArray(tests) ? tests : [ tests ]).every(
+        test => compareValOrFn(test, () => left)
+      ) ? left : false;
     };
 
     case 'InExtractor': return (context) => {
@@ -326,7 +341,7 @@ function evalNode(type, input, args) {
     case 'every': return tag((context) => {
       return (_contexts, _condition) => {
         const contexts = _contexts(context);
-        return contexts.every(ctx => _condition(ctx));
+        return contexts.every(ctx => isTruthy(_condition(ctx)));
       };
 
     }, Test('boolean'));
@@ -334,12 +349,17 @@ function evalNode(type, input, args) {
     case 'some': return tag((context) => {
       return (_contexts, _condition) => {
         const contexts = _contexts(context);
-        return contexts.some(ctx => _condition(ctx));
+        return contexts.some(ctx => isTruthy(_condition(ctx)));
       };
     }, Test('boolean'));
 
     case 'between': return tag(
-      (context) => (expr, start, end) => start(context) <= expr(context) <= end(context),
+      (context) => (expr, start, end) => {
+
+        const left = expr(context);
+
+        return start(context) <= left <= end(context) ? left : false;
+      },
       'boolean'
     );
 
@@ -364,7 +384,7 @@ function evalNode(type, input, args) {
 
       return tag((context) => {
 
-        if (ifCondition(context)) {
+        if (isTruthy(ifCondition(context))) {
           return thenValue(context);
         } else {
           return elseValue ? elseValue(context) : null;
@@ -508,7 +528,7 @@ function evalNode(type, input, args) {
       }
 
       // a[test]
-      return filterTarget.filter(el => {
+      return filterTarget.map(el => {
 
         const iterationContext = {
           ...context,
@@ -521,10 +541,8 @@ function evalNode(type, input, args) {
           ...el
         };
 
-        const filter = filterFn(iterationContext);
-
-        return filter;
-      });
+        return filterFn(iterationContext);
+      }).filter(isTruthy);
     };
 
     case 'SuperSimplePositiveUnaryTest': return tag((context) => {
@@ -628,6 +646,10 @@ function tag(fn, type) {
   };
 
   return fn;
+}
+
+function isTruthy(obj) {
+  return obj !== false && obj !== null;
 }
 
 function Test(type) {

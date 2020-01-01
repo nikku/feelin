@@ -93,6 +93,8 @@ describe('interpreter', function() {
 
     describe('QuantifiedExpression', function() {
 
+      evaluate('every e in [0, 1] satisfies e != 2', true);
+
       evaluate('every b in a satisfies b < 10', true, {
         a: [
           9,
@@ -122,6 +124,8 @@ describe('interpreter', function() {
         ]
       });
 
+      evaluate('every e in [0] satisfies e = 0', true);
+
       evaluate('some b in a satisfies b < 10', true, {
         a: [
           12,
@@ -147,35 +151,37 @@ describe('interpreter', function() {
 
       evaluate('5 > 10', false);
 
-      evaluate('5 >= 5', true);
+      evaluate('5 >= 5', 5);
 
-      evaluate('1 between -1 and 5', true);
+      evaluate('1 between -1 and 5', 1);
 
-      evaluate('5 in > 3', true);
+      evaluate('5 in > 3', 5);
 
       evaluate('5 in < 0', false);
 
-      evaluate('5 in (> 0, <10)', true);
+      evaluate('5 in (> 0, <10)', 5);
 
-      evaluate('5 in ([0..10], [5..15])', true);
+      evaluate('5 in ([0..10], [5..15])', 5);
+
+      evaluate('0 in (1, 0)', 0);
 
     });
 
 
     describe('Conjunction', function() {
 
-      evaluate('null and true', false);
+      evaluate('null and true', null);
 
-      evaluate('[] and 1', true);
+      evaluate('[] and 1', 1);
 
       evaluate('false and 1', false);
 
-      evaluate('a and b', false, {
+      evaluate('a and b', null, {
         a: null,
         b: 1
       });
 
-      evaluate('a and b', true, {
+      evaluate('a and b', 1, {
         a: true,
         b: 1
       });
@@ -187,9 +193,9 @@ describe('interpreter', function() {
 
       evaluate('null or true', true);
 
-      evaluate('false or 1', true);
+      evaluate('false or 1', 1);
 
-      evaluate('a or b', true, {
+      evaluate('a or b', 1, {
         a: null,
         b: 1
       });
@@ -263,7 +269,7 @@ describe('interpreter', function() {
 
     describe('FilterExpression', function() {
 
-      evaluate('a[ b > 10 ].b', [ 11, 15 ], {
+      evaluate('a[ b > 10 ]', [ 11, 15 ], {
         a: [
           { b: 5 },
           { b: 11 },
@@ -362,8 +368,8 @@ describe('interpreter', function() {
 
   describe('unaryTest', function() {
 
-    unaryTest(4, '[4..6]', true);
-    unaryTest(6, '[4..6]', true);
+    unaryTest(4, '[4..6]', 4);
+    unaryTest(6, '[4..6]', 6);
 
     unaryTest(4, ']4..6[', false);
     unaryTest(6, ']4..6[', false);
@@ -373,17 +379,17 @@ describe('interpreter', function() {
 
     unaryTest(5, '>= 10', false);
 
-    unaryTest(5, '5', true);
+    unaryTest(5, '5', 5);
 
-    unaryTest(5, 'a', true, { a: 5 });
+    unaryTest(5, 'a', 5, { a: 5 });
 
-    unaryTest(-5.312, '-5.312', true);
+    unaryTest(-5.312, '-5.312', -5.312);
 
     unaryTest(-5.312, '>-5.312', false);
 
     unaryTest(-5.312, '<-5.312', false);
 
-    unaryTest(5, '>= 3, < 10', true);
+    unaryTest(5, '>= 3, < 10', 5);
 
     unaryTest(5, '>= 3, < -1', false);
 

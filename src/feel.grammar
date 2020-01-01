@@ -1,8 +1,6 @@
 @skip { whitespace }
 
 @precedence {
-  else @left,
-  then @left,
   name,
   call,
   filter @left,
@@ -16,7 +14,9 @@
   compare @left,
   and @left,
   or @left,
-  unaryTest @cut
+  unaryTest @cut,
+  then @left,
+  else @left
 }
 
 @top[name=Script] {

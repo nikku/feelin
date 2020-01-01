@@ -1,0 +1,21 @@
+if 2 = 2 then 4 * 4 else 5 * 5
+
+----------
+
+Script "if 2 = 2 then 4 * 4 else 5 * 5"
+  IfExpression "if 2 = 2 then 4 * 4 else 5 * 5"
+    if "if"
+    Comparison "2 = 2"
+      NumericLiteral "2"
+      CompareOp "="
+      NumericLiteral "2"
+    then "then"
+    ArithmeticExpression "4 * 4"
+      NumericLiteral "4"
+      ArithOp "*"
+      NumericLiteral "4"
+    else "else"
+    ArithmeticExpression "5 * 5"
+      NumericLiteral "5"
+      ArithOp "*"
+      NumericLiteral "5"

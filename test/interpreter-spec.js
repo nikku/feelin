@@ -202,6 +202,10 @@ describe('interpreter', function() {
 
     describe('IfExpression', function() {
 
+      evaluate('if 1 = 2 then 4 * 4 else 5 * 5', 25);
+
+      evaluate('if 2 = 2 then 4 * 4 else 5 * 5', 16);
+
       evaluate('if 5 > 10 then 15', null);
 
       evaluate('if 15 > 10 then 15', 15);

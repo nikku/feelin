@@ -356,6 +356,10 @@ describe('interpreter', function() {
 
       evaluate('{🐎: "😀"}', { '🐎': '😀' });
 
+      evaluate('{ "foo+bar((!!],foo": 10 }', { 'foo+bar((!!],foo': 10 });
+
+      evaluate('{ "": 20 }', { '': 20 });
+
     });
 
 

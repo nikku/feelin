@@ -202,6 +202,10 @@ describe('interpreter', function() {
 
     describe('IfExpression', function() {
 
+      evaluate('if 5 > 10 then 15', null);
+
+      evaluate('if 15 > 10 then 15', 15);
+
       evaluate('if a > 10 then 15 else 5', 15, {
         a: 12
       });
@@ -213,7 +217,6 @@ describe('interpreter', function() {
       evaluate('if a then 15 else 5', 5, {
         a: null
       });
-
 
     });
 

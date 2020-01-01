@@ -210,23 +210,23 @@ function evalNode(type, input, args) {
       return null;
     };
 
-    case 'Disjunction': return (context) => {
+    case 'Disjunction': return tag((context) => {
 
       const a = args[0](context);
 
       const b = args[2](context);
 
       return !!(a || b);
-    };
+    }, Test('boolean'));
 
-    case 'Conjunction': return (context) => {
+    case 'Conjunction': return tag((context) => {
 
       const a = args[0](context);
 
       const b = args[2](context);
 
       return !!(a && b);
-    };
+    }, Test('boolean'));
 
     case 'Context': return (context) => {
 
@@ -315,30 +315,33 @@ function evalNode(type, input, args) {
       return extractor(context)(prop, target);
     };
 
-    case 'InstanceOf': return (context) => {
+    case 'InstanceOf': return tag((context) => {
 
       const a = args[0](context);
       const b = args[1](context);
 
       return a instanceof b;
-    };
+    }, Test('boolean'));
 
-    case 'every': return (context) => {
+    case 'every': return tag((context) => {
       return (_contexts, _condition) => {
         const contexts = _contexts(context);
         return contexts.every(ctx => _condition(ctx));
       };
 
-    };
+    }, Test('boolean'));
 
-    case 'some': return (context) => {
+    case 'some': return tag((context) => {
       return (_contexts, _condition) => {
         const contexts = _contexts(context);
         return contexts.some(ctx => _condition(ctx));
       };
-    };
+    }, Test('boolean'));
 
-    case 'between': return (context) => (expr, start, end) => start(context) <= expr(context) <= end(context);
+    case 'between': return tag(
+      (context) => (expr, start, end) => start(context) <= expr(context) <= end(context),
+      'boolean'
+    );
 
     case 'NumericLiteral': return tag((context) => input.includes('.') ? parseFloat(input) : parseInt(input), 'number');
 
@@ -350,15 +353,25 @@ function evalNode(type, input, args) {
 
     case 'FunctionInvocation': return (context) => args[0](context)(...args[1](context).map(fn => fn(context)));
 
-    case 'IfExpression': return (context) => {
-      const [ _if, ifCondition, _then, thenValue, _else, elseValue ] = args;
+    case 'IfExpression': return (function() {
 
-      if (ifCondition(context)) {
-        return thenValue(context);
-      } else {
-        return elseValue(context);
-      }
-    };
+      const ifCondition = args[1];
+
+      const thenValue = args[3];
+      const elseValue = args[5];
+
+      const type = coalecenseTypes(thenValue, elseValue);
+
+      return tag((context) => {
+
+        if (ifCondition(context)) {
+          return thenValue(context);
+        } else {
+          return elseValue ? elseValue(context) : null;
+        }
+      }, type);
+
+    })();
 
     case 'Parameters': return args.length === 3 ? args[1] : (context) => [];
 
@@ -413,6 +426,7 @@ function evalNode(type, input, args) {
       return iterationContexts.map(
         ctx => extractor(ctx)
       );
+
     };
 
     case 'UnaryExpression': return (context) => {
@@ -498,7 +512,12 @@ function evalNode(type, input, args) {
       };
     };
 
-    case 'Script': return (context) => args[args.length - 1](context);
+    case 'Script': return (function() {
+
+      const root = args[args.length - 1];
+
+      return tag((context) => root(context), root.type);
+    })();
   }
 }
 
@@ -545,6 +564,19 @@ function cartesianProduct(arrays) {
 }
 
 
+function coalecenseTypes(a, b) {
+
+  if (!b) {
+    return a.type;
+  }
+
+  if (a.type === b.type) {
+    return a.type;
+  }
+
+  return 'any';
+}
+
 function tag(fn, type) {
 
   fn.type = type;
@@ -554,6 +586,10 @@ function tag(fn, type) {
   };
 
   return fn;
+}
+
+function Test(type) {
+  return `Test<${type}>`;
 }
 
 function Interval(start, startValue, endValue, end) {

@@ -468,7 +468,7 @@ function evalNode(type, input, args) {
 
       const filterFn = args[2];
 
-      // [1, 2][1]
+      // a[1]
       if (filterFn.type === 'number') {
         const idx = filterFn(context);
 
@@ -483,6 +483,7 @@ function evalNode(type, input, args) {
         }
       }
 
+      // a[true]
       if (filterFn.type === 'boolean') {
         if (filterFn(context)) {
           return filterTarget;
@@ -491,6 +492,7 @@ function evalNode(type, input, args) {
         }
       }
 
+      // a[test]
       return filterTarget.filter(el => {
 
         const filter = filterFn({

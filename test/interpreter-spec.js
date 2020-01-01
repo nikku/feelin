@@ -86,6 +86,8 @@ describe('interpreter', function() {
 
       evaluate('for a in 1 .. 2, b in 1 .. 2 return a * 10 + b', [11, 12, 21, 22]);
 
+      evaluate('for i in 0..4 return if i = 0 then 1 else i * partial[-1]', [1, 1, 2, 6, 24 ]);
+
     });
 
 

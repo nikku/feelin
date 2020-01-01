@@ -194,7 +194,7 @@ function evalNode(type, input, args) {
       }
     };
 
-    case 'CompareOp': return (context) => {
+    case 'CompareOp': return tag((context) => {
 
       switch (input) {
         case '>': return (b) => (a) => a(context) > b(context);
@@ -204,7 +204,7 @@ function evalNode(type, input, args) {
         case '=': return (b) => (a) => a(context) == b(context);
         case '!=': return (b) => (a) => a(context) != b(context);
       }
-    };
+    }, Test('boolean'));
 
     case 'null': return (context) => {
       return null;
@@ -423,23 +423,38 @@ function evalNode(type, input, args) {
 
       const iterationContexts = args[1](context);
 
-      return iterationContexts.map(
-        ctx => extractor(ctx)
-      );
+      const partial = [];
 
+      for (const ctx of iterationContexts) {
+
+        partial.push(extractor({
+          ...ctx,
+          partial
+        }));
+      }
+
+      return partial;
     };
 
-    case 'UnaryExpression': return (context) => {
-      const operator = args[0](context);
+    case 'UnaryExpression': return (function() {
+      const operator = args[0];
 
-      return operator(() => 0, args[1]);
-    };
+      const value = args[1];
 
-    case 'ArithmeticExpression': return (context) => {
+      return tag((context) => {
+
+        return operator(context)(() => 0, value);
+      }, value.type);
+    })();
+
+    case 'ArithmeticExpression': return (function() {
+
       const [ a, op, b ] = args;
 
-      return op(context)(a, b);
-    };
+      return tag((context) => {
+        return op(context)(a, b);
+      }, coalecenseTypes(a, b));
+    })();
 
     case 'PositiveUnaryTest': return args[0];
 

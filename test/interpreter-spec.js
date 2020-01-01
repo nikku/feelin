@@ -343,6 +343,8 @@ describe('interpreter', function() {
 
     describe('List', function() {
 
+      evaluate('[]', []);
+
       evaluate('[1, a, 5 * 3]', [ 1, 2, 15 ], { a: 2 });
 
     });

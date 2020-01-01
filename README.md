@@ -1,5 +1,7 @@
 ## Feelin
 
+[![Build Status](https://travis-ci.com/nikku/feelin.svg?branch=master)](https://travis-ci.com/nikku/feelin)
+
 A FEEL parser and interpreter written in JavaScript.
 
 
@@ -14,7 +16,7 @@ import {
 unaryTest(1, '1'); // true
 unaryTest(1, '[1..end]', { end: 10 }); // true
 
-evaluate("Mike's dauther.name", { 
+evaluate("Mike's dauther.name", {
   'Mike's dauther.name': 'Lisa'
 }); // "Lisa"
 

@@ -170,7 +170,13 @@ function Interpreter(parser) {
       }
     });
 
-    return root.args[root.args.length - 1](parsedContext);
+    const results = root.args[root.args.length - 1](parsedContext);
+
+    if (results.length === 1) {
+      return results[0];
+    } else {
+      return results;
+    }
   };
 
 }
@@ -272,12 +278,18 @@ function evalNode(node, input, args) {
 
   case 'Name': return input;
 
-  case 'and': return null;
+  case 'and':
+  case 'in':
+  case 'if':
+  case 'then':
+  case 'else':
+  case 'or':
+  case 'satisfies':
+  case 'for':
+  case 'return': return undefined;
 
-    /*
-      expression !compare kw<"in"> PositiveUnaryTest |
-      expression !compare kw<"in"> !unaryTest "(" PositiveUnaryTests ")"
-     */
+  // expression !compare kw<"in"> PositiveUnaryTest |
+  // expression !compare kw<"in"> !unaryTest "(" PositiveUnaryTests ")"
   case 'InTester': return (context) => (b) => (a) => {
 
     const tests = b(context);
@@ -307,8 +319,8 @@ function evalNode(node, input, args) {
 
   };
 
-    // expression
-    // expression ".." expression
+  // expression
+  // expression ".." expression
   case 'IterationContext': return (context) => {
 
     const a = args[0](context);
@@ -411,13 +423,11 @@ function evalNode(node, input, args) {
   case '{': return '{';
   case '}': return '}';
 
-    /**
-     * expression !compare CompareOp<"=" | "!="> expression |
-     * expression !compare CompareOp<Gt | Gte | Lt | Lte> expression |
-     * expression !compare InTester PositiveUnaryTest |
-     * expression !compare kw<"between"> expression kw<"and"> expression |
-     * expression !compare InTester !unaryTest "(" PositiveUnaryTests ")"
-     */
+  // expression !compare CompareOp<"=" | "!="> expression |
+  // expression !compare CompareOp<Gt | Gte | Lt | Lte> expression |
+  // expression !compare InTester PositiveUnaryTest |
+  // expression !compare kw<"between"> expression kw<"and"> expression |
+  // expression !compare InTester !unaryTest "(" PositiveUnaryTests ")"
   case 'Comparison': return (context) => {
 
     if (args.length === 5) {
@@ -445,8 +455,8 @@ function evalNode(node, input, args) {
     return testFn(contexts, condition);
   };
 
-    // DMN 1.2 - 10.3.2.14
-    // kw<"for"> commaSep1<InExpression<IterationContext>> kw<"return"> expression
+  // DMN 1.2 - 10.3.2.14
+  // kw<"for"> commaSep1<InExpression<IterationContext>> kw<"return"> expression
   case 'ForExpression': return (context) => {
     const extractor = args[args.length - 1];
 
@@ -505,7 +515,7 @@ function evalNode(node, input, args) {
     }
   };
 
-    // expression !filter "[" expression "]"
+  // expression !filter "[" expression "]"
   case 'FilterExpression': return (context) => {
 
     const filterTarget = args[0](context);
@@ -576,15 +586,9 @@ function evalNode(node, input, args) {
     };
   };
 
-  case 'Expressions': return (function() {
+  case 'Expressions': return (context) => args.map(expr => expr(context));
 
-    const root = args[args.length - 1];
-
-    // TODO(nikku): return all results or drop support
-    // for multiple expressions
-
-    return tag((context) => root(context), root.type);
-  })();
+  default: throw new Error(`unsupported node <${node.name}>`);
   }
 }
 

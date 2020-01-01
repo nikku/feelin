@@ -7,6 +7,15 @@ describe('interpreter', function() {
 
   describe('evaluate', function() {
 
+    describe('Expressions', function() {
+
+      evaluate('1', 1);
+
+      evaluate('1 2 3', [ 1, 2, 3 ]);
+
+    });
+
+
     describe('ArithmeticExpression', function() {
 
       evaluate('1 + 1', 2);

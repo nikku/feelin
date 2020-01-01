@@ -112,19 +112,14 @@ InTester {
 }
 
 SuperSimplePositiveUnaryTest {
-  (CompareOp<Gt | Gte | Lt | Lte>) endpoint |
+  CompareOp<Gt | Gte | Lt | Lte> endpoint |
   Interval
 }
 
-SimplePositiveUnaryTests {
-  SimplePositiveUnaryTests |
-  kw<"not"> "(" SimplePositiveUnaryTests ")" |
+UnaryTests {
+  PositiveUnaryTests |
+  kw<"not"> "(" PositiveUnaryTests ")" |
   "-"
-}
-
-SimplePositiveUnaryTest {
-  CompareOp<Gt | Gte | Lt | Lte>? endpoint |
-  Interval
 }
 
 PositiveUnaryTests {
@@ -133,6 +128,21 @@ PositiveUnaryTests {
 
 PositiveUnaryTest {
   expression
+}
+
+SimpleUnaryTests {
+  SimplePositiveUnaryTests |
+  kw<"not"> "(" SimplePositiveUnaryTests ")" |
+  "-"
+}
+
+SimplePositiveUnaryTests {
+  commaSep1<SimplePositiveUnaryTest>
+}
+
+SimplePositiveUnaryTest {
+  CompareOp<Gt | Gte | Lt | Lte>? endpoint |
+  Interval
 }
 
 FunctionDefinition {

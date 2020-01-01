@@ -283,6 +283,12 @@ describe('interpreter', function() {
 
       evaluate('[1,2,3][false]', []);
 
+      evaluate('null[false]', null);
+
+      evaluate('null[true]', null);
+
+      evaluate('null[1]', null);
+
     });
 
 

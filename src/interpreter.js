@@ -472,6 +472,10 @@ function evalNode(type, input, args) {
       if (filterFn.type === 'number') {
         const idx = filterFn(context);
 
+        if (!filterTarget) {
+          return null;
+        }
+
         if (idx < 0) {
           return filterTarget[filterTarget.length + idx] || null;
         } else {

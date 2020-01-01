@@ -395,6 +395,89 @@ describe('interpreter', function() {
 
   });
 
+
+  describe.skip('comments', function() {
+
+    evaluate('1 + /* 1 + */ 1', 2);
+
+    evaluate(`1 + // eol comment
+                1`, 2);
+
+    evaluate(`1 + // eol comment
+                1`, 2);
+
+    evaluate(`/*
+               some intro waffle
+               */
+              1 + 1 // and stuff`, 2);
+
+  });
+
+
+  describe.skip('properties', function() {
+
+    function Duration() {};
+
+    evaluate('time("10:30:00+05:00").time offset', new Duration('PT5H'));
+
+  });
+
+
+  describe.skip('functions', function() {
+
+    evaluate('ends with("ASD", "D")', "ASD");
+
+  });
+
+
+  describe.skip('equality', function() {
+
+    evaluate('false = 0', null);
+
+    evaluate('false = null', false);
+
+    evaluate('true = 1', null);
+
+    evaluate('0 = 0.00', true);
+
+    evaluate('100 = null', null);
+
+    evaluate('-0 = 0', true);
+
+    evaluate('[1,2,3] = [1,2,3]', true);
+
+    evaluate('[1] = [2]', true);
+
+    evaluate('true[1] = true', true);
+
+    evaluate('100[1] = 100', true);
+
+    evaluate('"foo"[1] = "foo"', true);
+
+    evaluate('[] = null', false);
+
+    evaluate('{a: "foo"}[1] = {a: "foo"}', true);
+
+    evaluate('[] = 0', null);
+
+    evaluate('{} = {}', true);
+
+    evaluate('{foo: "bar", bar: "baz"} = {foo: "bar", bar: "baz"}', true);
+
+    evaluate('{foo: "bar"} = {"foo": "bar"}', true);
+
+    evaluate('{} = null', false);
+
+    evaluate('{} = []', null);
+
+    evaluate('date("2018-12-08") = date("2018-12-08")', true);
+
+    evaluate('[1,2,[3, 4]] = [1,2,[3, 4]]', true);
+
+    evaluate('{a: {c: "bar", b: "foo"}} = {a: {b: "foo", c: "bar"}}', true);
+
+  });
+
 });
 
 

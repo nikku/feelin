@@ -279,6 +279,10 @@ describe('interpreter', function() {
 
       evaluate('[1, 2, 3][4]', null);
 
+      evaluate('[1,2,3][true]', [1, 2, 3]);
+
+      evaluate('[1,2,3][false]', []);
+
     });
 
 

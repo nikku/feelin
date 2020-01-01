@@ -345,9 +345,9 @@ function evalNode(type, input, args) {
 
     case 'NumericLiteral': return tag((context) => input.includes('.') ? parseFloat(input) : parseInt(input), 'number');
 
-    case 'BooleanLiteral': return (context) => input === 'true' ? true : false;
+    case 'BooleanLiteral': return tag((context) => input === 'true' ? true : false, 'boolean');
 
-    case 'StringLiteral': return (context) => input.slice(1, -1);
+    case 'StringLiteral': return tag((context) => input.slice(1, -1), 'string');
 
     case 'PositionalParameters': return (context) => args;
 
@@ -476,6 +476,14 @@ function evalNode(type, input, args) {
           return filterTarget[filterTarget.length + idx] || null;
         } else {
           return filterTarget[idx - 1] || null;
+        }
+      }
+
+      if (filterFn.type === 'boolean') {
+        if (filterFn(context)) {
+          return filterTarget;
+        } else {
+          return Array.isArray(filterTarget) ? [] : null;
         }
       }
 

@@ -3,7 +3,7 @@
 ----------
 
 Expressions "(a..b)"
-  SuperSimplePositiveUnaryTest "(a..b)"
+  SimplePositiveUnaryTest "(a..b)"
     Interval "(a..b)"
       ( "("
       QualifiedName "a"

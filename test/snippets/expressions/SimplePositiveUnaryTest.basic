@@ -3,6 +3,6 @@
 ----------
 
 Expressions ">= 10"
-  SuperSimplePositiveUnaryTest ">= 10"
+  SimplePositiveUnaryTest ">= 10"
     CompareOp ">="
     NumericLiteral "10"

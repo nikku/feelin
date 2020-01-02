@@ -591,7 +591,7 @@ function evalNode(node, input, args) {
     }).filter(isTruthy);
   };
 
-  case 'SuperSimplePositiveUnaryTest': return tag((context) => {
+  case 'SimplePositiveUnaryTest': return tag((context) => {
 
     if (args.length === 1) {
       return args[0](context);

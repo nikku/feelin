@@ -58,7 +58,7 @@ textualExpression {
   literal |
   QualifiedName ~qname /* TODO(nikku): should be name according to spec */ |
   kw<"?"> |
-  SuperSimplePositiveUnaryTest |
+  SimplePositiveUnaryTest |
   ParenthesizedExpression { "(" textualExpression ")" }
 }
 
@@ -107,7 +107,7 @@ InTester {
   kw<"in">
 }
 
-SuperSimplePositiveUnaryTest {
+SimplePositiveUnaryTest {
   CompareOp<Gt | Gte | Lt | Lte> endpoint |
   Interval
 }
@@ -133,10 +133,10 @@ SimpleUnaryTests {
 }
 
 SimplePositiveUnaryTests {
-  commaSep1<SimplePositiveUnaryTest>
+  commaSep1<_SimplePositiveUnaryTest>
 }
 
-SimplePositiveUnaryTest {
+_SimplePositiveUnaryTest {
   CompareOp<Gt | Gte | Lt | Lte>? endpoint |
   Interval
 }

@@ -3,7 +3,7 @@
 ----------
 
 Expressions "[numB..numC]"
-  SuperSimplePositiveUnaryTest "[numB..numC]"
+  SimplePositiveUnaryTest "[numB..numC]"
     Interval "[numB..numC]"
       [ "["
       QualifiedName "numB"

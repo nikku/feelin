@@ -3,7 +3,7 @@
 ----------
 
 Expressions ">= a.b"
-  SuperSimplePositiveUnaryTest ">= a.b"
+  SimplePositiveUnaryTest ">= a.b"
     CompareOp ">="
     QualifiedName "a.b"
       Name "a"

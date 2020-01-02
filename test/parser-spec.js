@@ -9,15 +9,22 @@ import {
   writeFileSync as writeFile
 } from 'fs';
 
-import { parser } from '../src/parser';
+import { parser as expressionsParser } from '../src/parser';
 
-
-const snippetsCwd = __dirname + '/snippets';
+import { parser as unaryParser } from '../src/unary-parser';
 
 
 describe('parse', function() {
 
   testAll({
+    cwd: __dirname + '/snippets/expressions',
+    parser: expressionsParser,
+    write: !!process.env.REBUILD
+  });
+
+  testAll({
+    cwd: __dirname + '/snippets/unary-tests',
+    parser: unaryParser,
     write: !!process.env.REBUILD
   });
 
@@ -31,13 +38,14 @@ function test(test, options={}) {
 
   const {
     it,
-    cwd
+    cwd,
+    parser
   } = options;
 
 
   it(test, function() {
 
-    const specPath = (cwd || snippetsCwd) + '/' + test;
+    const specPath = cwd + '/' + test;
 
     const spec = readFile(specPath, 'utf8');
 
@@ -73,16 +81,18 @@ function testOnly(file, options={}) {
 function testAll(options={}) {
 
   const {
-    cwd
+    cwd,
+    parser
   } = options;
 
-  const tests = glob('*', { cwd: cwd || snippetsCwd });
+  const tests = glob('*', { cwd });
 
   tests.forEach(file => {
 
     test(file, {
       ...options,
       cwd,
+      parser,
       it
     });
 

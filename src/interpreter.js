@@ -1,20 +1,14 @@
-import { parser } from './parser';
+import {
+  parser as expressionParser
+} from './parser';
+
+import {
+  parser as unaryTestParser
+} from './unary-parser';
 
 import { NodeProp } from 'lezer';
 
-function Interpreter(parser) {
-
-  this.parser = parser;
-
-  this.unaryTest = (input, test, context) => {
-
-    context = {
-      ...context,
-      __INPUT: input
-    };
-
-    return this.evaluate(`__INPUT in (${test})`, context);
-  };
+function Interpreter() {
 
   this.injectBuiltins = (context) => {
     return context;
@@ -105,7 +99,7 @@ function Interpreter(parser) {
     };
   };
 
-  this.parse = (rawInput, rawContext) => {
+  this.parse = (parser, rawInput, rawContext) => {
 
     const injectedContext = this.injectBuiltins(rawContext);
 
@@ -125,12 +119,7 @@ function Interpreter(parser) {
     };
   };
 
-  this.evaluate = (input, context) => {
-
-    const {
-      tree,
-      context: parsedContext
-    } = this.parse(input, context);
+  this.traverse = (tree, input) => {
 
     const root = { args: [] };
 
@@ -170,13 +159,66 @@ function Interpreter(parser) {
       }
     });
 
-    const results = root.args[root.args.length - 1](parsedContext);
+    return root.args[root.args.length - 1];
+  };
+
+  this.evaluate = (expression, context) => {
+
+    const {
+      tree,
+      context: parsedContext
+    } = this.parse(expressionParser, expression, context);
+
+    const root = this.traverse(tree, expression);
+
+    const results = root(parsedContext);
 
     if (results.length === 1) {
       return results[0];
     } else {
       return results;
     }
+  };
+
+  this.unaryTest = (value, expression, context) => {
+
+    context = {
+      ...context,
+      '?': value
+    };
+
+    const {
+      tree,
+      context: parsedContext
+    } = this.parse(unaryTestParser, expression, context);
+
+    const root = this.traverse(tree, expression);
+
+    const results = root(parsedContext);
+
+    return results.some(r => {
+
+      if (Array.isArray(r)) {
+        return r.some(r => {
+
+          if (typeof r === 'function') {
+            return r(() => value);
+          }
+
+          if (Array.isArray(r)) {
+            return r.includes(value);
+          }
+
+          return r === true || r === value;
+        });
+      }
+
+      if (typeof r === 'function') {
+        return r(expression);
+      }
+
+      return r === true || r === value;
+    });
   };
 
 }
@@ -217,7 +259,7 @@ function evalNode(node, input, args) {
         const _a = a(context);
         const _b = b(context);
 
-        return fn(_a, _b) ? _a : false;
+        return fn(_a, _b) ? (context.__extractLeft ? _a : true) : false;
       };
     };
 
@@ -232,6 +274,8 @@ function evalNode(node, input, args) {
 
   }, Test('boolean'));
 
+  case 'Wildcard': return (context) => true;
+
   case 'null': return (context) => {
     return null;
   };
@@ -242,7 +286,9 @@ function evalNode(node, input, args) {
 
     const b = args[2](context);
 
-    return a || b;
+    const joined = a || b;
+
+    return context.__extractLeft ? joined : !!joined;
   }, Test('boolean'));
 
   case 'Conjunction': return tag((context) => {
@@ -251,7 +297,9 @@ function evalNode(node, input, args) {
 
     const b = args[2](context);
 
-    return a && b;
+    const joined = a && b;
+
+    return context.__extractLeft ? joined : !!joined;
   }, Test('boolean'));
 
   case 'Context': return (context) => {
@@ -276,6 +324,8 @@ function evalNode(node, input, args) {
 
   case 'QualifiedName': return (context) => getFromContext(args.join('.'), context);
 
+  case '?': return (context) => getFromContext('?', context);
+
   case 'Name': return input;
 
   case 'and':
@@ -298,7 +348,7 @@ function evalNode(node, input, args) {
 
     return (Array.isArray(tests) ? tests : [ tests ]).every(
       test => compareValOrFn(test, () => left)
-    ) ? left : false;
+    ) ? (context.__extractLeft ? left : true) : false;
   };
 
   case 'InExtractor': return (context) => {
@@ -379,7 +429,7 @@ function evalNode(node, input, args) {
 
       const left = expr(context);
 
-      return start(context) <= left <= end(context) ? left : false;
+      return start(context) <= left <= end(context) ? (context.__extractLeft ? left : true) : false;
     },
     'boolean'
   );
@@ -497,10 +547,6 @@ function evalNode(node, input, args) {
 
   case 'PositiveUnaryTest': return args[0];
 
-  case 'PositiveUnaryTests': return (context) => {
-    return args.map(a => a(context));
-  };
-
   case 'ParenthesizedExpression': return args[1];
 
   case 'PathExpression': return (context) => {
@@ -557,7 +603,8 @@ function evalNode(node, input, args) {
 
           return itemScope;
         }, {}),
-        ...el
+        ...el,
+        __extractLeft: true
       };
 
       return filterFn(iterationContext);
@@ -586,7 +633,11 @@ function evalNode(node, input, args) {
     };
   };
 
-  case 'Expressions': return (context) => args.map(expr => expr(context));
+  case 'PositiveUnaryTests':
+  case 'Expressions':
+  case 'UnaryTests': return (context) => {
+    return args.map(a => a(context));
+  };
 
   default: throw new Error(`unsupported node <${node.name}>`);
   }
@@ -693,7 +744,7 @@ function Interval(start, startValue, endValue, end) {
   };
 }
 
-const interpreter = new Interpreter(parser);
+const interpreter = new Interpreter();
 
 export {
   interpreter

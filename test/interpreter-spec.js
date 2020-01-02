@@ -160,37 +160,37 @@ describe('interpreter', function() {
 
       evaluate('5 > 10', false);
 
-      evaluate('5 >= 5', 5);
+      evaluate('5 >= 5', true);
 
-      evaluate('1 between -1 and 5', 1);
+      evaluate('1 between -1 and 5', true);
 
-      evaluate('5 in > 3', 5);
+      evaluate('5 in > 3', true);
 
       evaluate('5 in < 0', false);
 
-      evaluate('5 in (> 0, <10)', 5);
+      evaluate('5 in (> 0, <10)', true);
 
-      evaluate('5 in ([0..10], [5..15])', 5);
+      evaluate('5 in ([0..10], [5..15])', true);
 
-      evaluate('0 in (1, 0)', 0);
+      evaluate('0 in (1, 0)', true);
 
     });
 
 
     describe('Conjunction', function() {
 
-      evaluate('null and true', null);
+      evaluate('null and true', false);
 
-      evaluate('[] and 1', 1);
+      evaluate('[] and 1', true);
 
       evaluate('false and 1', false);
 
-      evaluate('a and b', null, {
+      evaluate('a and b', false, {
         a: null,
         b: 1
       });
 
-      evaluate('a and b', 1, {
+      evaluate('a and b', true, {
         a: true,
         b: 1
       });
@@ -202,9 +202,9 @@ describe('interpreter', function() {
 
       evaluate('null or true', true);
 
-      evaluate('false or 1', 1);
+      evaluate('false or 1', true);
 
-      evaluate('a or b', 1, {
+      evaluate('a or b', true, {
         a: null,
         b: 1
       });
@@ -316,9 +316,9 @@ describe('interpreter', function() {
 
       evaluate('false[1]', false);
 
-      evaluate('100[1] = 100', 100);
+      evaluate('100[1]', 100);
 
-      evaluate('a[1] = a', { b: 'foo' }, {
+      evaluate('a[1]', { b: 'foo' }, {
         a: { b: 'foo' }
       });
 
@@ -395,8 +395,8 @@ describe('interpreter', function() {
 
   describe('unaryTest', function() {
 
-    unaryTest(4, '[4..6]', 4);
-    unaryTest(6, '[4..6]', 6);
+    unaryTest(4, '[4..6]', true);
+    unaryTest(6, '[4..6]', true);
 
     unaryTest(4, ']4..6[', false);
     unaryTest(6, ']4..6[', false);
@@ -406,36 +406,50 @@ describe('interpreter', function() {
 
     unaryTest(5, '>= 10', false);
 
-    unaryTest(5, '5', 5);
+    unaryTest(5, '5', true);
 
-    unaryTest(5, 'a', 5, { a: 5 });
+    unaryTest({
+      '?': 5,
+      a: 5
+    }, 'a', true);
 
-    unaryTest(-5.312, '-5.312', -5.312);
+    unaryTest(-5.312, '-5.312', true);
 
     unaryTest(-5.312, '>-5.312', false);
 
     unaryTest(-5.312, '<-5.312', false);
 
-    unaryTest(5, '>= 3, < 10', 5);
+    unaryTest(5, '>= 3, < 10', true);
 
-    unaryTest(5, '>= 3, < -1', false);
+    unaryTest(5, '3, < -1', false);
 
-  });
+    unaryTest(5, '-', true);
+
+    unaryTest(5, '1, 5', true);
+
+    unaryTest(5, '1, 4', false);
+
+    unaryTest(5, '1, [2..5]', true);
+
+    unaryTest(5, '[1, 5], false', true);
+
+    unaryTest(5, '? * 2 = 10', true);
 
 
-  describe.skip('UnaryTests', function() {
+    describe.skip('negation', function() {
 
-    unaryTest(5, 'not(true)', false);
+      unaryTest(5, 'not(true)', false);
 
-    unaryTest(5, 'not(false)', true);
+      unaryTest(5, 'not(false)', true);
 
-    unaryTest(5, 'not(null)', null);
+      unaryTest(5, 'not(null)', null);
 
-    unaryTest(5, 'not(0)', null);
+      unaryTest(5, 'not(0)', null);
 
-    unaryTest(5, 'not(1)', null);
+      unaryTest(5, 'not(1)', null);
 
-    unaryTest(5, 'not("true")', null);
+      unaryTest(5, 'not("true")', null);
+    });
 
   });
 
@@ -553,9 +567,9 @@ function createUnaryTestVerifier(options) {
 
   const context = typeof inputOrContext === 'object' ? inputOrContext : null;
 
-  const input = context ? context.input : inputOrContext;
+  const input = context ? context['?'] : inputOrContext;
 
-  const name = `${input} in ${test}${context ? ' { ' + Object.keys(context).join(', ') + ' }' : ''}`;
+  const name = `${test} => ${input} ${context ? ' { ' + Object.keys(context).join(', ') + ' }' : ''}`;
 
   it(name, function() {
     const output = interpreter.unaryTest(input, test, context || {});

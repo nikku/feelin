@@ -17,10 +17,6 @@
   else @left
 }
 
-@top[name=Expressions] {
-  expression+
-}
-
 expression {
   textualExpression |
   boxedExpression
@@ -116,7 +112,7 @@ SuperSimplePositiveUnaryTest {
   Interval
 }
 
-UnaryTests {
+@top[name=UnaryTests] {
   Wildcard |
   PositiveUnaryTests |
   kw<"not"> "(" PositiveUnaryTests ")"

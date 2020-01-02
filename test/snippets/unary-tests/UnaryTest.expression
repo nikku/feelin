@@ -1,0 +1,14 @@
+? * 2 = 10
+
+----------
+
+UnaryTests "? * 2 = 10"
+  PositiveUnaryTests "? * 2 = 10"
+    PositiveUnaryTest "? * 2 = 10"
+      Comparison "? * 2 = 10"
+        ArithmeticExpression "? * 2"
+          ? "?"
+          ArithOp "*"
+          NumericLiteral "2"
+        CompareOp "="
+        NumericLiteral "10"

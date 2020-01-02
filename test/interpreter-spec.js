@@ -91,6 +91,8 @@ describe('interpreter', function() {
         ]
       });
 
+      evaluate('for a in 1 .. -1 return a', [1, 0, -1]);
+
       evaluate('for a in 1 .. 3 return a', [1, 2, 3]);
 
       evaluate('for a in 1 .. 2, b in 1 .. 2 return a * 10 + b', [11, 12, 21, 22]);
@@ -163,6 +165,8 @@ describe('interpreter', function() {
       evaluate('5 >= 5', true);
 
       evaluate('1 between -1 and 5', true);
+
+      evaluate('1 between 5 and -1', true);
 
       evaluate('5 in > 3', true);
 
@@ -395,15 +399,6 @@ describe('interpreter', function() {
 
   describe('unaryTest', function() {
 
-    unaryTest(4, '[4..6]', true);
-    unaryTest(6, '[4..6]', true);
-
-    unaryTest(4, ']4..6[', false);
-    unaryTest(6, ']4..6[', false);
-
-    unaryTest(4, '(4..6)', false);
-    unaryTest(6, '(4..6)', false);
-
     unaryTest(5, '>= 10', false);
 
     unaryTest(5, '5', true);
@@ -434,6 +429,29 @@ describe('interpreter', function() {
     unaryTest(5, '[1, 5], false', true);
 
     unaryTest(5, '? * 2 = 10', true);
+
+
+    describe('Interval', function() {
+
+      unaryTest(4, '[4..6]', true);
+      unaryTest(6, '[4..6]', true);
+
+      unaryTest(4, '[6..4]', true);
+      unaryTest(6, '[6..4]', true);
+
+      unaryTest(4, ']4..6[', false);
+      unaryTest(6, ']4..6[', false);
+
+      unaryTest(4, ']6..4[', false);
+      unaryTest(6, ']6..4[', false);
+
+      unaryTest(4, '(4..6)', false);
+      unaryTest(6, '(4..6)', false);
+
+      unaryTest(4, '(6..4)', false);
+      unaryTest(6, '(6..4)', false);
+
+    });
 
 
     describe('negation', function() {

@@ -406,7 +406,10 @@ function evalNode(node, input, args) {
 
       const left = expr(context);
 
-      return start(context) <= left <= end(context) ? (context.__extractLeft ? left : true) : false;
+      const _start = start(context);
+      const _end = end(context);
+
+      return Math.min(_start, _end) <= left <= Math.max(_start, _end) ? (context.__extractLeft ? left : true) : false;
     },
     'boolean'
   );
@@ -698,8 +701,9 @@ function compareValOrFn(valOrFn, expr) {
   return (context) => valOrFn == expr(context);
 }
 
-function range(size, startAt = 0) {
-  const r = [...Array(size).keys()].map(i => i + startAt);
+function range(size, startAt = 0, direction = 1) {
+
+  const r = [...Array(size).keys()].map(i => i * direction + startAt);
 
   r.__isRange = true;
 
@@ -710,9 +714,9 @@ function createRange(start, end) {
 
   if (typeof start === 'number' && typeof end === 'number') {
 
-    const steps = end - start;
+    const steps = Math.max(start, end) - Math.min(start, end);
 
-    return range(steps + 1, start);
+    return range(steps + 1, start, end < start ? -1 : 1);
   }
 
   throw new Error('unsupported range');
@@ -770,22 +774,21 @@ function Test(type) {
 
 function Interval(start, startValue, endValue, end) {
 
-  this.start = start;
-  this.startValue = startValue;
+  const exclusiveStart = [ '(', ']' ].includes(start);
+  const exclusiveEnd = [ ')', '[' ].includes(end);
 
-  this.endValue = endValue;
-  this.end = end;
+  const direction = Math.sign(endValue - startValue);
+
+  const rangeStart = (exclusiveStart ? direction : 0) + startValue;
+  const rangeEnd = (exclusiveEnd ? -direction : 0) + endValue;
+
+  const realStart = Math.min(rangeStart, rangeEnd);
+  const realEnd = Math.max(rangeStart, rangeEnd);
 
   this.includes = (value) => {
-    return this.includesFrom(value) && this.includesTo(value);
-  };
+    console.log(realStart, value, realEnd);
 
-  this.includesFrom = (value) => {
-    return [ '(', ']' ].includes(this.start) ? value > this.startValue : value >= this.startValue;
-  };
-
-  this.includesTo = (value) => {
-    return [ ')', '[' ].includes(this.end) ? value < this.endValue : value <= this.endValue;
+    return realStart <= value && value <= realEnd;
   };
 }
 

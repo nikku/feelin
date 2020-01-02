@@ -436,19 +436,16 @@ describe('interpreter', function() {
     unaryTest(5, '? * 2 = 10', true);
 
 
-    describe.skip('negation', function() {
+    describe('negation', function() {
 
       unaryTest(5, 'not(true)', false);
 
       unaryTest(5, 'not(false)', true);
 
-      unaryTest(5, 'not(null)', null);
+      unaryTest(5, 'not(1, 2, 3)', true);
 
-      unaryTest(5, 'not(0)', null);
+      unaryTest(5, 'not([5..6], 1)', false);
 
-      unaryTest(5, 'not(1)', null);
-
-      unaryTest(5, 'not("true")', null);
     });
 
   });

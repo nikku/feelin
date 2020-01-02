@@ -194,31 +194,7 @@ function Interpreter() {
 
     const root = this.traverse(tree, expression);
 
-    const results = root(parsedContext);
-
-    return results.some(r => {
-
-      if (Array.isArray(r)) {
-        return r.some(r => {
-
-          if (typeof r === 'function') {
-            return r(() => value);
-          }
-
-          if (Array.isArray(r)) {
-            return r.includes(value);
-          }
-
-          return r === true || r === value;
-        });
-      }
-
-      if (typeof r === 'function') {
-        return r(expression);
-      }
-
-      return r === true || r === value;
-    });
+    return root(parsedContext)(value);
   };
 
 }
@@ -328,6 +304,7 @@ function evalNode(node, input, args) {
 
   case 'Name': return input;
 
+  case 'not': return 'not';
   case 'and':
   case 'in':
   case 'if':
@@ -634,9 +611,44 @@ function evalNode(node, input, args) {
   };
 
   case 'PositiveUnaryTests':
-  case 'Expressions':
-  case 'UnaryTests': return (context) => {
+  case 'Expressions': return (context) => {
     return args.map(a => a(context));
+  };
+
+  case 'UnaryTests': return (context) => {
+
+    return (value) => {
+
+      const negate = args[0] === 'not';
+
+      const tests = negate ? args.slice(2, -1) : args;
+
+      const matches = tests.map(test => test(context)).some(r => {
+
+        if (Array.isArray(r)) {
+          return r.some(r => {
+
+            if (typeof r === 'function') {
+              return r(() => value);
+            }
+
+            if (Array.isArray(r)) {
+              return r.includes(value);
+            }
+
+            return r === true || r === value;
+          });
+        }
+
+        if (typeof r === 'function') {
+          return r(value);
+        }
+
+        return r === true || r === value;
+      });
+
+      return negate ? !matches : matches;
+    };
   };
 
   default: throw new Error(`unsupported node <${node.name}>`);

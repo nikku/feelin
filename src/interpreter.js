@@ -617,37 +617,61 @@ function evalNode(node, input, args) {
 
   case 'UnaryTests': return (context) => {
 
-    return (value) => {
+    return (value={}) => {
 
       const negate = args[0] === 'not';
 
       const tests = negate ? args.slice(2, -1) : args;
 
-      const matches = tests.map(test => test(context)).some(r => {
+      const matches = tests.map(test => test(context)).map(r => {
 
         if (Array.isArray(r)) {
-          return r.some(r => {
-
-            if (typeof r === 'function') {
-              return r(() => value);
-            }
+          return r.map(r => {
 
             if (Array.isArray(r)) {
               return r.includes(value);
             }
 
-            return r === true || r === value;
-          });
+            if (r === null) {
+              return null;
+            }
+
+            if (typeof r === 'boolean') {
+              return r;
+            }
+
+            if (typeof r === 'function') {
+              return r(() => value);
+            }
+
+            if (typeof r === typeof value) {
+              return r === value;
+            }
+
+            return null;
+          }).reduce(combineResult, undefined);
+        }
+
+        if (r === null) {
+          return null;
+        }
+
+        if (typeof r === 'boolean') {
+          return r;
         }
 
         if (typeof r === 'function') {
           return r(value);
         }
 
-        return r === true || r === value;
-      });
+        if (typeof r === typeof value) {
+          return r === value;
+        }
 
-      return negate ? !matches : matches;
+        return null;
+      }).reduce(combineResult, undefined);
+
+      return matches === null ? null : (negate ? !matches : matches);
     };
   };
 
@@ -725,6 +749,15 @@ function tag(fn, type) {
   };
 
   return fn;
+}
+
+function combineResult(result, match) {
+
+  if (!result) {
+    return match;
+  }
+
+  return result;
 }
 
 function isTruthy(obj) {

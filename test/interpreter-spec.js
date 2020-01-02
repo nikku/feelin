@@ -438,13 +438,23 @@ describe('interpreter', function() {
 
     describe('negation', function() {
 
-      unaryTest(5, 'not(true)', false);
+      unaryTest({}, 'not(true)', false);
 
-      unaryTest(5, 'not(false)', true);
+      unaryTest({}, 'not(false)', true);
 
       unaryTest(5, 'not(1, 2, 3)', true);
 
       unaryTest(5, 'not([5..6], 1)', false);
+
+      unaryTest(5, 'not(null)', null);
+
+      unaryTest({}, 'not(null)', null);
+
+      unaryTest({}, 'not(0)', null);
+
+      unaryTest({}, 'not(1)', null);
+
+      unaryTest({}, 'not("true")', null);
 
     });
 

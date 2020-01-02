@@ -15,7 +15,7 @@ const srcEntry = pkg.source;
 
 const umdDist = pkg['umd:main'];
 
-const umdName = 'ModdleXML';
+const umdName = 'Feelin';
 
 export default [
 

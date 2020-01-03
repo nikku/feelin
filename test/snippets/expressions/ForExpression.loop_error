@@ -1,0 +1,20 @@
+for fruit in [ ." ]
+
+----------
+
+Expressions "for fruit in [ ." ]"
+  ForExpression "for fruit in [ ." ]"
+    for "for"
+    InExpressions "fruit in [ ." ]"
+      InExpression "fruit in [ ."
+        Name "fruit"
+        in "in"
+        IterationContext "[ ."
+          PathExpression "[ ."
+            List "["
+              [ "["
+              ⚠ ""
+            ⚠ ""
+      ⚠ "" ]"
+        StringLiteral "" ]"
+    ⚠ ""

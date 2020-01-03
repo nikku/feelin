@@ -119,6 +119,14 @@ function Interpreter() {
     };
   };
 
+  this.parseExpressions = (input, context) => {
+    return this.parse(expressionParser, input, context);
+  };
+
+  this.parseUnaryTests = (input, context) => {
+    return this.parse(unaryTestParser, input, context);
+  };
+
   this.traverse = (tree, input) => {
 
     const root = { args: [] };
@@ -167,7 +175,7 @@ function Interpreter() {
     const {
       tree,
       context: parsedContext
-    } = this.parse(expressionParser, expression, context);
+    } = this.parseExpressions(expression, context);
 
     const root = this.traverse(tree, expression);
 
@@ -190,7 +198,7 @@ function Interpreter() {
     const {
       tree,
       context: parsedContext
-    } = this.parse(unaryTestParser, expression, context);
+    } = this.parseUnaryTests(expression, context);
 
     const root = this.traverse(tree, expression);
 

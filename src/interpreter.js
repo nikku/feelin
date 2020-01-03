@@ -794,8 +794,6 @@ function Interval(start, startValue, endValue, end) {
   const realEnd = Math.max(rangeStart, rangeEnd);
 
   this.includes = (value) => {
-    console.log(realStart, value, realEnd);
-
     return realStart <= value && value <= realEnd;
   };
 }

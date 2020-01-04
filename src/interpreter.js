@@ -643,7 +643,7 @@ function extractValue(context, prop, _target) {
   const target = _target(context);
 
   if (!Array.isArray(target)) {
-    throw new Error('<a> in <b> must target <b> : Collection');
+    throw new Error(`Cannot extract ${ prop } from ${ target }`);
   }
 
   return target.map(t => (

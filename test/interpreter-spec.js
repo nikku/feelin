@@ -584,6 +584,21 @@ describe('interpreter', function() {
       expect(error.message).to.eql('Statement error at [4, 5]');
     });
 
+
+    it('should throw Error on null extraction', function() {
+
+      let error;
+
+      try {
+        interpreter.evaluate('for i in null return i');
+      } catch (err) {
+        error = err;
+      }
+
+      expect(error).to.exist;
+      expect(error.message).to.eql('Cannot extract i from null');
+    });
+
   });
 
 });

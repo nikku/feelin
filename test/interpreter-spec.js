@@ -581,7 +581,7 @@ describe('interpreter', function() {
       }
 
       expect(error).to.exist;
-      expect(error.message).to.eql('Statement error at [4, 5]');
+      expect(error.message).to.eql('Statement unparseable at [4, 5]');
     });
 
 

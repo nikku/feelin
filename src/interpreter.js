@@ -141,7 +141,7 @@ function Interpreter() {
         }
 
         if (node.prop(NodeProp.error)) {
-          throw new Error(`Statement error at [${start}, ${end}]`);
+          throw new Error(`Statement unparseable at [${start}, ${end}]`);
         }
 
         const nodeInput = input.slice(start, end);

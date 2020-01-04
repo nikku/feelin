@@ -73,11 +73,7 @@ InExpressions<Expr> {
 }
 
 InExpression<Expr> {
-  Name InExtractor Expr
-}
-
-InExtractor {
-  kw<"in">
+  Name kw<"in"> Expr
 }
 
 IterationContext {
@@ -99,12 +95,8 @@ Comparison {
   expression !compare CompareOp<"=" | "!="> expression |
   expression !compare CompareOp<Gt | Gte | Lt | Lte> expression |
   expression !compare kw<"between"> expression kw<"and"> expression |
-  expression !compare InTester PositiveUnaryTest |
-  expression !compare InTester !unaryTest "(" PositiveUnaryTests ")"
-}
-
-InTester {
-  kw<"in">
+  expression !compare kw<"in"> PositiveUnaryTest |
+  expression !compare kw<"in"> !unaryTest "(" PositiveUnaryTests ")"
 }
 
 SimplePositiveUnaryTest {

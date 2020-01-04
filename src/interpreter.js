@@ -312,48 +312,6 @@ function evalNode(node, input, args) {
 
   case 'Name': return input;
 
-  case 'not': return 'not';
-  case 'and':
-  case 'in':
-  case 'if':
-  case 'then':
-  case 'else':
-  case 'or':
-  case 'satisfies':
-  case 'for':
-  case 'return': return undefined;
-
-  // expression !compare kw<"in"> PositiveUnaryTest |
-  // expression !compare kw<"in"> !unaryTest "(" PositiveUnaryTests ")"
-  case 'InTester': return (context) => (b) => (a) => {
-
-    const tests = b(context);
-
-    const left = a(context);
-
-    return (Array.isArray(tests) ? tests : [ tests ]).every(
-      test => compareValOrFn(test, () => left)
-    ) ? (context.__extractLeft ? left : true) : false;
-  };
-
-  case 'InExtractor': return (context) => {
-
-    return (prop, _target) => {
-
-      const target = _target(context);
-
-      if (!Array.isArray(target)) {
-        throw new Error('<a> in <b> must target <b> : Collection');
-      }
-
-      return target.map(t => (
-        { [prop]: t }
-      ));
-
-    };
-
-  };
-
   // expression
   // expression ".." expression
   case 'IterationContext': return (context) => {
@@ -379,11 +337,9 @@ function evalNode(node, input, args) {
       .map(ctx => Array.isArray(ctx) ? Object.assign({}, ...ctx) : ctx);
   };
 
+  // Name kw<"in"> Expr
   case 'InExpression': return (context) => {
-
-    const [ prop, extractor, target ] = args;
-
-    return extractor(context)(prop, target);
+    return extractValue(context, args[0], args[2]);
   };
 
   case 'InstanceOf': return tag((context) => {
@@ -408,19 +364,6 @@ function evalNode(node, input, args) {
       return contexts.some(ctx => isTruthy(_condition(ctx)));
     };
   }, Test('boolean'));
-
-  case 'between': return tag(
-    (context) => (expr, start, end) => {
-
-      const left = expr(context);
-
-      const _start = start(context);
-      const _end = end(context);
-
-      return Math.min(_start, _end) <= left <= Math.max(_start, _end) ? (context.__extractLeft ? left : true) : false;
-    },
-    'boolean'
-  );
 
   case 'NumericLiteral': return tag((context) => input.includes('.') ? parseFloat(input) : parseInt(input), 'number');
 
@@ -454,32 +397,24 @@ function evalNode(node, input, args) {
 
   case 'Parameters': return args.length === 3 ? args[1] : (context) => [];
 
-  case '(': return '(';
-  case ')': return ')';
-  case '[': return '[';
-  case ']': return ']';
-  case '{': return '{';
-  case '}': return '}';
-
-  // expression !compare CompareOp<"=" | "!="> expression |
-  // expression !compare CompareOp<Gt | Gte | Lt | Lte> expression |
-  // expression !compare InTester PositiveUnaryTest |
-  // expression !compare kw<"between"> expression kw<"and"> expression |
-  // expression !compare InTester !unaryTest "(" PositiveUnaryTests ")"
   case 'Comparison': return (context) => {
 
-    if (args.length === 5) {
+    const operator = args[1];
 
-      // expression !compare InTester !unaryTest "(" PositiveUnaryTests ")"
-      if (args[2] === '(') {
-        return args[1](context)(args[3])(args[0]);
-      }
-
-      // expression !compare kw<"between"> expression kw<"and"> expression
-      return args[1](context)(args[0], args[2], args[4]);
+    // expression !compare InTester PositiveUnaryTest |
+    // expression !compare InTester !unaryTest "(" PositiveUnaryTests ")"
+    if (operator === 'in') {
+      return compareIn(context, args[0], args[3] || args[2]);
     }
 
-    return args[1](context)(args[2])(args[0]);
+    // expression !compare kw<"between"> expression kw<"and"> expression
+    if (operator === 'between') {
+      return compareBetween(context, args[0], args[2], args[4]);
+    }
+
+    // expression !compare CompareOp<"=" | "!="> expression |
+    // expression !compare CompareOp<Gt | Gte | Lt | Lte> expression |
+    return operator(context)(args[2])(args[0]);
   };
 
   case 'QuantifiedExpression': return (context) => {
@@ -686,10 +621,9 @@ function evalNode(node, input, args) {
     };
   };
 
-  default: throw new Error(`unsupported node <${node.name}>`);
+  default: return node.name;
   }
 }
-
 
 function getFromContext(variable, context) {
 
@@ -698,6 +632,40 @@ function getFromContext(variable, context) {
   }
 
   return null;
+}
+
+function extractValue(context, prop, _target) {
+
+  const target = _target(context);
+
+  if (!Array.isArray(target)) {
+    throw new Error('<a> in <b> must target <b> : Collection');
+  }
+
+  return target.map(t => (
+    { [prop]: t }
+  ));
+}
+
+function compareBetween(context, _left, _start, _end) {
+
+  const left = _left(context);
+
+  const start = _start(context);
+  const end = _end(context);
+
+  return Math.min(start, end) <= left <= Math.max(start, end) ? (context.__extractLeft ? left : true) : false;
+}
+
+function compareIn(context, _left, _tests) {
+
+  const left = _left(context);
+
+  const tests = _tests(context);
+
+  return (Array.isArray(tests) ? tests : [ tests ]).every(
+    test => compareValOrFn(test, () => left)
+  ) ? (context.__extractLeft ? left : true) : false;
 }
 
 function compareValOrFn(valOrFn, expr) {

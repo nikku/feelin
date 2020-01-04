@@ -448,24 +448,26 @@ function evalNode(node, input, args) {
     return partial;
   };
 
-  case 'UnaryExpression': return (function() {
-    const operator = args[0];
-
-    const value = args[1];
-
-    return tag((context) => {
-
-      return operator(context)(() => 0, value);
-    }, value.type);
-  })();
-
   case 'ArithmeticExpression': return (function() {
 
-    const [ a, op, b ] = args;
+    // binary expression (a + b)
+    if (args.length === 3) {
+      const [ a, op, b ] = args;
 
-    return tag((context) => {
-      return op(context)(a, b);
-    }, coalecenseTypes(a, b));
+      return tag((context) => {
+        return op(context)(a, b);
+      }, coalecenseTypes(a, b));
+    }
+
+    // unary expression (-b)
+    if (args.length === 2) {
+      const [ op, value ] = args;
+
+      return tag((context) => {
+
+        return op(context)(() => 0, value);
+      }, value.type);
+    }
   })();
 
   case 'PositiveUnaryTest': return args[0];

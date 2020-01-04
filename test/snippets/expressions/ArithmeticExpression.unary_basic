@@ -3,7 +3,7 @@
 ----------
 
 Expressions "-x"
-  UnaryExpression "-x"
+  ArithmeticExpression "-x"
     ArithOp "-"
     QualifiedName "x"
       Name "x"

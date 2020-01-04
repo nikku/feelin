@@ -44,7 +44,6 @@ textualExpression {
   } |
   Comparison |
   ArithmeticExpression |
-  UnaryExpression |
   InstanceOf {
     expression !instanceOf instanceOf Type
   } |
@@ -80,15 +79,11 @@ IterationContext {
   expression (".." expression)?
 }
 
-UnaryExpression {
-  !prefix ArithOp<"+"> expression |
-  !prefix minus expression
-}
-
 ArithmeticExpression {
   expression !add (ArithOp<"+"> | minus) expression |
   expression !times (ArithOp<"*"> | divide) expression |
-  expression !exp ArithOp<"^" | "**"> expression
+  expression !exp ArithOp<"^" | "**"> expression |
+  !prefix (ArithOp<"+"> | minus) expression
 }
 
 Comparison {

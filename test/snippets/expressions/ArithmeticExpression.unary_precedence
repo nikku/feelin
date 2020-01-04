@@ -4,7 +4,7 @@
 
 Expressions "-x ** y"
   ArithmeticExpression "-x ** y"
-    UnaryExpression "-x"
+    ArithmeticExpression "-x"
       ArithOp "-"
       QualifiedName "x"
         Name "x"

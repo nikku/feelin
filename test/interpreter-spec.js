@@ -99,6 +99,10 @@ describe('interpreter', function() {
 
       evaluate('for i in 0..4 return if i = 0 then 1 else i * partial[-1]', [1, 1, 2, 6, 24 ]);
 
+      evaluate('for i in [1, 2] return i * b', [ 10, 20 ], {
+        'b': 10
+      });
+
     });
 
 
@@ -136,6 +140,10 @@ describe('interpreter', function() {
       });
 
       evaluate('every e in [0] satisfies e = 0', true);
+
+      evaluate('every e in [2] satisfies e = b * 2', true, {
+        b: 1
+      });
 
       evaluate('some b in a satisfies b < 10', true, {
         a: [

@@ -326,8 +326,13 @@ function evalNode(node, input, args) {
 
     const iterationContexts = args.map(ctx => ctx(context));
 
-    return cartesianProduct(iterationContexts)
-      .map(ctx => Array.isArray(ctx) ? Object.assign({}, ...ctx) : ctx);
+    return cartesianProduct(iterationContexts).map(ctx => {
+      if (!Array.isArray(ctx)) {
+        ctx = [ctx];
+      }
+
+      return Object.assign({}, context, ...ctx);
+    });
   };
 
   // Name kw<"in"> Expr

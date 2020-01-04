@@ -103,6 +103,8 @@ describe('interpreter', function() {
         'b': 10
       });
 
+      evaluate('for condition in [ > 5, [1..3], 5 ] return 6 in condition', [ true, false, false ]);
+
     });
 
 

@@ -375,7 +375,18 @@ function evalNode(node, input, args) {
 
   case 'PositionalParameters': return (context) => args;
 
-  case 'FunctionInvocation': return (context) => args[0](context)(...args[1](context).map(fn => fn(context)));
+  case 'FunctionInvocation': return (context) => {
+
+    const fn = args[0](context);
+
+    if (typeof fn !== 'function') {
+      throw new Error(`Failed to evaluate ${input}: Target is not a function`);
+    }
+
+    const fnArgs = args[1](context).map(fn => fn(context));
+
+    return fn(...fnArgs);
+  };
 
   case 'IfExpression': return (function() {
 

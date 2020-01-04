@@ -599,6 +599,21 @@ describe('interpreter', function() {
       expect(error.message).to.eql('Cannot extract i from null');
     });
 
+
+    it('should throw Error on missing function', function() {
+
+      let error;
+
+      try {
+        interpreter.evaluate('foo(1)');
+      } catch (err) {
+        error = err;
+      }
+
+      expect(error).to.exist;
+      expect(error.message).to.eql('Failed to evaluate foo(1): Target is not a function');
+    });
+
   });
 
 });

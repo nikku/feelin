@@ -127,7 +127,7 @@ function Interpreter() {
     return this.parse(unaryTestParser, input, context);
   };
 
-  this.traverse = (tree, input) => {
+  this.createExecutionTree = (tree, input) => {
 
     const root = { args: [] };
 
@@ -177,7 +177,7 @@ function Interpreter() {
       context: parsedContext
     } = this.parseExpressions(expression, context);
 
-    const root = this.traverse(tree, expression);
+    const root = this.createExecutionTree(tree, expression);
 
     const results = root(parsedContext);
 
@@ -188,19 +188,16 @@ function Interpreter() {
     }
   };
 
-  this.unaryTest = (value, expression, context) => {
+  this.unaryTest = (expression, context={}) => {
 
-    context = {
-      ...context,
-      '?': value
-    };
+    const value = context['?'] || null;
 
     const {
       tree,
       context: parsedContext
     } = this.parseUnaryTests(expression, context);
 
-    const root = this.traverse(tree, expression);
+    const root = this.createExecutionTree(tree, expression);
 
     return root(parsedContext)(value);
   };
@@ -209,10 +206,6 @@ function Interpreter() {
 
 
 function evalNode(node, input, args) {
-
-  if (process.env.LOG === 'evalNode') {
-    console.log(node.name, input, args);
-  }
 
   switch (node.name) {
   case 'ArithOp': return (context) => {

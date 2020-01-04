@@ -474,6 +474,12 @@ describe('interpreter', function() {
 
       unaryTest({}, 'not("true")', null);
 
+      unaryTest({}, 'false', false);
+
+      unaryTest(null, 'null', null);
+
+      unaryTest(null, '3 > 1', true);
+
     });
 
   });
@@ -597,7 +603,10 @@ function createUnaryTestVerifier(options) {
   const name = `${test} => ${input} ${context ? ' { ' + Object.keys(context).join(', ') + ' }' : ''}`;
 
   it(name, function() {
-    const output = interpreter.unaryTest(input, test, context || {});
+    const output = interpreter.unaryTest(test, {
+      ...(context || {}),
+      '?': input
+    });
 
     expect(output).to.eql(expectedOutput);
   });

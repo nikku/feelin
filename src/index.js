@@ -1,7 +1,12 @@
 import { interpreter } from './interpreter';
 
 function unaryTest(input, expression, context) {
-  return interpreter.unaryTest(input, expression, context);
+
+  return interpreter.unaryTest(expression, {
+    ...context,
+    '?': input
+  });
+
 }
 
 function evaluate(expression, context) {

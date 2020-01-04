@@ -140,6 +140,10 @@ function Interpreter() {
           return false;
         }
 
+        if (node.prop(NodeProp.error)) {
+          throw new Error(`Statement error at [${start}, ${end}]`);
+        }
+
         const nodeInput = input.slice(start, end);
 
         stack.push({
@@ -170,7 +174,7 @@ function Interpreter() {
     return root.args[root.args.length - 1];
   };
 
-  this.evaluate = (expression, context) => {
+  this.evaluate = (expression, context={}) => {
 
     const {
       tree,

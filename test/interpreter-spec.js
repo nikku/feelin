@@ -567,6 +567,25 @@ describe('interpreter', function() {
 
   });
 
+
+  describe('error handling', function() {
+
+    it('should throw Error on syntax errors', function() {
+
+      let error;
+
+      try {
+        interpreter.evaluate('1 * #3');
+      } catch (err) {
+        error = err;
+      }
+
+      expect(error).to.exist;
+      expect(error.message).to.eql('Statement error at [4, 5]');
+    });
+
+  });
+
 });
 
 

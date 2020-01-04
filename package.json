@@ -41,6 +41,7 @@
     "build-parser:unary:watch": "chokidar --initial src/feel-unary.grammar -c \"npm run build-parser:unary -- --names\"",
     "build-parser:unary": "lezer-generator src/feel-unary.grammar -o src/unary-parser",
     "build": "rollup -c",
+    "prepublishOnly": "run-s build-parser build",
     "test": "mocha -r esm test/*.js",
     "test:watch": "npm test -- -w"
   }

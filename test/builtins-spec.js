@@ -5,21 +5,69 @@ import { interpreter } from '../src/interpreter';
 
 describe('builtin functions', function() {
 
-  describe.skip('Conversion', function() {
+  describe('Conversion', function() {
 
-    evaluate('date()', null);
+    evaluateSkip('date("2012-12-25") – date("2012-12-24") = duration("P1D")', true);
 
-    evaluate('date and time()', null);
+    evaluateSkip(`
+      date(
+        date and time("2012-12-25T11:00:00Z")
+      ) = date("2012-12-25")
+    `, true);
 
-    evaluate('time()', null);
+    evaluateSkip('date(2012, 12, 25) = date("2012-12-25")', true);
 
-    evaluate('number()', null);
+    evaluateSkip(`
+      date and time ("2012-12-24T23:59:00") =
+        date and time (
+          date("2012-12-24”), time(“23:59:00")
+        )
+    `, true);
 
-    evaluate('string()', null);
+    evaluateSkip(`
+      date and time("2012-12-24T23:59:00") + duration("PT1M") =
+      date and time("2012-12-25T00:00:00")
+    `, true);
 
-    evaluate('duration()', null);
+    evaluateSkip(`
+      time("23:59:00z") + duration("PT2M") =
+      time("00:01:00@Etc/UTC")
+    `, true);
 
-    evaluate('years and months duration()', null);
+    evaluateSkip(`
+      time(
+        date and time("2012-12-25T11:00:00Z")
+      ) = time("11:00:00Z")
+    `, true);
+
+    evaluateSkip(`
+      time(“23:59:00z") =
+      time(23, 59, 0, duration(“PT0H”))
+    `, true);
+
+    evaluateSkip(`
+      number("1 000,0", " ", ",") =
+      number("1,000.0", ",", ".")
+    `, true);
+
+    evaluate('string(1.1)', '1.1');
+    evaluate('string(null)', null);
+    evaluateSkip('string(date("2012-12-25"))', '2012-12-25');
+
+    evaluateSkip(`
+      date and time("2012-12-24T23:59:00") -
+        date and time("2012-12-22T03:45:00") =
+        duration("P2DT20H14M")
+    `, true);
+
+    evaluateSkip('duration("P2Y2M") = duration("P26M")', true);
+
+    evaluateSkip(`
+      years and months duration(
+       date("2011-12-22"),
+       date("2013-08-24")
+      ) = duration("P1Y8M")
+    `, true);
 
   });
 
@@ -213,5 +261,13 @@ function evaluateOnly(...args) {
   return createEvalVerifier({
     args,
     it: it.only
+  });
+}
+
+// eslint-disable-next-line no-unused-vars
+function evaluateSkip(...args) {
+  return createEvalVerifier({
+    args,
+    it: it.skip
   });
 }

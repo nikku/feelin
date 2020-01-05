@@ -91,9 +91,9 @@ const builtins = {
     throw notImplemented();
   },
 
-  'string': function() {
-    throw notImplemented();
-  },
+  'string': fn(function(obj) {
+    return String(obj);
+  }, [ 'any' ]),
 
   'duration': function() {
     throw notImplemented();

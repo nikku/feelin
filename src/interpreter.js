@@ -545,7 +545,14 @@ function evalNode(node, input, args) {
         __extractLeft: true
       };
 
-      return filterFn(iterationContext);
+      const result = filterFn(iterationContext);
+
+      // test is fn(val) => boolean SimpleUnaryTest
+      if (typeof result === 'function') {
+        return result(() => el);
+      }
+
+      return result;
     }).filter(isTruthy);
   };
 
@@ -567,7 +574,11 @@ function evalNode(node, input, args) {
     const interval = new Interval(args[0], args[1](context), args[2](context), args[3]);
 
     return (a) => {
-      return interval.includes(a(context));
+      const left = a(context);
+
+      const includes = interval.includes(left);
+
+      return includes && context.__extractLeft ? left : includes;
     };
   };
 

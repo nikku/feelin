@@ -334,6 +334,10 @@ describe('interpreter', function() {
 
       evaluate('[1,2,3][false]', []);
 
+      evaluate('[1, 2, 3][ > 1 ]', [ 2, 3 ]);
+
+      evaluate('[1, 2, 3][ ]1..4] ]', [ 2, 3 ]);
+
       evaluate('null[false]', null);
 
       evaluate('null[true]', null);

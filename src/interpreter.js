@@ -12,10 +12,6 @@ import { NodeProp } from 'lezer';
 
 function Interpreter() {
 
-  this.injectBuiltins = (context) => {
-    return context;
-  };
-
   this.parseName = (name) => {
 
     let match;
@@ -103,14 +99,12 @@ function Interpreter() {
 
   this.parse = (parser, rawInput, rawContext) => {
 
-    const injectedContext = this.injectBuiltins(rawContext);
-
-    const names = this.findNames(injectedContext);
+    const names = this.findNames(rawContext);
 
     const {
       context,
       input
-    } = this.replaceNames(rawInput, injectedContext, names);
+    } = this.replaceNames(rawInput, rawContext, names);
 
     const tree = parser.parse(input);
 

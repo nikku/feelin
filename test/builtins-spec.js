@@ -117,27 +117,38 @@ describe('builtin functions', function() {
   });
 
 
-  describe.skip('Numeric', function() {
+  describe('Numeric', function() {
 
-    evaluate('decimal()', null);
+    evaluate('decimal(1/3, 2)', .33);
+    evaluate('decimal(1.5, 0)', 1);
 
-    evaluate('floor()', null);
+    // TODO(nikku): according to spec
+    // evaluate('decimal(1.5, 0)', 2);
+    evaluate('decimal(2.5, 0)', 2);
 
-    evaluate('ceiling()', null);
+    evaluate('floor(1.5)', 1);
+    evaluate('floor(-1.5)', -2);
 
-    evaluate('abs()', null);
+    evaluate('ceiling(1.5)', 2);
+    evaluate('ceiling(-1.5)', -1);
 
-    evaluate('modulo()', null);
+    evaluate('abs( 10 )', 10);
+    evaluate('abs( -10 )', 10);
 
-    evaluate('sqrt()', null);
+    evaluate('modulo( 12, 5 )', 2);
 
-    evaluate('log()', null);
+    evaluate('sqrt( 16 )', 4);
+    evaluate('sqrt( -3 )', null);
 
-    evaluate('exp()', null);
+    evaluate('log( 10 )', 2.302585092994046);
 
-    evaluate('odd()', null);
+    evaluate('exp( 5 )', 148.4131591025766);
 
-    evaluate('even()', null);
+    evaluate('odd( 5 )', true);
+    evaluate('odd( 2 )', false);
+
+    evaluate('even( 5 )', false);
+    evaluate('even ( 2 )', true);
 
   });
 

@@ -277,50 +277,62 @@ const builtins = {
 
 
   // 10.3.4.5 Numeric functions
-  'decimal': function() {
-    throw notImplemented();
-  },
+  'decimal': fn(function(n, scale) {
 
-  'floor': function() {
-    throw notImplemented();
-  },
+    if (!scale) {
+      return round(n);
+    }
 
-  'ceiling': function() {
-    throw notImplemented();
-  },
+    const offset = 10 ** scale;
 
-  'abs': function(number) {
+    return round(n * offset) / (offset);
+  }, [ 'number', 'number' ]),
+
+  'floor': fn(function(number) {
+    return Math.floor(number);
+  }, [ 'number' ]),
+
+  'ceiling': fn(function(number) {
+    return Math.ceil(number);
+  }, [ 'number' ]),
+
+  'abs': fn(function(number) {
 
     if (typeof number !== 'number') {
       return null;
     }
 
     return Math.abs(number);
-  },
+  }, [ 'number' ]),
 
-  'modulo': function() {
-    throw notImplemented();
-  },
+  'modulo': fn(function(dividend, divisor) {
+    return Math.floor(dividend / divisor);
+  }, [ 'number' ]),
 
-  'sqrt': function() {
-    throw notImplemented();
-  },
+  'sqrt': fn(function(number) {
 
-  'log': function() {
-    throw notImplemented();
-  },
+    if (number < 0) {
+      return null;
+    }
 
-  'exp': function() {
-    throw notImplemented();
-  },
+    return Math.sqrt(number);
+  }, [ 'number' ]),
 
-  'odd': function() {
-    throw notImplemented();
-  },
+  'log': fn(function(number) {
+    return Math.log(number);
+  }, [ 'number' ]),
 
-  'even': function() {
-    throw notImplemented();
-  },
+  'exp': fn(function(number) {
+    return Math.exp(number);
+  }, [ 'number' ]),
+
+  'odd': fn(function(number) {
+    return number % 2 === 1;
+  }, [ 'number' ]),
+
+  'even': fn(function(number) {
+    return number % 2 === 0;
+  }, [ 'number' ]),
 
 
   // 10.3.4.6 Sort
@@ -392,6 +404,17 @@ function fn(fnDefinition, argDefinitions) {
 
     return fnDefinition(...args);
   };
+}
+
+function round(n) {
+
+  const integral = Math.trunc(n);
+
+  if (n - integral > .5) {
+    return integral + 1;
+  } else {
+    return integral;
+  }
 }
 
 function notImplemented() {

@@ -105,60 +105,76 @@ const builtins = {
 
 
   // 10.3.4.2 Boolean function
-  'not': function(bool) {
-
-    if (bool === null) {
-      return null;
-    }
-
+  'not': fn(function(bool) {
     return !bool;
-  },
+  }, [ 'any' ]),
 
 
   // 10.3.4.3 String functions
-  'substring': function() {
-    throw notImplemented();
-  },
+  'substring': fn(function(str, start, length) {
 
-  'string length': function() {
-    throw notImplemented();
-  },
+    const _start = (start < 0 ? str.length + start : start - 1);
 
-  'upper case': function() {
-    throw notImplemented();
-  },
+    return (
+      arguments.length === 3
+        ? str.substring(_start, _start + length)
+        : str.substring(_start)
+    );
+  }, [ 'string', 'number', 'number?' ]),
 
-  'lower case': function() {
-    throw notImplemented();
-  },
+  'string length': fn(function(str) {
+    return str.length;
+  }, [ 'string' ]),
 
-  'substring before': function() {
-    throw notImplemented();
-  },
+  'upper case': fn(function(str) {
+    return str.toUpperCase();
+  }, [ 'string' ]),
 
-  'substring after': function() {
-    throw notImplemented();
-  },
+  'lower case': fn(function(str) {
+    return str.toLowerCase();
+  }, [ 'string' ]),
 
-  'replace': function() {
-    throw notImplemented();
-  },
+  'substring before': fn(function(str, match) {
 
-  'contains': function() {
-    throw notImplemented();
-  },
+    const index = str.indexOf(match);
 
-  'starts with': function() {
-    throw notImplemented();
-  },
+    if (index === -1) {
+      return '';
+    }
 
-  'ends with': function() {
-    throw notImplemented();
-  },
+    return str.substring(0, index);
+  }, [ 'string', 'string' ]),
 
-  'split': function() {
-    throw notImplemented();
-  },
+  'substring after': fn(function(str, match) {
+
+    const index = str.indexOf(match);
+
+    if (index === -1) {
+      return '';
+    }
+
+    return str.substring(index + match.length);
+  }, [ 'string', 'string' ]),
+
+  'replace': fn(function(str, pattern, replacement) {
+    return str.replace(new RegExp(pattern), replacement);
+  }, [ 'string', 'string', 'string' ]),
+
+  'contains': fn(function(str, match) {
+    return str.includes(match);
+  }, [ 'string', 'string' ]),
+
+  'starts with': fn(function(str, match) {
+    return str.startsWith(match);
+  }, [ 'string', 'string' ]),
+
+  'ends with': fn(function(str, match) {
+    return str.endsWith(match);
+  }, [ 'string', 'string' ]),
+
+  'split': fn(function(str, separator) {
+    return str.split(new RegExp(separator));
+  }, [ 'string', 'string' ]),
 
 
   // 10.3.4.4 List functions
@@ -331,6 +347,51 @@ export {
 
 function matches(a, b) {
   return a === b;
+}
+
+function createArgsValidator(argDefinitions) {
+
+  const tests = argDefinitions.map(arg => {
+
+    const optional = arg.endsWith('?');
+
+    const type = optional ? arg.substring(0, arg.length - 1) : arg;
+
+    return function(obj) {
+
+      const objType = typeof obj;
+
+      if (obj === null || objType === 'undefined') {
+        return optional;
+      }
+
+      if (type !== 'any' && objType !== type) {
+        return false;
+      }
+
+      return true;
+    };
+  });
+
+  return function(args) {
+    return tests.every((test, index) => {
+      return test(args[index]);
+    });
+  };
+}
+
+function fn(fnDefinition, argDefinitions) {
+
+  const validArgs = createArgsValidator(argDefinitions);
+
+  return function(...args) {
+
+    if (!validArgs(args)) {
+      return null;
+    }
+
+    return fnDefinition(...args);
+  };
 }
 
 function notImplemented() {

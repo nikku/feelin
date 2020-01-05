@@ -33,29 +33,37 @@ describe('builtin functions', function() {
   });
 
 
-  describe.skip('String', function() {
+  describe('String', function() {
 
-    evaluate('substring()', null);
+    evaluate('substring("foobar",3)', 'obar');
+    evaluate('substring("foobar",3,3)', 'oba');
+    evaluate('substring("foobar", -2, 1)', 'a');
+    evaluate('substring(null, -2, 1)', null);
 
-    evaluate('string length()', null);
+    evaluate('string length("")', 0);
+    evaluate('string length("123")', 3);
 
-    evaluate('upper case()', null);
+    evaluate('upper case("aBc4")', 'ABC4');
 
-    evaluate('lower case()', null);
+    evaluate('lower case("aBc4")', 'abc4');
 
-    evaluate('substring before()', null);
+    evaluate('substring before("foobar", "bar")', 'foo');
+    evaluate('substring before("foobar", "xyz")', '');
 
-    evaluate('substring after()', null);
+    evaluate('substring after("foobar", "ob")', 'ar');
+    evaluate('substring after("", "a")', '');
 
-    evaluate('replace()', null);
+    evaluate('replace("abcd", "(ab)|(a)", "[1=$1][2=$2]")', '[1=ab][2=]cd');
 
-    evaluate('contains()', null);
+    evaluate('contains("foobar", "of")', false);
+    evaluate('contains("foobar", "ob")', true);
 
-    evaluate('starts with()', null);
+    evaluate('starts with("foobar", "fo")', true);
 
-    evaluate('ends with()', null);
+    evaluate('ends with("foobar", "r")', true);
 
-    evaluate('split()', null);
+    evaluate('split("John Doe", "\\s")', ['John', 'Doe']);
+    evaluate('split("a;b;c;;", ";")', ['a','b','c','','']);
 
   });
 

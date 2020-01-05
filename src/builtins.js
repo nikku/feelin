@@ -179,101 +179,146 @@ const builtins = {
 
   // 10.3.4.4 List functions
 
-  'list contains': function() {
-    throw notImplemented();
-  },
+  'list contains': fn(function(list, element) {
+    return list.some(el => matches(el, element));
+  }, ['list', 'any?']),
 
-  'count': function() {
-    throw notImplemented();
-  },
+  'count': fn(function(list) {
+    return list.length;
+  }, [ 'list']),
 
-  'min': function() {
-    throw notImplemented();
-  },
+  'min': listFn(function(list) {
+    return list.reduce((min, el) => min === null ? el : Math.min(min, el), null);
+  }, 'number'),
 
-  'max': function() {
-    throw notImplemented();
-  },
+  'max': listFn(function(list) {
+    return list.reduce((max, el) => max === null ? el : Math.max(max, el), null);
+  }, 'number'),
 
-  'sum': function() {
-    throw notImplemented();
-  },
+  'sum': listFn(function(list) {
+    return sum(list);
+  }, 'number'),
 
-  'mean': function() {
-    throw notImplemented();
-  },
+  'mean': listFn(function(list) {
+    const s = sum(list);
 
-  'all': function() {
-    throw notImplemented();
-  },
+    return s === null ? s : s / list.length;
+  }, 'number'),
 
-  'any': function() {
-    throw notImplemented();
-  },
+  'all': listFn(function(list) {
 
-  'sublist': function() {
-    throw notImplemented();
-  },
+    let nonBool = false;
 
-  'append': function() {
-    throw notImplemented();
-  },
+    for (const o of list) {
 
-  'concatenate': function() {
-    throw notImplemented();
-  },
+      if (o === false) {
+        return false;
+      }
 
-  'insert before': function() {
-    throw notImplemented();
-  },
+      if (typeof o !== 'boolean') {
+        nonBool = true;
+      }
+    }
 
-  'remove': function() {
-    throw notImplemented();
-  },
+    return nonBool ? null : true;
 
-  'reverse': function() {
-    throw notImplemented();
-  },
+  }, 'any?'),
 
-  'index of': function(list, match) {
+  'any': listFn(function(list) {
+
+    let nonBool = false;
+
+    for (const o of list) {
+
+      if (o === true) {
+        return true;
+      }
+
+      if (typeof o !== 'boolean') {
+        nonBool = true;
+      }
+    }
+
+    return nonBool ? null : false;
+  }, 'any?'),
+
+  'sublist': fn(function(list, start, length) {
+
+    const _start = (start < 0 ? list.length + start : start - 1);
+
+    return (
+      arguments.length === 3
+        ? list.slice(_start, _start + length)
+        : list.slice(_start)
+    );
+
+  }, [ 'list', 'number', 'number?' ]),
+
+  'append': fn(function(list, ...items) {
+    return list.concat(items);
+  }, [ 'list', 'any?' ]),
+
+  'concatenate': fn(function(...args) {
+
+    return args.reduce((result, arg) => {
+      return result.concat(arg);
+    }, []);
+
+  }, [ 'any' ]),
+
+  'insert before': fn(function(list, position, newItem) {
+    return list.slice(0, position - 1).concat([ newItem ], list.slice(position - 1));
+  }, [ 'list', 'number', 'any?' ]),
+
+  'remove': fn(function(list, position) {
+    return list.slice(0, position - 1).concat(list.slice(position));
+  }, [ 'list', 'number' ]),
+
+  'reverse': fn(function(list) {
+    return list.slice().reverse();
+  }, [ 'list' ]),
+
+  'index of': fn(function(list, match) {
 
     return list.reduce(function(result, element, index) {
 
       if (matches(element, match)) {
-        result.push(index + 1);;
+        result.push(index + 1);
       }
 
       return result;
     }, []);
-  },
+  }, [ 'list', 'any' ]),
 
-  'union': function() {
+  'union': fn(function(...lists) {
     throw notImplemented();
-  },
+  }, [ 'list' ]),
 
-  'distinct values': function() {
+  'distinct values': fn(function(list) {
     throw notImplemented();
-  },
+  }, [ 'list' ]),
 
-  'flatten': function() {
-    throw notImplemented();
-  },
+  'flatten': fn(function(list) {
+    return flatten(list);
+  }, [ 'list' ]),
 
-  'product': function() {
-    throw notImplemented();
-  },
+  'product': listFn(function(numbers) {
+    return numbers.reduce((result, n) => {
+      return result * n;
+    }, 1);
+  }, 'number'),
 
-  'median': function() {
+  'median': listFn(function(numbers) {
     throw notImplemented();
-  },
+  }, 'number'),
 
-  'stddev': function() {
+  'stddev': listFn(function(numbers) {
     throw notImplemented();
-  },
+  }, 'number'),
 
-  'mode': function() {
+  'mode': listFn(function(numbers) {
     throw notImplemented();
-  },
+  }, 'number'),
 
 
   // 10.3.4.5 Numeric functions
@@ -361,38 +406,66 @@ function matches(a, b) {
   return a === b;
 }
 
+function createArgTester(arg) {
+  const optional = arg.endsWith('?');
+
+  const type = optional ? arg.substring(0, arg.length - 1) : arg;
+
+  return function(obj) {
+
+    const objType = typeof obj;
+
+    if (obj === null || objType === 'undefined') {
+      return optional;
+    }
+
+    if (type === 'list') {
+      return Array.isArray(obj);
+    }
+
+    if (type === 'context') {
+      return objType === 'object';
+    }
+
+    if (type !== 'any' && objType !== type) {
+      return false;
+    }
+
+    return true;
+  };
+}
+
 function createArgsValidator(argDefinitions) {
 
-  const tests = argDefinitions.map(arg => {
-
-    const optional = arg.endsWith('?');
-
-    const type = optional ? arg.substring(0, arg.length - 1) : arg;
-
-    return function(obj) {
-
-      const objType = typeof obj;
-
-      if (obj === null || objType === 'undefined') {
-        return optional;
-      }
-
-      if (type === 'context') {
-        return objType === 'object';
-      }
-
-      if (type !== 'any' && objType !== type) {
-        return false;
-      }
-
-      return true;
-    };
-  });
+  const tests = argDefinitions.map(createArgTester);
 
   return function(args) {
     return tests.every((test, index) => {
       return test(args[index]);
     });
+  };
+}
+
+function listFn(fnDefinition, type) {
+
+  const tester = createArgTester(type);
+
+  return function(...args) {
+
+    if (args.length === 0) {
+      return null;
+    }
+
+    // unwrap first arg
+    if (Array.isArray(args[0]) && args.length === 1) {
+      args = args[0];
+    }
+
+    if (!args.every(tester)) {
+      return null;
+    }
+
+    return fnDefinition(args);
   };
 }
 
@@ -408,6 +481,18 @@ function fn(fnDefinition, argDefinitions) {
 
     return fnDefinition(...args);
   };
+}
+
+function sum(list) {
+  return list.reduce((sum, el) => sum === null ? el : sum + el, null);
+}
+
+function flatten([x,...xs]) {
+  return (
+    x !== undefined
+      ? [...Array.isArray(x) ? flatten(x) : [x],...flatten(xs)]
+      : []
+  );
 }
 
 function round(n) {

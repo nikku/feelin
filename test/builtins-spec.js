@@ -116,51 +116,83 @@ describe('builtin functions', function() {
   });
 
 
-  describe.skip('List', function() {
+  describe('List', function() {
 
-    evaluate('list contains()', null);
+    evaluate('list contains([1,2,3], 2)', true);
+    evaluate('list contains([ null ], null)', true);
+    evaluate('list contains([ 1 ], null)', false);
 
-    evaluate('count()', null);
+    evaluate('count([1,2,3])', 3);
+    evaluate('count([])', 0);
+    evaluate('count([1,[2,3]])', 2);
 
-    evaluate('min()', null);
+    evaluate('min(1)', 1);
+    evaluate('min([1])', 1);
+    evaluate('min([1,2,3])', 1);
+    evaluate('min([])', null);
+    evaluate('max(1)', 1);
+    evaluate('max([1])', 1);
+    evaluate('max(1,2,3)', 3);
+    evaluate('max([])', null);
 
-    evaluate('max()', null);
+    evaluate('sum([1,2,3])', 6);
+    evaluate('sum(1,2,3)', 6);
+    evaluate('sum(1)', 1);
+    evaluate('sum([])', null);
 
-    evaluate('sum()', null);
+    evaluate('mean([1,2,3])', 2);
+    evaluate('mean(1,2,3)', 2);
+    evaluate('mean(1)', 1);
+    evaluate('mean([])', null);
 
-    evaluate('mean()', null);
+    evaluate('all([false,null,true])', false);
+    evaluate('all([true, true])', true);
+    evaluate('all(true)', true);
+    evaluate('all([true])', true);
+    evaluate('all([])', true);
+    evaluate('all(0)', null);
 
-    evaluate('all()', null);
+    evaluate('any([false,null,true])', true);
+    evaluate('any([false,false])', false);
+    evaluate('any(false)', false);
+    evaluate('any([])', false);
+    evaluate('any(0)', null);
 
-    evaluate('any()', null);
+    evaluate('sublist([4,5,6], 1, 2)', [4,5]);
+    evaluate('sublist([4,5,6], -1)', [6]);
+    evaluate('sublist([4,5,6], -2, 1)', [5]);
 
-    evaluate('sublist()', null);
+    evaluate('append([1], 2, 3)', [1,2,3]);
 
-    evaluate('append()', null);
+    evaluate('concatenate([1,2],[3])', [1,2,3]);
 
-    evaluate('concatenate()', null);
+    evaluate('insert before([1,3],1,2)', [2,1,3]);
 
-    evaluate('insert before()', null);
+    evaluate('remove([1,2,3], 2)', [1,3]);
 
-    evaluate('remove()', null);
+    evaluate('reverse([1,2,3])', [3,2,1]);
 
-    evaluate('reverse()', null);
+    evaluate('index of([1,2,3,2],2)', [2,4]);
 
-    evaluate('index of()', null);
+    evaluateSkip('union([1,2],[2,3])', [1,2,3]);
 
-    evaluate('union()', null);
+    evaluateSkip('distinct values([1,2,3,2,1])', [1,2,3]);
 
-    evaluate('distinct values()', null);
+    evaluate('flatten([[1,2],[[3]], 4])', [1,2,3,4]);
 
-    evaluate('flatten()', null);
+    evaluate('product( 2, 3, 4)', 24);
+    evaluate('product([ 2, 3, 4 ])', 24);
 
-    evaluate('product()', null);
+    evaluateSkip('median( 8, 2, 5, 3, 4 )', 4);
+    evaluateSkip('median( [6, 1, 2, 3] )', 2.5);
+    evaluateSkip('median( [ ] )', null);
 
-    evaluate('median()', null);
+    evaluateSkip('stddev( 2, 4, 7, 5 )', 2.0816659994661);
+    evaluateSkip('stddev( [ ] )', null);
 
-    evaluate('stddev()', null);
-
-    evaluate('mode()', null);
+    evaluateSkip('mode( 6, 3, 9, 6, 6 )', [ 6 ]);
+    evaluateSkip('mode( [6, 1, 9, 6, 1] )', [ 1, 6 ]);
+    evaluateSkip('mode( [ ] )', [ ]);
 
   });
 

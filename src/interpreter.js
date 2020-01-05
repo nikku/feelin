@@ -530,6 +530,13 @@ function evalNode(node, input, args) {
       }
     }
 
+    if (filterFn.type === 'string') {
+
+      const value = filterFn(context);
+
+      return filterTarget.filter(el => el === value);
+    }
+
     // a[test]
     return filterTarget.map(el => {
 

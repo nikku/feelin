@@ -592,6 +592,15 @@ describe('interpreter', function() {
   });
 
 
+  describe('built-ins', function() {
+
+    evaluate('abs(-1)', 1);
+
+    evaluate('index of([1, 2, 3, 2], 2)', [2, 4]);
+
+  });
+
+
   describe('error handling', function() {
 
     it('should throw Error on syntax errors', function() {

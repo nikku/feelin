@@ -6,6 +6,8 @@ import {
   parser as unaryTestParser
 } from './unary-parser';
 
+import { builtins } from './builtins';
+
 import { NodeProp } from 'lezer';
 
 function Interpreter() {
@@ -302,6 +304,8 @@ function evalNode(node, input, args) {
   };
 
   case 'Key': return args[0];
+
+  case 'BuiltInFunctionName': return (context) => builtins[input];
 
   case 'QualifiedName': return (context) => getFromContext(args.join('.'), context);
 

@@ -343,13 +343,13 @@ const builtins = {
 
 
   // 10.3.2.6 Context
-  'get value': function() {
-    throw notImplemented();
-  },
+  'get value': fn(function(context, value) {
+    return context[value];
+  }, [ 'context', 'string' ]),
 
-  'get entries': function() {
-    throw notImplemented();
-  }
+  'get entries': fn(function(context) {
+    return Object.entries(context).map(([key, value]) => ({ key, value }));
+  }, [ 'context' ]),
 };
 
 export {
@@ -375,6 +375,10 @@ function createArgsValidator(argDefinitions) {
 
       if (obj === null || objType === 'undefined') {
         return optional;
+      }
+
+      if (type === 'context') {
+        return objType === 'object';
       }
 
       if (type !== 'any' && objType !== type) {

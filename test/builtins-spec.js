@@ -160,11 +160,14 @@ describe('builtin functions', function() {
   });
 
 
-  describe.skip('Context', function() {
+  describe('Context', function() {
 
-    evaluate('get value()', null);
+    evaluate('get value({key1: "value1"}, "key1")', 'value1');
 
-    evaluate('get entries()', null);
+    // TODO(nikku): this should work, according to spec
+    // evaluate('get entries({key1: "value1"})[key="key1"].value', 'value1');
+
+    evaluate('get entries({key1: "value1"})', [ { key: 'key1', value: 'value1' } ]);
 
   });
 

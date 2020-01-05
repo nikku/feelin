@@ -106,7 +106,7 @@ SimplePositiveUnaryTest {
 UnaryTests {
   Wildcard |
   PositiveUnaryTests |
-  kw<"not"> "(" PositiveUnaryTests ")"
+  not "(" PositiveUnaryTests ")"
 }
 
 PositiveUnaryTests {
@@ -158,7 +158,7 @@ Key {
 }
 
 FunctionInvocation {
-  expression !call Parameters
+  (BuiltInFunctionName | expression) !call Parameters
 }
 
 Parameters {
@@ -190,8 +190,7 @@ literal {
 simpleLiteral {
   NumericLiteral |
   StringLiteral |
-  BooleanLiteral |
-  DateTimeLiteral
+  BooleanLiteral
 }
 
 QualifiedName {
@@ -275,8 +274,63 @@ commaSep<Expr> {
     "instance of"
   }
 
-  DateTimeLiteral {
-    "data time"
+  not[name="not"] { "not" }
+
+  BuiltInFunctionName {
+    "date" |
+    "date and time" |
+    "time" |
+    "number" |
+    "string" |
+    "duration" |
+    "years and months duration" |
+    not |
+    "substring" |
+    "string length" |
+    "upper case" |
+    "lower case" |
+    "substring before" |
+    "substring after" |
+    "replace" |
+    "contains" |
+    "starts with" |
+    "ends with" |
+    "split" |
+    "list contains" |
+    "count" |
+    "min" |
+    "max" |
+    "sum" |
+    "mean" |
+    "all" |
+    "any" |
+    "sublist" |
+    "append" |
+    "concatenate" |
+    "insert before" |
+    "remove" |
+    "reverse" |
+    "index of" |
+    "union" |
+    "distinct values" |
+    "flatten" |
+    "product" |
+    "median" |
+    "stddev" |
+    "mode" |
+    "decimal" |
+    "floor" |
+    "ceiling" |
+    "abs" |
+    "modulo" |
+    "sqrt" |
+    "log" |
+    "exp" |
+    "odd" |
+    "even" |
+    "sort" |
+    "get value" |
+    "get entries"
   }
 
   Gt { ">" }
@@ -287,8 +341,9 @@ commaSep<Expr> {
   @precedence { BlockComment, LineComment, divide }
 
   @precedence {
+    not,
+    BuiltInFunctionName,
     BooleanLiteral,
-    DateTimeLiteral,
     NumericLiteral,
     instanceOf,
     Name

@@ -414,8 +414,8 @@ function evalNode(node, input, args) {
 
     const operator = args[1];
 
-    // expression !compare InTester PositiveUnaryTest |
-    // expression !compare InTester !unaryTest "(" PositiveUnaryTests ")"
+    // expression !compare kw<"in"> PositiveUnaryTest |
+    // expression !compare kw<"in"> !unaryTest "(" PositiveUnaryTests ")"
     if (operator === 'in') {
       return compareIn(context, args[0], args[3] || args[2]);
     }
@@ -678,18 +678,18 @@ function compareIn(context, _left, _tests) {
 
   const tests = _tests(context);
 
-  return (Array.isArray(tests) ? tests : [ tests ]).every(
-    test => compareValOrFn(test, () => left)
+  return (Array.isArray(tests) ? tests : [ tests ]).some(
+    test => compareValOrFn(test, left)
   ) ? (context.__extractLeft ? left : true) : false;
 }
 
 function compareValOrFn(valOrFn, expr) {
 
   if (typeof valOrFn === 'function') {
-    return valOrFn(expr);
+    return valOrFn(() => expr);
   }
 
-  return (context) => valOrFn == expr(context);
+  return valOrFn === expr;
 }
 
 function range(size, startAt = 0, direction = 1) {

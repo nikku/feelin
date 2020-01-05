@@ -182,11 +182,27 @@ describe('interpreter', function() {
 
       evaluate('5 in < 0', false);
 
+      evaluate('"FOO" in "FOO1"', false);
+
+      evaluate('"FOO" in "FOO"', true);
+
+      evaluate('true in (false, false)', false);
+
+      evaluate('true in (true, false)', true);
+
+      evaluate('5 in 6', false);
+
+      evaluate('5 in 5', true);
+
       evaluate('5 in (> 0, <10)', true);
 
       evaluate('5 in ([0..10], [5..15])', true);
 
       evaluate('0 in (1, 0)', true);
+
+      evaluate('0 in (1, 2)', false);
+
+      evaluate('0 in (>1, <2)', true);
 
     });
 

@@ -32,7 +32,7 @@ evaluate('every rate in rates() satisfies rate < 10', {
 
 ## Features
 
-* [x] Support basic FEEL operations
+* [x] Support all FEEL operations
 * [x] Support names with spaces
 * [x] Recover on errors
 * [ ] Provides built-in functions

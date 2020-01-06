@@ -1,0 +1,15 @@
+a instance of list<boolean>
+
+----------
+
+Expressions "a instance of list<boolean>"
+  InstanceOf "a instance of list<boolean>"
+    QualifiedName "a"
+      Name "a"
+    Type "list<boolean>"
+      ListType "list<boolean>"
+        list "list"
+        < "<"
+        Type "boolean"
+          BuiltInType "boolean"
+        > ">"

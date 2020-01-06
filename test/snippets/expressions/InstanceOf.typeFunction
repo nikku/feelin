@@ -1,0 +1,52 @@
+a instance of function<string> -> string
+
+a instance of function<string, boolean> -> string
+
+a instance of function<> -> string
+
+----------
+
+Expressions "a instance of function<string> -> string
+
+a instance of function<string, boolean> -> string
+
+a instance of function<> -> string"
+  InstanceOf "a instance of function<string> -> string"
+    QualifiedName "a"
+      Name "a"
+    Type "function<string> -> string"
+      FunctionType "function<string> -> string"
+        function "function"
+        < "<"
+        ArgumentType "string"
+          Type "string"
+            BuiltInType "string"
+        > ">"
+        Type "string"
+          BuiltInType "string"
+  InstanceOf "a instance of function<string, boolean> -> string"
+    QualifiedName "a"
+      Name "a"
+    Type "function<string, boolean> -> string"
+      FunctionType "function<string, boolean> -> string"
+        function "function"
+        < "<"
+        ArgumentType "string"
+          Type "string"
+            BuiltInType "string"
+        ArgumentType "boolean"
+          Type "boolean"
+            BuiltInType "boolean"
+        > ">"
+        Type "string"
+          BuiltInType "string"
+  InstanceOf "a instance of function<> -> string"
+    QualifiedName "a"
+      Name "a"
+    Type "function<> -> string"
+      FunctionType "function<> -> string"
+        function "function"
+        < "<"
+        > ">"
+        Type "string"
+          BuiltInType "string"

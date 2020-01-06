@@ -1,0 +1,10 @@
+a instance of string
+
+----------
+
+Expressions "a instance of string"
+  InstanceOf "a instance of string"
+    QualifiedName "a"
+      Name "a"
+    Type "string"
+      BuiltInType "string"

@@ -1,5 +1,6 @@
 @precedence {
   name,
+  type,
   call,
   filter @left,
   qnamePath @left,
@@ -88,14 +89,14 @@ ArithmeticExpression {
 
 Comparison {
   expression !compare CompareOp<"=" | "!="> expression |
-  expression !compare CompareOp<Gt | Gte | Lt | Lte> expression |
+  expression !compare CompareOp<">" | ">=" | "<" | "<="> expression |
   expression !compare kw<"between"> expression kw<"and"> expression |
   expression !compare kw<"in"> PositiveUnaryTest |
   expression !compare kw<"in"> !unaryTest "(" PositiveUnaryTests ")"
 }
 
 SimplePositiveUnaryTest {
-  CompareOp<Gt | Gte | Lt | Lte> endpoint |
+  CompareOp<">" | ">=" | "<" | "<="> endpoint |
   Interval
 }
 
@@ -122,7 +123,19 @@ FormalParameter {
 }
 
 Type {
-  QualifiedName
+  QualifiedName |
+  BuiltInType |
+  ListType { kw<"list"> !type "<" Type !type ">" } |
+  ContextType { kw<"context"> !type "<" commaSep1<ContextEntryType> !type ">" } |
+  FunctionType { kw<"function"> !type "<" commaSep<ArgumentType> !type ">" "->" Type }
+}
+
+ArgumentType {
+  Type
+}
+
+ContextEntryType {
+  Name ":" Type
 }
 
 Context {
@@ -251,11 +264,23 @@ commaSep<Expr> {
     "true" | "false"
   }
 
+  not[name="not"] { "not" }
+
   instanceOf {
     "instance of"
   }
 
-  not[name="not"] { "not" }
+  BuiltInType {
+    "number" |
+    "string" |
+    "boolean" |
+    "days and time duration" |
+    "years and months duration" |
+    "date" |
+    "time" |
+    "date and time" |
+    "range"
+  }
 
   BuiltInFunctionName {
     "date" |
@@ -333,16 +358,21 @@ commaSep<Expr> {
     "get entries"
   }
 
-  Gt { ">" }
-  Lt { "<" }
-  Gte { ">=" }
-  Lte { "<=" }
-
   @precedence { BlockComment, LineComment, divide }
 
   @precedence {
     not,
     BuiltInFunctionName,
+    Name
+  }
+
+  @precedence {
+    BuiltInType,
+    Name
+  }
+
+  @precedence {
+    not,
     BooleanLiteral,
     NumericLiteral,
     instanceOf,
@@ -380,6 +410,8 @@ commaSep<Expr> {
   Name {
     NameStart (NamePart)*
   }
+
+  ">" "<" ">=" "<="
 
   "(" ")" "[" "]" "{" "}"
 

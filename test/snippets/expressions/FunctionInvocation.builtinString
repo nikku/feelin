@@ -1,0 +1,12 @@
+string(5)
+
+----------
+
+Expressions "string(5)"
+  FunctionInvocation "string(5)"
+    BuiltInFunctionName "string"
+    Parameters "(5)"
+      ( "("
+      PositionalParameters "5"
+        NumericLiteral "5"
+      ) ")"

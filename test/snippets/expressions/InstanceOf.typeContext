@@ -1,0 +1,17 @@
+a instance of context<foo: string>
+
+----------
+
+Expressions "a instance of context<foo: string>"
+  InstanceOf "a instance of context<foo: string>"
+    QualifiedName "a"
+      Name "a"
+    Type "context<foo: string>"
+      ContextType "context<foo: string>"
+        context "context"
+        < "<"
+        ContextEntryType "foo: string"
+          Name "foo"
+          Type "string"
+            BuiltInType "string"
+        > ">"

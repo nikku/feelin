@@ -113,21 +113,6 @@ PositiveUnaryTest {
   expression
 }
 
-SimpleUnaryTests {
-  Wildcard |
-  SimplePositiveUnaryTests |
-  kw<"not"> "(" SimplePositiveUnaryTests ")"
-}
-
-SimplePositiveUnaryTests {
-  commaSep1<_SimplePositiveUnaryTest>
-}
-
-_SimplePositiveUnaryTest {
-  CompareOp<Gt | Gte | Lt | Lte>? endpoint |
-  Interval
-}
-
 FunctionDefinition {
   kw<"function"> "(" commaSep<FormalParameter> ")" kw<"external">? expression
 }

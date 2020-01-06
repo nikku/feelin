@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.com/nikku/feelin.svg?branch=master)](https://travis-ci.com/nikku/feelin)
 
-A FEEL parser and interpreter written in JavaScript. [Try it out](https://nikku.github.io/tryfeel).
+A FEEL parser and interpreter written in JavaScript. [Try it out](https://nikku.github.io/feel-playground).
 
 
 ## Usage

@@ -62,7 +62,7 @@ textualExpression {
   QualifiedName ~qname /* TODO(nikku): should be name according to spec */ |
   kw<"?"> |
   SimplePositiveUnaryTest |
-  ParenthesizedExpression { "(" textualExpression ")" }
+  ParenthesizedExpression { "(" expression ")" }
 }
 
 boxedExpression {

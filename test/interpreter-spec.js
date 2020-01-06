@@ -318,14 +318,6 @@ describe('interpreter', function() {
 
     describe('FilterExpression', function() {
 
-      evaluate('a[ b > 10 ]', [ 11, 15 ], {
-        a: [
-          { b: 5 },
-          { b: 11 },
-          { b: 15 }
-        ]
-      });
-
       evaluate('[1, 2, 3][-1]', 3);
 
       evaluate('[1, 2, 3][-3]', 1);
@@ -368,13 +360,24 @@ describe('interpreter', function() {
         a: { b: 'foo' }
       });
 
-      evaluate('[1,2,3][item >= 2]', [2, 3]);
+      evaluate('a[ b > 10 ]', [ { b: 11 }, { b: 15 } ], {
+        a: [
+          { b: 5 },
+          { b: 11 },
+          { b: 15 }
+        ]
+      });
 
-      evaluate('[{a: 1}, {a: 2}, {a: 3}][item.a >= 2]', [2, 3]);
+      evaluate('[1, 2, 3, 4][item > 2]', [3, 4]);
 
-      evaluate('[{a: 1}, {a: 2}, {a: 3}][a >= 2]', [2, 3]);
+      evaluate('[ {x:1, y:2}, {x:2, y:3} ][x=1]', [ { x:1, y:2 } ]);
 
-      evaluate('[{item: 1}, {item: 2}, {item: 3}][item >= 2]', [2, 3]);
+      // TODO(nikku): part of DMN spec
+      evaluateSkip('[{a: 1}, {a: 2}, {a: 3}][item.a >= 2]', [2, 3]);
+
+      evaluate('[{a: 1}, {a: 2}, {a: 3}][a >= 2]', [ { a: 2 }, { a: 3 }]);
+
+      evaluate('[{item: 1}, {item: 2}, {item: 3}][item >= 2]', [ { item: 2 }, { item: 3 } ]);
 
     });
 
@@ -414,6 +417,19 @@ describe('interpreter', function() {
       evaluate('{ "foo+bar((!!],foo": 10 }', { 'foo+bar((!!],foo': 10 });
 
       evaluate('{ "": 20 }', { '': 20 });
+
+      evaluate(`
+        [
+          {a: {b: [1]}},
+          {a: {b: [2.1, 2.2]}},
+          {a: {b: [3]}},
+          {a: {b: [4, 5]}}
+        ].a.b
+      `, [[1], [2.1, 2.2], [3], [4, 5]]);
+
+      evaluate(`
+        [{b: [1]}, {b: [2.1,2.2]}, {b: [3]}, {b: [4, 5]}].b
+      `, [[1], [2.1, 2.2], [3], [4, 5]]);
 
     });
 
@@ -726,6 +742,14 @@ function evaluateOnly(...args) {
   return createEvalVerifier({
     args,
     it: it.only
+  });
+}
+
+// eslint-disable-next-line no-unused-vars
+function evaluateSkip(...args) {
+  return createEvalVerifier({
+    args,
+    it: it.skip
   });
 }
 

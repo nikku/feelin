@@ -546,15 +546,18 @@ function evalNode(node, input, args) {
 
           return itemScope;
         }, {}),
-        ...el,
-        __extractLeft: true
+        ...el
       };
 
-      const result = filterFn(iterationContext);
+      let result = filterFn(iterationContext);
 
       // test is fn(val) => boolean SimpleUnaryTest
       if (typeof result === 'function') {
-        return result(() => el);
+        result = result(() => el);
+      }
+
+      if (result === true) {
+        return el;
       }
 
       return result;

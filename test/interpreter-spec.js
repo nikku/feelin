@@ -303,6 +303,14 @@ describe('interpreter', function() {
         ]
       });
 
+      evaluate('(a).b.c', 1, {
+        a: {
+          b: {
+            c: 1
+          }
+        }
+      });
+
       evaluate('[ {x:1, y:2}, {x:2, y:3} ].y', [2, 3]);
 
     });

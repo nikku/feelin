@@ -1,0 +1,14 @@
+(a).b.c
+
+----------
+
+Expressions "(a).b.c"
+  PathExpression "(a).b.c"
+    PathExpression "(a).b"
+      ParenthesizedExpression "(a)"
+        ( "("
+        QualifiedName "a"
+          Name "a"
+        ) ")"
+      Name "b"
+    Name "c"

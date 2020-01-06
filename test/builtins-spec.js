@@ -253,6 +253,17 @@ describe('builtin functions', function() {
 
 
   // TODO(nikku): support this
+  describe.skip('Date and time', function() {
+
+    evaluate('is(date("2012-12-25"), time("23:00:50"))', false);
+    evaluate('is(date("2012-12-25"), date("2012-12-25"))', true);
+    evaluate('is(time("23:00:50z"), time("23:00:50"))', false);
+    evaluate('is(time("23:00:50z"), time("23:00:50+00:00"))', false);
+
+  });
+
+
+  // TODO(nikku): support this
   describe.skip('Range', function() {
 
   });

@@ -62,11 +62,37 @@ const names = [
   'odd',
   'even',
 
-  // 10.3.4.6 Sort
+  // 10.3.4.6 Date and time functions
+  'is',
+
+  // 10.3.4.7 Range Functions
+  'before',
+  'after',
+  'meets',
+  'met by',
+  'overlaps',
+  'overlaps before',
+  'overlaps after',
+  'finishes',
+  'finished by',
+  'includes',
+  'during',
+  'starts',
+  'started by',
+  'coincides',
+
+  // 10.3.4.8 Temporal built-in functions
+
+  'day of year',
+  'day of week',
+  'month of year',
+  'week of year',
+
+  // 10.3.4.9 Sort
 
   'sort',
 
-  // 10.3.2.6 Context
+  // 10.3.4.10 Context function
   'get value',
   'get entries'
 ];
@@ -76,19 +102,19 @@ const builtins = {
 
   // 10.3.4.1 Conversion functions
   'date': function() {
-    throw notImplemented();
+    throw notImplemented('date');
   },
 
   'date and time': function() {
-    throw notImplemented();
+    throw notImplemented('date and time');
   },
 
   'time': function() {
-    throw notImplemented();
+    throw notImplemented('time');
   },
 
   'number': function() {
-    throw notImplemented();
+    throw notImplemented('number');
   },
 
   'string': fn(function(obj) {
@@ -96,11 +122,11 @@ const builtins = {
   }, [ 'any' ]),
 
   'duration': function() {
-    throw notImplemented();
+    throw notImplemented('duration');
   },
 
   'years and months duration': function() {
-    throw notImplemented();
+    throw notImplemented('years and months duration');
   },
 
 
@@ -293,11 +319,11 @@ const builtins = {
   }, [ 'list', 'any' ]),
 
   'union': fn(function(...lists) {
-    throw notImplemented();
+    throw notImplemented('union');
   }, [ 'list' ]),
 
   'distinct values': fn(function(list) {
-    throw notImplemented();
+    throw notImplemented('distinct values');
   }, [ 'list' ]),
 
   'flatten': fn(function(list) {
@@ -311,15 +337,15 @@ const builtins = {
   }, 'number'),
 
   'median': listFn(function(numbers) {
-    throw notImplemented();
+    throw notImplemented('median');
   }, 'number'),
 
   'stddev': listFn(function(numbers) {
-    throw notImplemented();
+    throw notImplemented('stddev');
   }, 'number'),
 
   'mode': listFn(function(numbers) {
-    throw notImplemented();
+    throw notImplemented('mode');
   }, 'number'),
 
 
@@ -389,14 +415,99 @@ const builtins = {
   }, [ 'number' ]),
 
 
-  // 10.3.4.6 Sort
+  // 10.3.4.6 Date and time functions
+
+  'is': fn(function() {
+    throw notImplemented('is');
+  }, [ 'any?' ]),
+
+  // 10.3.4.7 Range Functions
+
+  'before': fn(function() {
+    throw notImplemented('before');
+  }, [ 'any?' ]),
+
+  'after': fn(function() {
+    throw notImplemented('after');
+  }, [ 'any?' ]),
+
+  'meets': fn(function() {
+    throw notImplemented('meets');
+  }, [ 'any?' ]),
+
+  'met by': fn(function() {
+    throw notImplemented('met by');
+  }, [ 'any?' ]),
+
+  'overlaps': fn(function() {
+    throw notImplemented('overlaps');
+  }, [ 'any?' ]),
+
+  'overlaps before': fn(function() {
+    throw notImplemented('overlaps before');
+  }, [ 'any?' ]),
+
+  'overlaps after': fn(function() {
+    throw notImplemented('overlaps after');
+  }, [ 'any?' ]),
+
+  'finishes': fn(function() {
+    throw notImplemented('finishes');
+  }, [ 'any?' ]),
+
+  'finished by': fn(function() {
+    throw notImplemented('finished by');
+  }, [ 'any?' ]),
+
+  'includes': fn(function() {
+    throw notImplemented('includes');
+  }, [ 'any?' ]),
+
+  'during': fn(function() {
+    throw notImplemented('during');
+  }, [ 'any?' ]),
+
+  'starts': fn(function() {
+    throw notImplemented('starts');
+  }, [ 'any?' ]),
+
+  'started by': fn(function() {
+    throw notImplemented('started by');
+  }, [ 'any?' ]),
+
+  'coincides': fn(function() {
+    throw notImplemented('coincides');
+  }, [ 'any?' ]),
+
+
+  // 10.3.4.8 Temporal built-in functions
+
+  'day of year': fn(function() {
+    throw notImplemented('day of year');
+  }, [ 'any?' ]),
+
+  'day of week': fn(function() {
+    throw notImplemented('day of week');
+  }, [ 'any?' ]),
+
+  'month of year': fn(function() {
+    throw notImplemented('month of year');
+  }, [ 'any?' ]),
+
+  'week of year': fn(function() {
+    throw notImplemented('week of year');
+  }, [ 'any?' ]),
+
+
+  // 10.3.4.9 Sort
 
   'sort': function() {
-    throw notImplemented();
+    throw notImplemented('sort');
   },
 
 
-  // 10.3.2.6 Context
+  // 10.3.4.10 Context function
+
   'get value': fn(function(context, value) {
     return value in context ? context[value] : null;
   }, [ 'context', 'string' ]),
@@ -556,6 +667,6 @@ function round(n) {
   }
 }
 
-function notImplemented() {
-  return new Error('not implemented');
+function notImplemented(fn) {
+  return new Error(`not implemented: ${fn}`);
 }

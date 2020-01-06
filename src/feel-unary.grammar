@@ -309,6 +309,25 @@ commaSep<Expr> {
     "exp" |
     "odd" |
     "even" |
+    "is" |
+    "before" |
+    "after" |
+    "meets" |
+    "met by" |
+    "overlaps" |
+    "overlaps before" |
+    "overlaps after" |
+    "finishes" |
+    "finished by" |
+    "includes" |
+    "during" |
+    "starts" |
+    "started by" |
+    "coincides" |
+    "day of year" |
+    "day of week" |
+    "month of year" |
+    "week of year" |
     "sort" |
     "get value" |
     "get entries"

@@ -627,6 +627,17 @@ describe('interpreter', function() {
   });
 
 
+  describe('implicit conversion', function() {
+
+    evaluate('3[item > 2]', [3]);
+
+    evaluate('contains(["foobar"], "of")', false);
+
+    evaluate('append("foo", "bar")', [ 'foo', 'bar' ]);
+
+  });
+
+
   describe('error handling', function() {
 
     it('should throw Error on syntax errors', function() {

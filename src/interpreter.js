@@ -500,22 +500,27 @@ function evalNode(node, input, args) {
   // expression !filter "[" expression "]"
   case 'FilterExpression': return (context) => {
 
-    const filterTarget = args[0](context);
+    const target = args[0](context);
 
     const filterFn = args[2];
+
+    const filterTarget = Array.isArray(target) ? target : [ target ];
+
+    // null[..]
+    if (target === null) {
+      return null;
+    }
 
     // a[1]
     if (filterFn.type === 'number') {
       const idx = filterFn(context);
 
-      if (!Array.isArray(filterTarget)) {
-        return filterTarget;
-      }
+      const value = filterTarget[idx < 0 ? filterTarget.length + idx : idx -1];
 
-      if (idx < 0) {
-        return filterTarget[filterTarget.length + idx] || null;
+      if (typeof value === 'undefined') {
+        return null;
       } else {
-        return filterTarget[idx - 1] || null;
+        return value;
       }
     }
 
@@ -524,7 +529,7 @@ function evalNode(node, input, args) {
       if (filterFn(context)) {
         return filterTarget;
       } else {
-        return Array.isArray(filterTarget) ? [] : null;
+        return Array.isArray(target) ? [] : null;
       }
     }
 

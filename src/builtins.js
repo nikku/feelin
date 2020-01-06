@@ -406,6 +406,8 @@ function matches(a, b) {
   return a === b;
 }
 
+const FALSE = {};
+
 function createArgTester(arg) {
   const optional = arg.endsWith('?');
 
@@ -413,25 +415,39 @@ function createArgTester(arg) {
 
   return function(obj) {
 
+    const arr = Array.isArray(obj);
+
+    if (type === 'list') {
+      if (arr || optional && typeof obj === 'undefined') {
+        return obj;
+      } else {
+
+        // implicit conversion obj => [ obj ]
+        return [ obj ];
+      }
+    }
+
+    if (arr && obj.length === 1) {
+
+      // implicit conversion [ obj ] => obj
+      obj = obj[0];
+    }
+
     const objType = typeof obj;
 
     if (obj === null || objType === 'undefined') {
-      return optional;
-    }
-
-    if (type === 'list') {
-      return Array.isArray(obj);
+      return (optional ? obj : FALSE);
     }
 
     if (type === 'context') {
-      return objType === 'object';
+      return objType === 'object' ? obj : FALSE;
     }
 
     if (type !== 'any' && objType !== type) {
-      return false;
+      return FALSE;
     }
 
-    return true;
+    return obj;
   };
 }
 
@@ -440,9 +456,26 @@ function createArgsValidator(argDefinitions) {
   const tests = argDefinitions.map(createArgTester);
 
   return function(args) {
-    return tests.every((test, index) => {
-      return test(args[index]);
-    });
+
+    return args.reduce((result, arg, index) => {
+
+      if (result === false) {
+        return result;
+      }
+
+      const test = tests[index];
+
+      const conversion = test ? test(arg) : arg;
+
+      if (conversion === FALSE) {
+        return false;
+      }
+
+      result.push(conversion);
+
+      return result;
+    }, []);
+
   };
 }
 
@@ -461,7 +494,7 @@ function listFn(fnDefinition, type) {
       args = args[0];
     }
 
-    if (!args.every(tester)) {
+    if (!args.every(arg => tester(arg) !== FALSE)) {
       return null;
     }
 
@@ -471,15 +504,17 @@ function listFn(fnDefinition, type) {
 
 function fn(fnDefinition, argDefinitions) {
 
-  const validArgs = createArgsValidator(argDefinitions);
+  const checkArgs = createArgsValidator(argDefinitions);
 
   return function(...args) {
 
-    if (!validArgs(args)) {
+    const convertedArgs = checkArgs(args);
+
+    if (!convertedArgs) {
       return null;
     }
 
-    return fnDefinition(...args);
+    return fnDefinition(...convertedArgs);
   };
 }
 

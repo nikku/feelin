@@ -115,15 +115,17 @@ const builtins = {
 
     const _start = (start < 0 ? str.length + start : start - 1);
 
+    const arr = Array.from(str);
+
     return (
       arguments.length === 3
-        ? str.substring(_start, _start + length)
-        : str.substring(_start)
-    );
+        ? arr.slice(_start, _start + length)
+        : arr.slice(_start)
+    ).join('');
   }, [ 'string', 'number', 'number?' ]),
 
   'string length': fn(function(str) {
-    return str.length;
+    return countSymbols(str);
   }, [ 'string' ]),
 
   'upper case': fn(function(str) {
@@ -157,7 +159,7 @@ const builtins = {
   }, [ 'string', 'string' ]),
 
   'replace': fn(function(str, pattern, replacement) {
-    return str.replace(new RegExp(pattern), replacement);
+    return str.replace(new RegExp(pattern, 'u'), replacement);
   }, [ 'string', 'string', 'string' ]),
 
   'contains': fn(function(str, match) {
@@ -173,7 +175,7 @@ const builtins = {
   }, [ 'string', 'string' ]),
 
   'split': fn(function(str, separator) {
-    return str.split(new RegExp(separator));
+    return str.split(new RegExp(separator, 'u'));
   }, [ 'string', 'string' ]),
 
 
@@ -535,6 +537,12 @@ function flatten([x,...xs]) {
       ? [...Array.isArray(x) ? flatten(x) : [x],...flatten(xs)]
       : []
   );
+}
+
+function countSymbols(str) {
+
+  // cf. https://mathiasbynens.be/notes/javascript-unicode
+  return str.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '_').length;
 }
 
 function round(n) {

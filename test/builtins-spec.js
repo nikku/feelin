@@ -188,6 +188,8 @@ describe('builtin functions', function() {
     evaluateSkip('median( [ ] )', null);
 
     evaluateSkip('stddev( 2, 4, 7, 5 )', 2.0816659994661);
+    evaluateSkip('stddev( [ 47 ] )', null);
+    evaluateSkip('stddev( 47 )', null);
     evaluateSkip('stddev( [ ] )', null);
 
     evaluateSkip('mode( 6, 3, 9, 6, 6 )', [ 6 ]);
@@ -215,7 +217,18 @@ describe('builtin functions', function() {
     evaluate('abs( 10 )', 10);
     evaluate('abs( -10 )', 10);
 
+    // TODO(nikku): support this
+    evaluateSkip('abs(@"PT5H") = @"PT5H"', true);
+    evaluateSkip('abs(@"-PT5H") = @"PT5H"', true);
+
     evaluate('modulo( 12, 5 )', 2);
+    evaluate('modulo(-12,5)', 3);
+    evaluate('modulo(12,-5)', -3);
+    evaluate('modulo(-12,-5)', -2);
+    evaluate('modulo(10.1, 4.5)', 1.1);
+    evaluate('modulo(-10.1, 4.5)', 3.4);
+    evaluate('modulo(10.1, -4.5)', -3.4);
+    evaluate('modulo(-10.1, -4.5)', -1.1);
 
     evaluate('sqrt( 16 )', 4);
     evaluate('sqrt( -3 )', null);
@@ -233,6 +246,19 @@ describe('builtin functions', function() {
   });
 
 
+  // TODO(nikku): support this
+  describe.skip('Range', function() {
+
+  });
+
+
+  // TODO(nikku): support this
+  describe.skip('Temporal', function() {
+
+  });
+
+
+  // TODO(nikku): support this
   describe.skip('Sort', function() {
 
     evaluate('sort()', null);
@@ -242,12 +268,17 @@ describe('builtin functions', function() {
 
   describe('Context', function() {
 
-    evaluate('get value({key1: "value1"}, "key1")', 'value1');
+    evaluate('get value({key1 : "value1"}, "key1")', 'value1');
+    evaluate('get value({key1 : "value1"}, "unexistent-key")', null);
 
     // TODO(nikku): this should work, according to spec
     // evaluate('get entries({key1: "value1"})[key="key1"].value', 'value1');
 
     evaluate('get entries({key1: "value1"})', [ { key: 'key1', value: 'value1' } ]);
+    evaluate('get entries({key1 : "value1", key2 : "value2"})', [
+      { key : 'key1', value : 'value1' },
+      { key : 'key2', value : 'value2' }
+    ]);
 
   });
 

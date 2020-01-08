@@ -210,9 +210,12 @@ describe('builtin functions', function() {
     evaluate('decimal(1/3, 2)', .33);
     evaluate('decimal(1.5, 0)', 1);
 
-    // TODO(nikku): according to spec
+    // TODO(nikku): according to the DMN spec half-even
+    // rounding should be used
     // evaluate('decimal(1.5, 0)', 2);
-    evaluate('decimal(2.5, 0)', 2);
+    evaluateSkip('decimal(2.5, 0)', 2);
+    evaluate('decimal(0.505, 2)', 0.50);
+    evaluateSkip('decimal(0.515, 2)', 0.52);
 
     evaluate('floor(1.5)', 1);
     evaluate('floor(-1.5)', -2);

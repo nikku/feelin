@@ -10,7 +10,9 @@ import { builtins } from './builtins';
 
 import { NodeProp } from 'lezer';
 
+
 function Interpreter() {
+
 
   this.parseName = (name) => {
 
@@ -584,7 +586,7 @@ function evalNode(node, input, args) {
 
   case 'Interval': return (context) => {
 
-    const interval = new Interval(args[0], args[1](context), args[2](context), args[3]);
+    const interval = createInterval(args[0], args[1](context), args[2](context), args[3]);
 
     return (a) => {
       const left = a(context);
@@ -787,15 +789,20 @@ function Test(type) {
   return `Test<${type}>`;
 }
 
-function Interval(start, startValue, endValue, end) {
+function createInterval(start, startValue, endValue, end) {
 
-  const exclusiveStart = [ '(', ']' ].includes(start);
-  const exclusiveEnd = [ ')', '[' ].includes(end);
+  const inclusiveStart = start === '[';
+  const inclusiveEnd = end === ']';
+
+  return new Interval(startValue, endValue, inclusiveStart, inclusiveEnd);
+}
+
+function Interval(startValue, endValue, inclusiveStart, inclusiveEnd) {
 
   const direction = Math.sign(endValue - startValue);
 
-  const rangeStart = (exclusiveStart ? direction : 0) + startValue;
-  const rangeEnd = (exclusiveEnd ? -direction : 0) + endValue;
+  const rangeStart = (inclusiveStart ? 0 : direction * 0.000001) + startValue;
+  const rangeEnd = (inclusiveEnd ? 0 : -direction * 0.000001) + endValue;
 
   const realStart = Math.min(rangeStart, rangeEnd);
   const realEnd = Math.max(rangeStart, rangeEnd);

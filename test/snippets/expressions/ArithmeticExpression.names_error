@@ -3,9 +3,10 @@ Student's name + " is " + Graduation DT + " with grade: " + Grade + " and evalua
 ----------
 
 Expressions "Student's name + " is " + Graduation DT + " with grade: " + Grade + " and evaluation: " + Teacher's Evaluation"
-  QualifiedName "Student's"
+  QualifiedName "Student'"
     Name "Student"
     ⚠ "'"
+  QualifiedName "s"
     Name "s"
   ArithmeticExpression "name + " is " + Graduation"
     ArithmeticExpression "name + " is ""

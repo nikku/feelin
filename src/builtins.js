@@ -512,11 +512,25 @@ const builtins = {
 
   // 10.3.4.10 Context function
 
-  'get value': fn(function(context, value) {
-    return value in context ? context[value] : null;
+  'get value': fn(function(context, key) {
+
+    if (arguments.length !== 2) {
+      return null;
+    }
+
+    if (!context) {
+      return null;
+    }
+
+    return key in context ? context[key] : null;
+
   }, [ 'context', 'string' ]),
 
   'get entries': fn(function(context) {
+
+    if (arguments.length !== 1) {
+      return null;
+    }
 
     if (Array.isArray(context)) {
       return null;

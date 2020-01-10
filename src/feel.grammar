@@ -100,7 +100,7 @@ Comparison {
 }
 
 SimplePositiveUnaryTest {
-  CompareOp<">" | ">=" | "<" | "<="> endpoint |
+  CompareOp<">" | ">=" | "<" | "<="> expression |
   Interval
 }
 
@@ -261,14 +261,12 @@ commaSep<Expr> {
   Wildcard { "-" }
 
   NumericLiteral {
-    "-"? (Digits ("." Digits)? | "." Digits)
+    (Digits ("." Digits)? | "." Digits)
   }
 
   BooleanLiteral {
     "true" | "false"
   }
-
-  not[name="not"] { "not" }
 
   instanceOf {
     "instance of"
@@ -294,7 +292,7 @@ commaSep<Expr> {
     "string" |
     "duration" |
     "years and months duration" |
-    not |
+    "not" |
     "substring" |
     "string length" |
     "upper case" |
@@ -365,7 +363,6 @@ commaSep<Expr> {
   @precedence { BlockComment, LineComment, divide }
 
   @precedence {
-    not,
     BuiltInFunctionName,
     Name
   }
@@ -376,7 +373,6 @@ commaSep<Expr> {
   }
 
   @precedence {
-    not,
     BooleanLiteral,
     NumericLiteral,
     instanceOf,

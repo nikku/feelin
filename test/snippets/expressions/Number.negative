@@ -3,4 +3,6 @@
 ----------
 
 Expressions "-1"
-  NumericLiteral "-1"
+  ArithmeticExpression "-1"
+    ArithOp "-"
+    NumericLiteral "1"

@@ -110,6 +110,7 @@ describe('builtin functions', function() {
 
     evaluate('replace("abracadabra","bra","*")', 'a*cada*');
     evaluate('replace("facetiously","[iouy]","[$0]")', 'facet[i][o][u]sl[y]');
+    evaluate('replace("abc","[A-Z]","#", "i")', '###');
 
     evaluate('contains("foobar", "of")', false);
     evaluate('contains("foobar", "ob")', true);

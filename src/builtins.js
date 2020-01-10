@@ -117,8 +117,12 @@ const builtins = {
     throw notImplemented('number');
   },
 
-  'string': fn(function(obj) {
-    return String(obj);
+  'string': fn(function(obj, b) {
+    if (arguments.length !== 1) {
+      return null;
+    }
+
+    return toString(obj);
   }, [ 'any' ]),
 
   'duration': function() {
@@ -653,6 +657,41 @@ function flatten([x,...xs]) {
       ? [...Array.isArray(x) ? flatten(x) : [x],...flatten(xs)]
       : []
   );
+}
+
+function toKeyString(key) {
+  if (/\W/.test(key)) {
+    return toString(key, true);
+  }
+
+  return key;
+}
+
+function toDeepString(obj) {
+  return toString(obj, true);
+}
+
+function toString(obj, wrap) {
+
+  if (obj === null) {
+    return 'null';
+  }
+
+  if (typeof obj === 'string') {
+    return (wrap && '"' || '') + obj + (wrap && '"' || '');
+  }
+
+  if (typeof obj === 'boolean' || typeof obj === 'number') {
+    return String(obj);
+  }
+
+  if (Array.isArray(obj)) {
+    return '[' + obj.map(toDeepString).join(', ') + ']';
+  }
+
+  return '{' + Object.entries(obj).map((entry, idx) => {
+    return toKeyString(entry[0]) + ': ' + toDeepString(entry[1]);
+  }).join(', ') + '}';
 }
 
 function countSymbols(str) {

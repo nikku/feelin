@@ -52,7 +52,40 @@ describe('builtin functions', function() {
 
     evaluate('string(1.1)', '1.1');
     evaluate('string(null)', null);
+    evaluate('string("foo")', 'foo');
+    evaluate('string(123.45)', '123.45');
+    evaluate('string(true)', 'true');
+    evaluate('string(false)', 'false');
     evaluateSkip('string(date("2012-12-25"))', '2012-12-25');
+
+    evaluateSkip('string(date("2018-12-10"))', '2018-12-10');
+    evaluateSkip('string(date and time("2018-12-10"))', '2018-12-10T00:00:00');
+    evaluateSkip('string(date and time("2018-12-10T10:30:00.0001"))', '2018-12-10T10:30:00.0001');
+    evaluateSkip('string(date and time("2018-12-10T10:30:00.0001+05:00:01"))', '2018-12-10T10:30:00.0001+05:00:01');
+    evaluateSkip('string(date and time("2018-12-10T10:30:00@Etc/UTC"))', '2018-12-10T10:30:00@Etc/UTC');
+    evaluateSkip('string(time("10:30:00.0001"))', '10:30:00.0001');
+    evaluateSkip('string(time("10:30:00.0001+05:00:01"))', '10:30:00.0001+05:00:01');
+    evaluateSkip('string(time("10:30:00@Etc/UTC"))', '10:30:00@Etc/UTC');
+    evaluateSkip('string(duration("P1D"))', 'P1D');
+    evaluateSkip('string(duration("-P1D"))', '-P1D');
+    evaluateSkip('string(duration("P0D"))', 'PT0S');
+    evaluateSkip('string(duration("P1DT2H3M4.1234S"))', 'P1DT2H3M4.1234S');
+    evaluateSkip('string(duration("PT49H"))', 'P2DT1H');
+    evaluateSkip('string(duration("P1Y"))', 'P1Y');
+    evaluateSkip('string(duration("-P1Y"))', '-P1Y');
+    evaluateSkip('string(duration("P0Y"))', 'P0M');
+    evaluateSkip('string(duration("P1Y2M"))', 'P1Y2M');
+    evaluateSkip('string(duration("P25M"))', 'P2Y1M');
+    evaluate('string([1,2,3,"foo"])', '[1, 2, 3, "foo"]');
+    evaluate('string([1,2,3,[4,5,"foo"]])', '[1, 2, 3, [4, 5, "foo"]]');
+    evaluateSkip('string(["\\"foo\\""])', '["\\"foo\\"]');
+    evaluate('string({a: "foo"})', '{a: "foo"}');
+    evaluate('string({a: "foo", b: {bar: "baz"}})', '{a: "foo", b: {bar: "baz"}}');
+    evaluate('string({"{": "foo"})', '{"{": "foo"}');
+    evaluate('string({":": "foo"})', '{":": "foo"}');
+    evaluate('string({",": "foo"})', '{",": "foo"}');
+    evaluate('string({"}": "foo"})', '{"}": "foo"}');
+    evaluateSkip('string({"\\"": "foo"})', '{"\\": "foo"}');
 
     evaluateSkip(`
       date and time("2012-12-24T23:59:00") -

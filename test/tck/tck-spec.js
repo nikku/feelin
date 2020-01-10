@@ -12,6 +12,9 @@ import {
 import { interpreter } from '../../src/interpreter';
 
 
+const NOT_IMPLEMENTED = {};
+
+
 describe('tck', function() {
 
   const suitePaths = glob('tmp/dmn-tck/*/*.json');
@@ -24,11 +27,29 @@ describe('tck', function() {
 
       for (const [ _, c ] of Object.entries(suite.cases)) {
 
-        const expression = c.expression;
-        const expectedValue = c.resultNode.expected;
+        let iit = it;
 
-        it(`${c.name}   ${expression} === ${expectedValue}`, function() {
-          expect(interpreter.evaluate(expression)).to.eql(interpreter.evaluate(expectedValue));
+        const expression = c.expression;
+        const expectedValue = c.resultNode.value;
+
+        const a = tryEval(expression);
+        const b = tryEval(expectedValue);
+
+        if (a === NOT_IMPLEMENTED || b === NOT_IMPLEMENTED) {
+          iit = it.skip;
+        }
+
+        iit(`${c.name}   ${expression} === ${expectedValue}`, function() {
+
+          if (a instanceof Error) {
+            expect(a).not.to.exist;
+          }
+
+          if (b instanceof Error) {
+            expect(b).not.to.exist;
+          }
+
+          expect(a).to.eql(b);
         });
 
       }
@@ -38,3 +59,16 @@ describe('tck', function() {
   }
 
 });
+
+
+function tryEval(expr) {
+  try {
+    return interpreter.evaluate(expr);
+  } catch (err) {
+    if (err.message.startsWith('not implemented')) {
+      return NOT_IMPLEMENTED;
+    }
+
+    return new Error(err.message);
+  }
+}

@@ -513,6 +513,11 @@ const builtins = {
   }, [ 'context', 'string' ]),
 
   'get entries': fn(function(context) {
+
+    if (Array.isArray(context)) {
+      return null;
+    }
+
     return Object.entries(context).map(([key, value]) => ({ key, value }));
   }, [ 'context' ]),
 };

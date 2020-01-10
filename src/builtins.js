@@ -185,7 +185,7 @@ const builtins = {
   }, [ 'string', 'string' ]),
 
   'replace': fn(function(str, pattern, replacement) {
-    return str.replace(new RegExp(pattern, 'ug'), replacement);
+    return str.replace(new RegExp(pattern, 'ug'), replacement.replace(/\$0/g, '$$&'));
   }, [ 'string', 'string', 'string' ]),
 
   'contains': fn(function(str, match) {

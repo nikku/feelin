@@ -108,6 +108,8 @@ describe('builtin functions', function() {
     evaluate('replace("abcd", "(ab)|(a)", "[1=$1][2=$2]")', '[1=ab][2=]cd');
     evaluate('replace("ab🐎cd", "(b.c)", "___")', 'a___d');
 
+    evaluate('replace("abracadabra","bra","*")', 'a*cada*');
+
     evaluate('contains("foobar", "of")', false);
     evaluate('contains("foobar", "ob")', true);
 

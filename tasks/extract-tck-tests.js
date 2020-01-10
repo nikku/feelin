@@ -96,7 +96,7 @@ function parseModelFile(file) {
 
     text(value, decodeEntities) {
       if (text) {
-        expression.text += decodeEntities(value).trim();
+        expression.text += decodeEntities(value);
       }
     },
 
@@ -143,13 +143,20 @@ function parseTestFile(file) {
 
   let modelName;
 
-  let expected;
+  let record;
+
+  let node;
 
   let context;
 
   let stackDepth;
 
   function isType(type) {
+
+    if (!context) {
+      return false;
+    }
+
     const ctx = context[context.length - 1];
 
     return ctx && ctx.type === type;
@@ -172,11 +179,11 @@ function parseTestFile(file) {
       throw new Error('no context');
     }
 
-    return (ctx.children || []).length;
+    return (ctx.children || []);
   }
 
   function addToken(token) {
-    expected.push(token);
+    record.push(token);
   }
 
   function addDelimiters(type, openDelimiter, closeDelimiter) {
@@ -224,8 +231,25 @@ function parseTestFile(file) {
 
       if (el.name === 'test:testCase') {
         testCase = {
-          name: el.attrs.id
+          name: el.attrs.id,
+          inputNodes: []
         };
+
+        return;
+      }
+
+      if (el.name === 'test:inputNode') {
+        node = {
+          name: el.attrs.name
+        };
+
+        testCase.inputNodes.push(node);
+      }
+
+      if (el.name === 'test:expected' || el.name == 'test:inputNode') {
+        record = [];
+        context = [];
+        stackDepth = 0;
 
         return;
       }
@@ -234,7 +258,7 @@ function parseTestFile(file) {
 
         test.cases[el.attrs.name] = testCase;
 
-        testCase.resultNode = {
+        node = testCase.resultNode = {
           name: el.attrs.name,
           type: el.attrs.type
         };
@@ -242,17 +266,17 @@ function parseTestFile(file) {
         return;
       }
 
-      if (expected) {
+      if (record) {
+
+        if (el.name === 'test:component') {
+          if (!isType('context')) {
+            addDelimiters('context', '{', '}');
+          } else {
+            addToken(', ');
+          }
+        }
 
         stackDepth++;
-
-        if (el.attrs['xsi:nil'] === 'true') {
-          return addToken('null');
-        }
-
-        if (el.name === 'test:list') {
-          return addDelimiters('list', '[', ']');
-        }
 
         if (el.name === 'test:item') {
 
@@ -263,10 +287,22 @@ function parseTestFile(file) {
           return addChild({});
         }
 
+        if (el.attrs['xsi:nil'] === 'true') {
+          return addToken('null');
+        }
+
+        if (el.name === 'test:list') {
+          return addDelimiters('list', '[', ']');
+        }
+
         if (el.name === 'test:value') {
 
           if (el.attrs['xsi:type'].endsWith(':string')) {
             return addDelimiters('string', '"', '"');
+          }
+
+          if (el.attrs['xsi:type'].endsWith(':decimal')) {
+            return openElement('decimal');
           }
 
           if (el.attrs['xsi:type'].endsWith(':dateTime')) {
@@ -275,6 +311,10 @@ function parseTestFile(file) {
 
           if (el.attrs['xsi:type'].endsWith(':date')) {
             return addTypeDelimiters('date', '("', '")');
+          }
+
+          if (el.attrs['xsi:type'].endsWith(':boolean')) {
+            return openElement('boolean');
           }
 
           if (el.attrs['xsi:type'].endsWith(':duration')) {
@@ -289,12 +329,6 @@ function parseTestFile(file) {
 
         if (el.name === 'test:component') {
 
-          if (!isType('context')) {
-            addDelimiters('context', '{', '}');
-          } else {
-            addToken(', ');
-          }
-
           openElement('entry');
 
           return addToken(`"${el.attrs.name}":`);
@@ -302,17 +336,11 @@ function parseTestFile(file) {
 
       }
 
-      if (el.name === 'test:expected') {
-        expected = [];
-        context = [];
-        stackDepth = 0;
-      }
-
     },
 
     text(value, decodeEntities) {
 
-      if (!value.trim()) {
+      if (!isType('string') && !value.trim()) {
         return;
       }
 
@@ -320,11 +348,10 @@ function parseTestFile(file) {
         test.modelName = decodeEntities(value);
       }
 
-      if (expected) {
-
+      if (record) {
         const token = decodeEntities(value);
 
-        addToken(isType('string') ? token.replace(/"/g, '\\"') : token);
+        addToken(isType('string') ? token.replace(/\\/g, '\\\\').replace(/"/g, '\\"') : token);
       }
     },
 
@@ -336,21 +363,22 @@ function parseTestFile(file) {
         return;
       }
 
-      if (expected) {
+      if (record) {
         stackDepth--;
 
         closeElement(stackDepth);
       }
 
-      if (el.name === 'test:expected') {
-        testCase.resultNode.expected = expected.join('');
-        expected = null;
+      if (el.name === 'test:expected' || el.name == 'test:inputNode') {
+        closeElement(stackDepth);
+
+        node.value = record.join('').trim();
+        record = null;
         context = null;
         stackDepth = -1;
 
         return;
       }
-
 
     }
   });

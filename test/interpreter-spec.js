@@ -434,6 +434,13 @@ describe('interpreter', function() {
     });
 
 
+    describe('DateTime', function() {
+
+      evaluate('date and time()', null);
+
+    });
+
+
     describe('Name', function() {
 
       evaluate('a + b', 1, { 'a + b': 1 });

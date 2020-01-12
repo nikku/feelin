@@ -156,6 +156,13 @@ Key {
   StringLiteral
 }
 
+DateTimeConstructor {
+  ckw<"date"> Parameters |
+  ckw<"time"> Parameters |
+  DateAndTime Parameters |
+  ckw<"duration"> Parameters
+}
+
 FunctionInvocation {
   (expression | SpecialFunctionName) !call Parameters
 }
@@ -189,7 +196,8 @@ literal {
 simpleLiteral {
   NumericLiteral |
   StringLiteral |
-  BooleanLiteral
+  BooleanLiteral |
+  DateTimeLiteral
 }
 
 QualifiedName {
@@ -213,11 +221,10 @@ SpecialParameterName {
 SpecialType {
   ckw<"days"> kw<"and"> ckw<"time"> ckw<"duration"> |
   ckw<"years"> kw<"and"> ckw<"months"> ckw<"duration"> |
-  ckw<"date"> kw<"and"> ckw<"time">
+  DateAndTime
 }
 
 SpecialFunctionName {
-  ckw<"date"> kw<"and"> ckw<"time"> |
   ckw<"years"> kw<"and"> ckw<"months"> ckw<"duration"> |
   ckw<"string"> ckw<"length"> |
   ckw<"upper"> ckw<"case"> |
@@ -241,6 +248,10 @@ SpecialFunctionName {
   ckw<"week"> ckw<"of"> ckw<"year"> |
   ckw<"get"> ckw<"value"> |
   ckw<"get"> ckw<"entries">
+}
+
+DateTimeLiteral {
+  DateTimeConstructor
 }
 
 kw<Term> {
@@ -298,6 +309,10 @@ commaSep<Expr> {
 
   Wildcard { "-" }
 
+  DateAndTime {
+    "date" whitespace "and" whitespace "time"
+  }
+
   NumericLiteral {
     (Digits ("." Digits)? | "." Digits)
   }
@@ -311,6 +326,7 @@ commaSep<Expr> {
   @precedence {
     BooleanLiteral,
     NumericLiteral,
+    DateAndTime,
     Name
   }
 

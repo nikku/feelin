@@ -375,6 +375,21 @@ function evalNode(node, input, args) {
 
   case 'PositionalParameters': return (context) => args;
 
+  case 'DateTimeLiteral': return args[0];
+
+  case 'DateTimeConstructor': return (context) => {
+
+    const _name = args[0];
+
+    const name = _name === 'DateAndTime' ? 'date and time' : _name;
+
+    const fn = getBuiltin(name);
+
+    const fnArgs = args[1](context).map(fn => fn(context));
+
+    return fn(...fnArgs);
+  };
+
   case 'FunctionInvocation': return (context) => {
 
     const fn = args[0](context);

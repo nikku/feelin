@@ -15,7 +15,8 @@
   or @left,
   unaryTest @cut,
   then @left,
-  else @left
+  else @left,
+  paren
 }
 
 @top[name=Expressions] {
@@ -63,7 +64,7 @@ textualExpression {
   QualifiedName ~qname /* TODO(nikku): should be name according to spec */ |
   kw<"?"> |
   SimplePositiveUnaryTest |
-  ParenthesizedExpression { "(" expression ")" }
+  ParenthesizedExpression { "(" expression !paren ")" }
 }
 
 boxedExpression {
@@ -96,7 +97,7 @@ Comparison {
   expression !compare CompareOp<">" | ">=" | "<" | "<="> expression |
   expression !compare kw<"between"> expression kw<"and"> expression |
   expression !compare kw<"in"> PositiveUnaryTest |
-  expression !compare kw<"in"> !unaryTest "(" PositiveUnaryTests ")"
+  expression !compare kw<"in"> "(" PositiveUnaryTests ")"
 }
 
 SimplePositiveUnaryTest {

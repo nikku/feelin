@@ -1,0 +1,22 @@
+a in (((1..3)))
+
+----------
+
+Expressions "a in (((1..3)))"
+  Comparison "a in (((1..3)))"
+    QualifiedName "a"
+      Name "a"
+    in "in"
+    PositiveUnaryTest "(((1..3)))"
+      ParenthesizedExpression "(((1..3)))"
+        ( "("
+        ParenthesizedExpression "((1..3))"
+          ( "("
+          SimplePositiveUnaryTest "(1..3)"
+            Interval "(1..3)"
+              ( "("
+              NumericLiteral "1"
+              NumericLiteral "3"
+              ) ")"
+          ) ")"
+        ) ")"

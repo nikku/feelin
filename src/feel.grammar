@@ -204,7 +204,9 @@ List {
 }
 
 SpecialParameterName {
-  ckw<"start"> ckw<"position">
+  ckw<"start"> ckw<"position"> |
+  ckw<"decimal"> (ckw<"sep"> | ckw<"separator">) |
+  ckw<"grouping"> (ckw<"sep"> | ckw<"separator">)
 }
 
 SpecialType {

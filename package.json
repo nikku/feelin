@@ -48,6 +48,7 @@
     "test:watch": "npm test -- -w",
     "tck": "run-s tck:extract tck:test",
     "tck:extract": "node tasks/extract-tck-tests.js ../dmn-tck",
-    "tck:test": "mocha -r esm test/tck/*.js"
+    "tck:test": "mocha -r esm test/tck/*.js",
+    "grammars": "mocha -r esm test/grammar/*.js"
   }
 }

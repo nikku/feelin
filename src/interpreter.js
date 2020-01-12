@@ -301,9 +301,9 @@ function evalNode(node, input, args) {
 
   case 'Key': return args[0];
 
-  case 'BuiltInFunctionName': return (context) => builtins[input];
+  case 'SpecialFunctionName': return (context) => getBuiltin(input, context);
 
-  case 'QualifiedName': return (context) => getFromContext(args.join('.'), context);
+  case 'QualifiedName': return (context) => getBuiltin(args.join('.'), context) || getFromContext(args.join('.'), context);
 
   case '?': return (context) => getFromContext('?', context);
 
@@ -347,7 +347,7 @@ function evalNode(node, input, args) {
   case 'InstanceOf': return tag((context) => {
 
     const a = args[0](context);
-    const b = args[1](context);
+    const b = args[3](context);
 
     return a instanceof b;
   }, Test('boolean'));
@@ -664,6 +664,10 @@ function evalNode(node, input, args) {
 
   default: return node.name;
   }
+}
+
+function getBuiltin(name, context) {
+  return builtins[name];
 }
 
 function getFromContext(variable, context) {

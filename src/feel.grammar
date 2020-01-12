@@ -33,13 +33,13 @@ textualExpressions {
 
 textualExpression {
   ForExpression {
-    kw<"for"> InExpressions<IterationContext> kw<"return"> expression
+    kw<"for"> InExpressions<IterationContext> ckw<"return"> expression
   } |
   IfExpression {
     kw<"if"> expression !then kw<"then"> expression (!else kw<"else"> expression)?
   } |
   QuantifiedExpression {
-    (kw<"some"> | kw<"every">) InExpressions<expression> kw<"satisfies"> expression
+    (kw<"some"> | kw<"every">) InExpressions<expression> ckw<"satisfies"> expression
   } |
   Disjunction {
     expression !or kw<"or"> expression
@@ -50,7 +50,7 @@ textualExpression {
   Comparison |
   ArithmeticExpression |
   InstanceOf {
-    expression !instanceOf instanceOf Type
+    expression !instanceOf kw<"instance"> ckw<"of"> Type
   } |
   PathExpression {
     expression !path "." Name
@@ -128,9 +128,9 @@ FormalParameter {
 
 Type {
   QualifiedName |
-  BuiltInType |
-  ListType { kw<"list"> !type "<" Type !type ">" } |
-  ContextType { kw<"context"> !type "<" commaSep1<ContextEntryType> !type ">" } |
+  SpecialType |
+  ListType { ckw<"list"> !type "<" Type !type ">" } |
+  ContextType { ckw<"context"> !type "<" commaSep1<ContextEntryType> !type ">" } |
   FunctionType { kw<"function"> !type "<" commaSep<ArgumentType> !type ">" "->" Type }
 }
 
@@ -156,7 +156,7 @@ Key {
 }
 
 FunctionInvocation {
-  (BuiltInFunctionName | expression) !call Parameters
+  (expression | SpecialFunctionName) !call Parameters
 }
 
 Parameters {
@@ -168,7 +168,7 @@ NamedParameters {
 }
 
 ParameterName {
-  Name
+  Name | SpecialParameterName
 }
 
 PositionalParameters {
@@ -203,15 +203,50 @@ List {
   "[" ~interval commaSep<expression> "]"
 }
 
+SpecialParameterName {
+  ckw<"start"> ckw<"position">
+}
+
+SpecialType {
+  ckw<"days"> kw<"and"> ckw<"time"> ckw<"duration"> |
+  ckw<"years"> kw<"and"> ckw<"months"> ckw<"duration"> |
+  ckw<"date"> kw<"and"> ckw<"time">
+}
+
+SpecialFunctionName {
+  ckw<"date"> kw<"and"> ckw<"time"> |
+  ckw<"years"> kw<"and"> ckw<"months"> ckw<"duration"> |
+  ckw<"string"> ckw<"length"> |
+  ckw<"upper"> ckw<"case"> |
+  ckw<"lower"> ckw<"case"> |
+  ckw<"substring"> ckw<"before"> |
+  ckw<"substring"> ckw<"after"> |
+  ckw<"starts"> ckw<"with"> |
+  ckw<"ends"> ckw<"with"> |
+  ckw<"list"> ckw<"contains"> |
+  ckw<"insert"> ckw<"before"> |
+  ckw<"index"> ckw<"of"> |
+  ckw<"distinct"> ckw<"values"> |
+  ckw<"met"> ckw<"by"> |
+  ckw<"overlaps"> ckw<"before"> |
+  ckw<"overlaps"> ckw<"after"> |
+  ckw<"finished"> ckw<"by"> |
+  ckw<"started"> ckw<"by"> |
+  ckw<"day"> ckw<"of"> ckw<"year"> |
+  ckw<"day"> ckw<"of"> ckw<"week"> |
+  ckw<"month"> ckw<"of"> ckw<"year"> |
+  ckw<"week"> ckw<"of"> ckw<"year"> |
+  ckw<"get"> ckw<"value"> |
+  ckw<"get"> ckw<"entries">
+}
+
 kw<Term> {
   @specialize[name={Term}]<Name, Term>
 }
 
-/*
 ckw<Term> {
   @extend[name={Term}]<Name, Term>
 }
-*/
 
 commaSep1<Expr> {
   Expr ("," Expr)*
@@ -268,114 +303,11 @@ commaSep<Expr> {
     "true" | "false"
   }
 
-  instanceOf {
-    "instance of"
-  }
-
-  BuiltInType {
-    "number" |
-    "string" |
-    "boolean" |
-    "days and time duration" |
-    "years and months duration" |
-    "date" |
-    "time" |
-    "date and time" |
-    "range"
-  }
-
-  BuiltInFunctionName {
-    "date" |
-    "date and time" |
-    "time" |
-    "number" |
-    "string" |
-    "duration" |
-    "years and months duration" |
-    "not" |
-    "substring" |
-    "string length" |
-    "upper case" |
-    "lower case" |
-    "substring before" |
-    "substring after" |
-    "replace" |
-    "contains" |
-    "starts with" |
-    "ends with" |
-    "split" |
-    "list contains" |
-    "count" |
-    "min" |
-    "max" |
-    "sum" |
-    "mean" |
-    "all" |
-    "any" |
-    "sublist" |
-    "append" |
-    "concatenate" |
-    "insert before" |
-    "remove" |
-    "reverse" |
-    "index of" |
-    "union" |
-    "distinct values" |
-    "flatten" |
-    "product" |
-    "median" |
-    "stddev" |
-    "mode" |
-    "decimal" |
-    "floor" |
-    "ceiling" |
-    "abs" |
-    "modulo" |
-    "sqrt" |
-    "log" |
-    "exp" |
-    "odd" |
-    "even" |
-    "is" |
-    "before" |
-    "after" |
-    "meets" |
-    "met by" |
-    "overlaps" |
-    "overlaps before" |
-    "overlaps after" |
-    "finishes" |
-    "finished by" |
-    "includes" |
-    "during" |
-    "starts" |
-    "started by" |
-    "coincides" |
-    "day of year" |
-    "day of week" |
-    "month of year" |
-    "week of year" |
-    "sort" |
-    "get value" |
-    "get entries"
-  }
-
   @precedence { BlockComment, LineComment, divide }
-
-  @precedence {
-    BuiltInFunctionName,
-    Name
-  }
-
-  @precedence {
-    BuiltInType,
-    Name
-  }
 
   @precedence {
     BooleanLiteral,
     NumericLiteral,
-    instanceOf,
     Name
   }
 
@@ -390,7 +322,7 @@ commaSep<Expr> {
     "."
   }
 
-  NameStart {
+  nameStart {
     nameStartChar namePartChar*
   }
 
@@ -403,12 +335,12 @@ commaSep<Expr> {
     nameStartChar | Digit | $[\u0300-\u036F] | $[\u203F-\u2040]
   }
 
-  NamePart {
+  namePart {
     namePartChar+
   }
 
   Name {
-    NameStart (NamePart)*
+    nameStart (namePart)*
   }
 
   ">" "<" ">=" "<="

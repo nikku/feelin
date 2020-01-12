@@ -1,0 +1,15 @@
+duration("P2M").years
+
+----------
+
+Expressions "duration("P2M").years"
+  PathExpression "duration("P2M").years"
+    FunctionInvocation "duration("P2M")"
+      QualifiedName "duration"
+        Name "duration"
+      Parameters "("P2M")"
+        ( "("
+        PositionalParameters ""P2M""
+          StringLiteral ""P2M""
+        ) ")"
+    Name "years"

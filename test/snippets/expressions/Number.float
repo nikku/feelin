@@ -3,6 +3,6 @@
 ----------
 
 Expressions "-1220.12"
-  ArithmeticExpression "-1220.12"
+  NumericLiteral "-1220.12"
     ArithOp "-"
-    NumericLiteral "1220.12"
+    Number "1220.12"

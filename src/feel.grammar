@@ -101,7 +101,7 @@ Comparison {
 }
 
 SimplePositiveUnaryTest {
-  CompareOp<">" | ">=" | "<" | "<="> expression |
+  CompareOp<">" | ">=" | "<" | "<="> endpoint |
   Interval
 }
 
@@ -254,6 +254,14 @@ DateTimeLiteral {
   DateTimeConstructor
 }
 
+NumericLiteral {
+  minus? Number
+}
+
+BooleanLiteral {
+  kw<"true"> | kw<"false">
+}
+
 kw<Term> {
   @specialize[name={Term}]<Name, Term>
 }
@@ -313,32 +321,25 @@ commaSep<Expr> {
     "date" whitespace "and" whitespace "time"
   }
 
-  NumericLiteral {
+  Number {
     (Digits ("." Digits)? | "." Digits)
-  }
-
-  BooleanLiteral {
-    "true" | "false"
   }
 
   @precedence { BlockComment, LineComment, divide }
 
   @precedence {
-    BooleanLiteral,
-    NumericLiteral,
     DateAndTime,
     Name
   }
 
   @precedence {
-    NumericLiteral,
-    Wildcard,
-    minus
+    Number,
+    "."
   }
 
   @precedence {
-    NumericLiteral,
-    "."
+    Wildcard,
+    minus
   }
 
   nameStart {

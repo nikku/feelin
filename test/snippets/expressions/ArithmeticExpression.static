@@ -5,5 +5,7 @@
 Expressions "1 + 1"
   ArithmeticExpression "1 + 1"
     NumericLiteral "1"
+      Number "1"
     ArithOp "+"
     NumericLiteral "1"
+      Number "1"

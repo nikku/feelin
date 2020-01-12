@@ -105,9 +105,9 @@ const builtins = {
     throw notImplemented('date');
   },
 
-  'date and time': function() {
+  'date and time': fn(function() {
     throw notImplemented('date and time');
-  },
+  }, [ 'any' ]),
 
   'time': function() {
     throw notImplemented('time');
@@ -148,7 +148,7 @@ const builtins = {
     const arr = Array.from(str);
 
     return (
-      arguments.length === 3
+      typeof length !== 'undefined'
         ? arr.slice(_start, _start + length)
         : arr.slice(_start)
     ).join('');
@@ -279,7 +279,7 @@ const builtins = {
     const _start = (start < 0 ? list.length + start : start - 1);
 
     return (
-      arguments.length === 3
+      typeof length !== 'undefined'
         ? list.slice(_start, _start + length)
         : list.slice(_start)
     );
@@ -599,6 +599,10 @@ function createArgsValidator(argDefinitions) {
   const tests = argDefinitions.map(createArgTester);
 
   return function(args) {
+
+    while (args.length < argDefinitions.length) {
+      args.push(undefined);
+    }
 
     return args.reduce((result, arg, index) => {
 

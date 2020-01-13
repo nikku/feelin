@@ -26,7 +26,6 @@ const names = [
   'split',
 
   // 10.3.4.4 List functions
-
   'list contains',
   'count',
   'min',
@@ -82,14 +81,12 @@ const names = [
   'coincides',
 
   // 10.3.4.8 Temporal built-in functions
-
   'day of year',
   'day of week',
   'month of year',
   'week of year',
 
   // 10.3.4.9 Sort
-
   'sort',
 
   // 10.3.4.10 Context function

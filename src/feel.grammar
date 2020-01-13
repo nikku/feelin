@@ -153,6 +153,7 @@ ContextEntry {
 
 Key {
   Name |
+  SpecialKey |
   StringLiteral
 }
 
@@ -210,6 +211,10 @@ Interval {
 
 List {
   "[" ~interval commaSep<expression> "]"
+}
+
+SpecialKey {
+  ckw<"method"> ckw<"signature">
 }
 
 SpecialParameterName {

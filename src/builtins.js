@@ -1,3 +1,7 @@
+import {
+  is
+} from './types';
+
 const names = [
 
   // 10.3.4.1 Conversion functions
@@ -133,7 +137,7 @@ const builtins = {
 
   // 10.3.4.2 Boolean function
   'not': fn(function(bool) {
-    return !bool;
+    return is(bool, 'Boolean') ? !bool : null;
   }, [ 'any' ]),
 
 

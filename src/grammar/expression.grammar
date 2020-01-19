@@ -106,9 +106,9 @@ SimplePositiveUnaryTest {
 }
 
 UnaryTests {
-  Wildcard |
+  Wildcard { minus ~maybeNum } |
   PositiveUnaryTests |
-  not "(" PositiveUnaryTests ")"
+  kw<"not"> "(" PositiveUnaryTests ")"
 }
 
 PositiveUnaryTests {
@@ -260,7 +260,7 @@ DateTimeLiteral {
 }
 
 NumericLiteral {
-  minus? Number
+  minus? ~maybeNum Number
 }
 
 BooleanLiteral {
@@ -320,8 +320,6 @@ commaSep<Expr> {
     '"' (![\\\n"] | "\\" _)* '"'?
   }
 
-  Wildcard { "-" }
-
   DateAndTime {
     "date" whitespace "and" whitespace "time"
   }
@@ -340,11 +338,6 @@ commaSep<Expr> {
   @precedence {
     Number,
     "."
-  }
-
-  @precedence {
-    Wildcard,
-    minus
   }
 
   nameStart {

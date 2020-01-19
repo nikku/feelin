@@ -1,0 +1,15 @@
+duration("asddsa")
+
+----------
+
+UnaryTests "duration("asddsa")"
+  PositiveUnaryTests "duration("asddsa")"
+    PositiveUnaryTest "duration("asddsa")"
+      DateTimeLiteral "duration("asddsa")"
+        DateTimeConstructor "duration("asddsa")"
+          duration "duration"
+          Parameters "("asddsa")"
+            ( "("
+            PositionalParameters ""asddsa""
+              StringLiteral ""asddsa""
+            ) ")"

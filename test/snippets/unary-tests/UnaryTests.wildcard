@@ -4,3 +4,4 @@
 
 UnaryTests "-"
   Wildcard "-"
+    ArithOp "-"

@@ -1,0 +1,10 @@
+-5.312
+
+----------
+
+UnaryTests "-5.312"
+  PositiveUnaryTests "-5.312"
+    PositiveUnaryTest "-5.312"
+      NumericLiteral "-5.312"
+        ArithOp "-"
+        Number "5.312"

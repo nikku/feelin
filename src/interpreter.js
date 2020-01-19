@@ -1,131 +1,15 @@
-import {
-  parser as expressionParser
-} from './parser';
-
-import {
-  parser as unaryTestParser
-} from './unary-parser';
-
 import { builtins } from './builtins';
 
 import { NodeProp } from 'lezer';
 
 
-function Interpreter() {
+export class Interpreter {
 
+  constructor(parser) {
+    this._parser = parser;
+  }
 
-  this.parseName = (name) => {
-
-    let match;
-
-    const pattern = /([./\-'+*]+)|([^\s./\-'+*]+)/g;
-
-    const tokens = [];
-
-    let lastName = false;
-
-    while ((match = pattern.exec(name))) {
-
-      const [ _, additionalPart, namePart ] = match;
-
-      if (additionalPart) {
-        lastName = false;
-
-        if (tokens.length) {
-          tokens.push('\\s*');
-        }
-
-        tokens.push(additionalPart.replace(/[+*]/g, '\\$&'));
-      } else {
-        if (tokens.length) {
-          if (lastName) {
-            tokens.push('\\s+');
-          } else {
-            tokens.push('\\s*');
-          }
-        }
-
-        lastName = true;
-
-        tokens.push(namePart);
-      }
-    }
-
-    return tokens;
-  };
-
-  this.findNames = (context) => {
-
-    let uid = 0;
-
-    return Object.keys(context).filter(key => /[\s./\-'+*]/.test(key)).map(name => {
-
-      const replacement = '_' + uid.toString(36);
-      const tokens = this.parseName(name);
-
-      const replacer = new RegExp(tokens.join(''), 'g');
-
-      return {
-        name,
-        replacement,
-        replacer
-      };
-    });
-
-  };
-
-  this.replaceNames = (input, context, names) => {
-
-    for (const { name, replacement, replacer } of names) {
-
-      input = input.replace(replacer, function(match) {
-
-        const placeholder = replacement.padEnd(match.length, '_');
-
-        if (!context[placeholder]) {
-          context = {
-            ...context,
-            [match]: context[name]
-          };
-        }
-
-        return placeholder;
-      });
-    }
-
-    return {
-      input,
-      context
-    };
-  };
-
-  this.parse = (parser, rawInput, rawContext) => {
-
-    const names = this.findNames(rawContext);
-
-    const {
-      context,
-      input
-    } = this.replaceNames(rawInput, rawContext, names);
-
-    const tree = parser.parse(input);
-
-    return {
-      context,
-      input,
-      tree
-    };
-  };
-
-  this.parseExpressions = (input, context) => {
-    return this.parse(expressionParser, input, context);
-  };
-
-  this.parseUnaryTests = (input, context) => {
-    return this.parse(unaryTestParser, input, context);
-  };
-
-  this.createExecutionTree = (tree, input) => {
+  _buildExecutionTree(tree, input) {
 
     const root = { args: [] };
 
@@ -170,39 +54,29 @@ function Interpreter() {
     });
 
     return root.args[root.args.length - 1];
-  };
+  }
 
-  this.evaluate = (expression, context={}) => {
+  _parse(expression, context) {
+    return this._parser.parse(expression, context);
+  }
 
-    const {
-      tree,
-      context: parsedContext
-    } = this.parseExpressions(expression, context);
-
-    const root = this.createExecutionTree(tree, expression);
-
-    const results = root(parsedContext);
-
-    if (results.length === 1) {
-      return results[0];
-    } else {
-      return results;
-    }
-  };
-
-  this.unaryTest = (expression, context={}) => {
-
-    const value = context['?'] || null;
+  evaluate(expression, context={}) {
 
     const {
-      tree,
-      context: parsedContext
-    } = this.parseUnaryTests(expression, context);
+      tree: parseTree,
+      parsedContext,
+      parsedInput
+    } = this._parse(expression, context);
 
-    const root = this.createExecutionTree(tree, expression);
+    const root = this._buildExecutionTree(parseTree, expression);
 
-    return root(parsedContext)(value);
-  };
+    return {
+      parseTree,
+      parsedContext,
+      parsedInput,
+      root
+    };
+  }
 
 }
 
@@ -830,9 +704,3 @@ function Interval(startValue, endValue, inclusiveStart, inclusiveEnd) {
     return realStart <= value && value <= realEnd;
   };
 }
-
-const interpreter = new Interpreter();
-
-export {
-  interpreter
-};

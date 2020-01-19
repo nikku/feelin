@@ -1,6 +1,9 @@
 import { expect } from 'chai';
 
-import { interpreter } from '../src/interpreter';
+import {
+  unaryTest,
+  evaluate
+} from '../src';
 
 
 describe('interpreter', function() {
@@ -9,50 +12,50 @@ describe('interpreter', function() {
 
     describe('Expressions', function() {
 
-      evaluate('1', 1);
+      expr('1', 1);
 
-      evaluate('1 2 3', [ 1, 2, 3 ]);
+      expr('1 2 3', [ 1, 2, 3 ]);
 
     });
 
 
     describe('ArithmeticExpression', function() {
 
-      evaluate('1 + 1', 2);
+      expr('1 + 1', 2);
 
-      evaluate('2 * (3 + 5)', 16);
+      expr('2 * (3 + 5)', 16);
 
-      evaluate('a * (b)', 15, {
+      expr('a * (b)', 15, {
         a: 3,
         b: 5
       });
 
-      evaluate('-(a)', -3, {
+      expr('-(a)', -3, {
         a: 3
       });
 
-      evaluate('-10--5', -5);
+      expr('-10--5', -5);
 
-      evaluate('10**5', 100000);
+      expr('10**5', 100000);
 
-      evaluate('10^5', 100000);
+      expr('10^5', 100000);
 
-      evaluate('null - 3', null);
+      expr('null - 3', null);
 
-      evaluate('0.0 / 0.0', null);
+      expr('0.0 / 0.0', null);
 
     });
 
 
     describe('FunctionInvocation', function() {
 
-      evaluate('with spaces()', 1, {
+      expr('with spaces()', 1, {
         'with spaces': function() {
           return 1;
         }
       });
 
-      evaluate('foo.bar(b, c)', 5, {
+      expr('foo.bar(b, c)', 5, {
         'foo.bar': function(b, c) {
           return b + c;
         },
@@ -60,7 +63,7 @@ describe('interpreter', function() {
         c: 3
       });
 
-      evaluate('foo()', 5, {
+      expr('foo()', 5, {
         foo: function() {
           return 5;
         }
@@ -71,16 +74,16 @@ describe('interpreter', function() {
 
     describe('ForExpression', function() {
 
-      evaluate('for i in [] return i', []);
+      expr('for i in [] return i', []);
 
-      evaluate('for a in b return (a).c', [1, 2], {
+      expr('for a in b return (a).c', [1, 2], {
         b: [
           { c: 1 },
           { c: 2 }
         ]
       });
 
-      evaluate('for w in widths, h in heights return w * h', [20, 40, 40, 80], {
+      expr('for w in widths, h in heights return w * h', [20, 40, 40, 80], {
         widths: [
           2,
           4
@@ -91,46 +94,46 @@ describe('interpreter', function() {
         ]
       });
 
-      evaluate('for a in 1 .. -1 return a', [1, 0, -1]);
+      expr('for a in 1 .. -1 return a', [1, 0, -1]);
 
-      evaluate('for a in 1 .. 3 return a', [1, 2, 3]);
+      expr('for a in 1 .. 3 return a', [1, 2, 3]);
 
-      evaluate('for a in 1 .. 2, b in 1 .. 2 return a * 10 + b', [11, 12, 21, 22]);
+      expr('for a in 1 .. 2, b in 1 .. 2 return a * 10 + b', [11, 12, 21, 22]);
 
-      evaluate('for i in 0..4 return if i = 0 then 1 else i * partial[-1]', [1, 1, 2, 6, 24 ]);
+      expr('for i in 0..4 return if i = 0 then 1 else i * partial[-1]', [1, 1, 2, 6, 24 ]);
 
-      evaluate('for i in [1, 2] return i * b', [ 10, 20 ], {
+      expr('for i in [1, 2] return i * b', [ 10, 20 ], {
         'b': 10
       });
 
-      evaluate('for condition in [ > 5, [1..3], 5 ] return 6 in condition', [ true, false, false ]);
+      expr('for condition in [ > 5, [1..3], 5 ] return 6 in condition', [ true, false, false ]);
 
     });
 
 
     describe('QuantifiedExpression', function() {
 
-      evaluate('every e in [0, 1] satisfies e != 2', true);
+      expr('every e in [0, 1] satisfies e != 2', true);
 
-      evaluate('every b in a satisfies b < 10', true, {
+      expr('every b in a satisfies b < 10', true, {
         a: [
           9,
           5
         ]
       });
 
-      evaluate('every b in a satisfies b < 10', false, {
+      expr('every b in a satisfies b < 10', false, {
         a: [
           12,
           5
         ]
       });
 
-      evaluate('every b in a satisfies b < 10', true, {
+      expr('every b in a satisfies b < 10', true, {
         a: [ ]
       });
 
-      evaluate('every w in widths, h in heights satisfies w * h < 100', true, {
+      expr('every w in widths, h in heights satisfies w * h < 100', true, {
         widths: [
           2,
           4
@@ -141,20 +144,20 @@ describe('interpreter', function() {
         ]
       });
 
-      evaluate('every e in [0] satisfies e = 0', true);
+      expr('every e in [0] satisfies e = 0', true);
 
-      evaluate('every e in [2] satisfies e = b * 2', true, {
+      expr('every e in [2] satisfies e = b * 2', true, {
         b: 1
       });
 
-      evaluate('some b in a satisfies b < 10', true, {
+      expr('some b in a satisfies b < 10', true, {
         a: [
           12,
           5
         ]
       });
 
-      evaluate('some w in widths, h in heights satisfies w * h < 30', true, {
+      expr('some w in widths, h in heights satisfies w * h < 30', true, {
         widths: [
           2,
           4
@@ -170,57 +173,57 @@ describe('interpreter', function() {
 
     describe('Comparison', function() {
 
-      evaluate('5 > 10', false);
+      expr('5 > 10', false);
 
-      evaluate('5 >= 5', true);
+      expr('5 >= 5', true);
 
-      evaluate('1 between -1 and 5', true);
+      expr('1 between -1 and 5', true);
 
-      evaluate('1 between 5 and -1', true);
+      expr('1 between 5 and -1', true);
 
-      evaluate('5 in > 3', true);
+      expr('5 in > 3', true);
 
-      evaluate('5 in < 0', false);
+      expr('5 in < 0', false);
 
-      evaluate('"FOO" in "FOO1"', false);
+      expr('"FOO" in "FOO1"', false);
 
-      evaluate('"FOO" in "FOO"', true);
+      expr('"FOO" in "FOO"', true);
 
-      evaluate('true in (false, false)', false);
+      expr('true in (false, false)', false);
 
-      evaluate('true in (true, false)', true);
+      expr('true in (true, false)', true);
 
-      evaluate('5 in 6', false);
+      expr('5 in 6', false);
 
-      evaluate('5 in 5', true);
+      expr('5 in 5', true);
 
-      evaluate('5 in (> 0, <10)', true);
+      expr('5 in (> 0, <10)', true);
 
-      evaluate('5 in ([0..10], [5..15])', true);
+      expr('5 in ([0..10], [5..15])', true);
 
-      evaluate('0 in (1, 0)', true);
+      expr('0 in (1, 0)', true);
 
-      evaluate('0 in (1, 2)', false);
+      expr('0 in (1, 2)', false);
 
-      evaluate('0 in (>1, <2)', true);
+      expr('0 in (>1, <2)', true);
 
     });
 
 
     describe('Conjunction', function() {
 
-      evaluate('null and true', false);
+      expr('null and true', false);
 
-      evaluate('[] and 1', true);
+      expr('[] and 1', true);
 
-      evaluate('false and 1', false);
+      expr('false and 1', false);
 
-      evaluate('a and b', false, {
+      expr('a and b', false, {
         a: null,
         b: 1
       });
 
-      evaluate('a and b', true, {
+      expr('a and b', true, {
         a: true,
         b: 1
       });
@@ -230,16 +233,16 @@ describe('interpreter', function() {
 
     describe('Disjunction', function() {
 
-      evaluate('null or true', true);
+      expr('null or true', true);
 
-      evaluate('false or 1', true);
+      expr('false or 1', true);
 
-      evaluate('a or b', true, {
+      expr('a or b', true, {
         a: null,
         b: 1
       });
 
-      evaluate('a or b', false, {
+      expr('a or b', false, {
         a: false,
         b: false
       });
@@ -249,23 +252,23 @@ describe('interpreter', function() {
 
     describe('IfExpression', function() {
 
-      evaluate('if 1 = 2 then 4 * 4 else 5 * 5', 25);
+      expr('if 1 = 2 then 4 * 4 else 5 * 5', 25);
 
-      evaluate('if 2 = 2 then 4 * 4 else 5 * 5', 16);
+      expr('if 2 = 2 then 4 * 4 else 5 * 5', 16);
 
-      evaluate('if 5 > 10 then 15', null);
+      expr('if 5 > 10 then 15', null);
 
-      evaluate('if 15 > 10 then 15', 15);
+      expr('if 15 > 10 then 15', 15);
 
-      evaluate('if a > 10 then 15 else 5', 15, {
+      expr('if a > 10 then 15 else 5', 15, {
         a: 12
       });
 
-      evaluate('if a > 10 then 15 else 5', 5, {
+      expr('if a > 10 then 15 else 5', 5, {
         a: 8
       });
 
-      evaluate('if a then 15 else 5', 5, {
+      expr('if a then 15 else 5', 5, {
         a: null
       });
 
@@ -276,7 +279,7 @@ describe('interpreter', function() {
 
       function B() { }
 
-      evaluate('a instance of B', true, {
+      expr('a instance of B', true, {
         a: new B(),
         B
       });
@@ -286,13 +289,13 @@ describe('interpreter', function() {
 
     describe('PathExpression', function() {
 
-      evaluate('(a).b', 1, {
+      expr('(a).b', 1, {
         a: {
           b: 1
         }
       });
 
-      evaluate('(a).b', [ 1, 2 ], {
+      expr('(a).b', [ 1, 2 ], {
         a: [
           {
             b: 1
@@ -303,7 +306,7 @@ describe('interpreter', function() {
         ]
       });
 
-      evaluate('(a).b.c', 1, {
+      expr('(a).b.c', 1, {
         a: {
           b: {
             c: 1
@@ -311,56 +314,56 @@ describe('interpreter', function() {
         }
       });
 
-      evaluate('[ {x:1, y:2}, {x:2, y:3} ].y', [2, 3]);
+      expr('[ {x:1, y:2}, {x:2, y:3} ].y', [2, 3]);
 
     });
 
 
     describe('FilterExpression', function() {
 
-      evaluate('[1, 2, 3][-1]', 3);
+      expr('[1, 2, 3][-1]', 3);
 
-      evaluate('[1, 2, 3][-3]', 1);
+      expr('[1, 2, 3][-3]', 1);
 
-      evaluate('[1, 2, 3][-4]', null);
+      expr('[1, 2, 3][-4]', null);
 
-      evaluate('[1, 2, 3][1]', 1);
+      expr('[1, 2, 3][1]', 1);
 
-      evaluate('[1, 2, 3][3]', 3);
+      expr('[1, 2, 3][3]', 3);
 
-      evaluate('[1, 2, 3][0]', null);
+      expr('[1, 2, 3][0]', null);
 
-      evaluate('[1, 2, 3][4]', null);
+      expr('[1, 2, 3][4]', null);
 
-      evaluate('[1,2,3][true]', [1, 2, 3]);
+      expr('[1,2,3][true]', [1, 2, 3]);
 
-      evaluate('[1,2,3][false]', []);
+      expr('[1,2,3][false]', []);
 
-      evaluate('[1, 2, 3][ > 1 ]', [ 2, 3 ]);
+      expr('[1, 2, 3][ > 1 ]', [ 2, 3 ]);
 
-      evaluate('[1, 2, 3][ ]1..4] ]', [ 2, 3 ]);
+      expr('[1, 2, 3][ ]1..4] ]', [ 2, 3 ]);
 
-      evaluate('["a", "b"][ "b" ]', [ 'b' ]);
+      expr('["a", "b"][ "b" ]', [ 'b' ]);
 
-      evaluate('null[false]', null);
+      expr('null[false]', null);
 
-      evaluate('null[true]', null);
+      expr('null[true]', null);
 
-      evaluate('null[1]', null);
+      expr('null[1]', null);
 
-      evaluate('true[1]', true);
+      expr('true[1]', true);
 
-      evaluate('"Foo"[1]', 'Foo');
+      expr('"Foo"[1]', 'Foo');
 
-      evaluate('false[1]', false);
+      expr('false[1]', false);
 
-      evaluate('100[1]', 100);
+      expr('100[1]', 100);
 
-      evaluate('a[1]', { b: 'foo' }, {
+      expr('a[1]', { b: 'foo' }, {
         a: { b: 'foo' }
       });
 
-      evaluate('a[ b > 10 ]', [ { b: 11 }, { b: 15 } ], {
+      expr('a[ b > 10 ]', [ { b: 11 }, { b: 15 } ], {
         a: [
           { b: 5 },
           { b: 11 },
@@ -368,57 +371,57 @@ describe('interpreter', function() {
         ]
       });
 
-      evaluate('[1, 2, 3, 4][item > 2]', [3, 4]);
+      expr('[1, 2, 3, 4][item > 2]', [3, 4]);
 
-      evaluate('[ {x:1, y:2}, {x:2, y:3} ][x=1]', [ { x:1, y:2 } ]);
+      expr('[ {x:1, y:2}, {x:2, y:3} ][x=1]', [ { x:1, y:2 } ]);
 
       // TODO(nikku): part of DMN spec
-      evaluateSkip('[{a: 1}, {a: 2}, {a: 3}][item.a >= 2]', [2, 3]);
+      exprSkip('[{a: 1}, {a: 2}, {a: 3}][item.a >= 2]', [2, 3]);
 
-      evaluate('[{a: 1}, {a: 2}, {a: 3}][a >= 2]', [ { a: 2 }, { a: 3 }]);
+      expr('[{a: 1}, {a: 2}, {a: 3}][a >= 2]', [ { a: 2 }, { a: 3 }]);
 
-      evaluate('[{item: 1}, {item: 2}, {item: 3}][item >= 2]', [ { item: 2 }, { item: 3 } ]);
+      expr('[{item: 1}, {item: 2}, {item: 3}][item >= 2]', [ { item: 2 }, { item: 3 } ]);
 
     });
 
 
     describe('Literals', function() {
 
-      evaluate('"foo"', 'foo');
+      expr('"foo"', 'foo');
 
-      evaluate('-1', -1);
+      expr('-1', -1);
 
-      evaluate('false', false);
+      expr('false', false);
 
-      evaluate('true', true);
+      expr('true', true);
 
-      evaluate('.5', .5);
+      expr('.5', .5);
 
-      evaluate('null', null);
+      expr('null', null);
 
     });
 
 
     describe('List', function() {
 
-      evaluate('[]', []);
+      expr('[]', []);
 
-      evaluate('[1, a, 5 * 3]', [ 1, 2, 15 ], { a: 2 });
+      expr('[1, a, 5 * 3]', [ 1, 2, 15 ], { a: 2 });
 
     });
 
 
     describe('Context', function() {
 
-      evaluate('{ a: [ { b: 1 }, { b: 2 } ].b }', { a: [ 1, 2 ] });
+      expr('{ a: [ { b: 1 }, { b: 2 } ].b }', { a: [ 1, 2 ] });
 
-      evaluate('{🐎: "😀"}', { '🐎': '😀' });
+      expr('{🐎: "😀"}', { '🐎': '😀' });
 
-      evaluate('{ "foo+bar((!!],foo": 10 }', { 'foo+bar((!!],foo': 10 });
+      expr('{ "foo+bar((!!],foo": 10 }', { 'foo+bar((!!],foo': 10 });
 
-      evaluate('{ "": 20 }', { '': 20 });
+      expr('{ "": 20 }', { '': 20 });
 
-      evaluate(`
+      expr(`
         [
           {a: {b: [1]}},
           {a: {b: [2.1, 2.2]}},
@@ -427,7 +430,7 @@ describe('interpreter', function() {
         ].a.b
       `, [[1], [2.1, 2.2], [3], [4, 5]]);
 
-      evaluate(`
+      expr(`
         [{b: [1]}, {b: [2.1,2.2]}, {b: [3]}, {b: [4, 5]}].b
       `, [[1], [2.1, 2.2], [3], [4, 5]]);
 
@@ -436,26 +439,26 @@ describe('interpreter', function() {
 
     describe('DateTime', function() {
 
-      evaluate('date and time()', null);
+      expr('date and time()', null);
 
     });
 
 
     describe('Name', function() {
 
-      evaluate('a + b', 1, { 'a + b': 1 });
+      expr('a + b', 1, { 'a + b': 1 });
 
-      evaluate('a +', 1, { 'a +': 1 });
+      expr('a +', 1, { 'a +': 1 });
 
-      evaluate('a+b', 1, { 'a + b': 1 });
+      expr('a+b', 1, { 'a + b': 1 });
 
-      evaluate('a  b c*d', 1, { 'a b  c * d': 1 });
+      expr('a  b c*d', 1, { 'a b  c * d': 1 });
 
-      evaluate('Mike\'s age + walt\'s age - average age' , 40, { 'Mike\'s age + walt\'s age': 90, 'average age': 50 });
+      expr('Mike\'s age + walt\'s age - average age' , 40, { 'Mike\'s age + walt\'s age': 90, 'average age': 50 });
 
-      evaluate('"šomeÚnicodeŠtriňg"', 'šomeÚnicodeŠtriňg');
+      expr('"šomeÚnicodeŠtriňg"', 'šomeÚnicodeŠtriňg');
 
-      evaluate('"横綱"', '横綱');
+      expr('"横綱"', '横綱');
 
     });
 
@@ -464,86 +467,86 @@ describe('interpreter', function() {
 
   describe('unaryTest', function() {
 
-    unaryTest(5, '>= 10', false);
+    unary(5, '>= 10', false);
 
-    unaryTest(5, '5', true);
+    unary(5, '5', true);
 
-    unaryTest({
+    unary({
       '?': 5,
       a: 5
     }, 'a', true);
 
-    unaryTest(-5.312, '-5.312', true);
+    unary(-5.312, '-5.312', true);
 
-    unaryTest(-5.312, '>-5.312', false);
+    unary(-5.312, '>-5.312', false);
 
-    unaryTest(-5.312, '<-5.312', false);
+    unary(-5.312, '<-5.312', false);
 
-    unaryTest(5, '>= 3, < 10', true);
+    unary(5, '>= 3, < 10', true);
 
-    unaryTest(5, '3, < -1', false);
+    unary(5, '3, < -1', false);
 
-    unaryTest(5, '-', true);
+    unary(5, '-', true);
 
-    unaryTest(5, '1, 5', true);
+    unary(5, '1, 5', true);
 
-    unaryTest(5, '1, 4', false);
+    unary(5, '1, 4', false);
 
-    unaryTest(5, '1, [2..5]', true);
+    unary(5, '1, [2..5]', true);
 
-    unaryTest(5, '[1, 5], false', true);
+    unary(5, '[1, 5], false', true);
 
-    unaryTest(5, '? * 2 = 10', true);
+    unary(5, '? * 2 = 10', true);
 
 
     describe('Interval', function() {
 
-      unaryTest(4, '[4..6]', true);
-      unaryTest(6, '[4..6]', true);
+      unary(4, '[4..6]', true);
+      unary(6, '[4..6]', true);
 
-      unaryTest(4, '[6..4]', true);
-      unaryTest(6, '[6..4]', true);
+      unary(4, '[6..4]', true);
+      unary(6, '[6..4]', true);
 
-      unaryTest(4, ']4..6[', false);
-      unaryTest(6, ']4..6[', false);
+      unary(4, ']4..6[', false);
+      unary(6, ']4..6[', false);
 
-      unaryTest(4, ']6..4[', false);
-      unaryTest(6, ']6..4[', false);
+      unary(4, ']6..4[', false);
+      unary(6, ']6..4[', false);
 
-      unaryTest(4, '(4..6)', false);
-      unaryTest(6, '(4..6)', false);
+      unary(4, '(4..6)', false);
+      unary(6, '(4..6)', false);
 
-      unaryTest(4, '(6..4)', false);
-      unaryTest(6, '(6..4)', false);
+      unary(4, '(6..4)', false);
+      unary(6, '(6..4)', false);
 
     });
 
 
     describe('negation', function() {
 
-      unaryTest({}, 'not(true)', false);
+      unary({}, 'not(true)', false);
 
-      unaryTest({}, 'not(false)', true);
+      unary({}, 'not(false)', true);
 
-      unaryTest(5, 'not(1, 2, 3)', true);
+      unary(5, 'not(1, 2, 3)', true);
 
-      unaryTest(5, 'not([5..6], 1)', false);
+      unary(5, 'not([5..6], 1)', false);
 
-      unaryTest(5, 'not(null)', null);
+      unary(5, 'not(null)', null);
 
-      unaryTest({}, 'not(null)', null);
+      unary({}, 'not(null)', null);
 
-      unaryTest({}, 'not(0)', null);
+      unary({}, 'not(0)', null);
 
-      unaryTest({}, 'not(1)', null);
+      unary({}, 'not(1)', null);
 
-      unaryTest({}, 'not("true")', null);
+      unary({}, 'not("true")', null);
 
-      unaryTest({}, 'false', false);
+      unary({}, 'false', false);
 
-      unaryTest(null, 'null', null);
+      unary(null, 'null', null);
 
-      unaryTest(null, '3 > 1', true);
+      unary(null, '3 > 1', true);
 
     });
 
@@ -552,15 +555,15 @@ describe('interpreter', function() {
 
   describe('comments', function() {
 
-    evaluate('1 + /* 1 + */ 1', 2);
+    expr('1 + /* 1 + */ 1', 2);
 
-    evaluate(`1 + // eol comment
+    expr(`1 + // eol comment
                 1`, 2);
 
-    evaluate(`1 + // eol comment
+    expr(`1 + // eol comment
                 1`, 2);
 
-    evaluate(`/*
+    expr(`/*
                some intro waffle
                */
               1 + 1 // and stuff`, 2);
@@ -572,75 +575,75 @@ describe('interpreter', function() {
 
     function Duration() {}
 
-    evaluate('time("10:30:00+05:00").time offset', new Duration('PT5H'));
+    expr('time("10:30:00+05:00").time offset', new Duration('PT5H'));
 
   });
 
 
   describe.skip('functions', function() {
 
-    evaluate('ends with("ASD", "D")', 'ASD');
+    expr('ends with("ASD", "D")', 'ASD');
 
   });
 
 
   describe.skip('equality', function() {
 
-    evaluate('false = 0', null);
+    expr('false = 0', null);
 
-    evaluate('false = null', false);
+    expr('false = null', false);
 
-    evaluate('true = 1', null);
+    expr('true = 1', null);
 
-    evaluate('0 = 0.00', true);
+    expr('0 = 0.00', true);
 
-    evaluate('100 = null', null);
+    expr('100 = null', null);
 
-    evaluate('-0 = 0', true);
+    expr('-0 = 0', true);
 
-    evaluate('[1,2,3] = [1,2,3]', true);
+    expr('[1,2,3] = [1,2,3]', true);
 
-    evaluate('[1] = [2]', false);
+    expr('[1] = [2]', false);
 
-    evaluate('[] = null', false);
+    expr('[] = null', false);
 
-    evaluate('[] = 0', null);
+    expr('[] = 0', null);
 
-    evaluate('{} = {}', true);
+    expr('{} = {}', true);
 
-    evaluate('{foo: "bar", bar: "baz"} = {foo: "bar", bar: "baz"}', true);
+    expr('{foo: "bar", bar: "baz"} = {foo: "bar", bar: "baz"}', true);
 
-    evaluate('{foo: "bar"} = {"foo": "bar"}', true);
+    expr('{foo: "bar"} = {"foo": "bar"}', true);
 
-    evaluate('{} = null', false);
+    expr('{} = null', false);
 
-    evaluate('{} = []', null);
+    expr('{} = []', null);
 
-    evaluate('date("2018-12-08") = date("2018-12-08")', true);
+    expr('date("2018-12-08") = date("2018-12-08")', true);
 
-    evaluate('[1,2,[3, 4]] = [1,2,[3, 4]]', true);
+    expr('[1,2,[3, 4]] = [1,2,[3, 4]]', true);
 
-    evaluate('{a: {c: "bar", b: "foo"}} = {a: {b: "foo", c: "bar"}}', true);
+    expr('{a: {c: "bar", b: "foo"}} = {a: {b: "foo", c: "bar"}}', true);
 
   });
 
 
   describe('built-ins', function() {
 
-    evaluate('abs(-1)', 1);
+    expr('abs(-1)', 1);
 
-    evaluate('index of([1, 2, 3, 2], 2)', [2, 4]);
+    expr('index of([1, 2, 3, 2], 2)', [2, 4]);
 
   });
 
 
   describe('implicit conversion', function() {
 
-    evaluate('3[item > 2]', [3]);
+    expr('3[item > 2]', [3]);
 
-    evaluate('contains(["foobar"], "of")', false);
+    expr('contains(["foobar"], "of")', false);
 
-    evaluate('append("foo", "bar")', [ 'foo', 'bar' ]);
+    expr('append("foo", "bar")', [ 'foo', 'bar' ]);
 
   });
 
@@ -652,7 +655,7 @@ describe('interpreter', function() {
       let error;
 
       try {
-        interpreter.evaluate('1 * #3');
+        evaluate('1 * #3');
       } catch (err) {
         error = err;
       }
@@ -667,7 +670,7 @@ describe('interpreter', function() {
       let error;
 
       try {
-        interpreter.evaluate('for i in null return i');
+        evaluate('for i in null return i');
       } catch (err) {
         error = err;
       }
@@ -682,7 +685,7 @@ describe('interpreter', function() {
       let error;
 
       try {
-        interpreter.evaluate('foo(1)');
+        evaluate('foo(1)');
       } catch (err) {
         error = err;
       }
@@ -698,7 +701,7 @@ describe('interpreter', function() {
 
 // helpers ///////////////
 
-function createEvalVerifier(options) {
+function createExprVerifier(options) {
 
   const {
     args,
@@ -714,14 +717,14 @@ function createEvalVerifier(options) {
   const name = `${expression}${context ? ' { ' + Object.keys(context).join(', ') + ' }' : ''}`;
 
   it(name, function() {
-    const output = interpreter.evaluate(expression, context || {});
+    const output = evaluate(expression, context || {});
 
     expect(output).to.eql(expectedOutput);
   });
 
 }
 
-function createUnaryTestVerifier(options) {
+function createUnaryVerifier(options) {
 
   const {
     args,
@@ -737,7 +740,8 @@ function createUnaryTestVerifier(options) {
   const name = `${test} => ${input} ${context ? ' { ' + Object.keys(context).join(', ') + ' }' : ''}`;
 
   it(name, function() {
-    const output = interpreter.unaryTest(test, {
+
+    const output = unaryTest(test, {
       ...(context || {}),
       '?': input
     });
@@ -747,41 +751,41 @@ function createUnaryTestVerifier(options) {
 
 }
 
-function evaluate(...args) {
+function expr(...args) {
 
-  return createEvalVerifier({
+  return createExprVerifier({
     it,
     args
   });
 }
 
 // eslint-disable-next-line no-unused-vars
-function evaluateOnly(...args) {
-  return createEvalVerifier({
+function exprOnly(...args) {
+  return createExprVerifier({
     args,
     it: it.only
   });
 }
 
 // eslint-disable-next-line no-unused-vars
-function evaluateSkip(...args) {
-  return createEvalVerifier({
+function exprSkip(...args) {
+  return createExprVerifier({
     args,
     it: it.skip
   });
 }
 
 // eslint-disable-next-line no-unused-vars
-function unaryTestOnly(...args) {
-  return createUnaryTestVerifier({
+function unaryOnly(...args) {
+  return createUnaryVerifier({
     args,
     it: it.only
   });
 }
 
-function unaryTest(...args) {
+function unary(...args) {
 
-  return createUnaryTestVerifier({
+  return createUnaryVerifier({
     args,
     it
   });

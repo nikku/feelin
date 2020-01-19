@@ -9,22 +9,23 @@ import {
   writeFileSync as writeFile
 } from 'fs';
 
-import { parser as expressionsParser } from '../src/parser';
-
-import { parser as unaryParser } from '../src/unary-parser';
+import {
+  parseUnaryTests,
+  parseExpressions
+} from '../src';
 
 
 describe('parse', function() {
 
   testAll({
     cwd: __dirname + '/snippets/expressions',
-    parser: expressionsParser,
+    parse: parseExpressions,
     write: !!process.env.REBUILD
   });
 
   testAll({
     cwd: __dirname + '/snippets/unary-tests',
-    parser: unaryParser,
+    parse: parseUnaryTests,
     write: !!process.env.REBUILD
   });
 
@@ -39,7 +40,8 @@ function test(test, options={}) {
   const {
     it,
     cwd,
-    parser
+    parse,
+    context
   } = options;
 
 
@@ -51,7 +53,9 @@ function test(test, options={}) {
 
     const [ input, expectedTree ] = spec.split('----------').map(str => str.trim());
 
-    const tree = parser.parse(input);
+    const {
+      tree
+    } = parse(input, context || {});
 
     const serializedTree = treeToString(tree, input);
 

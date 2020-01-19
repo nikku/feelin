@@ -2,7 +2,9 @@ import {
   readFileSync as readFile
 } from 'fs';
 
-import { interpreter } from '../src/interpreter';
+import {
+  evaluate
+} from '../src';
 
 
 describe('interpreter', function() {
@@ -29,7 +31,7 @@ describe('interpreter', function() {
 
           const [ term, context ] = t;
 
-          interpreter.evaluate(term, context);
+          evaluate(term, context);
         }
 
       }

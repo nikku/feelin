@@ -1,29 +1,62 @@
-import { interpreter } from './interpreter';
+import {
+  parser as expressionGrammarParser
+} from './grammar/expression-parser';
 
-function unaryTest(input, expression, context) {
+import {
+  parser as unaryTestGrammarParser
+} from './grammar/unary-test-parser';
 
-  return interpreter.unaryTest(expression, {
-    ...context,
-    '?': input
-  });
+import {
+  Interpreter
+} from './interpreter';
 
+import {
+  Parser
+} from './parser';
+
+const unaryTestParser = new Parser(unaryTestGrammarParser);
+const expressionParser = new Parser(expressionGrammarParser);
+
+const unaryTester = new Interpreter(unaryTestParser);
+const expressionEvaluator = new Interpreter(expressionParser);
+
+
+export function unaryTest(expression, context={}) {
+  const value = context['?'] || null;
+
+  const {
+    root,
+    parsedContext
+  } = unaryTester.evaluate(expression, context);
+
+  // root = fn(ctx) => test(val)
+  const test = root(parsedContext);
+
+  return test(value);
 }
 
-function evaluate(expression, context) {
-  return interpreter.evaluate(expression, context);
+export function evaluate(expression, context={}) {
+
+  const {
+    root,
+    parsedContext
+  } = expressionEvaluator.evaluate(expression, context);
+
+  // root = [ fn(ctx) ]
+
+  const results = root(parsedContext);
+
+  if (results.length === 1) {
+    return results[0];
+  } else {
+    return results;
+  }
 }
 
-function parseExpressions(expression, context={}) {
-  return interpreter.parseExpressions(expression, context);
+export function parseExpressions(expression, context={}) {
+  return expressionParser.parse(expression, context);
 }
 
-function parseUnaryTests(expression, context={}) {
-  return interpreter.parseUnaryTests(expression, context);
+export function parseUnaryTests(expression, context={}) {
+  return unaryTestParser.parse(expression, context);
 }
-
-export {
-  parseExpressions,
-  parseUnaryTests,
-  unaryTest,
-  evaluate
-};

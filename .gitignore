@@ -1,5 +1,4 @@
 node_modules
-src/parser.*
-src/unary-parser.*
+src/grammar/*.js
 dist
 tmp

@@ -1,3 +1,2 @@
 dist
-src/parser.*
-src/unary-parser.*
+src/grammar/*.js

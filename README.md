@@ -13,8 +13,8 @@ import {
   evaluate
 } from 'feelin';
 
-unaryTest(1, '1'); // true
-unaryTest(1, '[1..end]', { end: 10 }); // true
+unaryTest('1', { '?': 1 }); // true
+unaryTest('[1..end]', { '?': 1, end: 10 }); // true
 
 evaluate("Mike's dauther.name", {
   'Mike\'s dauther.name': 'Lisa'

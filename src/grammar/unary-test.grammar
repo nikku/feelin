@@ -100,7 +100,7 @@ SimplePositiveUnaryTest {
   Interval
 }
 
-@top[name=UnaryTests] {
+@top UnaryTests {
   Wildcard |
   PositiveUnaryTests |
   not "(" PositiveUnaryTests ")"

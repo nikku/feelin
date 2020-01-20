@@ -3,8 +3,9 @@
 ----------
 
 Expressions "(a"
-  ParenthesizedExpression "(a"
-    ( "("
-    QualifiedName "a"
-      Name "a"
-    ⚠ ""
+  SimplePositiveUnaryTest "(a"
+    Interval "(a"
+      ( "("
+      QualifiedName "a"
+        Name "a"
+      ⚠ ""

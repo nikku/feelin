@@ -19,7 +19,7 @@
   paren
 }
 
-@top[name=Expressions] {
+@top Expressions {
   expression+
 }
 

@@ -1,6 +1,8 @@
 node_modules
+tasks
 test
 tmp
-rollup.config.js
 .eslintrc
+.eslintignore
 .travis.yml
+rollup.config.js

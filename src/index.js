@@ -1,10 +1,6 @@
 import {
-  parser as expressionGrammarParser
-} from './grammar/expression-parser';
-
-import {
-  parser as unaryTestGrammarParser
-} from './grammar/unary-test-parser';
+  parser as grammarParser
+} from './grammar/feel-parser';
 
 import {
   Interpreter
@@ -14,11 +10,9 @@ import {
   Parser
 } from './parser';
 
-const unaryTestParser = new Parser(unaryTestGrammarParser);
-const expressionParser = new Parser(expressionGrammarParser);
+const parser = new Parser(grammarParser);
 
-const unaryTester = new Interpreter(unaryTestParser);
-const expressionEvaluator = new Interpreter(expressionParser);
+const interpreter = new Interpreter(parser);
 
 
 export function unaryTest(expression, context={}) {
@@ -27,7 +21,7 @@ export function unaryTest(expression, context={}) {
   const {
     root,
     parsedContext
-  } = unaryTester.evaluate(expression, context);
+  } = interpreter.unaryTest(expression, context);
 
   // root = fn(ctx) => test(val)
   const test = root(parsedContext);
@@ -40,7 +34,7 @@ export function evaluate(expression, context={}) {
   const {
     root,
     parsedContext
-  } = expressionEvaluator.evaluate(expression, context);
+  } = interpreter.evaluate(expression, context);
 
   // root = [ fn(ctx) ]
 
@@ -54,9 +48,9 @@ export function evaluate(expression, context={}) {
 }
 
 export function parseExpressions(expression, context={}) {
-  return expressionParser.parse(expression, context);
+  return parser.parseExpressions(expression, context);
 }
 
 export function parseUnaryTests(expression, context={}) {
-  return unaryTestParser.parse(expression, context);
+  return parser.parseUnaryTests(expression, context);
 }

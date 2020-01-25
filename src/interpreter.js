@@ -56,17 +56,31 @@ export class Interpreter {
     return root.args[root.args.length - 1];
   }
 
-  _parse(expression, context) {
-    return this._parser.parse(expression, context);
-  }
-
   evaluate(expression, context={}) {
 
     const {
       tree: parseTree,
       parsedContext,
       parsedInput
-    } = this._parse(expression, context);
+    } = this._parser.parseExpressions(expression, context);
+
+    const root = this._buildExecutionTree(parseTree, expression);
+
+    return {
+      parseTree,
+      parsedContext,
+      parsedInput,
+      root
+    };
+  }
+
+  unaryTest(expression, context={}) {
+
+    const {
+      tree: parseTree,
+      parsedContext,
+      parsedInput
+    } = this._parser.parseUnaryTests(expression, context);
 
     const root = this._buildExecutionTree(parseTree, expression);
 

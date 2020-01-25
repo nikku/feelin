@@ -1,0 +1,14 @@
+not(false)
+
+----------
+
+Expressions "not(false)"
+  FunctionInvocation "not(false)"
+    QualifiedName "not"
+      Name "not"
+    Parameters "(false)"
+      ( "("
+      PositionalParameters "false"
+        BooleanLiteral "false"
+          false "false"
+      ) ")"

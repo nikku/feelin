@@ -105,10 +105,10 @@ SimplePositiveUnaryTest {
   Interval
 }
 
-UnaryTests {
+@top UnaryTests {
   Wildcard { minus ~maybeNum } |
   PositiveUnaryTests |
-  kw<"not"> "(" PositiveUnaryTests ")"
+  ckw<"not"> "(" PositiveUnaryTests ")"
 }
 
 PositiveUnaryTests {
@@ -165,7 +165,7 @@ DateTimeConstructor {
 }
 
 FunctionInvocation {
-  (expression | SpecialFunctionName) !call Parameters
+  (SpecialFunctionName | expression) !call Parameters
 }
 
 Parameters {

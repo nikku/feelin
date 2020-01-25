@@ -7,7 +7,15 @@ export class Parser {
     this._grammarParser = grammarParser;
   }
 
-  parse(rawInput, rawContext) {
+  parseExpressions(rawInput, rawContext) {
+    return this._parse(rawInput, rawContext, { top: 'Expressions' });
+  }
+
+  parseUnaryTests(rawInput, rawContext) {
+    return this._parse(rawInput, rawContext, { top: 'UnaryTests' });
+  }
+
+  _parse(rawInput, rawContext, parseOptions) {
 
     const names = this._findNames(rawContext);
 
@@ -16,7 +24,7 @@ export class Parser {
       input: parsedInput
     } = this._replaceNames(rawInput, rawContext, names);
 
-    const tree = this._grammarParser.parse(parsedInput);
+    const tree = this._grammarParser.parse(parsedInput, parseOptions);
 
     return {
       parsedContext,

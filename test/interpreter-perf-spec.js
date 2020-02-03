@@ -4,7 +4,7 @@ import {
 
 import {
   evaluate
-} from '../src';
+} from '../dist/index.esm';
 
 
 describe('interpreter', function() {

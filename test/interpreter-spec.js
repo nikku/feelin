@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import {
   unaryTest,
   evaluate
-} from '../src';
+} from '../dist/index.esm';
 
 
 describe('interpreter', function() {

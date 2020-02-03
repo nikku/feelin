@@ -12,7 +12,7 @@ import {
 import {
   parseUnaryTests,
   parseExpressions
-} from '../src';
+} from '../dist/index.esm';
 
 
 describe('parse', function() {

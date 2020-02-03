@@ -9,7 +9,9 @@ import {
   expect
 } from 'chai';
 
-import { interpreter } from '../../src/interpreter';
+import {
+  evaluate
+} from '../dist/index.esm';
 
 
 const NOT_IMPLEMENTED = {};
@@ -63,7 +65,7 @@ describe('tck', function() {
 
 function tryEval(expr) {
   try {
-    return interpreter.evaluate(expr);
+    return evaluate(expr);
   } catch (err) {
     if (err.message.startsWith('not implemented')) {
       return NOT_IMPLEMENTED;

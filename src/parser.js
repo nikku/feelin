@@ -1,11 +1,12 @@
+import {
+  parser as grammarParser
+} from './grammar/feel-parser';
+
+
 /**
  * A feel parser for a specific grammar (unary tests / expressions)
  */
-export class Parser {
-
-  constructor(grammarParser) {
-    this._grammarParser = grammarParser;
-  }
+class Parser {
 
   parseExpressions(rawInput, rawContext) {
     return this._parse(rawInput, rawContext, { top: 'Expressions' });
@@ -24,7 +25,7 @@ export class Parser {
       input: parsedInput
     } = this._replaceNames(rawInput, rawContext, names);
 
-    const tree = this._grammarParser.parse(parsedInput, parseOptions);
+    const tree = grammarParser.parse(parsedInput, parseOptions);
 
     return {
       parsedContext,
@@ -117,4 +118,14 @@ export class Parser {
     };
   }
 
+}
+
+const parser = new Parser();
+
+export function parseExpressions(expression, context = {}) {
+  return parser.parseExpressions(expression, context);
+}
+
+export function parseUnaryTests(expression, context = {}) {
+  return parser.parseUnaryTests(expression, context);
 }

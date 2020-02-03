@@ -1,13 +1,14 @@
-import { builtins } from './builtins';
-
 import { NodeProp } from 'lezer';
 
+import { builtins } from './builtins';
 
-export class Interpreter {
+import {
+  parseExpressions,
+  parseUnaryTests
+} from './parser';
 
-  constructor(parser) {
-    this._parser = parser;
-  }
+
+class Interpreter {
 
   _buildExecutionTree(tree, input) {
 
@@ -62,7 +63,7 @@ export class Interpreter {
       tree: parseTree,
       parsedContext,
       parsedInput
-    } = this._parser.parseExpressions(expression, context);
+    } = parseExpressions(expression, context);
 
     const root = this._buildExecutionTree(parseTree, expression);
 
@@ -80,7 +81,7 @@ export class Interpreter {
       tree: parseTree,
       parsedContext,
       parsedInput
-    } = this._parser.parseUnaryTests(expression, context);
+    } = parseUnaryTests(expression, context);
 
     const root = this._buildExecutionTree(parseTree, expression);
 
@@ -92,6 +93,40 @@ export class Interpreter {
     };
   }
 
+}
+
+const interpreter = new Interpreter();
+
+export function unaryTest(expression, context = {}) {
+  const value = context['?'] || null;
+
+  const {
+    root,
+    parsedContext
+  } = interpreter.unaryTest(expression, context);
+
+  // root = fn(ctx) => test(val)
+  const test = root(parsedContext);
+
+  return test(value);
+}
+
+export function evaluate(expression, context = {}) {
+
+  const {
+    root,
+    parsedContext
+  } = interpreter.evaluate(expression, context);
+
+  // root = [ fn(ctx) ]
+
+  const results = root(parsedContext);
+
+  if (results.length === 1) {
+    return results[0];
+  } else {
+    return results;
+  }
 }
 
 

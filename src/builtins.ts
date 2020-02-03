@@ -670,7 +670,7 @@ function sum(list) {
   return list.reduce((sum, el) => sum === null ? el : sum + el, null);
 }
 
-function flatten([x,...xs]) {
+function flatten([x,...xs]: any[]) {
   return (
     x !== undefined
       ? [...Array.isArray(x) ? flatten(x) : [x],...flatten(xs)]
@@ -690,7 +690,7 @@ function toDeepString(obj) {
   return toString(obj, true);
 }
 
-function toString(obj, wrap) {
+function toString(obj, wrap:boolean=false) {
 
   if (obj === null) {
     return 'null';

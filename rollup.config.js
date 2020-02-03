@@ -1,15 +1,10 @@
 import nodeResolve from '@rollup/plugin-node-resolve';
-
 import commonjs from '@rollup/plugin-commonjs';
-
+import typescript from '@rollup/plugin-typescript';
 import { terser } from 'rollup-plugin-terser';
 
 
 import pkg from './package.json';
-
-function pgl(plugins=[]) {
-  return plugins;
-}
 
 const srcEntry = pkg.source;
 
@@ -27,11 +22,12 @@ export default [
       format: 'umd',
       name: umdName
     },
-    plugins: pgl([
+    plugins: [
       nodeResolve(),
       commonjs(),
+      typescript(),
       terser()
-    ])
+    ]
   },
   {
     input: srcEntry,
@@ -40,10 +36,11 @@ export default [
       format: 'umd',
       name: umdName
     },
-    plugins: pgl([
+    plugins: [
       nodeResolve(),
-      commonjs()
-    ])
+      commonjs(),
+      typescript()
+    ]
   },
   {
     input: srcEntry,
@@ -54,6 +51,8 @@ export default [
     external: [
       'lezer'
     ],
-    plugins: pgl()
+    plugins: [
+      typescript()
+    ]
   }
 ];

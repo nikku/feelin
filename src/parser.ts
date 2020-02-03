@@ -1,6 +1,22 @@
 import {
   parser as grammarParser
-} from './grammar/feel-parser';
+} from './grammar/feel-parser.js';
+
+import { Tree, ParseOptions } from 'lezer';
+
+type NameDefinition = {
+  name: string,
+  replacement: string,
+  replacer: RegExp
+};
+
+type ParseContext = Record<string, any>;
+
+type ParseResult = {
+  parsedContext: ParseContext
+  parsedInput: string
+  tree: Tree
+};
 
 
 /**
@@ -8,15 +24,15 @@ import {
  */
 class Parser {
 
-  parseExpressions(rawInput, rawContext) {
+  parseExpressions(rawInput: string, rawContext: ParseContext): ParseResult {
     return this._parse(rawInput, rawContext, { top: 'Expressions' });
   }
 
-  parseUnaryTests(rawInput, rawContext) {
+  parseUnaryTests(rawInput: string, rawContext: ParseContext): ParseResult {
     return this._parse(rawInput, rawContext, { top: 'UnaryTests' });
   }
 
-  _parse(rawInput, rawContext, parseOptions) {
+  _parse(rawInput: string, rawContext: ParseContext, parseOptions: ParseOptions): ParseResult {
 
     const names = this._findNames(rawContext);
 
@@ -34,7 +50,7 @@ class Parser {
     };
   }
 
-  _parseName(name) {
+  _parseName(name: string) {
 
     let match;
 
@@ -46,7 +62,7 @@ class Parser {
 
     while ((match = pattern.exec(name))) {
 
-      const [ _, additionalPart, namePart ] = match;
+      const [, additionalPart, namePart ] = match;
 
       if (additionalPart) {
         lastName = false;
@@ -74,7 +90,7 @@ class Parser {
     return tokens;
   }
 
-  _findNames(context) {
+  _findNames(context: ParseContext): NameDefinition[] {
 
     let uid = 0;
 
@@ -93,7 +109,7 @@ class Parser {
     });
   }
 
-  _replaceNames(input, context, names) {
+  _replaceNames(input: string, context: ParseContext, names: NameDefinition[]) {
 
     for (const { name, replacement, replacer } of names) {
 
@@ -120,12 +136,13 @@ class Parser {
 
 }
 
+
 const parser = new Parser();
 
-export function parseExpressions(expression, context = {}) {
+export function parseExpressions(expression: string, context: ParseContext = {}): ParseResult {
   return parser.parseExpressions(expression, context);
 }
 
-export function parseUnaryTests(expression, context = {}) {
+export function parseUnaryTests(expression: string, context: ParseContext = {}): ParseResult {
   return parser.parseUnaryTests(expression, context);
 }

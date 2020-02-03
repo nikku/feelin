@@ -1,5 +1,5 @@
 
-export function is(el, type) {
+export function is(el: any, type: string): boolean {
 
   switch (type) {
   case 'Boolean': return typeof el === 'boolean';

@@ -1,4 +1,4 @@
-import { NodeProp } from 'lezer';
+import { NodeProp, Tree } from 'lezer';
 
 import { builtins } from './builtins';
 
@@ -7,14 +7,15 @@ import {
   parseUnaryTests
 } from './parser';
 
-
 class Interpreter {
 
-  _buildExecutionTree(tree, input) {
+  _buildExecutionTree(tree: Tree, input: string) {
 
-    const root = { args: [] };
+    type StackEntry = { args: any[], nodeInput: string };
 
-    const stack = [ root ];
+    const root = { args: [], nodeInput: input };
+
+    const stack: StackEntry[] = [ root ];
 
     tree.iterate({
       enter(node, start, end) {
@@ -44,7 +45,7 @@ class Interpreter {
         const {
           nodeInput,
           args
-        } = stack.pop();
+        } = stack.pop() as StackEntry;
 
         const parent = stack[stack.length - 1];
 
@@ -57,7 +58,7 @@ class Interpreter {
     return root.args[root.args.length - 1];
   }
 
-  evaluate(expression, context={}) {
+  evaluate(expression: string, context={}) {
 
     const {
       tree: parseTree,
@@ -75,7 +76,7 @@ class Interpreter {
     };
   }
 
-  unaryTest(expression, context={}) {
+  unaryTest(expression: string, context={}) {
 
     const {
       tree: parseTree,
@@ -97,7 +98,7 @@ class Interpreter {
 
 const interpreter = new Interpreter();
 
-export function unaryTest(expression, context = {}) {
+export function unaryTest(expression: string, context: Record<string, any> = {}) {
   const value = context['?'] || null;
 
   const {
@@ -111,7 +112,7 @@ export function unaryTest(expression, context = {}) {
   return test(value);
 }
 
-export function evaluate(expression, context = {}) {
+export function evaluate(expression: string, context: Record<string, any> = {}) {
 
   const {
     root,
@@ -306,7 +307,7 @@ function evalNode(node, input, args) {
 
     const name = _name === 'DateAndTime' ? 'date and time' : _name;
 
-    const fn = getBuiltin(name);
+    const fn = getBuiltin(name, context);
 
     const fnArgs = args[1](context).map(fn => fn(context));
 
@@ -637,7 +638,7 @@ function compareBetween(context, _left, _start, _end) {
   const start = _start(context);
   const end = _end(context);
 
-  return Math.min(start, end) <= left <= Math.max(start, end) ? (context.__extractLeft ? left : true) : false;
+  return Math.min(start, end) <= left && left <= Math.max(start, end) ? (context.__extractLeft ? left : true) : false;
 }
 
 function compareIn(context, _left, _tests) {
@@ -660,9 +661,13 @@ function compareValOrFn(valOrFn, expr) {
   return valOrFn === expr;
 }
 
-function range(size, startAt = 0, direction = 1) {
+interface RangeArray<T> extends Array<T> {
+  __isRange: boolean
+};
 
-  const r = [...Array(size).keys()].map(i => i * direction + startAt);
+function range(size: number, startAt = 0, direction = 1) {
+
+  const r = Array.from(Array(size).keys()).map(i => i * direction + startAt) as RangeArray<number>;
 
   r.__isRange = true;
 
@@ -681,10 +686,10 @@ function createRange(start, end) {
   throw new Error('unsupported range');
 }
 
-function cartesianProduct(arrays) {
+function cartesianProduct(arrays: number[][]) {
 
   const f = (a, b) => [].concat(...a.map(d => b.map(e => [].concat(d, e))));
-  const cartesian = (a, b, ...c) => (b ? cartesian(f(a, b), ...c) : a);
+  const cartesian = (a?, b?, ...c) => (b ? cartesian(f(a, b), ...c) : a);
 
   return cartesian(...arrays);
 }

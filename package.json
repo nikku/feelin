@@ -37,11 +37,12 @@
   },
   "sideEffects": false,
   "scripts": {
-    "all": "run-s lint build-parser build test",
+    "all": "run-s lint build-parser build generate-typings test",
     "lint": "eslint .",
     "build-parser:watch": "chokidar --initial src/grammar/feel.grammar -c \"npm run build-parser -- --names\"",
     "build-parser": "lezer-generator src/grammar/feel.grammar -o src/grammar/feel-parser",
     "build": "rollup -c",
+    "generate-typings": "tsc src/index.ts --emitDeclarationOnly --declaration --outDir dist",
     "prepublishOnly": "run-s build-parser build",
     "test": "mocha -r esm test/*.js",
     "test:watch": "npm test -- -w",

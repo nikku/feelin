@@ -29,7 +29,7 @@
     "typescript": "^3.7.5"
   },
   "dependencies": {
-    "lezer": "^0.8.0"
+    "lezer": "^0.8.2"
   },
   "repository": {
     "type": "git",

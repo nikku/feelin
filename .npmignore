@@ -7,3 +7,4 @@ tmp
 .eslintignore
 .travis.yml
 rollup.config.js
+tsconfig.json

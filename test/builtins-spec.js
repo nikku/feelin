@@ -1,8 +1,8 @@
-import { expect } from 'chai';
+import { expect } from './helpers.js';
 
 import {
   evaluate
-} from '../dist/index.esm';
+} from '../dist/index.esm.js';
 
 
 describe('builtin functions', function() {

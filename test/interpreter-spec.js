@@ -1,9 +1,9 @@
-import { expect } from 'chai';
+import { expect } from './helpers.js';
 
 import {
   unaryTest,
   evaluate
-} from '../dist/index.esm';
+} from '../dist/index.esm.js';
 
 
 describe('interpreter', function() {

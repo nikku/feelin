@@ -1,9 +1,0 @@
->= a
-
-----------
-
-Expressions ">= a"
-  SimplePositiveUnaryTest ">= a"
-    CompareOp ">="
-    QualifiedName "a"
-      Name "a"

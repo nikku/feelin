@@ -1,9 +1,0 @@
--x
-
-----------
-
-Expressions "-x"
-  ArithmeticExpression "-x"
-    ArithOp "-"
-    QualifiedName "x"
-      Name "x"

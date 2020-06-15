@@ -309,7 +309,7 @@ function evalNode(node, input, args) {
 
     const fn = getBuiltin(name, context);
 
-    const fnArgs = args[1](context).map(fn => fn(context));
+    const fnArgs = args[2](context).map(fn => fn(context));
 
     return fn(...fnArgs);
   };
@@ -322,7 +322,7 @@ function evalNode(node, input, args) {
       throw new Error(`Failed to evaluate ${input}: Target is not a function`);
     }
 
-    const fnArgs = args[1](context).map(fn => fn(context));
+    const fnArgs = args[2](context).map(fn => fn(context));
 
     return fn(...fnArgs);
   };

@@ -1,8 +1,0 @@
--1
-
-----------
-
-Expressions "-1"
-  NumericLiteral "-1"
-    ArithOp "-"
-    Number "1"

@@ -1,6 +1,6 @@
 import {
   parser as grammarParser
-} from './grammar/feel-parser.js';
+} from 'lezer-feel';
 
 import { Tree, ParseOptions } from 'lezer';
 

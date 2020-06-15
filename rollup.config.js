@@ -49,7 +49,8 @@ export default [
       { file: pkg.module, format: 'es' }
     ],
     external: [
-      'lezer'
+      'lezer',
+      'lezer-feel'
     ],
     plugins: [
       typescript()

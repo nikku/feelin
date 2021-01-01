@@ -1,6 +1,6 @@
 ## Feelin
 
-[![Build Status](https://travis-ci.com/nikku/feelin.svg?branch=master)](https://travis-ci.com/nikku/feelin)
+[![Build Status](https://img.shields.io/github/workflow/status/nikku/feelin/CI)](https://github.com/nikku/feelin/actions?query=workflow%3ACI)
 
 A FEEL parser and interpreter written in JavaScript. [__:arrow_right: Try it out__](https://nikku.github.io/feel-playground).
 

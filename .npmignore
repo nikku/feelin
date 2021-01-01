@@ -1,3 +1,4 @@
+.github
 !dist
 node_modules
 tasks
@@ -5,6 +6,5 @@ test
 tmp
 .eslintrc
 .eslintignore
-.travis.yml
 rollup.config.js
 tsconfig.json

@@ -41,11 +41,14 @@ evaluate('every rate in rates() satisfies rate < 10', {
 
 ## Related
 
+Feel language support:
+
+* [lezer-feel](https://github.com/nikku/lezer-feel)
+
 Other open source FEEL interpreters:
 
 * [feel-scala](https://github.com/camunda/feel-scala)
 * [js-feel](https://github.com/EdgeVerve/feel)
-
 
 Standards related resources:
 

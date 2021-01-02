@@ -1,4 +1,4 @@
-import { NodeProp, Tree } from 'lezer';
+import { Tree } from 'lezer';
 
 import { builtins } from './builtins';
 
@@ -20,12 +20,12 @@ class Interpreter {
     tree.iterate({
       enter(node, start, end) {
 
-        if (node.prop(NodeProp.skipped)) {
-          return false;
+        if (node.isError) {
+          throw new Error(`Statement unparseable at [${start}, ${end}]`);
         }
 
-        if (node.prop(NodeProp.error)) {
-          throw new Error(`Statement unparseable at [${start}, ${end}]`);
+        if (node.isSkipped) {
+          return false;
         }
 
         const nodeInput = input.slice(start, end);
@@ -38,7 +38,7 @@ class Interpreter {
 
       leave(node, start, end) {
 
-        if (node.prop(NodeProp.skipped)) {
+        if (node.isSkipped) {
           return;
         }
 
@@ -227,11 +227,19 @@ function evalNode(node, input, args) {
 
   case 'SpecialFunctionName': return (context) => getBuiltin(input, context);
 
-  case 'QualifiedName': return (context) => getBuiltin(args.join('.'), context) || getFromContext(args.join('.'), context);
+  case 'Name': return input;
+
+  case 'VariableName': return (context) => getBuiltin(input, context) || getFromContext(input, context);
+
+  case 'QualifiedName': return (context) => {
+
+    const name = args.join('.');
+
+    return getBuiltin(name, context) || getFromContext(name, context);
+  };
 
   case '?': return (context) => getFromContext('?', context);
 
-  case 'Name': return input;
 
   // expression
   // expression ".." expression
@@ -299,21 +307,11 @@ function evalNode(node, input, args) {
 
   case 'PositionalParameters': return (context) => args;
 
-  case 'DateTimeLiteral': return args[0];
-
   case 'DateTimeConstructor': return (context) => {
-
-    const _name = args[0];
-
-    const name = _name === 'DateAndTime' ? 'date and time' : _name;
-
-    const fn = getBuiltin(name, context);
-
-    const fnArgs = args[2](context).map(fn => fn(context));
-
-    return fn(...fnArgs);
+    return getBuiltin(input, context);
   };
 
+  case 'DateTimeLiteral':
   case 'FunctionInvocation': return (context) => {
 
     const fn = args[0](context);

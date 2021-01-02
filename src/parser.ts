@@ -2,7 +2,7 @@ import {
   parser as grammarParser
 } from 'lezer-feel';
 
-import { Tree, ParseOptions } from 'lezer';
+import { Tree, ParserConfig } from 'lezer';
 
 type NameDefinition = {
   name: string,
@@ -32,7 +32,7 @@ class Parser {
     return this._parse(rawInput, rawContext, { top: 'UnaryTests' });
   }
 
-  _parse(rawInput: string, rawContext: ParseContext, parseOptions: ParseOptions): ParseResult {
+  _parse(rawInput: string, rawContext: ParseContext, parseConfig: ParserConfig): ParseResult {
 
     const names = this._findNames(rawContext);
 
@@ -41,7 +41,7 @@ class Parser {
       input: parsedInput
     } = this._replaceNames(rawInput, rawContext, names);
 
-    const tree = grammarParser.parse(parsedInput, parseOptions);
+    const tree = grammarParser.configure(parseConfig).parse(parsedInput);
 
     return {
       parsedContext,

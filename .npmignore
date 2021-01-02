@@ -1,6 +1,7 @@
 .github
 !dist
 node_modules
+src
 tasks
 test
 tmp

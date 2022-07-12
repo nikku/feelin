@@ -154,9 +154,9 @@ describe('builtin functions', function() {
 
     expr('ends with("foobar", "r")', true);
 
-    expr('split("John Doe", "\\s")', ['John', 'Doe']);
-    expr('split("a;b;c;;", ";")', ['a','b','c','','']);
-    expr('split("foo🐎bar", "o.b")', ['fo', 'ar']);
+    expr('split("John Doe", "\\s")', [ 'John', 'Doe' ]);
+    expr('split("a;b;c;;", ";")', [ 'a','b','c','','' ]);
+    expr('split("foo🐎bar", "o.b")', [ 'fo', 'ar' ]);
 
   });
 
@@ -203,27 +203,27 @@ describe('builtin functions', function() {
     expr('any([])', false);
     expr('any(0)', null);
 
-    expr('sublist([4,5,6], 1, 2)', [4,5]);
-    expr('sublist([4,5,6], -1)', [6]);
-    expr('sublist([4,5,6], -2, 1)', [5]);
+    expr('sublist([4,5,6], 1, 2)', [ 4,5 ]);
+    expr('sublist([4,5,6], -1)', [ 6 ]);
+    expr('sublist([4,5,6], -2, 1)', [ 5 ]);
 
-    expr('append([1], 2, 3)', [1,2,3]);
+    expr('append([1], 2, 3)', [ 1,2,3 ]);
 
-    expr('concatenate([1,2],[3])', [1,2,3]);
+    expr('concatenate([1,2],[3])', [ 1,2,3 ]);
 
-    expr('insert before([1,3],1,2)', [2,1,3]);
+    expr('insert before([1,3],1,2)', [ 2,1,3 ]);
 
-    expr('remove([1,2,3], 2)', [1,3]);
+    expr('remove([1,2,3], 2)', [ 1,3 ]);
 
-    expr('reverse([1,2,3])', [3,2,1]);
+    expr('reverse([1,2,3])', [ 3,2,1 ]);
 
-    expr('index of([1,2,3,2],2)', [2,4]);
+    expr('index of([1,2,3,2],2)', [ 2,4 ]);
 
-    exprSkip('union([1,2],[2,3])', [1,2,3]);
+    exprSkip('union([1,2],[2,3])', [ 1,2,3 ]);
 
-    exprSkip('distinct values([1,2,3,2,1])', [1,2,3]);
+    exprSkip('distinct values([1,2,3,2,1])', [ 1,2,3 ]);
 
-    expr('flatten([[1,2],[[3]], 4])', [1,2,3,4]);
+    expr('flatten([[1,2],[[3]], 4])', [ 1,2,3,4 ]);
 
     expr('product( 2, 3, 4)', 24);
     expr('product([ 2, 3, 4 ])', 24);

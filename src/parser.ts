@@ -63,7 +63,7 @@ class Parser {
 
     while ((match = pattern.exec(name))) {
 
-      const [, additionalPart, namePart ] = match;
+      const [ , additionalPart, namePart ] = match;
 
       if (additionalPart) {
         lastName = false;

@@ -69,7 +69,7 @@ class Interpreter {
     return root.args[root.args.length - 1];
   }
 
-  evaluate(expression: string, context={}) {
+  evaluate(expression: string, context = {}) {
 
     const {
       tree: parseTree,
@@ -87,7 +87,7 @@ class Interpreter {
     };
   }
 
-  unaryTest(expression: string, context={}) {
+  unaryTest(expression: string, context = {}) {
 
     const {
       tree: parseTree,
@@ -218,7 +218,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
   case 'Context': return (context) => {
 
-    return args.slice(1, -1).map(entry => entry(context)).reduce((obj, [key, value]) => {
+    return args.slice(1, -1).map(entry => entry(context)).reduce((obj, [ key, value ]) => {
       obj[key] = value;
 
       return obj;
@@ -275,7 +275,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
     return cartesianProduct(iterationContexts).map(ctx => {
       if (!Array.isArray(ctx)) {
-        ctx = [ctx];
+        ctx = [ ctx ];
       }
 
       return Object.assign({}, context, ...ctx);
@@ -465,7 +465,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     if (filterFn.type === 'number') {
       const idx = filterFn(context);
 
-      const value = filterTarget[idx < 0 ? filterTarget.length + idx : idx -1];
+      const value = filterTarget[idx < 0 ? filterTarget.length + idx : idx - 1];
 
       if (typeof value === 'undefined') {
         return null;
@@ -496,7 +496,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
       const iterationContext = {
         ...context,
         item: el,
-        ...Object.entries(el).reduce(function(itemScope, [key, value]) {
+        ...Object.entries(el).reduce(function(itemScope, [ key, value ]) {
           itemScope[ 'item.' + key ] = value;
 
           return itemScope;
@@ -552,7 +552,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
   case 'UnaryTests': return (context) => {
 
-    return (value={}) => {
+    return (value = {}) => {
 
       const negate = args[0] === 'not';
 

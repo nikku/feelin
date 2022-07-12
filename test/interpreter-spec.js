@@ -76,14 +76,14 @@ describe('interpreter', function() {
 
       expr('for i in [] return i', []);
 
-      expr('for a in b return (a).c', [1, 2], {
+      expr('for a in b return (a).c', [ 1, 2 ], {
         b: [
           { c: 1 },
           { c: 2 }
         ]
       });
 
-      expr('for w in widths, h in heights return w * h', [20, 40, 40, 80], {
+      expr('for w in widths, h in heights return w * h', [ 20, 40, 40, 80 ], {
         widths: [
           2,
           4
@@ -94,13 +94,13 @@ describe('interpreter', function() {
         ]
       });
 
-      expr('for a in 1 .. -1 return a', [1, 0, -1]);
+      expr('for a in 1 .. -1 return a', [ 1, 0, -1 ]);
 
-      expr('for a in 1 .. 3 return a', [1, 2, 3]);
+      expr('for a in 1 .. 3 return a', [ 1, 2, 3 ]);
 
-      expr('for a in 1 .. 2, b in 1 .. 2 return a * 10 + b', [11, 12, 21, 22]);
+      expr('for a in 1 .. 2, b in 1 .. 2 return a * 10 + b', [ 11, 12, 21, 22 ]);
 
-      expr('for i in 0..4 return if i = 0 then 1 else i * partial[-1]', [1, 1, 2, 6, 24 ]);
+      expr('for i in 0..4 return if i = 0 then 1 else i * partial[-1]', [ 1, 1, 2, 6, 24 ]);
 
       expr('for i in [1, 2] return i * b', [ 10, 20 ], {
         'b': 10
@@ -321,7 +321,7 @@ describe('interpreter', function() {
         }
       });
 
-      expr('[ {x:1, y:2}, {x:2, y:3} ].y', [2, 3]);
+      expr('[ {x:1, y:2}, {x:2, y:3} ].y', [ 2, 3 ]);
 
     });
 
@@ -342,7 +342,7 @@ describe('interpreter', function() {
 
       expr('[1, 2, 3][4]', null);
 
-      expr('[1,2,3][true]', [1, 2, 3]);
+      expr('[1,2,3][true]', [ 1, 2, 3 ]);
 
       expr('[1,2,3][false]', []);
 
@@ -378,14 +378,14 @@ describe('interpreter', function() {
         ]
       });
 
-      expr('[1, 2, 3, 4][item > 2]', [3, 4]);
+      expr('[1, 2, 3, 4][item > 2]', [ 3, 4 ]);
 
       expr('[ {x:1, y:2}, {x:2, y:3} ][x=1]', [ { x:1, y:2 } ]);
 
       // TODO(nikku): part of DMN spec
-      exprSkip('[{a: 1}, {a: 2}, {a: 3}][item.a >= 2]', [2, 3]);
+      exprSkip('[{a: 1}, {a: 2}, {a: 3}][item.a >= 2]', [ 2, 3 ]);
 
-      expr('[{a: 1}, {a: 2}, {a: 3}][a >= 2]', [ { a: 2 }, { a: 3 }]);
+      expr('[{a: 1}, {a: 2}, {a: 3}][a >= 2]', [ { a: 2 }, { a: 3 } ]);
 
       expr('[{item: 1}, {item: 2}, {item: 3}][item >= 2]', [ { item: 2 }, { item: 3 } ]);
 
@@ -435,11 +435,11 @@ describe('interpreter', function() {
           {a: {b: [3]}},
           {a: {b: [4, 5]}}
         ].a.b
-      `, [[1], [2.1, 2.2], [3], [4, 5]]);
+      `, [ [ 1 ], [ 2.1, 2.2 ], [ 3 ], [ 4, 5 ] ]);
 
       expr(`
         [{b: [1]}, {b: [2.1,2.2]}, {b: [3]}, {b: [4, 5]}].b
-      `, [[1], [2.1, 2.2], [3], [4, 5]]);
+      `, [ [ 1 ], [ 2.1, 2.2 ], [ 3 ], [ 4, 5 ] ]);
 
     });
 
@@ -640,14 +640,14 @@ describe('interpreter', function() {
 
     expr('abs(-1)', 1);
 
-    expr('index of([1, 2, 3, 2], 2)', [2, 4]);
+    expr('index of([1, 2, 3, 2], 2)', [ 2, 4 ]);
 
   });
 
 
   describe('implicit conversion', function() {
 
-    expr('3[item > 2]', [3]);
+    expr('3[item > 2]', [ 3 ]);
 
     expr('contains(["foobar"], "of")', false);
 

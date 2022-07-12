@@ -116,7 +116,7 @@ function parseModelFile(file) {
 
 function merge(test, expressions) {
 
-  for (const [_, expr ] of Object.entries(expressions)) {
+  for (const [ _, expr ] of Object.entries(expressions)) {
     const tc = test.cases[expr.name];
 
     if (!tc) {
@@ -196,7 +196,7 @@ function parseTestFile(file) {
     context.push({ type, closeDelimiter, stackDepth });
   }
 
-  function addTypeDelimiters(type, openDelimiter, closeDelimiter, printType=true) {
+  function addTypeDelimiters(type, openDelimiter, closeDelimiter, printType = true) {
 
     openElement(type, closeDelimiter);
 

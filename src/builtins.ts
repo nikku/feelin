@@ -189,7 +189,7 @@ const builtins = {
     return str.substring(index + match.length);
   }, [ 'string', 'string' ]),
 
-  'replace': fn(function(str, pattern, replacement, flags='') {
+  'replace': fn(function(str, pattern, replacement, flags = '') {
     return str.replace(new RegExp(pattern, 'ug' + flags), replacement.replace(/\$0/g, '$$&'));
   }, [ 'string', 'string', 'string' ]),
 
@@ -214,11 +214,11 @@ const builtins = {
 
   'list contains': fn(function(list, element) {
     return list.some(el => matches(el, element));
-  }, ['list', 'any?']),
+  }, [ 'list', 'any?' ]),
 
   'count': fn(function(list) {
     return list.length;
-  }, [ 'list']),
+  }, [ 'list' ]),
 
   'min': listFn(function(list) {
     return list.reduce((min, el) => min === null ? el : Math.min(min, el), null);
@@ -537,7 +537,7 @@ const builtins = {
       return null;
     }
 
-    return Object.entries(context).map(([key, value]) => ({ key, value }));
+    return Object.entries(context).map(([ key, value ]) => ({ key, value }));
   }, [ 'context' ]),
 };
 
@@ -670,10 +670,10 @@ function sum(list) {
   return list.reduce((sum, el) => sum === null ? el : sum + el, null);
 }
 
-function flatten<T>([x,...xs]: (T|T[])[]):T[] {
+function flatten<T>([ x,...xs ]: (T|T[])[]):T[] {
   return (
     x !== undefined
-      ? [...Array.isArray(x) ? flatten(x) : [x],...flatten(xs)]
+      ? [ ...Array.isArray(x) ? flatten(x) : [ x ],...flatten(xs) ]
       : []
   );
 }
@@ -690,7 +690,7 @@ function toDeepString(obj) {
   return toString(obj, true);
 }
 
-function toString(obj, wrap=false) {
+function toString(obj, wrap = false) {
 
   if (obj === null) {
     return 'null';

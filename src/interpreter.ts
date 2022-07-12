@@ -1,4 +1,4 @@
-import { Tree } from 'lezer';
+import { Tree, SyntaxNodeRef } from '@lezer/common';
 
 import { builtins } from './builtins';
 
@@ -6,6 +6,7 @@ import {
   parseExpressions,
   parseUnaryTests
 } from './parser';
+
 
 class Interpreter {
 
@@ -18,17 +19,27 @@ class Interpreter {
     const stack: StackEntry[] = [ root ];
 
     tree.iterate({
-      enter(node, start, end) {
+      enter(nodeRef) {
 
-        if (node.isError) {
-          throw new Error(`Statement unparseable at [${start}, ${end}]`);
+        const {
+          isError,
+          isSkipped
+        } = nodeRef.type;
+
+        const {
+          from,
+          to
+        } = nodeRef;
+
+        if (isError) {
+          throw new Error(`Statement unparseable at [${from}, ${to}]`);
         }
 
-        if (node.isSkipped) {
+        if (isSkipped) {
           return false;
         }
 
-        const nodeInput = input.slice(start, end);
+        const nodeInput = input.slice(from, to);
 
         stack.push({
           nodeInput,
@@ -36,20 +47,20 @@ class Interpreter {
         });
       },
 
-      leave(node, start, end) {
+      leave(nodeRef) {
 
-        if (node.isSkipped) {
+        if (nodeRef.type.isSkipped) {
           return;
         }
 
         const {
           nodeInput,
           args
-        } = stack.pop() as StackEntry;
+        } = stack.pop();
 
         const parent = stack[stack.length - 1];
 
-        const expr = evalNode(node, nodeInput, args);
+        const expr = evalNode(nodeRef, nodeInput, args);
 
         parent.args.push(expr);
       }
@@ -131,7 +142,7 @@ export function evaluate(expression: string, context: Record<string, any> = {}) 
 }
 
 
-function evalNode(node, input, args) {
+function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
   switch (node.name) {
   case 'ArithOp': return (context) => {

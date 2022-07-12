@@ -2,7 +2,8 @@ import {
   parser as grammarParser
 } from 'lezer-feel';
 
-import { Tree, ParserConfig } from 'lezer';
+import { ParserConfig } from '@lezer/lr';
+import { Tree } from '@lezer/common';
 
 type NameDefinition = {
   name: string,
@@ -13,8 +14,8 @@ type NameDefinition = {
 type ParseContext = Record<string, any>;
 
 type ParseResult = {
-  parsedContext: ParseContext
-  parsedInput: string
+  parsedContext: ParseContext,
+  parsedInput: string,
   tree: Tree
 };
 

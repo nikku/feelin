@@ -277,6 +277,7 @@ describe('interpreter', function() {
 
     describe('InstanceOf', function() {
 
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       function B() { }
 
       expr('a instance of B', true, {
@@ -288,6 +289,12 @@ describe('interpreter', function() {
 
 
     describe('PathExpression', function() {
+
+      expr('a.b', 1, {
+        a: {
+          b: 1
+        }
+      });
 
       expr('(a).b', 1, {
         a: {
@@ -573,6 +580,7 @@ describe('interpreter', function() {
 
   describe.skip('properties', function() {
 
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     function Duration() {}
 
     expr('time("10:30:00+05:00").time offset', new Duration('PT5H'));
@@ -760,6 +768,7 @@ function expr(...args) {
 }
 
 // eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function exprOnly(...args) {
   return createExprVerifier({
     args,
@@ -768,6 +777,7 @@ function exprOnly(...args) {
 }
 
 // eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function exprSkip(...args) {
   return createExprVerifier({
     args,
@@ -776,6 +786,7 @@ function exprSkip(...args) {
 }
 
 // eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function unaryOnly(...args) {
   return createUnaryVerifier({
     args,

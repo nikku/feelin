@@ -1,3 +1,5 @@
+/* eslint @typescript-eslint/no-var-requires: OFF */
+
 const path = require('path');
 const fs = require('fs');
 
@@ -221,7 +223,7 @@ function parseTestFile(file) {
   }
 
   const parser = createParser({
-    openTag(el, decodeEntities, selfClosing, getContext) {
+    openTag(el, _decodeEntities, _selfClosing, _getContext) {
 
       if (el.name === 'test:modelName') {
         modelName = true;
@@ -355,7 +357,7 @@ function parseTestFile(file) {
       }
     },
 
-    closeTag(el, _, selfClosing) {
+    closeTag(el, _, _selfClosing) {
 
       if (el.name === 'test:modelName') {
         modelName = false;

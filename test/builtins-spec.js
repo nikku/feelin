@@ -306,15 +306,11 @@ describe('builtin functions', function() {
 
 
   // TODO(nikku): support this
-  describe.skip('Range', function() {
-
-  });
+  describe.skip('Range');
 
 
   // TODO(nikku): support this
-  describe.skip('Temporal', function() {
-
-  });
+  describe.skip('Temporal');
 
 
   // TODO(nikku): support this
@@ -379,6 +375,7 @@ function expr(...args) {
 }
 
 // eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function exprOnly(...args) {
   return createExprVerifier({
     args,
@@ -387,6 +384,7 @@ function exprOnly(...args) {
 }
 
 // eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function exprSkip(...args) {
   return createExprVerifier({
     args,

@@ -93,7 +93,7 @@ class Parser {
 
   _findNames(context: ParseContext): NameDefinition[] {
 
-    let uid = 0;
+    const uid = 0;
 
     return Object.keys(context).filter(key => /[\s./\-'+*]/.test(key)).map(name => {
 

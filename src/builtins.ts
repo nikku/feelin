@@ -118,7 +118,7 @@ const builtins = {
     throw notImplemented('number');
   },
 
-  'string': fn(function(obj, b) {
+  'string': fn(function(obj) {
     if (arguments.length !== 1) {
       return null;
     }
@@ -323,11 +323,11 @@ const builtins = {
     }, []);
   }, [ 'list', 'any' ]),
 
-  'union': fn(function(...lists) {
+  'union': fn(function(..._lists) {
     throw notImplemented('union');
   }, [ 'list' ]),
 
-  'distinct values': fn(function(list) {
+  'distinct values': fn(function(_list) {
     throw notImplemented('distinct values');
   }, [ 'list' ]),
 
@@ -341,15 +341,15 @@ const builtins = {
     }, 1);
   }, 'number'),
 
-  'median': listFn(function(numbers) {
+  'median': listFn(function(_numbers) {
     throw notImplemented('median');
   }, 'number'),
 
-  'stddev': listFn(function(numbers) {
+  'stddev': listFn(function(_numbers) {
     throw notImplemented('stddev');
   }, 'number'),
 
-  'mode': listFn(function(numbers) {
+  'mode': listFn(function(_numbers) {
     throw notImplemented('mode');
   }, 'number'),
 
@@ -670,7 +670,7 @@ function sum(list) {
   return list.reduce((sum, el) => sum === null ? el : sum + el, null);
 }
 
-function flatten([x,...xs]: any[]) {
+function flatten<T>([x,...xs]: (T|T[])[]):T[] {
   return (
     x !== undefined
       ? [...Array.isArray(x) ? flatten(x) : [x],...flatten(xs)]
@@ -690,7 +690,7 @@ function toDeepString(obj) {
   return toString(obj, true);
 }
 
-function toString(obj, wrap:boolean=false) {
+function toString(obj, wrap=false) {
 
   if (obj === null) {
     return 'null';
@@ -708,7 +708,7 @@ function toString(obj, wrap:boolean=false) {
     return '[' + obj.map(toDeepString).join(', ') + ']';
   }
 
-  return '{' + Object.entries(obj).map((entry, idx) => {
+  return '{' + Object.entries(obj).map((entry) => {
     return toKeyString(entry[0]) + ': ' + toDeepString(entry[1]);
   }).join(', ') + '}';
 }

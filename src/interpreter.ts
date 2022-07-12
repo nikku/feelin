@@ -188,9 +188,9 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
   }, Test('boolean'));
 
-  case 'Wildcard': return (context) => true;
+  case 'Wildcard': return (_context) => true;
 
-  case 'null': return (context) => {
+  case 'null': return (_context) => {
     return null;
   };
 
@@ -310,13 +310,13 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     };
   }, Test('boolean'));
 
-  case 'NumericLiteral': return tag((context) => input.includes('.') ? parseFloat(input) : parseInt(input), 'number');
+  case 'NumericLiteral': return tag((_context) => input.includes('.') ? parseFloat(input) : parseInt(input), 'number');
 
-  case 'BooleanLiteral': return tag((context) => input === 'true' ? true : false, 'boolean');
+  case 'BooleanLiteral': return tag((_context) => input === 'true' ? true : false, 'boolean');
 
-  case 'StringLiteral': return tag((context) => input.slice(1, -1), 'string');
+  case 'StringLiteral': return tag((_context) => input.slice(1, -1), 'string');
 
-  case 'PositionalParameters': return (context) => args;
+  case 'PositionalParameters': return (_context) => args;
 
   case 'DateTimeConstructor': return (context) => {
     return getBuiltin(input, context);
@@ -356,7 +356,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
   })();
 
-  case 'Parameters': return args.length === 3 ? args[1] : (context) => [];
+  case 'Parameters': return args.length === 3 ? args[1] : (_context) => [];
 
   case 'Comparison': return (context) => {
 
@@ -614,7 +614,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
   }
 }
 
-function getBuiltin(name, context) {
+function getBuiltin(name, _context) {
   return builtins[name];
 }
 
@@ -672,7 +672,7 @@ function compareValOrFn(valOrFn, expr) {
 
 interface RangeArray<T> extends Array<T> {
   __isRange: boolean
-};
+}
 
 function range(size: number, startAt = 0, direction = 1) {
 
@@ -717,15 +717,19 @@ function coalecenseTypes(a, b) {
   return 'any';
 }
 
-function tag(fn, type) {
+type ContextFn<T> = (context: any) => T;
+type TaggedFn = {
+  type: string
+};
 
-  fn.type = type;
+function tag<Z, T extends ContextFn<Z>>(fn: T, type: string) : T & TaggedFn {
 
-  fn.toString = function() {
-    return `TaggedFunction[${type}] ${Function.prototype.toString.call(fn)}`;
-  };
-
-  return fn;
+  return Object.assign(fn, {
+    type,
+    toString() {
+      return `TaggedFunction[${type}] ${Function.prototype.toString.call(fn)}`;
+    }
+  });
 }
 
 function combineResult(result, match) {
@@ -741,7 +745,7 @@ function isTruthy(obj) {
   return obj !== false && obj !== null;
 }
 
-function Test(type) {
+function Test(type: string): string {
   return `Test<${type}>`;
 }
 

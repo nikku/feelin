@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@lezer/lr": "^1.2.0",
-    "lezer-feel": "^0.5.1"
+    "lezer-feel": "^0.6.0"
   },
   "repository": {
     "type": "git",
@@ -48,7 +48,7 @@
     "lint:types": "tsc --noEmit test/types.ts",
     "build": "rollup -c",
     "generate-typings": "tsc src/index.ts --emitDeclarationOnly --declaration --outDir dist",
-    "prepare": "run-s build",
+    "prepare": "run-s build generate-typings",
     "test": "mocha test/*-spec.js",
     "test:watch": "npm test -- -w",
     "tck": "run-s tck:extract tck:test",

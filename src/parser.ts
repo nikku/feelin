@@ -11,9 +11,9 @@ type NameDefinition = {
   replacer: RegExp
 };
 
-type ParseContext = Record<string, any>;
+export type ParseContext = Record<string, any>;
 
-type ParseResult = {
+export type ParseResult = {
   parsedContext: ParseContext,
   parsedInput: string,
   tree: Tree

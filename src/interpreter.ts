@@ -8,6 +8,8 @@ import {
 } from './parser';
 
 
+export type InterpreterContext = Record<string, any>;
+
 class Interpreter {
 
   _buildExecutionTree(tree: Tree, input: string) {
@@ -69,7 +71,7 @@ class Interpreter {
     return root.args[root.args.length - 1];
   }
 
-  evaluate(expression: string, context = {}) {
+  evaluate(expression: string, context: InterpreterContext = {}) {
 
     const {
       tree: parseTree,
@@ -87,7 +89,7 @@ class Interpreter {
     };
   }
 
-  unaryTest(expression: string, context = {}) {
+  unaryTest(expression: string, context: InterpreterContext = {}) {
 
     const {
       tree: parseTree,
@@ -109,7 +111,7 @@ class Interpreter {
 
 const interpreter = new Interpreter();
 
-export function unaryTest(expression: string, context: Record<string, any> = {}) {
+export function unaryTest(expression: string, context: InterpreterContext = {}) {
   const value = context['?'] || null;
 
   const {
@@ -123,7 +125,7 @@ export function unaryTest(expression: string, context: Record<string, any> = {})
   return test(value);
 }
 
-export function evaluate(expression: string, context: Record<string, any> = {}) {
+export function evaluate(expression: string, context: InterpreterContext = {}) {
 
   const {
     root,
@@ -717,7 +719,7 @@ function coalecenseTypes(a, b) {
   return 'any';
 }
 
-type ContextFn<T> = (context: any) => T;
+type ContextFn<T> = (context: InterpreterContext) => T;
 type TaggedFn = {
   type: string
 };

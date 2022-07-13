@@ -1,9 +1,3 @@
-export {
-  unaryTest,
-  evaluate
-} from './interpreter';
+export * from './interpreter';
 
-export {
-  parseExpressions,
-  parseUnaryTests
-} from './parser';
+export * from './parser';

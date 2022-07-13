@@ -6,6 +6,11 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 0.26.0
+
+* `CHORE`: improve typings
+* `DEPS`: bump to `lezer-feel@0.6.0`
+
 ## 0.25.0
 
 * `CHORE`: add typings

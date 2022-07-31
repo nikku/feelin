@@ -220,6 +220,33 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     }, {});
   };
 
+  case 'FunctionBody': return args[0];
+
+  case 'FormalParameters': return args;
+
+  case 'FormalParameter': return args[0];
+
+  case 'ParameterName': return args.join(' ');
+
+  case 'FunctionDefinition': return (context) => {
+    const parameterNames = args[2];
+
+    const fnBody = args[4];
+
+    return (...args) => {
+
+      const fnContext = parameterNames.reduce((context, name, idx) => {
+
+        // support positional parameters
+        context[name] = args[idx];
+
+        return context;
+      }, { ...context });
+
+      return fnBody(fnContext);
+    };
+  };
+
   case 'ContextEntry': return (context) => {
 
     const key = typeof args[0] === 'function' ? args[0](context) : args[0];

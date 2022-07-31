@@ -82,9 +82,17 @@ describe('interpreter', function() {
 
     describe('FunctionDefinition', function() {
 
-      exprSkip(`
+      expr(`
         ({
           foo: function(a + b) a +b + 5,
+          bar: foo(5)
+        }).bar
+      `, 10);
+
+      expr(`
+        ({
+          woop: 5,
+          foo: function(a + b) a +b + woop,
           bar: foo(5)
         }).bar
       `, 10);

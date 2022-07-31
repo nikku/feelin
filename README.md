@@ -33,7 +33,7 @@ evaluate('every rate in rates() satisfies rate < 10', {
 ## Features
 
 * [x] Recognizes full FEEL grammar
-* [x] Supports names with spaces
+* [x] Context sensitive (incl. names with spaces)
 * [x] Recovers on errors
 * [ ] Provides built-in functions
 * [ ] Passes all FEEL tests in the [DMN TCK](https://github.com/dmn-tck/tck)

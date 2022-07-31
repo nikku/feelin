@@ -80,6 +80,18 @@ describe('interpreter', function() {
     });
 
 
+    describe('FunctionDefinition', function() {
+
+      exprSkip(`
+        ({
+          foo: function(a + b) a +b + 5,
+          bar: foo(5)
+        }).bar
+      `, 10);
+
+    });
+
+
     describe('ForExpression', function() {
 
       expr('for i in [] return i', []);

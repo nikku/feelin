@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@lezer/lr": "^1.2.0",
-    "lezer-feel": "^0.6.0"
+    "lezer-feel": "^0.8.6"
   },
   "repository": {
     "type": "git",
@@ -47,10 +47,12 @@
     "lint": "eslint . --ext js,ts",
     "lint:types": "tsc --noEmit test/types.ts",
     "build": "rollup -c",
+    "build:dev": "npm run build -- --watch",
+    "dev": "run-p *:dev",
     "generate-typings": "tsc src/index.ts --emitDeclarationOnly --declaration --outDir dist",
     "prepare": "run-s build generate-typings",
     "test": "mocha test/*-spec.js",
-    "test:watch": "npm test -- -w",
+    "test:dev": "chokidar '{dist,test}/**/*.js' -c 'npm test'",
     "tck": "run-s tck:extract tck:test",
     "tck:extract": "node tasks/extract-tck-tests.js ../dmn-tck",
     "tck:test": "mocha test/tck/*.js"

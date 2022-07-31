@@ -55,9 +55,17 @@ describe('interpreter', function() {
         }
       });
 
+      expr('with  spaces()', 1, {
+        'with spaces': function() {
+          return 1;
+        }
+      });
+
       expr('foo.bar(b, c)', 5, {
-        'foo.bar': function(b, c) {
-          return b + c;
+        foo: {
+          bar: function(b, c) {
+            return b + c;
+          }
         },
         b: 2,
         c: 3
@@ -275,7 +283,7 @@ describe('interpreter', function() {
     });
 
 
-    describe('InstanceOf', function() {
+    describe('InstanceOfExpression', function() {
 
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       function B() { }
@@ -427,6 +435,10 @@ describe('interpreter', function() {
       expr('{ "foo+bar((!!],foo": 10 }', { 'foo+bar((!!],foo': 10 });
 
       expr('{ "": 20 }', { '': 20 });
+
+      expr('{ hello world: 10 }', { 'hello world': 10 });
+
+      expr('{ hello  world: 10 }', { 'hello world': 10 });
 
       expr(`
         [

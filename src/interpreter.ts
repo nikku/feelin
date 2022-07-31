@@ -1,4 +1,5 @@
 import { Tree, SyntaxNodeRef } from '@lezer/common';
+import { normalizeContext } from 'lezer-feel';
 
 import { builtins } from './builtins';
 
@@ -73,36 +74,24 @@ class Interpreter {
 
   evaluate(expression: string, context: InterpreterContext = {}) {
 
-    const {
-      tree: parseTree,
-      parsedContext,
-      parsedInput
-    } = parseExpressions(expression, context);
+    const parseTree = parseExpressions(expression, context);
 
     const root = this._buildExecutionTree(parseTree, expression);
 
     return {
       parseTree,
-      parsedContext,
-      parsedInput,
       root
     };
   }
 
   unaryTest(expression: string, context: InterpreterContext = {}) {
 
-    const {
-      tree: parseTree,
-      parsedContext,
-      parsedInput
-    } = parseUnaryTests(expression, context);
+    const parseTree = parseUnaryTests(expression, context);
 
     const root = this._buildExecutionTree(parseTree, expression);
 
     return {
       parseTree,
-      parsedContext,
-      parsedInput,
       root
     };
   }
@@ -115,12 +104,11 @@ export function unaryTest(expression: string, context: InterpreterContext = {}) 
   const value = context['?'] || null;
 
   const {
-    root,
-    parsedContext
+    root
   } = interpreter.unaryTest(expression, context);
 
   // root = fn(ctx) => test(val)
-  const test = root(parsedContext);
+  const test = root(normalizeContext(context));
 
   return test(value);
 }
@@ -128,13 +116,12 @@ export function unaryTest(expression: string, context: InterpreterContext = {}) 
 export function evaluate(expression: string, context: InterpreterContext = {}) {
 
   const {
-    root,
-    parsedContext
+    root
   } = interpreter.evaluate(expression, context);
 
   // root = [ fn(ctx) ]
 
-  const results = root(parsedContext);
+  const results = root(normalizeContext(context));
 
   if (results.length === 1) {
     return results[0];
@@ -238,21 +225,23 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
   case 'Key': return args[0];
 
+  case 'Identifier': return input;
+
   case 'SpecialFunctionName': return (context) => getBuiltin(input, context);
 
-  case 'Name': return input;
+  case 'Name': return args.join(' ');
 
-  case 'VariableName': return (context) => getBuiltin(input, context) || getFromContext(input, context);
-
-  case 'QualifiedName': return (context) => {
-
-    const name = args.join('.');
+  case 'VariableName': return (context) => {
+    const name = args.join(' ');
 
     return getBuiltin(name, context) || getFromContext(name, context);
   };
 
-  case '?': return (context) => getFromContext('?', context);
+  case 'QualifiedName': return (context) => {
+    return args.reduce((context, arg) => arg(context), context);
+  };
 
+  case '?': return (context) => getFromContext('?', context);
 
   // expression
   // expression ".." expression
@@ -289,7 +278,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     return extractValue(context, args[0], args[2]);
   };
 
-  case 'InstanceOf': return tag((context) => {
+  case 'InstanceOfExpression': return tag((context) => {
 
     const a = args[0](context);
     const b = args[3](context);
@@ -443,9 +432,9 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     const pathProp = args[1];
 
     if (Array.isArray(pathTarget)) {
-      return pathTarget.map(el => el[pathProp]);
+      return pathTarget.map(pathProp);
     } else {
-      return pathTarget[pathProp];
+      return pathProp(pathTarget);
     }
   };
 
@@ -620,10 +609,9 @@ function getBuiltin(name, _context) {
   return builtins[name];
 }
 
-function getFromContext(variable, context) {
-
-  if (variable in context) {
-    return context[variable];
+function getFromContext(name, context) {
+  if (name in context) {
+    return context[name];
   }
 
   return null;

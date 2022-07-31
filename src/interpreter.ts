@@ -207,10 +207,16 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
   case 'Context': return (context) => {
 
-    return args.slice(1, -1).map(entry => entry(context)).reduce((obj, [ key, value ]) => {
-      obj[key] = value;
+    return args.slice(1, -1).reduce((obj, arg) => {
+      const [ key, value ] = arg({
+        ...context,
+        ...obj
+      });
 
-      return obj;
+      return {
+        ...obj,
+        [key]: value
+      };
     }, {});
   };
 

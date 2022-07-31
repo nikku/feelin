@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@lezer/lr": "^1.2.0",
-    "lezer-feel": "^0.8.6"
+    "lezer-feel": "^0.8.8"
   },
   "repository": {
     "type": "git",

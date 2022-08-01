@@ -668,7 +668,14 @@ function listFn(fnDefinition, type, parameterNames = null) {
   return wrappedFn;
 }
 
-function fn(fnDefinition, argDefinitions) {
+/**
+ * @param {Function} fnDefinition
+ * @param {string[]} argDefinitions
+ * @param {string[]} [parameterNames]
+ *
+ * @return {Function}
+ */
+function fn(fnDefinition, argDefinitions, parameterNames = null) {
 
   const checkArgs = createArgsValidator(argDefinitions);
 
@@ -683,7 +690,7 @@ function fn(fnDefinition, argDefinitions) {
     return fnDefinition(...convertedArgs);
   };
 
-  wrappedFn.$args = parseParameterNames(fnDefinition);
+  wrappedFn.$args = parameterNames || parseParameterNames(fnDefinition);
 
   return wrappedFn;
 }

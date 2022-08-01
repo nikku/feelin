@@ -149,71 +149,71 @@ const builtins = {
 
 
   // 10.3.4.3 String functions
-  'substring': fn(function(str, start, length) {
+  'substring': fn(function(string, start, length) {
 
-    const _start = (start < 0 ? str.length + start : start - 1);
+    const _start = (start < 0 ? string.length + start : start - 1);
 
-    const arr = Array.from(str);
+    const arr = Array.from(string);
 
     return (
       typeof length !== 'undefined'
         ? arr.slice(_start, _start + length)
         : arr.slice(_start)
     ).join('');
-  }, [ 'string', 'number', 'number?' ]),
+  }, [ 'string', 'number', 'number?' ], [ 'string', 'start position', 'length' ]),
 
-  'string length': fn(function(str) {
-    return countSymbols(str);
+  'string length': fn(function(string) {
+    return countSymbols(string);
   }, [ 'string' ]),
 
-  'upper case': fn(function(str) {
-    return str.toUpperCase();
+  'upper case': fn(function(string) {
+    return string.toUpperCase();
   }, [ 'string' ]),
 
-  'lower case': fn(function(str) {
-    return str.toLowerCase();
+  'lower case': fn(function(string) {
+    return string.toLowerCase();
   }, [ 'string' ]),
 
-  'substring before': fn(function(str, match) {
+  'substring before': fn(function(string, match) {
 
-    const index = str.indexOf(match);
+    const index = string.indexOf(match);
 
     if (index === -1) {
       return '';
     }
 
-    return str.substring(0, index);
+    return string.substring(0, index);
   }, [ 'string', 'string' ]),
 
-  'substring after': fn(function(str, match) {
+  'substring after': fn(function(string, match) {
 
-    const index = str.indexOf(match);
+    const index = string.indexOf(match);
 
     if (index === -1) {
       return '';
     }
 
-    return str.substring(index + match.length);
+    return string.substring(index + match.length);
   }, [ 'string', 'string' ]),
 
-  'replace': fn(function(str, pattern, replacement, flags = '') {
-    return str.replace(new RegExp(pattern, 'ug' + flags), replacement.replace(/\$0/g, '$$&'));
+  'replace': fn(function(input, pattern, replacement, flags = '') {
+    return input.replace(new RegExp(pattern, 'ug' + flags.replace(/[x]/g, '')), replacement.replace(/\$0/g, '$$&'));
   }, [ 'string', 'string', 'string' ]),
 
-  'contains': fn(function(str, match) {
-    return str.includes(match);
+  'contains': fn(function(string, match) {
+    return string.includes(match);
   }, [ 'string', 'string' ]),
 
-  'starts with': fn(function(str, match) {
-    return str.startsWith(match);
+  'starts with': fn(function(string, match) {
+    return string.startsWith(match);
   }, [ 'string', 'string' ]),
 
-  'ends with': fn(function(str, match) {
-    return str.endsWith(match);
+  'ends with': fn(function(string, match) {
+    return string.endsWith(match);
   }, [ 'string', 'string' ]),
 
-  'split': fn(function(str, separator) {
-    return str.split(new RegExp(separator, 'u'));
+  'split': fn(function(string, separator) {
+    return string.split(new RegExp(separator, 'u'));
   }, [ 'string', 'string' ]),
 
 
@@ -342,21 +342,26 @@ const builtins = {
     return flatten(list);
   }, [ 'list' ]),
 
-  'product': listFn(function(numbers) {
-    return numbers.reduce((result, n) => {
+  'product': listFn(function(list) {
+
+    if (list.length === 0) {
+      return null;
+    }
+
+    return list.reduce((result, n) => {
       return result * n;
     }, 1);
   }, 'number'),
 
-  'median': listFn(function(_numbers) {
+  'median': listFn(function(list) {
     throw notImplemented('median');
   }, 'number'),
 
-  'stddev': listFn(function(_numbers) {
+  'stddev': listFn(function(list) {
     throw notImplemented('stddev');
   }, 'number'),
 
-  'mode': listFn(function(_numbers) {
+  'mode': listFn(function(list) {
     throw notImplemented('mode');
   }, 'number'),
 
@@ -373,21 +378,21 @@ const builtins = {
     return round(n * offset) / (offset);
   }, [ 'number', 'number' ]),
 
-  'floor': fn(function(number) {
-    return Math.floor(number);
+  'floor': fn(function(n) {
+    return Math.floor(n);
   }, [ 'number' ]),
 
-  'ceiling': fn(function(number) {
-    return Math.ceil(number);
+  'ceiling': fn(function(n) {
+    return Math.ceil(n) + 0;
   }, [ 'number' ]),
 
-  'abs': fn(function(number) {
+  'abs': fn(function(n) {
 
-    if (typeof number !== 'number') {
+    if (typeof n !== 'number') {
       return null;
     }
 
-    return Math.abs(number);
+    return Math.abs(n);
   }, [ 'number' ]),
 
   'modulo': fn(function(dividend, divisor) {
@@ -520,31 +525,31 @@ const builtins = {
 
   // 10.3.4.10 Context function
 
-  'get value': fn(function(context, key) {
+  'get value': fn(function(m, key) {
 
     if (arguments.length !== 2) {
       return null;
     }
 
-    if (!context) {
+    if (!m) {
       return null;
     }
 
-    return key in context ? context[key] : null;
+    return key in m ? m[key] : null;
 
   }, [ 'context', 'string' ]),
 
-  'get entries': fn(function(context) {
+  'get entries': fn(function(m) {
 
     if (arguments.length !== 1) {
       return null;
     }
 
-    if (Array.isArray(context)) {
+    if (Array.isArray(m)) {
       return null;
     }
 
-    return Object.entries(context).map(([ key, value ]) => ({ key, value }));
+    return Object.entries(m).map(([ key, value ]) => ({ key, value }));
   }, [ 'context' ]),
 };
 

@@ -366,7 +366,39 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     return getBuiltin(input, context);
   };
 
-  case 'DateTimeLiteral':
+  case 'DateTimeLiteral': return (context) => {
+
+    // AtLiteral
+    if (args.length === 1) {
+      return args[0](context);
+    }
+
+    // FunctionInvocation
+    else {
+      const wrappedFn = wrapFunction(args[0](context));
+
+      if (!wrappedFn) {
+        throw new Error(`Failed to evaluate ${input}: Target is not a function`);
+      }
+
+      const contextOrArgs = args[2](context);
+
+      return wrappedFn.invoke(contextOrArgs);
+    }
+
+  };
+
+  case 'AtLiteral': return (context) => {
+
+    const wrappedFn = wrapFunction(getBuiltin('@', context));
+
+    if (!wrappedFn) {
+      throw new Error(`Failed to evaluate ${input}: Target is not a function`);
+    }
+
+    return wrappedFn.invoke([ args[0](context) ]);
+  };
+
   case 'FunctionInvocation': return (context) => {
 
     const wrappedFn = wrapFunction(args[0](context));

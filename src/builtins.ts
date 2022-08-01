@@ -138,6 +138,9 @@ const builtins = {
     throw notImplemented('years and months duration');
   },
 
+  '@': function() {
+    throw notImplemented('@');
+  },
 
   // 10.3.4.2 Boolean function
   'not': fn(function(bool) {

@@ -777,6 +777,21 @@ describe('interpreter', function() {
       expect(error.message).to.eql('Failed to evaluate foo(1): Target is not a function');
     });
 
+
+    it('should throw Error on AtLiteral', function() {
+
+      let error;
+
+      try {
+        evaluate('@"PT01H"');
+      } catch (err) {
+        error = err;
+      }
+
+      expect(error).to.exist;
+      expect(error.message).to.eql('not implemented: @');
+    });
+
   });
 
 });

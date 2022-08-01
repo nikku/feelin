@@ -679,11 +679,11 @@ describe('interpreter', function() {
   });
 
 
-  describe.skip('equality', function() {
+  describe('equality', function() {
 
     expr('false = 0', null);
 
-    expr('false = null', false);
+    exprSkip('false = null', false);
 
     expr('true = 1', null);
 
@@ -697,7 +697,7 @@ describe('interpreter', function() {
 
     expr('[1] = [2]', false);
 
-    expr('[] = null', false);
+    exprSkip('[] = null', false);
 
     expr('[] = 0', null);
 
@@ -707,15 +707,17 @@ describe('interpreter', function() {
 
     expr('{foo: "bar"} = {"foo": "bar"}', true);
 
-    expr('{} = null', false);
+    exprSkip('{} = null', false);
 
     expr('{} = []', null);
 
-    expr('date("2018-12-08") = date("2018-12-08")', true);
+    exprSkip('date("2018-12-08") = date("2018-12-08")', true);
 
     expr('[1,2,[3, 4]] = [1,2,[3, 4]]', true);
 
     expr('{a: {c: "bar", b: "foo"}} = {a: {b: "foo", c: "bar"}}', true);
+
+    expr('[{b: [1]}, {b: [2.1,2.2]}, {b: [3]}, {b: [4, 5]}].b = [[1], [2.1, 2.2], [3], [4, 5]]', true);
 
   });
 

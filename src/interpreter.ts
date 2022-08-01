@@ -166,7 +166,9 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
         const _a = a(context);
         const _b = b(context);
 
-        return fn(_a, _b) ? (context.__extractLeft ? _a : true) : false;
+        const result = fn(_a, _b);
+
+        return result ? (context.__extractLeft ? _a : true) : result;
       };
     };
 
@@ -892,6 +894,22 @@ function isArray(e) {
 
 function getType(e) {
 
+  if (e === null || e === undefined) {
+    return 'nil';
+  }
+
+  if (typeof e === 'boolean') {
+    return 'boolean';
+  }
+
+  if (typeof e === 'number') {
+    return 'number';
+  }
+
+  if (typeof e === 'string') {
+    return 'string';
+  }
+
   if (isContext(e)) {
     return 'context';
   }
@@ -900,32 +918,28 @@ function getType(e) {
     return 'list';
   }
 
-  if (e === null || e === undefined) {
-    return 'nil';
-  }
-
   return 'literal';
 }
 
 function compareEquality(a, b) {
 
-  if (isArray(a) && a.length === 1) {
+  if (isArray(a) && a.length < 2) {
     a = a[0];
   }
 
-  if (isArray(b) && b.length === 1) {
+  if (isArray(b) && b.length < 2) {
     b = b[0];
   }
 
   const aType = getType(a);
   const bType = getType(b);
 
-  if (aType === 'nil' || bType === 'nil') {
-    return a == b;
+  if (aType !== bType) {
+    return null;
   }
 
-  if (aType !== bType) {
-    return false;
+  if (aType === 'nil') {
+    return true;
   }
 
   if (aType === 'list') {
@@ -952,5 +966,9 @@ function compareEquality(a, b) {
     );
   }
 
-  return a == b;
+  if (a == b) {
+    return true;
+  }
+
+  return aType === bType ? false : null;
 }

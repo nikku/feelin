@@ -482,6 +482,12 @@ describe('interpreter', function() {
 
       expr('[1, a, 5 * 3]', [ 1, 2, 15 ], { a: 2 });
 
+      expr('true[false]', []);
+
+      expr('"foo"[false]', []);
+
+      expr('100[false]', []);
+
     });
 
 

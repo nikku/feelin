@@ -555,7 +555,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
       if (filterFn(context)) {
         return filterTarget;
       } else {
-        return Array.isArray(target) ? [] : null;
+        return [];
       }
     }
 

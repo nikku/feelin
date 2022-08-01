@@ -1,6 +1,6 @@
 ## Feelin
 
-[![Build Status](https://img.shields.io/github/workflow/status/nikku/feelin/CI)](https://github.com/nikku/feelin/actions?query=workflow%3ACI)
+[![CI](https://github.com/nikku/feelin/actions/workflows/CI.yml/badge.svg)](https://github.com/nikku/feelin/actions/workflows/CI.yml)
 
 A FEEL parser and interpreter written in JavaScript. [__:arrow_right: Try it out__](https://nikku.github.io/feel-playground).
 
@@ -35,8 +35,9 @@ evaluate('every rate in rates() satisfies rate < 10', {
 * [x] Recognizes full FEEL grammar
 * [x] Context sensitive (incl. names with spaces)
 * [x] Recovers on errors
-* [ ] Provides built-in functions
-* [ ] Passes all FEEL tests in the [DMN TCK](https://github.com/dmn-tck/tck)
+* [ ] Temporal types and operations
+* [ ] Built-in FEEL functions
+* [ ] Full [DMN TCK](https://github.com/dmn-tck/tck) compliance
 
 
 ## Related

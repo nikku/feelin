@@ -1,9 +1,6 @@
-import {
-  sync as glob
-} from 'fast-glob';
+import glob from 'fast-glob';
 
 import fs from 'fs';
-
 
 import {
   expect
@@ -11,7 +8,7 @@ import {
 
 import {
   evaluate
-} from '../dist/index.esm';
+} from '../../dist/index.esm.js';
 
 
 const NOT_IMPLEMENTED = {};
@@ -19,13 +16,15 @@ const NOT_IMPLEMENTED = {};
 
 describe('tck', function() {
 
-  const suitePaths = glob('tmp/dmn-tck/*/*.json');
+  const suitePaths = glob.sync('tmp/dmn-tck/*/*.json');
 
   for (const suitePath of suitePaths) {
 
     const suite = JSON.parse(fs.readFileSync(suitePath, 'utf8'));
 
-    describe(suite.testName, function() {
+    const ddescribe = skipSuite(suite.testName) ? describe.skip : describe;
+
+    ddescribe(suite.testName, function() {
 
       for (const [ _, c ] of Object.entries(suite.cases)) {
 
@@ -51,7 +50,7 @@ describe('tck', function() {
             expect(b).not.to.exist;
           }
 
-          expect(a).to.eql(b);
+          expect(a, expression).to.eql(b, expectedValue);
         });
 
       }
@@ -73,4 +72,8 @@ function tryEval(expr) {
 
     return new Error(err.message);
   }
+}
+
+function skipSuite(name) {
+  return [ '0076-feel-external-java-test-01.xml' ].includes(name);
 }

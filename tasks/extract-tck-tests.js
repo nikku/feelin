@@ -1,15 +1,15 @@
 /* eslint @typescript-eslint/no-var-requires: OFF */
 
-const path = require('path');
-const fs = require('fs');
+import path from 'path';
+import fs from 'fs';
 
-const mkdirp = require('mkdirp').sync;
+import mkdirp from 'mkdirp';
 
-const glob = require('fast-glob').sync;
+import glob from 'fast-glob';
 
-const {
-  Parser: SAXParser
-} = require('saxen');
+import {
+  Parser as SAXParser
+} from 'saxen';
 
 const arg = process.argv[2];
 
@@ -22,7 +22,7 @@ if (!arg || arg === '--help' || arg === '-h') {
 const tckLocation = path.resolve(arg);
 
 
-const tests = glob('TestCases/*/*-feel-*/*.xml', { cwd: tckLocation });
+const tests = glob.sync('TestCases/*/*-feel-*/*.xml', { cwd: tckLocation });
 
 
 for (const testGlob of tests) {
@@ -41,7 +41,7 @@ for (const testGlob of tests) {
 
   const resultDir = path.join('tmp/dmn-tck', testDir.substring(testDir.lastIndexOf('/')));
 
-  mkdirp(resultDir);
+  mkdirp.sync(resultDir);
 
   fs.writeFileSync(path.join(resultDir, test.testName + '.json'), JSON.stringify(result, 0, 2), 'utf8');
 
@@ -56,9 +56,9 @@ function createParser(handlers) {
   // elements in other namespaces will still be processed
   parser.ns({
     'http://www.omg.org/spec/DMN/20160719/testcase': 'test',
-    'http://www.omg.org/spec/DMN/20180521/MODEL/': 'dmn',
+    'https://www.omg.org/spec/DMN/20191111/MODEL/': 'dmn',
     'http://www.omg.org/spec/DMN/20180521/DI/': 'di',
-    'http://www.omg.org/spec/DMN/20180521/DMNDI/': 'dmndi',
+    'https://www.omg.org/spec/DMN/20191111/DMNDI/': 'dmndi',
     'http://www.omg.org/spec/DMN/20180521/DC/': 'dc',
     'http://www.w3.org/2001/XMLSchema': 'xs',
     'http://www.w3.org/2001/XMLSchema-instance': 'xsi'
@@ -80,19 +80,25 @@ function parseModelFile(file) {
   let expression;
 
   let text = false;
+  let description = false;
 
   const parser = createParser({
 
     openTag(el) {
       if (el.name === 'dmn:decision') {
-        expression = expressions[el.attrs.name] = {
+        expression = {
           name: el.attrs.name,
-          text: ''
+          text: '',
+          description: ''
         };
       }
 
       if (el.name === 'dmn:text') {
-        text = true;
+        text = !!expression;
+      }
+
+      if (el.name === 'dmn:description') {
+        description = !!expression;
       }
     },
 
@@ -100,11 +106,24 @@ function parseModelFile(file) {
       if (text) {
         expression.text += decodeEntities(value);
       }
+
+      if (description) {
+        expression.description += decodeEntities(value);
+      }
     },
 
     closeTag(el) {
       if (el.name === 'dmn:text') {
         text = false;
+      }
+
+      if (el.name === 'dmn:description') {
+        description = false;
+      }
+
+      if (el.name === 'dmn:decision') {
+        expressions[expression.name] = expression;
+        expression = null;
       }
     }
   });
@@ -123,6 +142,7 @@ function merge(test, expressions) {
       console.warn(`No test for ${expr.name}`);
     } else {
       tc.expression = expr.text;
+      tc.description = expr.description;
     }
   }
 

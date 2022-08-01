@@ -634,11 +634,18 @@ function createArgsValidator(argDefinitions) {
   };
 }
 
-function listFn(fnDefinition, type) {
+/**
+ * @param {Function} fnDefinition
+ * @param {string} type
+ * @param {string[]} [parameterNames]
+ *
+ * @return {Function}
+ */
+function listFn(fnDefinition, type, parameterNames = null) {
 
   const tester = createArgTester(type);
 
-  return function(...args) {
+  const wrappedFn = function(...args) {
 
     if (args.length === 0) {
       return null;
@@ -655,6 +662,10 @@ function listFn(fnDefinition, type) {
 
     return fnDefinition(args);
   };
+
+  wrappedFn.$args = parameterNames || parseParameterNames(fnDefinition);
+
+  return wrappedFn;
 }
 
 function fn(fnDefinition, argDefinitions) {

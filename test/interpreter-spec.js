@@ -724,7 +724,17 @@ describe('interpreter', function() {
 
     expr('abs(-1)', 1);
 
+    expr('abs(n: -1)', 1);
+
     expr('index of([1, 2, 3, 2], 2)', [ 2, 4 ]);
+
+    expr('get value(key:"a", m:{a: "foo"}) = "foo"', true);
+
+    expr(`
+      get entries(m:{a: "foo", b: "bar"}) = [{"key": "a", "value":"foo"},{"key":"b", "value":"bar"}]
+    `, true);
+
+    exprSkip('string({",": "foo"})', '{\\",\\": \\"foo\\"}');
 
   });
 

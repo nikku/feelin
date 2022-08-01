@@ -4,6 +4,10 @@ import { normalizeContext } from 'lezer-feel';
 import { builtins } from './builtins';
 
 import {
+  parseParameterNames
+} from './utils';
+
+import {
   parseExpressions,
   parseUnaryTests
 } from './parser';
@@ -233,7 +237,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
     const fnBody = args[4];
 
-    return (...args) => {
+    return wrapFunction((...args) => {
 
       const fnContext = parameterNames.reduce((context, name, idx) => {
 
@@ -244,7 +248,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
       }, { ...context });
 
       return fnBody(fnContext);
-    };
+    }, parameterNames);
   };
 
   case 'ContextEntry': return (context) => {
@@ -340,7 +344,23 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
   case 'StringLiteral': return tag((_context) => input.slice(1, -1), 'string');
 
-  case 'PositionalParameters': return (_context) => args;
+  case 'PositionalParameters': return (context) => args.map(arg => arg(context));
+
+  case 'NamedParameter': return (context) => {
+
+    const name = args[0];
+    const value = args[1](context);
+
+    return [ name, value ];
+  };
+
+  case 'NamedParameters': return (context) => args.reduce((args, arg) => {
+    const [ name, value ] = arg(context);
+
+    args[name] = value;
+
+    return args;
+  }, {});
 
   case 'DateTimeConstructor': return (context) => {
     return getBuiltin(input, context);
@@ -349,15 +369,15 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
   case 'DateTimeLiteral':
   case 'FunctionInvocation': return (context) => {
 
-    const fn = args[0](context);
+    const wrappedFn = wrapFunction(args[0](context));
 
-    if (typeof fn !== 'function') {
+    if (!wrappedFn) {
       throw new Error(`Failed to evaluate ${input}: Target is not a function`);
     }
 
-    const fnArgs = args[2](context).map(fn => fn(context));
+    const contextOrArgs = args[2](context);
 
-    return fn(...fnArgs);
+    return wrappedFn.invoke(contextOrArgs);
   };
 
   case 'IfExpression': return (function() {
@@ -792,5 +812,40 @@ function Interval(startValue, endValue, inclusiveStart, inclusiveEnd) {
 
   this.includes = (value) => {
     return realStart <= value && value <= realEnd;
+  };
+}
+
+/**
+ * @param {Function} fn
+ * @param {string[]} [parameterNames]
+ *
+ * @return {WrappedFn}
+ */
+function wrapFunction(fn, parameterNames = null) {
+
+  if (fn instanceof WrappedFn) {
+    return fn;
+  }
+
+  if (!fn) {
+    return null;
+  }
+
+  return new WrappedFn(fn, parameterNames || parseParameterNames(fn));
+}
+
+function WrappedFn(fn, parameterNames) {
+
+  this.invoke = function(contextOrArgs) {
+
+    let params;
+
+    if (Array.isArray(contextOrArgs)) {
+      params = contextOrArgs;
+    } else {
+      params = parameterNames.map(n => contextOrArgs[n]);
+    }
+
+    return fn.call(null, ...params);
   };
 }

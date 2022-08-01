@@ -2,6 +2,10 @@ import {
   is
 } from './types';
 
+import {
+  parseParameterNames
+} from './utils';
+
 const names = [
 
   // 10.3.4.1 Conversion functions
@@ -654,7 +658,7 @@ function fn(fnDefinition, argDefinitions) {
 
   const checkArgs = createArgsValidator(argDefinitions);
 
-  return function(...args) {
+  const wrappedFn = function(...args) {
 
     const convertedArgs = checkArgs(args);
 
@@ -664,6 +668,10 @@ function fn(fnDefinition, argDefinitions) {
 
     return fnDefinition(...convertedArgs);
   };
+
+  wrappedFn.$args = parseParameterNames(fnDefinition);
+
+  return wrappedFn;
 }
 
 function sum(list) {

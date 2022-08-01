@@ -77,6 +77,42 @@ describe('interpreter', function() {
         }
       });
 
+      expr('foo(a: true)', true, {
+        foo: function() {
+          return true;
+        }
+      });
+
+      expr('foo(a: true, c: "NOT_NEEDED")', [ true, undefined ], {
+        foo: function(a, b) {
+          return [ a, b ];
+        }
+      });
+
+      expr('foo(b: true)', [ undefined, true ], {
+        foo: function(a, b) {
+          return [ a, b ];
+        }
+      });
+
+      expr('foo(b: 1, a: "FOO" )', [ 'FOO', 1 ], {
+        foo: function(a, b) {
+          return [ a, b ];
+        }
+      });
+
+      expr('foo(b: 1, a: "FOO" )', [ 'FOO', 1 ], {
+        foo(a, b) {
+          return [ a, b ];
+        }
+      });
+
+      expr('foo(b: 1, a: "FOO" )', [ 'FOO', 1 ], {
+        foo: (a, b) => {
+          return [ a, b ];
+        }
+      });
+
     });
 
 

@@ -6,6 +6,13 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 0.30.0
+
+* `FEAT`: implement FEEL equality check
+* `FIX`: correct filter on non lists
+* `FIX`: correct various built-in issues (argument names, ...)
+* `FIX`: annotate built-in list functions
+
 ## 0.29.0
 
 * `FEAT`: support named function invocation ([#1](https://github.com/nikku/feelin/issues/1))

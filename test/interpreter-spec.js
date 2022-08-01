@@ -271,6 +271,9 @@ describe('interpreter', function() {
 
       expr('0 in (>1, <2)', true);
 
+      expr('{a: "foo"} in [{b: "bar"}, {a: "foo"}]', true);
+
+      expr('{a: "foo"} in {a: "foo"}', true);
     });
 
 
@@ -727,6 +730,19 @@ describe('interpreter', function() {
     expr('contains(["foobar"], "of")', false);
 
     expr('append("foo", "bar")', [ 'foo', 'bar' ]);
+
+  });
+
+
+  describe('comparison', function() {
+
+    expr('1 = [1]', true);
+
+    expr('[ 1 ] = 1', true);
+
+    expr('[ "A" ] = "A"', true);
+
+    expr('[ 1, 2, { foo: "FOO" } ] = [ 1, 2, { foo: "FOO" } ]', true);
 
   });
 

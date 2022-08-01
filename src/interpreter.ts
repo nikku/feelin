@@ -175,7 +175,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     case '>=': return compare((a, b) => a >= b);
     case '<': return compare((a, b) => a < b);
     case '<=': return compare((a, b) => a <= b);
-    case '=': return compare((a, b) => a == b);
+    case '=': return compare((a, b) => compareEquality(a, b));
     case '!=': return compare((a, b) => a != b);
     }
 
@@ -742,7 +742,7 @@ function compareValOrFn(valOrFn, expr) {
     return valOrFn(() => expr);
   }
 
-  return valOrFn === expr;
+  return compareEquality(valOrFn, expr);
 }
 
 interface RangeArray<T> extends Array<T> {
@@ -880,4 +880,77 @@ function WrappedFn(fn, parameterNames) {
 
     return fn.call(null, ...params);
   };
+}
+
+function isContext(e) {
+  return Object.getPrototypeOf(e) === Object.prototype;
+}
+
+function isArray(e) {
+  return Array.isArray(e);
+}
+
+function getType(e) {
+
+  if (isContext(e)) {
+    return 'context';
+  }
+
+  if (isArray(e)) {
+    return 'list';
+  }
+
+  if (e === null || e === undefined) {
+    return 'nil';
+  }
+
+  return 'literal';
+}
+
+function compareEquality(a, b) {
+
+  if (isArray(a) && a.length === 1) {
+    a = a[0];
+  }
+
+  if (isArray(b) && b.length === 1) {
+    b = b[0];
+  }
+
+  const aType = getType(a);
+  const bType = getType(b);
+
+  if (aType === 'nil' || bType === 'nil') {
+    return a == b;
+  }
+
+  if (aType !== bType) {
+    return false;
+  }
+
+  if (aType === 'list') {
+    if (a.length !== b.length) {
+      return false;
+    }
+
+    return a.every(
+      (element, idx) => compareEquality(element, b[idx])
+    );
+  }
+
+  if (aType === 'context') {
+
+    const aEntries = Object.entries(a);
+    const bEntries = Object.entries(b);
+
+    if (aEntries.length !== bEntries.length) {
+      return false;
+    }
+
+    return aEntries.every(
+      ([ key, value ]) => key in b && compareEquality(value, b[key])
+    );
+  }
+
+  return a == b;
 }

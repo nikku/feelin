@@ -6,6 +6,10 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 0.29.0
+
+* `FEAT`: support named function invocation
+
 ## 0.28.0
 
 * `FEAT`: support `FunctionDefinition`

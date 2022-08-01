@@ -353,15 +353,15 @@ const builtins = {
     }, 1);
   }, 'number'),
 
-  'median': listFn(function(list) {
+  'median': listFn(function(_list) {
     throw notImplemented('median');
   }, 'number'),
 
-  'stddev': listFn(function(list) {
+  'stddev': listFn(function(_list) {
     throw notImplemented('stddev');
   }, 'number'),
 
-  'mode': listFn(function(list) {
+  'mode': listFn(function(_list) {
     throw notImplemented('mode');
   }, 'number'),
 

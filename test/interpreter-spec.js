@@ -277,6 +277,18 @@ describe('interpreter', function() {
     });
 
 
+    describe('ForExpression > SimplePositiveUnaryTest', function() {
+
+      expr(`
+        for
+          test in [ < 10, > 100 ]
+        return
+          test(40)
+      `, [ false, false ]);
+
+    });
+
+
     describe('Conjunction', function() {
 
       expr('null and true', false);

@@ -158,16 +158,10 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     }
   };
 
-  case 'CompareOp': return tag((context) => {
+  case 'CompareOp': return tag(() => {
 
-    const compare = (fn) => {
-      return (b) => (a) => {
-
-        const _a = a(context);
-        const _b = b(context);
-
-        return fn(_a, _b);
-      };
+    const compare = (fn) => (b) => (a) => {
+      return fn(a, b);
     };
 
     switch (input) {
@@ -176,7 +170,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     case '<': return compare((a, b) => a < b);
     case '<=': return compare((a, b) => a <= b);
     case '=': return compare((a, b) => compareEquality(a, b));
-    case '!=': return compare((a, b) => a != b);
+    case '!=': return compare((a, b) => !compareEquality(a, b));
     }
 
   }, Test('boolean'));
@@ -437,17 +431,17 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     // expression !compare kw<"in"> PositiveUnaryTest |
     // expression !compare kw<"in"> !unaryTest "(" PositiveUnaryTests ")"
     if (operator === 'in') {
-      return compareIn(context, args[0], args[3] || args[2]);
+      return compareIn(args[0](context), (args[3] || args[2])(context));
     }
 
     // expression !compare kw<"between"> expression kw<"and"> expression
     if (operator === 'between') {
-      return compareBetween(context, args[0], args[2], args[4]);
+      return compareBetween(args[0](context), args[2](context), args[4](context));
     }
 
     // expression !compare CompareOp<"=" | "!="> expression |
     // expression !compare CompareOp<Gt | Gte | Lt | Lte> expression |
-    return operator(context)(args[2])(args[0]);
+    return operator()(args[2](context))(args[0](context));
   };
 
   case 'QuantifiedExpression': return (context) => {
@@ -580,7 +574,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
       // test is fn(val) => boolean SimpleUnaryTest
       if (typeof result === 'function') {
-        result = result(() => el);
+        result = result(el);
       }
 
       if (result === true) {
@@ -593,27 +587,27 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
   case 'SimplePositiveUnaryTest': return tag((context) => {
 
+    // <Interval>
     if (args.length === 1) {
       return args[0](context);
     }
 
-    return args[0](context)(args[1]);
+    // <CompareOp> <Expr>
+    return args[0](context)(args[1](context));
   }, 'test');
 
   case 'List': return (context) => {
     return args.slice(1, -1).map(arg => arg(context));
   };
 
-  case 'Interval': return (context) => {
+  case 'Interval': return tag((context) => {
 
     const interval = createInterval(args[0], args[1](context), args[2](context), args[3]);
 
-    return (a) => {
-      const left = a(context);
-
-      return interval.includes(left);
+    return (value) => {
+      return interval.includes(value);
     };
-  };
+  }, Test('boolean'));
 
   case 'PositiveUnaryTests':
   case 'Expressions': return (context) => {
@@ -646,7 +640,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
             }
 
             if (typeof r === 'function') {
-              return r(() => value);
+              return r(value);
             }
 
             if (typeof r === typeof value) {
@@ -709,37 +703,32 @@ function extractValue(context, prop, _target) {
   ));
 }
 
-function compareBetween(context, _left, _start, _end) {
-
-  const left = _left(context);
-
-  const start = _start(context);
-  const end = _end(context);
+function compareBetween(value, start, end) {
 
   return (
-    Math.min(start, end) <= left &&
-    Math.max(start, end) >= left
+    Math.min(start, end) <= value &&
+    Math.max(start, end) >= value
   );
 }
 
-function compareIn(context, _left, _tests) {
+function compareIn(value, tests) {
 
-  const left = _left(context);
-
-  const tests = _tests(context);
-
-  return (Array.isArray(tests) ? tests : [ tests ]).some(
-    test => compareValOrFn(test, left)
-  );
-}
-
-function compareValOrFn(valOrFn, expr) {
-
-  if (typeof valOrFn === 'function') {
-    return valOrFn(() => expr);
+  if (!Array.isArray(tests)) {
+    tests = [ tests ];
   }
 
-  return compareEquality(valOrFn, expr);
+  return tests.some(
+    test => compareValue(test, value)
+  );
+}
+
+function compareValue(test, value) {
+
+  if (typeof test === 'function') {
+    return test(value);
+  }
+
+  return compareEquality(test, value);
 }
 
 interface RangeArray<T> extends Array<T> {

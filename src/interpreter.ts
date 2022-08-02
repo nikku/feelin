@@ -166,9 +166,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
         const _a = a(context);
         const _b = b(context);
 
-        const result = fn(_a, _b);
-
-        return result ? (context.__extractLeft ? _a : true) : result;
+        return fn(_a, _b);
       };
     };
 
@@ -195,9 +193,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
     const b = args[2](context);
 
-    const joined = a || b;
-
-    return context.__extractLeft ? joined : !!joined;
+    return !!(a || b);
   }, Test('boolean'));
 
   case 'Conjunction': return tag((context) => {
@@ -206,9 +202,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
     const b = args[2](context);
 
-    const joined = a && b;
-
-    return context.__extractLeft ? joined : !!joined;
+    return !!(a && b);
   }, Test('boolean'));
 
   case 'Context': return (context) => {
@@ -617,9 +611,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     return (a) => {
       const left = a(context);
 
-      const includes = interval.includes(left);
-
-      return includes && context.__extractLeft ? left : includes;
+      return interval.includes(left);
     };
   };
 
@@ -724,7 +716,10 @@ function compareBetween(context, _left, _start, _end) {
   const start = _start(context);
   const end = _end(context);
 
-  return Math.min(start, end) <= left && left <= Math.max(start, end) ? (context.__extractLeft ? left : true) : false;
+  return (
+    Math.min(start, end) <= left &&
+    Math.max(start, end) >= left
+  );
 }
 
 function compareIn(context, _left, _tests) {
@@ -735,7 +730,7 @@ function compareIn(context, _left, _tests) {
 
   return (Array.isArray(tests) ? tests : [ tests ]).some(
     test => compareValOrFn(test, left)
-  ) ? (context.__extractLeft ? left : true) : false;
+  );
 }
 
 function compareValOrFn(valOrFn, expr) {

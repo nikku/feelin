@@ -300,6 +300,9 @@ describe('builtin functions', function() {
 
     expr('log( 10 )', 2.302585092994046);
 
+    expr('log( 0 )', null);
+    expr('log( -1 )', null);
+
     expr('exp( 5 )', 148.4131591025766);
 
     expr('odd( 5 )', true);

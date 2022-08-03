@@ -430,6 +430,10 @@ const builtins = {
   }, [ 'number' ]),
 
   'log': fn(function(number) {
+    if (number <= 0) {
+      return null;
+    }
+
     return Math.log(number);
   }, [ 'number' ]),
 

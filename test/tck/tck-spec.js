@@ -22,35 +22,63 @@ describe('tck', function() {
 
     const suite = JSON.parse(fs.readFileSync(suitePath, 'utf8'));
 
-    const ddescribe = skipSuite(suite.testName) ? describe.skip : describe;
+    const desc = (skipSuite(suite.testName) ? describe.skip : describe);
 
-    ddescribe(suite.testName, function() {
+    desc(suite.testName, function() {
 
-      for (const [ _, c ] of Object.entries(suite.cases)) {
+      for (const testCase of suite.cases) {
 
-        let iit = it;
+        describe(testCase.id, function() {
 
-        const expression = c.expression;
-        const expectedValue = c.resultNode.value;
+          for (const run of testCase.runs) {
 
-        const a = tryEval(expression);
-        const b = tryEval(expectedValue);
+            let iit = it;
 
-        if (a === NOT_IMPLEMENTED || b === NOT_IMPLEMENTED) {
-          iit = it.skip;
-        }
+            const {
+              context,
+              expression,
+              expectedValue,
+              decision
+            } = run;
 
-        iit(`${c.name}   ${expression} === ${expectedValue}`, function() {
+            let a;
 
-          if (a instanceof Error) {
-            expect(a).not.to.exist;
+            const c = tryEval(context);
+            const b = tryEval(expectedValue);
+
+            if (c !== NOT_IMPLEMENTED) {
+              a = tryEval(expression.text, fixContext(suite.testName, decision)(c));
+            } else {
+              console.error(`Failed to evaluate context: ${context}`);
+
+              iit = it.skip;
+            }
+
+            if (b === NOT_IMPLEMENTED) {
+              console.error(`Failed to evaluate expectedValue: ${expectedValue}`);
+
+              iit = it.skip;
+            }
+
+            if (a === NOT_IMPLEMENTED) {
+              iit = it.skip;
+            }
+
+            iit(`${expression.text} === ${expectedValue} ${ context || '' }`, function() {
+
+              if (a instanceof Error) {
+                expect(a).not.to.exist;
+              }
+
+              if (b instanceof Error) {
+                expect(b).not.to.exist;
+              }
+
+              expect(a).to.eql(b);
+            });
+
           }
 
-          if (b instanceof Error) {
-            expect(b).not.to.exist;
-          }
-
-          expect(a, expression).to.eql(b, expectedValue);
         });
 
       }
@@ -62,9 +90,9 @@ describe('tck', function() {
 });
 
 
-function tryEval(expr) {
+function tryEval(expr, context = {}) {
   try {
-    return evaluate(expr);
+    return evaluate(expr, context);
   } catch (err) {
     if (err.message.startsWith('not implemented')) {
       return NOT_IMPLEMENTED;
@@ -74,6 +102,27 @@ function tryEval(expr) {
   }
 }
 
-function skipSuite(name) {
-  return [ '0076-feel-external-java-test-01.xml' ].includes(name);
+function skipSuite(testName) {
+  const only = process.env.TEST_ONLY;
+
+  if (only) {
+    return !testName.includes(only);
+  }
+
+  return [
+    '0070-feel-instance-of-test-01.xml',
+    '0076-feel-external-java-test-01.xml',
+    '0082-feel-coercion-test-01.xml',
+    '0083-feel-unicode-test-01.xml',
+    '0092-feel-lambda-test-01.xml'
+  ].includes(testName);
+}
+
+function fixContext(testName, decisionName) {
+
+  if (testName === '0084-feel-for-loops-test-01.xml' && decisionName === 'decision_014') {
+    return (context) => ({ ...context, 'days in weekend': [ 'saturday', 'sunday' ] });
+  }
+
+  return (c) => c;
 }

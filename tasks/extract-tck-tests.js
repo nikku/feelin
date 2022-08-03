@@ -75,7 +75,7 @@ function parseModelFile(file) {
 
   const contents = fs.readFileSync(file, 'utf8');
 
-  const expressions = { };
+  const expressions = [];
 
   let expression;
 
@@ -122,7 +122,7 @@ function parseModelFile(file) {
       }
 
       if (el.name === 'dmn:decision') {
-        expressions[expression.name] = expression;
+        expressions.push(expression);
         expression = null;
       }
     }
@@ -135,15 +135,28 @@ function parseModelFile(file) {
 
 function merge(test, expressions) {
 
-  for (const [ _, expr ] of Object.entries(expressions)) {
-    const tc = test.cases[expr.name];
+  for (const testCase of test.cases) {
 
-    if (!tc) {
-      console.warn(`No test for ${expr.name}`);
-    } else {
-      tc.expression = expr.text;
-      tc.description = expr.description;
-    }
+    const contextParts = testCase.inputNodes.reduce((context, { name, value }, idx) => {
+
+      if (idx > 0) {
+        context.push(', ');
+      }
+
+      context.push(name, ': ', value);
+
+      return context;
+    }, []).join('');
+
+    const context = contextParts && `{ ${contextParts} }` || null;
+
+    testCase.runs = testCase.resultNodes.map(resultNode => ({
+      context,
+      expression: expressions.find(expr => expr.name === resultNode.name),
+      expectedValue: resultNode.value,
+      decision: resultNode.name
+    }));
+
   }
 
   return test;
@@ -158,7 +171,7 @@ function parseTestFile(file) {
   const test = {
     testName,
     modelName: null,
-    cases: {}
+    cases: []
   };
 
   let testCase;
@@ -253,9 +266,12 @@ function parseTestFile(file) {
 
       if (el.name === 'test:testCase') {
         testCase = {
-          name: el.attrs.id,
-          inputNodes: []
+          id: el.attrs.id,
+          inputNodes: [],
+          resultNodes: []
         };
+
+        test.cases.push(testCase);
 
         return;
       }
@@ -278,12 +294,12 @@ function parseTestFile(file) {
 
       if (el.name === 'test:resultNode') {
 
-        test.cases[el.attrs.name] = testCase;
-
-        node = testCase.resultNode = {
+        node = {
           name: el.attrs.name,
           type: el.attrs.type
         };
+
+        testCase.resultNodes.push(node);
 
         return;
       }

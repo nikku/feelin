@@ -291,40 +291,34 @@ describe('interpreter', function() {
 
     describe('Conjunction', function() {
 
-      expr('null and true', false);
+      expr('true and true', true);
 
-      expr('[] and 1', true);
+      expr('false and true', false);
+
+      expr('null and true', null);
 
       expr('false and 1', false);
 
-      expr('a and b', false, {
-        a: null,
-        b: 1
-      });
+      expr('[] and 1', null);
 
-      expr('a and b', true, {
-        a: true,
-        b: 1
-      });
+      expr('null and 1', null);
+
+      expr('true and 1', null);
 
     });
 
 
     describe('Disjunction', function() {
 
+      expr('false or true', true);
+
       expr('null or true', true);
 
-      expr('false or 1', true);
+      expr('false or 1', null);
 
-      expr('a or b', true, {
-        a: null,
-        b: 1
-      });
+      expr('null or 1', null);
 
-      expr('a or b', false, {
-        a: false,
-        b: false
-      });
+      expr('false or false', false);
 
     });
 

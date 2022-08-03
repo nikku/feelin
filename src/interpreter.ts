@@ -183,20 +183,47 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
   case 'Disjunction': return tag((context) => {
 
-    const a = args[0](context);
+    const left = args[0](context);
+    const right = args[2](context);
 
-    const b = args[2](context);
+    const matrix = [
+      [ true, true, true ],
+      [ true, false, true ],
+      [ true, null, true ],
+      [ false, true, true ],
+      [ false, false, false ],
+      [ false, null, null ],
+      [ null, true, true ],
+      [ null, false, null ],
+      [ null, null, null ],
+    ];
 
-    return !!(a || b);
+    const a = typeof left === 'boolean' ? left : null;
+    const b = typeof right === 'boolean' ? right : null;
+
+    return matrix.find(el => el[0] === a && el[1] === b)[2];
   }, Test('boolean'));
 
   case 'Conjunction': return tag((context) => {
+    const left = args[0](context);
+    const right = args[2](context);
 
-    const a = args[0](context);
+    const matrix = [
+      [ true, true, true ],
+      [ true, false, false ],
+      [ true, null, null ],
+      [ false, true, false ],
+      [ false, false, false ],
+      [ false, null, false ],
+      [ null, true, null ],
+      [ null, false, false ],
+      [ null, null, null ],
+    ];
 
-    const b = args[2](context);
+    const a = typeof left === 'boolean' ? left : null;
+    const b = typeof right === 'boolean' ? right : null;
 
-    return !!(a && b);
+    return matrix.find(el => el[0] === a && el[1] === b)[2];
   }, Test('boolean'));
 
   case 'Context': return (context) => {

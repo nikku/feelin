@@ -397,6 +397,10 @@ const builtins = {
 
   'modulo': fn(function(dividend, divisor) {
 
+    if (!divisor) {
+      return null;
+    }
+
     const adjust = 1000000000;
 
     // cf. https://dustinpfister.github.io/2017/09/02/js-whats-wrong-with-modulo/
@@ -404,7 +408,7 @@ const builtins = {
     // need to round here as using this custom modulo
     // variant is prone to rounding errors
     return Math.round((dividend % divisor + divisor) % divisor * adjust) / adjust;
-  }, [ 'number' ]),
+  }, [ 'number', 'number' ]),
 
   'sqrt': fn(function(number) {
 

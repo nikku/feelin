@@ -285,6 +285,9 @@ describe('builtin functions', function() {
     expr('modulo(10.1, -4.5)', -3.4);
     expr('modulo(-10.1, -4.5)', -1.1);
 
+    expr('modulo(10, 0)', null);
+    expr('modulo(10)', null);
+
     expr('sqrt( 16 )', 4);
     expr('sqrt( -3 )', null);
 

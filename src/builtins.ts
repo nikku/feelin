@@ -371,8 +371,8 @@ const builtins = {
     return stddev(list);
   }, 'number'),
 
-  'mode': listFn(function(_list) {
-    throw notImplemented('mode');
+  'mode': listFn(function(list) {
+    return mode(list);
   }, 'number'),
 
 
@@ -815,4 +815,21 @@ function median(array) {
 
   // uneven
   return sorted[index];
+}
+
+function mode(array) {
+
+  if (array.length < 2) {
+    return array;
+  }
+
+  const buckets = {};
+
+  for (const n of array) {
+    buckets[n] = (buckets[n] || 0) + 1;
+  }
+
+  const sorted = Object.entries(buckets).sort((a, b) => b[1] - a[1]);
+
+  return sorted.filter(s => s[1] === sorted[0][1]).map(e => +e[0]);
 }

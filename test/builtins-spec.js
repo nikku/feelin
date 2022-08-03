@@ -248,9 +248,11 @@ describe('builtin functions', function() {
     expr('stddev(list:[2, 4, 7, 5])', 2.0816659994661326);
     expr('stddev([2, 4, 7, 5])', 2.0816659994661326);
 
-    exprSkip('mode( 6, 3, 9, 6, 6 )', [ 6 ]);
-    exprSkip('mode( [6, 1, 9, 6, 1] )', [ 1, 6 ]);
-    exprSkip('mode( [ ] )', [ ]);
+    expr('mode( 6, 3, 9, 6, 6 )', [ 6 ]);
+    expr('mode( [6, 1, 9, 6, 1] )', [ 1, 6 ]);
+    expr('mode( [ ] )', [ ]);
+
+    expr('mode( list: [6, 1, 9, 6, 1] )', [ 1, 6 ]);
 
   });
 

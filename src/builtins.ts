@@ -821,13 +821,13 @@ function median(array) {
   return sorted[index];
 }
 
-function mode(array) {
+function mode(array: number[]) {
 
   if (array.length < 2) {
     return array;
   }
 
-  const buckets = {};
+  const buckets: Record<number, number> = {};
 
   for (const n of array) {
     buckets[n] = (buckets[n] || 0) + 1;

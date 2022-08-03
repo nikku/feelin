@@ -684,13 +684,6 @@ describe('interpreter', function() {
   });
 
 
-  describe.skip('functions', function() {
-
-    expr('ends with("ASD", "D")', 'ASD');
-
-  });
-
-
   describe('equality', function() {
 
     expr('false = 0', null);
@@ -749,6 +742,10 @@ describe('interpreter', function() {
     `, true);
 
     exprSkip('string({",": "foo"})', '{\\",\\": \\"foo\\"}');
+
+    expr('ends with("ASD", "D")', true);
+
+    expr('ends with(a, "D")', false, { a: '' });
 
   });
 

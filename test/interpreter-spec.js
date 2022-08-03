@@ -688,13 +688,13 @@ describe('interpreter', function() {
 
     expr('false = 0', null);
 
-    exprSkip('false = null', false);
+    expr('false = null', false);
 
     expr('true = 1', null);
 
     expr('0 = 0.00', true);
 
-    expr('100 = null', null);
+    expr('100 = null', false);
 
     expr('-0 = 0', true);
 
@@ -702,7 +702,7 @@ describe('interpreter', function() {
 
     expr('[1] = [2]', false);
 
-    exprSkip('[] = null', false);
+    expr('[] = null', false);
 
     expr('[] = 0', null);
 
@@ -712,7 +712,7 @@ describe('interpreter', function() {
 
     expr('{foo: "bar"} = {"foo": "bar"}', true);
 
-    exprSkip('{} = null', false);
+    expr('{} = null', false);
 
     expr('{} = []', null);
 

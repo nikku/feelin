@@ -907,6 +907,13 @@ function getType(e) {
 
 function compareEquality(a, b) {
 
+  if (
+    a === null && b !== null ||
+    a !== null && b === null
+  ) {
+    return false;
+  }
+
   if (isArray(a) && a.length < 2) {
     a = a[0];
   }

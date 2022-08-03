@@ -6,6 +6,21 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 0.31.0
+
+* `FEAT`: support tests in `ForExpression`
+* `FEAT`: implement `stddev`
+* `FEAT`: implement `mode`
+* `FEAT`: implement `median`
+* `FIX`: correct `log` invalid argument handling
+* `FIX`: correct `odd` negative argument handling
+* `FIX`: handle `modulo` invalid `divisor` argument
+* `FIX`: correct `split` argument name
+* `FIX`: correct `string` escaping behavior
+* `FIX`: correct type + unboxing behavior in `ArithmenticExpression`
+* `FIX`: correct `null` handling in `Conjunction` and `Disjunction`
+* `FIX`: correct equality `null` handling
+
 ## 0.30.0
 
 * `FEAT`: implement FEEL equality check

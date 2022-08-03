@@ -58,8 +58,8 @@ describe('builtin functions', function() {
     expr('string(123.45)', '123.45');
     expr('string(true)', 'true');
     expr('string(false)', 'false');
-    exprSkip('string(date("2012-12-25"))', '2012-12-25');
 
+    exprSkip('string(date("2012-12-25"))', '2012-12-25');
     exprSkip('string(date("2018-12-10"))', '2018-12-10');
     exprSkip('string(date and time("2018-12-10"))', '2018-12-10T00:00:00');
     exprSkip('string(date and time("2018-12-10T10:30:00.0001"))', '2018-12-10T10:30:00.0001');
@@ -78,16 +78,17 @@ describe('builtin functions', function() {
     exprSkip('string(duration("P0Y"))', 'P0M');
     exprSkip('string(duration("P1Y2M"))', 'P1Y2M');
     exprSkip('string(duration("P25M"))', 'P2Y1M');
-    expr('string([1,2,3,"foo"])', '[1, 2, 3, "foo"]');
-    expr('string([1,2,3,[4,5,"foo"]])', '[1, 2, 3, [4, 5, "foo"]]');
-    exprSkip('string(["\\"foo\\""])', '["\\"foo\\"]');
-    expr('string({a: "foo"})', '{a: "foo"}');
-    expr('string({a: "foo", b: {bar: "baz"}})', '{a: "foo", b: {bar: "baz"}}');
-    expr('string({"{": "foo"})', '{"{": "foo"}');
-    expr('string({":": "foo"})', '{":": "foo"}');
-    expr('string({",": "foo"})', '{",": "foo"}');
-    expr('string({"}": "foo"})', '{"}": "foo"}');
-    exprSkip('string({"\\"": "foo"})', '{"\\": "foo"}');
+
+    expr('string([1,2,3,"foo"])', '[1, 2, 3, \\"foo\\"]');
+    expr('string([1,2,3,[4,5,"foo"]])', '[1, 2, 3, [4, 5, \\"foo\\"]]');
+    expr('string(["\\"foo\\""])', '[\\"\\\\\\"foo\\\\\\"\\"]');
+    expr('string({a: "foo"})', '{a: \\"foo\\"}');
+    expr('string({a: "foo", b: {bar: "baz"}})', '{a: \\"foo\\", b: {bar: \\"baz\\"}}');
+    expr('string({"{": "foo"})', '{\\"{\\": \\"foo\\"}');
+    expr('string({":": "foo"})', '{\\":\\": \\"foo\\"}');
+    expr('string({",": "foo"})', '{\\",\\": \\"foo\\"}');
+    expr('string({"}": "foo"})', '{\\"}\\": \\"foo\\"}');
+    expr('string({"\\"": "foo"})', '{\\"\\\\\\"\\": \\"foo\\"}');
 
     exprSkip(`
       date and time("2012-12-24T23:59:00") -

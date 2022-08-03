@@ -122,12 +122,12 @@ const builtins = {
     throw notImplemented('number');
   },
 
-  'string': fn(function(obj) {
+  'string': fn(function(from) {
     if (arguments.length !== 1) {
       return null;
     }
 
-    return toString(obj);
+    return toString(from);
   }, [ 'any' ]),
 
   'duration': function() {
@@ -583,7 +583,7 @@ function createArgTester(arg) {
       }
     }
 
-    if (arr && obj.length === 1) {
+    if (type !== 'any' && arr && obj.length === 1) {
 
       // implicit conversion [ obj ] => obj
       obj = obj[0];
@@ -713,7 +713,7 @@ function flatten<T>([ x,...xs ]: (T|T[])[]):T[] {
 }
 
 function toKeyString(key) {
-  if (/\W/.test(key)) {
+  if (typeof key === 'string' && /\W/.test(key)) {
     return toString(key, true);
   }
 
@@ -724,6 +724,10 @@ function toDeepString(obj) {
   return toString(obj, true);
 }
 
+function escapeStr(str) {
+  return str.replace(/(([\\]?)")/g, '\\$2$1');
+}
+
 function toString(obj, wrap = false) {
 
   if (obj === null) {
@@ -731,7 +735,7 @@ function toString(obj, wrap = false) {
   }
 
   if (typeof obj === 'string') {
-    return (wrap && '"' || '') + obj + (wrap && '"' || '');
+    return (wrap && '\\"' || '') + escapeStr(obj) + (wrap && '\\"' || '');
   }
 
   if (typeof obj === 'boolean' || typeof obj === 'number') {
@@ -742,8 +746,8 @@ function toString(obj, wrap = false) {
     return '[' + obj.map(toDeepString).join(', ') + ']';
   }
 
-  return '{' + Object.entries(obj).map((entry) => {
-    return toKeyString(entry[0]) + ': ' + toDeepString(entry[1]);
+  return '{' + Object.entries(obj).map(([ key, value ]) => {
+    return toKeyString(key) + ': ' + toDeepString(value);
   }).join(', ') + '}';
 }
 

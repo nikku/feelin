@@ -428,11 +428,11 @@ const builtins = {
   }, [ 'number' ]),
 
   'odd': fn(function(number) {
-    return number % 2 === 1;
+    return Math.abs(number) % 2 === 1;
   }, [ 'number' ]),
 
   'even': fn(function(number) {
-    return number % 2 === 0;
+    return Math.abs(number) % 2 === 0;
   }, [ 'number' ]),
 
 

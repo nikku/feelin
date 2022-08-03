@@ -297,9 +297,11 @@ describe('builtin functions', function() {
 
     expr('odd( 5 )', true);
     expr('odd( 2 )', false);
+    expr('odd( -1 )', true);
 
     expr('even( 5 )', false);
     expr('even ( 2 )', true);
+    expr('even ( -1 )', false);
 
   });
 

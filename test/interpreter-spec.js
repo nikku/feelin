@@ -172,6 +172,8 @@ describe('interpreter', function() {
 
       expr('for condition in [ > 5, [1..3], 5 ] return 6 in condition', [ true, false, false ]);
 
+      expr('for i in days in weekend return if i = "sunday" then true else false', [ false, true ], { 'days in weekend': [ 'saturday', 'sunday' ] });
+
     });
 
 

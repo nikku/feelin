@@ -154,6 +154,8 @@ describe('builtin functions', function() {
     expr('starts with("foobar", "fo")', true);
 
     expr('ends with("foobar", "r")', true);
+    expr('ends with("ASD", "D")', true);
+    expr('ends with(a, "D")', false, { a: '' });
 
     expr('split("John Doe", "\\s")', [ 'John', 'Doe' ]);
     expr('split("a;b;c;;", ";")', [ 'a','b','c','','' ]);
@@ -219,6 +221,7 @@ describe('builtin functions', function() {
     expr('reverse([1,2,3])', [ 3,2,1 ]);
 
     expr('index of([1,2,3,2],2)', [ 2,4 ]);
+    expr('index of([1, 2, 3, 2], 5)', [ ]);
 
     exprSkip('union([1,2],[2,3])', [ 1,2,3 ]);
 
@@ -264,7 +267,8 @@ describe('builtin functions', function() {
     expr('ceiling(-1.5)', -1);
 
     expr('abs( 10 )', 10);
-    expr('abs( -10 )', 10);
+    expr('abs(-1)', 1);
+    expr('abs(n: -1)', 1);
 
     // TODO(nikku): support this
     exprSkip('abs(@"PT5H") = @"PT5H"', true);
@@ -327,6 +331,8 @@ describe('builtin functions', function() {
     expr('get value({key1 : "value1"}, "key1")', 'value1');
     expr('get value({key1 : "value1"}, "unexistent-key")', null);
 
+    expr('get value(key:"a", m:{a: "foo"}) = "foo"', true);
+
     // TODO(nikku): this should work, according to spec
     // evaluate('get entries({key1: "value1"})[key="key1"].value', 'value1');
 
@@ -335,6 +341,10 @@ describe('builtin functions', function() {
       { key : 'key1', value : 'value1' },
       { key : 'key2', value : 'value2' }
     ]);
+
+    expr(`
+      get entries(m:{a: "foo", b: "bar"}) = [{"key": "a", "value":"foo"},{"key":"b", "value":"bar"}]
+    `, true);
 
   });
 

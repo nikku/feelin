@@ -233,6 +233,7 @@ describe('builtin functions', function() {
 
     expr('product( 2, 3, 4)', 24);
     expr('product([ 2, 3, 4 ])', 24);
+    expr('product([])', null);
 
     expr('median( 8, 2, 5, 3, 4 )', 4);
     expr('median( [6, 1, 2, 3] )', 2.5);

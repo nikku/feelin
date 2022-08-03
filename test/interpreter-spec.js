@@ -40,10 +40,23 @@ describe('interpreter', function() {
 
       expr('10^5', 100000);
 
-      expr('null - 3', null);
-
       expr('0.0 / 0.0', null);
 
+      expr('null - 3', null);
+
+      expr('null / 10', null);
+
+      expr('10 ** null', null);
+
+      expr('null ** null', null);
+
+      expr('"FOO" / 10', null);
+
+      expr('10 * {}', null);
+
+      expr('[ 5 ] * 2', 10);
+
+      expr('2 - [ 0 ]', 2);
     });
 
 

@@ -142,10 +142,25 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
     const nullable = (op) => (a, b) => {
 
-      const _a = a(context);
-      const _b = b(context);
+      let left = a(context);
+      let right = b(context);
 
-      return _a === null || _b === null ? null : op(_a, _b);
+      if (Array.isArray(left) && left.length < 2) {
+        left = left[0];
+      }
+
+      if (Array.isArray(right) && right.length < 2) {
+        right = right[0];
+      }
+
+      if (
+        typeof left !== 'number' ||
+        typeof right !== 'number'
+      ) {
+        return null;
+      }
+
+      return op(left, right);
     };
 
     switch (input) {

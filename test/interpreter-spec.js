@@ -725,13 +725,17 @@ describe('interpreter', function() {
 
     expr('{} = []', null);
 
-    exprSkip('date("2018-12-08") = date("2018-12-08")', true);
-
     expr('[1,2,[3, 4]] = [1,2,[3, 4]]', true);
 
     expr('{a: {c: "bar", b: "foo"}} = {a: {b: "foo", c: "bar"}}', true);
 
     expr('[{b: [1]}, {b: [2.1,2.2]}, {b: [3]}, {b: [4, 5]}].b = [[1], [2.1, 2.2], [3], [4, 5]]', true);
+
+    exprSkip(`
+      date and time("2018-12-08T00:00:00@Europe/Paris") = date and time("2018-12-08T00:00:00@Europe/Paris")
+    `, true);
+
+    exprSkip('date("2018-12-08") = date("2018-12-08")', true);
 
   });
 

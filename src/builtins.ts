@@ -353,8 +353,13 @@ const builtins = {
     }, 1);
   }, 'number'),
 
-  'median': listFn(function(_list) {
-    throw notImplemented('median');
+  'median': listFn(function(list) {
+
+    if (list.length === 0) {
+      return null;
+    }
+
+    return median(list);
   }, 'number'),
 
   'stddev': listFn(function(list) {
@@ -794,4 +799,20 @@ function stddev(array) {
       (a, b) => a + b
     ) / (n - 1)
   );
+}
+
+function median(array) {
+  const n = array.length;
+  const sorted = array.slice().sort();
+
+  const mid = n / 2 - 1;
+  const index = Math.ceil(mid);
+
+  // even
+  if (mid === index) {
+    return (sorted[index] + sorted[index + 1]) / 2;
+  }
+
+  // uneven
+  return sorted[index];
 }

@@ -234,9 +234,11 @@ describe('builtin functions', function() {
     expr('product( 2, 3, 4)', 24);
     expr('product([ 2, 3, 4 ])', 24);
 
-    exprSkip('median( 8, 2, 5, 3, 4 )', 4);
-    exprSkip('median( [6, 1, 2, 3] )', 2.5);
-    exprSkip('median( [ ] )', null);
+    expr('median( 8, 2, 5, 3, 4 )', 4);
+    expr('median( [6, 1, 2, 3] )', 2.5);
+    expr('median( [ ] )', null);
+
+    expr('median( list: [6, 1, 2, 3] )', 2.5);
 
     expr('stddev( 2, 4, 7, 5 )', 2.0816659994661326);
     expr('stddev( [ 47 ] )', null);

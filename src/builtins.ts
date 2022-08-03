@@ -357,8 +357,13 @@ const builtins = {
     throw notImplemented('median');
   }, 'number'),
 
-  'stddev': listFn(function(_list) {
-    throw notImplemented('stddev');
+  'stddev': listFn(function(list) {
+
+    if (list.length < 2) {
+      return null;
+    }
+
+    return stddev(list);
   }, 'number'),
 
   'mode': listFn(function(_list) {
@@ -774,4 +779,19 @@ function round(n) {
 
 function notImplemented(fn) {
   return new Error(`not implemented: ${fn}`);
+}
+
+// adapted from https://stackoverflow.com/a/53577159
+
+function stddev(array) {
+  const n = array.length;
+  const mean = array.reduce((a, b) => a + b) / n;
+
+  return Math.sqrt(
+    array.map(
+      x => Math.pow(x - mean, 2)
+    ).reduce(
+      (a, b) => a + b
+    ) / (n - 1)
+  );
 }

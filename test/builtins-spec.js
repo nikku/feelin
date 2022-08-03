@@ -238,10 +238,13 @@ describe('builtin functions', function() {
     exprSkip('median( [6, 1, 2, 3] )', 2.5);
     exprSkip('median( [ ] )', null);
 
-    exprSkip('stddev( 2, 4, 7, 5 )', 2.0816659994661);
-    exprSkip('stddev( [ 47 ] )', null);
-    exprSkip('stddev( 47 )', null);
-    exprSkip('stddev( [ ] )', null);
+    expr('stddev( 2, 4, 7, 5 )', 2.0816659994661326);
+    expr('stddev( [ 47 ] )', null);
+    expr('stddev( 47 )', null);
+    expr('stddev( [ ] )', null);
+
+    expr('stddev(list:[2, 4, 7, 5])', 2.0816659994661326);
+    expr('stddev([2, 4, 7, 5])', 2.0816659994661326);
 
     exprSkip('mode( 6, 3, 9, 6, 6 )', [ 6 ]);
     exprSkip('mode( [6, 1, 9, 6, 1] )', [ 1, 6 ]);

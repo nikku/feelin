@@ -212,8 +212,8 @@ const builtins = {
     return string.endsWith(match);
   }, [ 'string', 'string' ]),
 
-  'split': fn(function(string, separator) {
-    return string.split(new RegExp(separator, 'u'));
+  'split': fn(function(string, delimiter) {
+    return string.split(new RegExp(delimiter, 'u'));
   }, [ 'string', 'string' ]),
 
 

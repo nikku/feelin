@@ -161,6 +161,8 @@ describe('builtin functions', function() {
     expr('split("a;b;c;;", ";")', [ 'a','b','c','','' ]);
     expr('split("foo🐎bar", "o.b")', [ 'fo', 'ar' ]);
 
+    expr('split(string: "foo🐎bar", delimiter: "o.b")', [ 'fo', 'ar' ]);
+
   });
 
 

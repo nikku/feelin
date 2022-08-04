@@ -1,4 +1,3 @@
-export function is(el: string, type: string): boolean {
 
   switch (type) {
   case 'Boolean': return typeof el === 'boolean';
@@ -6,6 +5,7 @@ export function is(el: string, type: string): boolean {
 
   default: return false;
   }
+export function isType(el: string, type: string): boolean {
 }
 
 export type RangeProps = {

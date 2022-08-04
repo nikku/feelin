@@ -1,5 +1,5 @@
 import {
-  is
+  isType
 } from './types';
 
 import {
@@ -144,7 +144,7 @@ const builtins = {
 
   // 10.3.4.2 Boolean function
   'not': fn(function(bool) {
-    return is(bool, 'Boolean') ? !bool : null;
+    return isType(bool, 'boolean') ? !bool : null;
   }, [ 'any' ]),
 
 

@@ -21,6 +21,9 @@ if (!arg || arg === '--help' || arg === '-h') {
 
 const tckLocation = path.resolve(arg);
 
+if (!fs.existsSync(tckLocation)) {
+  throw new Error(`expected DMN TCK in ${ tckLocation }`);
+}
 
 const tests = glob.sync('TestCases/*/*-feel-*/*.xml', { cwd: tckLocation });
 

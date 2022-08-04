@@ -44,8 +44,8 @@ evaluate('every rate in rates() satisfies rate < 10', {
 
 Feel language support:
 
-* [lezer-feel](https://github.com/nikku/lezer-feel) - FEEL language grammar
-* [feel-playground](https://github.com/nikku/feel-playground) - Interactive FEEL playground
+* [lezer-feel](https://github.com/nikku/lezer-feel) - FEEL language definition for the [Lezer](https://lezer.codemirror.net/) parser system
+* [feel-playground](https://github.com/nikku/feel-playground) - Interactive playground to learn the FEEL language
 
 Other open source FEEL interpreters:
 

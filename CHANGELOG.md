@@ -8,7 +8,7 @@ ___Note:__ Yet to be released changes appear here._
 
 ## 0.32.0
 
-* `FEAT`: implement `range` type
+* `FEAT`: implement `range` type ([#6](https://github.com/nikku/feelin/issues/6), [#10](https://github.com/nikku/feelin/issues/10), [#11](https://github.com/nikku/feelin/issues/11))
 * `FEAT`: implement first round of `range` builtins
 * `FEAT`: implement `is` builtin
 

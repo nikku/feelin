@@ -609,11 +609,6 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
       const iterationContext = {
         ...context,
         item: el,
-        ...Object.entries(el).reduce(function(itemScope, [ key, value ]) {
-          itemScope[ 'item.' + key ] = value;
-
-          return itemScope;
-        }, {}),
         ...el
       };
 

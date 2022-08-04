@@ -1,4 +1,4 @@
-## Feelin
+# feelin
 
 [![CI](https://github.com/nikku/feelin/actions/workflows/CI.yml/badge.svg)](https://github.com/nikku/feelin/actions/workflows/CI.yml)
 

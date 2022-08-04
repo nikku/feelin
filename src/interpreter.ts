@@ -175,17 +175,13 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
   case 'CompareOp': return tag(() => {
 
-    const compare = (fn) => (b) => (a) => {
-      return fn(a, b);
-    };
-
     switch (input) {
-    case '>': return compare((a, b) => a > b);
-    case '>=': return compare((a, b) => a >= b);
-    case '<': return compare((a, b) => a < b);
-    case '<=': return compare((a, b) => a <= b);
-    case '=': return compare((a, b) => compareEquality(a, b));
-    case '!=': return compare((a, b) => !compareEquality(a, b));
+    case '>': return (b) => createRange(b, null, false, false);
+    case '>=': return (b) => createRange(b, null, true, false);
+    case '<': return (b) => createRange(null, b, false, false);
+    case '<=': return (b) => createRange(null, b, false, true);
+    case '=': return (b) => (a) => compareEquality(a, b);
+    case '!=': return (b) => (a) => !compareEquality(a, b);
     }
 
   }, Test('boolean'));
@@ -320,11 +316,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
     const b = args[1] && args[1](context);
 
-    if (!b) {
-      return a;
-    }
-
-    return createRange(a, b);
+    return b ? createRange(a, b) : a;
   };
 
   case 'Type': return args[0];
@@ -478,12 +470,25 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
     // expression !compare kw<"between"> expression kw<"and"> expression
     if (operator === 'between') {
-      return compareBetween(args[0](context), args[2](context), args[4](context));
+
+      const start = args[2](context);
+      const end = args[4](context);
+
+      if (start === null || end === null) {
+        return null;
+      }
+
+      return createRange(start, end).includes(args[0](context));
     }
 
     // expression !compare CompareOp<"=" | "!="> expression |
     // expression !compare CompareOp<Gt | Gte | Lt | Lte> expression |
-    return operator()(args[2](context))(args[0](context));
+    const left = args[0](context);
+    const right = args[2](context);
+
+    const test = operator()(right);
+
+    return compareValue(test, left);
   };
 
   case 'QuantifiedExpression': return (context) => {
@@ -619,6 +624,10 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
         result = result(el);
       }
 
+      if (result instanceof Range) {
+        result = result.includes(el);
+      }
+
       if (result === true) {
         return el;
       }
@@ -644,11 +653,13 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
   case 'Interval': return tag((context) => {
 
-    const interval = createInterval(args[0], args[1](context), args[2](context), args[3]);
+    const left = args[1](context);
+    const right = args[2](context);
 
-    return (value) => {
-      return interval.includes(value);
-    };
+    const startIncluded = left !== null && args[0] === '[';
+    const endIncluded = right !== null && args[3] === ']';
+
+    return createRange(left, right, startIncluded, endIncluded);
   }, Test('boolean'));
 
   case 'PositiveUnaryTests':
@@ -658,58 +669,27 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
   case 'UnaryTests': return (context) => {
 
-    return (value = {}) => {
+    return (value = null) => {
 
       const negate = args[0] === 'not';
 
       const tests = negate ? args.slice(2, -1) : args;
 
-      const matches = tests.map(test => test(context)).map(r => {
+      const matches = tests.map(test => test(context)).flat(1).map(test => {
 
-        if (Array.isArray(r)) {
-          return r.map(r => {
-
-            if (Array.isArray(r)) {
-              return r.includes(value);
-            }
-
-            if (r === null) {
-              return null;
-            }
-
-            if (typeof r === 'boolean') {
-              return r;
-            }
-
-            if (typeof r === 'function') {
-              return r(value);
-            }
-
-            if (typeof r === typeof value) {
-              return r === value;
-            }
-
-            return null;
-          }).reduce(combineResult, undefined);
+        if (Array.isArray(test)) {
+          return test.includes(value);
         }
 
-        if (r === null) {
+        if (test === null) {
           return null;
         }
 
-        if (typeof r === 'boolean') {
-          return r;
+        if (typeof test === 'boolean') {
+          return test;
         }
 
-        if (typeof r === 'function') {
-          return r(value);
-        }
-
-        if (typeof r === typeof value) {
-          return r === value;
-        }
-
-        return null;
+        return compareValue(test, value);
       }).reduce(combineResult, undefined);
 
       return matches === null ? null : (negate ? !matches : matches);
@@ -736,21 +716,13 @@ function extractValue(context, prop, _target) {
 
   const target = _target(context);
 
-  if (!Array.isArray(target)) {
-    throw new Error(`Cannot extract ${ prop } from ${ target }`);
+  if (target && 'map' in target) {
+    return target.map(t => (
+      { [prop]: t }
+    ));
   }
 
-  return target.map(t => (
-    { [prop]: t }
-  ));
-}
-
-function compareBetween(value, start, end) {
-
-  return (
-    Math.min(start, end) <= value &&
-    Math.max(start, end) >= value
-  );
+  throw new Error(`Cannot extract ${ prop } from ${ target }`);
 }
 
 function compareIn(value, tests) {
@@ -770,35 +742,239 @@ function compareValue(test, value) {
     return test(value);
   }
 
+  if (test instanceof Range) {
+    return test.includes(value);
+  }
+
   return compareEquality(test, value);
 }
 
-interface RangeArray<T> extends Array<T> {
-  __isRange: boolean
+
+const chars = Array.from(
+  'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+);
+
+function isTyped(type, values) {
+  return (
+    values.some(e => typeof e === type) &&
+    values.every(e => typeof e === type || e === null)
+  );
 }
 
-function range(size: number, startAt = 0, direction = 1) {
+function createRange(start, end, startIncluded = true, endIncluded = true) {
 
-  const r = Array.from(Array(size).keys()).map(i => i * direction + startAt) as RangeArray<number>;
-
-  r.__isRange = true;
-
-  return r;
-}
-
-function createRange(start, end) {
-
-  if (typeof start === 'number' && typeof end === 'number') {
-
-    const steps = Math.max(start, end) - Math.min(start, end);
-
-    return range(steps + 1, start, end < start ? -1 : 1);
+  if (isTyped('string', [ start, end ])) {
+    return createStringRange(start, end, startIncluded, endIncluded);
   }
 
-  throw new Error('unsupported range');
+  if (isTyped('number', [ start, end ])) {
+    return createNumberRange(start, end, startIncluded, endIncluded);
+  }
+
+  throw new Error(`unsupported range: ${start}..${end}`);
 }
 
-function cartesianProduct(arrays: number[][]) {
+type RangeProps = {
+  'start included': boolean,
+  'end included': boolean,
+  start: string|number|null,
+  end: string|number|null,
+  map<T>(fn: (val: any) => T): T[],
+  includes(val: any): boolean
+};
+
+
+class Range {
+
+  props: RangeProps;
+
+  constructor(props: RangeProps) {
+    this.props = props;
+  }
+
+  map<T>(fn: (any) => T) : T[] {
+    return this.props.map(fn);
+  }
+
+  includes(val: any) : boolean {
+
+    if (val === null) {
+      return null;
+    }
+
+    return this.props.includes(val);
+  }
+
+  get start() {
+    return this.props.start;
+  }
+
+  get 'start included'() {
+    return this.props['start included'];
+  }
+
+  get end() {
+    return this.props.end;
+  }
+
+  get 'end included'() {
+    return this.props['end included'];
+  }
+
+}
+
+function noopMap() {
+  return () => {
+    throw new Error('unsupported range operation: map');
+  };
+}
+
+function valuesMap(values) {
+  return (fn) => values.map(fn);
+}
+
+function valuesIncludes(values) {
+  return (value) => values.includes(value);
+}
+
+function numberMap(start, end, startIncluded, endIncluded) {
+
+  const direction = start > end ? -1 : 1;
+
+  return (fn) => {
+
+    const result = [];
+
+    for (let i = start;; i += direction) {
+
+      if (i === 0 && !startIncluded) {
+        continue;
+      }
+
+      if (i === end && !endIncluded) {
+        break;
+      }
+
+      result.push(fn(i));
+
+      if (i === end) {
+        break;
+      }
+    }
+
+    return result;
+  };
+}
+
+function includesStart(n, inclusive) {
+
+  if (inclusive) {
+    return (value) => n <= value;
+  } else {
+    return (value) => n < value;
+  }
+}
+
+function includesEnd(n, inclusive) {
+
+  if (inclusive) {
+    return (value) => n >= value;
+  } else {
+    return (value) => n > value;
+  }
+}
+
+function anyIncludes(start, end, startIncluded, endIncluded) {
+
+  let tests = [];
+
+  if (start !== null && end !== null) {
+    if (start > end) {
+      tests = [
+        includesStart(end, endIncluded),
+        includesEnd(start, startIncluded)
+      ];
+    } else {
+      tests = [
+        includesStart(start, startIncluded),
+        includesEnd(end, endIncluded)
+      ];
+    }
+  } else
+
+  if (end !== null) {
+    tests = [
+      includesEnd(end, endIncluded)
+    ];
+  } else
+
+  if (start !== null) {
+    tests = [
+      includesStart(start, startIncluded)
+    ];
+  }
+
+  return (value) => tests.every(t => t(value));
+}
+
+function createStringRange(start, end, startIncluded = true, endIncluded = true) {
+
+  if (start !== null && !chars.includes(start)) {
+    throw new Error('illegal range start: ' + start);
+  }
+
+  if (end !== null && !chars.includes(end)) {
+    throw new Error('illegal range end: ' + end);
+  }
+
+  let values;
+
+  if (start !== null && end !== null) {
+
+    let startIdx = chars.indexOf(start);
+    let endIdx = chars.indexOf(end);
+
+    const direction = startIdx > endIdx ? -1 : 1;
+
+    if (startIncluded === false) {
+      startIdx += direction;
+    }
+
+    if (endIncluded === false) {
+      endIdx -= direction;
+    }
+
+    values = chars.slice(startIdx, endIdx + 1);
+  }
+
+  const map = values ? valuesMap(values) : noopMap();
+  const includes = values ? valuesIncludes(values) : anyIncludes(start, end, startIncluded, endIncluded);
+
+  return new Range({
+    start,
+    end,
+    'start included': startIncluded,
+    'end included': endIncluded,
+    map,
+    includes
+  });
+}
+
+function createNumberRange(start, end, startIncluded, endIncluded) {
+  const map = start !== null && end !== null ? numberMap(start, end, startIncluded, endIncluded) : noopMap();
+  const includes = anyIncludes(start, end, startIncluded, endIncluded);
+
+  return new Range({
+    start,
+    end,
+    'start included': startIncluded,
+    'end included': endIncluded,
+    map,
+    includes
+  });
+}
+
+function cartesianProduct(arrays: any[]) {
 
   const f = (a, b) => [].concat(...a.map(d => b.map(e => [].concat(d, e))));
   const cartesian = (a?, b?, ...c) => (b ? cartesian(f(a, b), ...c) : a);
@@ -852,29 +1028,6 @@ function Test(type: string): string {
   return `Test<${type}>`;
 }
 
-function createInterval(start, startValue, endValue, end) {
-
-  const inclusiveStart = start === '[';
-  const inclusiveEnd = end === ']';
-
-  return new Interval(startValue, endValue, inclusiveStart, inclusiveEnd);
-}
-
-function Interval(startValue, endValue, inclusiveStart, inclusiveEnd) {
-
-  const direction = Math.sign(endValue - startValue);
-
-  const rangeStart = (inclusiveStart ? 0 : direction * 0.000001) + startValue;
-  const rangeEnd = (inclusiveEnd ? 0 : -direction * 0.000001) + endValue;
-
-  const realStart = Math.min(rangeStart, rangeEnd);
-  const realEnd = Math.max(rangeStart, rangeEnd);
-
-  this.includes = (value) => {
-    return realStart <= value && value <= realEnd;
-  };
-}
-
 /**
  * @param {Function} fn
  * @param {string[]} [parameterNames]
@@ -883,12 +1036,16 @@ function Interval(startValue, endValue, inclusiveStart, inclusiveEnd) {
  */
 function wrapFunction(fn, parameterNames = null) {
 
+  if (!fn) {
+    return null;
+  }
+
   if (fn instanceof WrappedFn) {
     return fn;
   }
 
-  if (!fn) {
-    return null;
+  if (fn instanceof Range) {
+    return new WrappedFn((value) => fn.includes(value), [ 'value' ]);
   }
 
   return new WrappedFn(fn, parameterNames || parseParameterNames(fn));
@@ -944,6 +1101,10 @@ function getType(e) {
     return 'list';
   }
 
+  if (e instanceof Range) {
+    return 'range';
+  }
+
   return 'literal';
 }
 
@@ -997,6 +1158,15 @@ function compareEquality(a, b) {
     return aEntries.every(
       ([ key, value ]) => key in b && compareEquality(value, b[key])
     );
+  }
+
+  if (aType === 'range') {
+    return [
+      [ a.start, b.start ],
+      [ a.end, b.end ],
+      [ a['start included'], b['start included'] ],
+      [ a['end included'], b['end included'] ]
+    ].every(([ a, b ]) => a === b);
   }
 
   if (a == b) {

@@ -260,6 +260,22 @@ describe('interpreter', function() {
 
       expr('1 between 5 and -1', true);
 
+      expr('"b" between "b" and "d"', true);
+      expr('"a" between "b" and "d"', false);
+
+      expr('"d" between "b" and "d"', true);
+      expr('"e" between "b" and "d"', false);
+
+      expr('1 between null and 3', null);
+      expr('1 between 1 and null', null);
+
+      exprSkip('1 between "b" and "d"', null);
+
+      expr('"d" in ["b".."d"]', true);
+      expr('"d" in ["b".."d")', false);
+      expr('"b" in ["b".."d"]', true);
+      expr('"b" in ("b".."d"]', false);
+
       expr('5 in > 3', true);
 
       expr('5 in < 0', false);
@@ -636,9 +652,9 @@ describe('interpreter', function() {
 
     describe('negation', function() {
 
-      unary({}, 'not(true)', false);
+      unary({ '?': {} }, 'not(true)', false);
 
-      unary({}, 'not(false)', true);
+      unary({ '?': {} }, 'not(false)', true);
 
       unary(5, 'not(1, 2, 3)', true);
 
@@ -646,15 +662,15 @@ describe('interpreter', function() {
 
       unary(5, 'not(null)', null);
 
-      unary({}, 'not(null)', null);
+      unary({ '?': {} }, 'not(null)', null);
 
-      unary({}, 'not(0)', null);
+      unary({ '?': {} }, 'not(0)', null);
 
-      unary({}, 'not(1)', null);
+      unary({ '?': {} }, 'not(1)', null);
 
-      unary({}, 'not("true")', null);
+      unary({ '?': {} }, 'not("true")', null);
 
-      unary({}, 'false', false);
+      unary({ '?': {} }, 'false', false);
 
       unary(null, 'null', null);
 
@@ -683,12 +699,56 @@ describe('interpreter', function() {
   });
 
 
-  describe.skip('properties', function() {
+  describe('properties', function() {
 
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    function Duration() {}
+    expr('[1..10].start included or false', true);
 
-    expr('time("10:30:00+05:00").time offset', new Duration('PT5H'));
+
+    describe('Range', function() {
+
+      expr('[1..10].start included', true);
+      expr('[1..10].end included', true);
+      expr('(1..10].start included', false);
+      expr('[1..10).end included', false);
+      expr(']1..10].start included', false);
+      expr('[1..10[.end included', false);
+
+      expr('[1..10].start', 1);
+      expr('[1..10].end', 10);
+
+      expr('[a..10].start', null, { a: null });
+      expr('[a..10].start included', false, { a: null });
+
+      expr('[1..a].end', null, { a: null });
+      expr('[1..a].end included', false, { a: null });
+
+      expr('(> 10).start included', false);
+      expr('(> 10).end included', false);
+      expr('(> 10).start', 10);
+      expr('(> 10).end', null);
+
+      expr('(>= 10).start included', true);
+      expr('(>= 10).start', 10);
+
+      expr('(< 10).start included', false);
+      expr('(< 10).end included', false);
+      expr('(< 10).start', null);
+      expr('(< 10).end', 10);
+
+      expr('(<= 10).end included', true);
+      expr('(<= 10).end', 10);
+
+    });
+
+
+    describe.skip('DateAndTime', function() {
+
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      function Duration() {}
+
+      expr('time("10:30:00+05:00").time offset', new Duration('PT5H'));
+
+    });
 
   });
 
@@ -736,6 +796,12 @@ describe('interpreter', function() {
     `, true);
 
     exprSkip('date("2018-12-08") = date("2018-12-08")', true);
+
+    expr('(> 5) = (5 .. null_value]', true, { null_value: null });
+
+    expr('(>= 5) = [5 .. null_value]', true, { null_value: null });
+
+    expr('(5..10) = ]5 .. 10[', true);
 
   });
 

@@ -337,8 +337,18 @@ describe('builtin functions', function() {
   });
 
 
-  // TODO(nikku): support this
-  describe.skip('Range');
+  describe('Range', function() {
+
+    expr('meets([0..5], [5..10])', true);
+    expr('meets([0..5), [5..10])', false);
+    expr('meets([0..5], [4..10])', false);
+
+    expr('before( 1, 10 )', true);
+    expr('before( 10, 1 )', false);
+    expr('before( [1..10], 10 )', false);
+    expr('before( 1, (1..10] )', true);
+    expr('before( [1..10), [10..20] )', true);
+  });
 
 
   // TODO(nikku): support this

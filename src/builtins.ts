@@ -1,6 +1,7 @@
 import {
   isType,
-  equals
+  equals,
+  Range
 } from './types';
 
 import {
@@ -459,21 +460,21 @@ const builtins = {
 
   // 10.3.4.7 Range Functions
 
-  'before': fn(function() {
-    throw notImplemented('before');
-  }, [ 'any?' ]),
+  'before': fn(function(a, b) {
+    return before(a, b);
+  }, [ 'any', 'any' ]),
 
-  'after': fn(function() {
-    throw notImplemented('after');
-  }, [ 'any?' ]),
+  'after': fn(function(a, b) {
+    return before(b, a);
+  }, [ 'any', 'any' ]),
 
-  'meets': fn(function() {
-    throw notImplemented('meets');
-  }, [ 'any?' ]),
+  'meets': fn(function(a, b) {
+    return meets(a, b);
+  }, [ 'range', 'range' ]),
 
-  'met by': fn(function() {
-    throw notImplemented('met by');
-  }, [ 'any?' ]),
+  'met by': fn(function(a, b) {
+    return meets(b, a);
+  }, [ 'range', 'range' ]),
 
   'overlaps': fn(function() {
     throw notImplemented('overlaps');
@@ -608,6 +609,10 @@ function createArgTester(arg) {
       obj = obj[0];
     }
 
+    if (type === 'range') {
+      return obj instanceof Range ? obj : FALSE;
+    }
+
     const objType = typeof obj;
 
     if (obj === null || objType === 'undefined') {
@@ -617,6 +622,7 @@ function createArgTester(arg) {
     if (type === 'context') {
       return objType === 'object' ? obj : FALSE;
     }
+
 
     if (type !== 'any' && objType !== type) {
       return FALSE;
@@ -717,6 +723,43 @@ function fn(fnDefinition, argDefinitions, parameterNames = null) {
   wrappedFn.$args = parameterNames || parseParameterNames(fnDefinition);
 
   return wrappedFn;
+}
+
+function meets(a, b) {
+  return [
+    (a.end === b.start),
+    (a['end included'] === true),
+    (b['start included'] === true)
+  ].every(v => v);
+}
+
+function before(a, b) {
+  if (a instanceof Range && b instanceof Range) {
+    return (
+      a.end < b.start || (
+        !a['end included'] || !b['start included']
+      ) && a.end == b.start
+    );
+  }
+
+  if (a instanceof Range) {
+    return (
+      a.end < b || (
+        !a['end included'] && a.end === b
+      )
+    );
+  }
+
+
+  if (b instanceof Range) {
+    return (
+      b.start > a || (
+        !b['start included'] && b.start === a
+      )
+    );
+  }
+
+  return a < b;
 }
 
 function sum(list) {

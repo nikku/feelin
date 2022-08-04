@@ -317,6 +317,15 @@ describe('builtin functions', function() {
   });
 
 
+  describe('Utility', function() {
+
+    expr('is(1, 1)', true);
+
+    expr('is({ a: 1 }, { a: 1 })', true);
+
+  });
+
+
   // TODO(nikku): support this
   describe.skip('Date and time', function() {
 

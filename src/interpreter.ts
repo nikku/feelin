@@ -3,7 +3,11 @@ import { normalizeContext } from 'lezer-feel';
 
 import { builtins } from './builtins';
 
-import { Range } from './types';
+import {
+  Range,
+  equals,
+  isArray
+} from './types';
 
 import {
   parseParameterNames
@@ -147,11 +151,11 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
       let left = a(context);
       let right = b(context);
 
-      if (Array.isArray(left) && left.length < 2) {
+      if (isArray(left) && left.length < 2) {
         left = left[0];
       }
 
-      if (Array.isArray(right) && right.length < 2) {
+      if (isArray(right) && right.length < 2) {
         right = right[0];
       }
 
@@ -182,8 +186,8 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     case '>=': return (b) => createRange(b, null, true, false);
     case '<': return (b) => createRange(null, b, false, false);
     case '<=': return (b) => createRange(null, b, false, true);
-    case '=': return (b) => (a) => compareEquality(a, b);
-    case '!=': return (b) => (a) => !compareEquality(a, b);
+    case '=': return (b) => (a) => equals(a, b);
+    case '!=': return (b) => (a) => !equals(a, b);
     }
 
   }, Test('boolean'));
@@ -328,7 +332,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     const iterationContexts = args.map(ctx => ctx(context));
 
     return cartesianProduct(iterationContexts).map(ctx => {
-      if (!Array.isArray(ctx)) {
+      if (!isArray(ctx)) {
         ctx = [ ctx ];
       }
 
@@ -555,7 +559,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     const pathTarget = args[0](context);
     const pathProp = args[1];
 
-    if (Array.isArray(pathTarget)) {
+    if (isArray(pathTarget)) {
       return pathTarget.map(pathProp);
     } else {
       return pathProp(pathTarget);
@@ -569,7 +573,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
     const filterFn = args[2];
 
-    const filterTarget = Array.isArray(target) ? target : [ target ];
+    const filterTarget = isArray(target) ? target : [ target ];
 
     // null[..]
     if (target === null) {
@@ -674,7 +678,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
       const matches = tests.map(test => test(context)).flat(1).map(test => {
 
-        if (Array.isArray(test)) {
+        if (isArray(test)) {
           return test.includes(value);
         }
 
@@ -724,7 +728,7 @@ function extractValue(context, prop, _target) {
 
 function compareIn(value, tests) {
 
-  if (!Array.isArray(tests)) {
+  if (!isArray(tests)) {
     tests = [ tests ];
   }
 
@@ -743,7 +747,7 @@ function compareValue(test, value) {
     return test.includes(value);
   }
 
-  return compareEquality(test, value);
+  return equals(test, value);
 }
 
 
@@ -1005,7 +1009,7 @@ function WrappedFn(fn, parameterNames) {
 
     let params;
 
-    if (Array.isArray(contextOrArgs)) {
+    if (isArray(contextOrArgs)) {
       params = contextOrArgs;
     } else {
       params = parameterNames.map(n => contextOrArgs[n]);
@@ -1013,113 +1017,4 @@ function WrappedFn(fn, parameterNames) {
 
     return fn.call(null, ...params);
   };
-}
-
-function isContext(e) {
-  return Object.getPrototypeOf(e) === Object.prototype;
-}
-
-function isArray(e) {
-  return Array.isArray(e);
-}
-
-function getType(e) {
-
-  if (e === null || e === undefined) {
-    return 'nil';
-  }
-
-  if (typeof e === 'boolean') {
-    return 'boolean';
-  }
-
-  if (typeof e === 'number') {
-    return 'number';
-  }
-
-  if (typeof e === 'string') {
-    return 'string';
-  }
-
-  if (isContext(e)) {
-    return 'context';
-  }
-
-  if (isArray(e)) {
-    return 'list';
-  }
-
-  if (e instanceof Range) {
-    return 'range';
-  }
-
-  return 'literal';
-}
-
-function compareEquality(a, b) {
-
-  if (
-    a === null && b !== null ||
-    a !== null && b === null
-  ) {
-    return false;
-  }
-
-  if (isArray(a) && a.length < 2) {
-    a = a[0];
-  }
-
-  if (isArray(b) && b.length < 2) {
-    b = b[0];
-  }
-
-  const aType = getType(a);
-  const bType = getType(b);
-
-  if (aType !== bType) {
-    return null;
-  }
-
-  if (aType === 'nil') {
-    return true;
-  }
-
-  if (aType === 'list') {
-    if (a.length !== b.length) {
-      return false;
-    }
-
-    return a.every(
-      (element, idx) => compareEquality(element, b[idx])
-    );
-  }
-
-  if (aType === 'context') {
-
-    const aEntries = Object.entries(a);
-    const bEntries = Object.entries(b);
-
-    if (aEntries.length !== bEntries.length) {
-      return false;
-    }
-
-    return aEntries.every(
-      ([ key, value ]) => key in b && compareEquality(value, b[key])
-    );
-  }
-
-  if (aType === 'range') {
-    return [
-      [ a.start, b.start ],
-      [ a.end, b.end ],
-      [ a['start included'], b['start included'] ],
-      [ a['end included'], b['end included'] ]
-    ].every(([ a, b ]) => a === b);
-  }
-
-  if (a == b) {
-    return true;
-  }
-
-  return aType === bType ? false : null;
 }

@@ -1,5 +1,6 @@
 import {
-  isType
+  isType,
+  equals
 } from './types';
 
 import {
@@ -452,9 +453,9 @@ const builtins = {
 
   // 10.3.4.6 Date and time functions
 
-  'is': fn(function() {
-    throw notImplemented('is');
-  }, [ 'any?' ]),
+  'is': fn(function(value1, value2) {
+    return equals(value1, value2);
+  }, [ 'any', 'any' ]),
 
   // 10.3.4.7 Range Functions
 

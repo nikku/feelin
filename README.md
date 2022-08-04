@@ -40,6 +40,17 @@ evaluate('every rate in rates() satisfies rate < 10', {
 * [ ] Full [DMN TCK](https://github.com/dmn-tck/tck) compliance
 
 
+## Build and Run
+
+```sh
+# build the library and run all tests
+npm run all
+
+# execute FEEL tests in DMN TCK
+npm run tck
+```
+
+
 ## Related
 
 * [lezer-feel](https://github.com/nikku/lezer-feel) - FEEL language definition for the [Lezer](https://lezer.codemirror.net/) parser system

@@ -6,6 +6,12 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 0.32.0
+
+* `FEAT`: implement `range` type
+* `FEAT`: implement first round of `range` builtins
+* `FEAT`: implement `is` builtin
+
 ## 0.31.0
 
 * `FEAT`: support tests in `ForExpression`

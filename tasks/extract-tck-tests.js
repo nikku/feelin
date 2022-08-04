@@ -82,6 +82,8 @@ function parseModelFile(file) {
   let text = false;
   let description = false;
 
+  let context = false;
+
   const parser = createParser({
 
     openTag(el) {
@@ -93,8 +95,24 @@ function parseModelFile(file) {
         };
       }
 
+      if (el.name === 'dmn:variable' && context) {
+        expression.text += (
+          (expression.text.endsWith('{ ') ? '' : ', ') +
+          el.attrs.name +
+          ': '
+        );
+      }
+
+      if (el.name === 'dmn:contextEntry') {
+        context = true;
+      }
+
+      if (el.name === 'dmn:context') {
+        expression.text += '{ ';
+      }
+
       if (el.name === 'dmn:text') {
-        text = !!expression;
+        text = !!(expression);
       }
 
       if (el.name === 'dmn:description') {
@@ -119,6 +137,14 @@ function parseModelFile(file) {
 
       if (el.name === 'dmn:description') {
         description = false;
+      }
+
+      if (el.name === 'dmn:context') {
+        expression.text += ' }';
+      }
+
+      if (el.name === 'dmn:contextEntry') {
+        context = false;
       }
 
       if (el.name === 'dmn:decision') {

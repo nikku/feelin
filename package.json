@@ -49,7 +49,7 @@
     "build": "rollup -c",
     "build:dev": "npm run build -- --watch",
     "dev": "run-p *:dev",
-    "generate-typings": "tsc src/index.ts --emitDeclarationOnly --declaration --outDir dist",
+    "generate-typings": "tsc --emitDeclarationOnly --declaration --outDir dist",
     "prepare": "run-s build generate-typings",
     "test": "mocha test/*-spec.js",
     "test:dev": "chokidar '{dist,test}/**/*.js' -c 'npm test'",

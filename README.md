@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/nikku/feelin/actions/workflows/CI.yml/badge.svg)](https://github.com/nikku/feelin/actions/workflows/CI.yml)
 
-A FEEL parser and interpreter written in JavaScript. [__:arrow_right: Try it out__](https://nikku.github.io/feel-playground).
+A [DMN](https://www.omg.org/spec/DMN/) FEEL parser and interpreter written in JavaScript. [__:arrow_right: Try it out__](https://nikku.github.io/feel-playground).
 
 
 ## Usage
@@ -44,7 +44,8 @@ evaluate('every rate in rates() satisfies rate < 10', {
 
 Feel language support:
 
-* [lezer-feel](https://github.com/nikku/lezer-feel)
+* [lezer-feel](https://github.com/nikku/lezer-feel) - FEEL language grammar
+* [feel-playground](https://github.com/nikku/feel-playground) - Interactive FEEL playground
 
 Other open source FEEL interpreters:
 

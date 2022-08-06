@@ -77,7 +77,9 @@ describe('tck', function() {
               if (typeof a === 'number' && typeof b === 'number') {
                 expect(a).to.be.closeTo(b, 0.00001);
               } else {
-                expect(a).to.eql(b);
+                if (tryEval('a = b', { a, b }) !== true) {
+                  expect(a).to.eql(b);
+                }
               }
             });
 

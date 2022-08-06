@@ -1,12 +1,23 @@
 import {
   isType,
   equals,
-  Range
+  Range,
+  isString,
+  isNumber,
+  getType,
+  isCompatible
 } from './types';
 
 import {
   parseParameterNames
 } from './utils';
+
+import {
+  duration,
+  date,
+  isDateTime
+} from './temporal';
+
 
 const names = [
 
@@ -98,27 +109,23 @@ const names = [
 
   // 10.3.4.9 Sort
   'sort',
+  'list',
+  'precedes',
 
   // 10.3.4.10 Context function
   'get value',
-  'get entries'
+  'get entries',
+  'context',
+  'context merge',
+  'context put'
 ];
 
+
+// 10.3.4 Built-in functions
 
 const builtins = {
 
   // 10.3.4.1 Conversion functions
-  'date': function() {
-    throw notImplemented('date');
-  },
-
-  'date and time': fn(function() {
-    throw notImplemented('date and time');
-  }, [ 'any' ]),
-
-  'time': function() {
-    throw notImplemented('time');
-  },
 
   'number': function() {
     throw notImplemented('number');
@@ -132,23 +139,128 @@ const builtins = {
     return toString(from);
   }, [ 'any' ]),
 
-  'duration': function() {
-    throw notImplemented('duration');
-  },
+  // date(from) => date string
+  // date(from) => date and time
+  // date(year, month, day)
+  'date': fn(function(year, month, day, from) {
 
-  'years and months duration': function() {
-    throw notImplemented('years and months duration');
-  },
+    if (!isNumber(year)) {
+      from = year;
+      year = null;
+    }
 
-  '@': function() {
-    throw notImplemented('@');
-  },
+    if (isString(from)) {
+      return date(from).setZone('utc').startOf('day');
+    }
+
+    if (isDateTime(from)) {
+      return from.setZone('utc').startOf('day');
+    }
+
+    if (year) {
+      return date().setZone('utc').set({
+        year,
+        month,
+        day
+      }).startOf('day');
+    }
+
+    return null;
+  }, [ 'any', 'number?', 'number?', 'string?' ]),
+
+  // date and time(from) => date time string
+  // date and time(date, time)
+  'date and time': fn(function(d, time, from) {
+
+    if (isDateTime(d) && isDateTime(time)) {
+      return time.set({
+        year: d.year,
+        month: d.month,
+        day: d.day
+      });
+    }
+
+    if (isString(d)) {
+      from = d;
+      d = null;
+    }
+
+    if (isString(from)) {
+      return date(from);
+    }
+
+    return null;
+  }, [ 'any', 'any?', 'string?' ], [ 'date', 'time', 'from' ]),
+
+  // time(from) => time string
+  // time(from) => time, date and time
+  // time(hour, minute, second, offset?) => ...
+  'time': fn(function(hour, minute, second, offset, from) {
+
+    if (isString(hour) || isDateTime(hour)) {
+      from = hour;
+      hour = null;
+    }
+
+    if (isString(from)) {
+      return date(null, from);
+    }
+
+    if (isDateTime(from)) {
+
+      return from.set({
+        year: 1900,
+        month: 1,
+        day: 1,
+        millisecond: 0
+      });
+    }
+
+    // TODO: support offset = days and time duration
+    return date().set({
+      year: 1900,
+      month: 1,
+      day: 1,
+      hour,
+      minute,
+      second,
+      millisecond: 0
+    });
+  }, [ 'any', 'number?', 'number?', 'number?', 'any?' ]),
+
+  'duration': fn(function(from) {
+    return duration(from);
+  }, [ 'string' ]),
+
+  'years and months duration': fn(function(from, to) {
+    return to.diff(from, [ 'years', 'months' ]);
+  }, [ 'date', 'date' ]),
+
+  '@': fn(function(string) {
+
+    if (/^-?P/.test(string)) {
+      return duration(string);
+    }
+
+    if (/^[\d]{1,2}:[\d]{1,2}:[\d]{1,2}/.test(string)) {
+      return date(null, string);
+    }
+
+    return date(string);
+  }, [ 'string' ]),
+
+  'now': fn(function() {
+    return date();
+  }, []),
+
+  'today': fn(function() {
+    return date().startOf('day');
+  }, []),
 
   // 10.3.4.2 Boolean function
   'not': fn(function(bool) {
     return isType(bool, 'boolean') ? !bool : null;
   }, [ 'any' ]),
-
 
   // 10.3.4.3 String functions
   'substring': fn(function(string, start, length) {
@@ -571,6 +683,19 @@ const builtins = {
 
     return Object.entries(m).map(([ key, value ]) => ({ key, value }));
   }, [ 'context' ]),
+
+  'context': listFn(function(_contexts) {
+    throw notImplemented('context');
+  }, 'context'),
+
+  'context merge': listFn(function(_contexts) {
+    throw notImplemented('context merge');
+  }, 'context'),
+
+  'context put': fn(function(_context, _keys, _value) {
+    throw notImplemented('context put');
+  }, [ 'context', 'list', 'any' ])
+
 };
 
 export {
@@ -613,18 +738,13 @@ function createArgTester(arg) {
       return obj instanceof Range ? obj : FALSE;
     }
 
-    const objType = typeof obj;
+    const objType = getType(obj);
 
-    if (obj === null || objType === 'undefined') {
+    if (objType === 'nil') {
       return (optional ? obj : FALSE);
     }
 
-    if (type === 'context') {
-      return objType === 'object' ? obj : FALSE;
-    }
-
-
-    if (type !== 'any' && objType !== type) {
+    if (!isCompatible(objType, type) && type !== 'any') {
       return FALSE;
     }
 

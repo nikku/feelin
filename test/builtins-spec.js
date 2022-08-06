@@ -9,20 +9,20 @@ describe('builtin functions', function() {
 
   describe('Conversion', function() {
 
-    exprSkip('date("2012-12-25") – date("2012-12-24") = duration("P1D")', true);
+    exprSkip('date("2012-12-25") - date("2012-12-24") = duration("P1D")', true);
 
-    exprSkip(`
+    expr(`
       date(
         date and time("2012-12-25T11:00:00Z")
       ) = date("2012-12-25")
     `, true);
 
-    exprSkip('date(2012, 12, 25) = date("2012-12-25")', true);
+    expr('date(2012, 12, 25) = date("2012-12-25")', true);
 
-    exprSkip(`
+    expr(`
       date and time ("2012-12-24T23:59:00") =
         date and time (
-          date("2012-12-24”), time(“23:59:00")
+          date("2012-12-24"), time("23:59:00")
         )
     `, true);
 
@@ -36,15 +36,19 @@ describe('builtin functions', function() {
       time("00:01:00@Etc/UTC")
     `, true);
 
-    exprSkip(`
+    expr(`
       time(
         date and time("2012-12-25T11:00:00Z")
       ) = time("11:00:00Z")
     `, true);
 
+    expr(`
+      time(11, 0, 0) = time("11:00:00")
+    `, true);
+
     exprSkip(`
-      time(“23:59:00z") =
-      time(23, 59, 0, duration(“PT0H”))
+      time("23:59:00z") =
+      time(23, 59, 0, duration("PT0H"))
     `, true);
 
     exprSkip(`
@@ -96,15 +100,34 @@ describe('builtin functions', function() {
         duration("P2DT20H14M")
     `, true);
 
-    exprSkip('duration("P2Y2M") = duration("P26M")', true);
+    expr('duration("P2Y2M") = duration("P26M")', true);
 
-    exprSkip(`
+    expr(`
       years and months duration(
-       date("2011-12-22"),
-       date("2013-08-24")
+        date("2011-12-22"),
+        date("2013-08-24")
       ) = duration("P1Y8M")
     `, true);
 
+    expr(`
+      date(
+        date and time("2017-08-10T10:20:00@Europe/Paris")
+      ) = @"2017-08-10"
+    `, true);
+
+    expr(`
+      years and months duration(
+        from:date("2016-01-21"),
+        to:date("2015-01-21")
+      ) = duration("-P1Y")
+    `, true);
+
+    expr(`
+      years and months duration(
+        from:date and time("2016-01-21T10:20:00"),
+        to:date and time("2015-01-21T10:20:00")
+      ) = duration("-P1Y")
+    `, true);
   });
 
 
@@ -326,13 +349,77 @@ describe('builtin functions', function() {
   });
 
 
-  // TODO(nikku): support this
-  describe.skip('Date and time', function() {
+  // 10.3.4 Built-in functions
 
-    expr('is(date("2012-12-25"), time("23:00:50"))', false);
-    expr('is(date("2012-12-25"), date("2012-12-25"))', true);
-    expr('is(time("23:00:50z"), time("23:00:50"))', false);
-    expr('is(time("23:00:50z"), time("23:00:50+00:00"))', false);
+  describe('Temporals', function() {
+
+    // time
+    // date
+    // date-time
+    // days and time duration
+    // years and month duration
+
+    expr('@"2019-03-31" = date("2019-03-31")', true);
+    expr('@"2019-03-30" = @"2019-03-31"', false);
+    expr('@"2019-03-30" = @"PT01H"', null);
+
+    expr('@"15:00:00" = time("15:00:00")', true);
+
+    expr('@"PT01H" = duration("PT01H")', true);
+    expr('@"-PT01H" = duration("-PT01H")', true);
+
+    expr('@"PT01H" = duration("-PT01H")', false);
+    expr('@"PT01H" = @"2014-04-02"', null);
+
+    expr('@"2014-12-31T23:59:59" = date and time("2014-12-31T23:59:59")', true);
+
+    expr('is(date("2012-12-25"), time("23:00:50"))', null);
+    expr('is(date("2012-12-25"), @"2012-12-25")', true);
+    expr('is(date("2011-12-25"), @"2012-12-25")', false);
+
+    expr('is(time("23:00:50z"), time("23:00:50+00:00"))', true);
+    expr('is(time("23:00:50z"), time("23:00:50+01:30"))', false);
+    expr('is(time("23:00:50z"), time("23:00:50+01:00"))', false);
+
+    expr(`
+      years and months duration(
+        from:date("2016-01-21"),
+        to:date("2015-01-21")
+      ) = duration("-P1Y")
+    `, true);
+
+    expr(`
+      years and months duration(
+        @"2016-01-21",
+        @"2015-01-21"
+      ) = duration("-P1Y")
+    `, true);
+
+    expr('duration("-P1Y") = duration("-P365D")', true);
+
+    expr(`
+      date and time(
+        "2016-01-21"
+      ) = date and time("2016-01-21T00:00:00z")
+    `, true);
+
+    expr(`
+      date and time(
+        date("2016-01-21"), time("03:01:00+01:00")
+      ) = date and time("2016-01-21T03:01:00+01:00")
+    `, true);
+
+    expr(`
+      date("2016-01-15") = date(2016, 1, 15)
+    `, true);
+
+    expr(`
+      date(2016, 1, 15) = date and time("2016-01-15T00:00:00z")
+    `, true);
+
+    expr(`
+      today() = date and time(now(), @"00:00:00")
+    `, true);
 
   });
 

@@ -1,3 +1,11 @@
+import { FixedOffsetZone } from 'luxon';
+import { isDateTime, isDuration } from './temporal';
+
+export {
+  isDateTime,
+  isDuration
+};
+
 export function isContext(e) {
   return Object.getPrototypeOf(e) === Object.prototype;
 }
@@ -6,21 +14,25 @@ export function isArray(e) {
   return Array.isArray(e);
 }
 
+export function isBoolean(e) {
+  return typeof e === 'boolean';
+}
+
 export function getType(e) {
 
   if (e === null || e === undefined) {
     return 'nil';
   }
 
-  if (typeof e === 'boolean') {
+  if (isBoolean(e)) {
     return 'boolean';
   }
 
-  if (typeof e === 'number') {
+  if (isNumber(e)) {
     return 'number';
   }
 
-  if (typeof e === 'string') {
+  if (isString(e)) {
     return 'string';
   }
 
@@ -32,6 +44,32 @@ export function getType(e) {
     return 'list';
   }
 
+  if (isDuration(e)) {
+    return 'duration';
+  }
+
+  if (isDateTime(e)) {
+    if (
+      e.year === 1900 &&
+      e.month === 1 &&
+      e.day === 1
+    ) {
+      return 'time';
+    }
+
+    if (
+      e.hour === 0 &&
+      e.minute === 0 &&
+      e.second === 0 &&
+      e.millisecond === 0 &&
+      e.zone === FixedOffsetZone.utcInstance
+    ) {
+      return 'date';
+    }
+
+    return 'date time';
+  }
+
   if (e instanceof Range) {
     return 'range';
   }
@@ -41,6 +79,23 @@ export function getType(e) {
 
 export function isType(el: string, type: string): boolean {
   return getType(el) === type;
+}
+
+export function isCompatible(aType: string, bType: string) {
+
+  if (aType === bType) {
+    return true;
+  }
+
+  return [
+    [ 'time', 'date time' ],
+    [ 'date', 'date time' ]
+  ].some(
+    e => (
+      e[0] === aType && e[1] === bType ||
+      e[1] === aType && e[0] === bType
+    )
+  );
 }
 
 export type RangeProps = {
@@ -91,8 +146,15 @@ export class Range {
 
 }
 
-export function equals(a, b) {
+export function isNumber(obj) : obj is number {
+  return typeof obj === 'number';
+}
 
+export function isString(obj) : obj is string {
+  return typeof obj === 'string';
+}
+
+export function equals(a, b) {
   if (
     a === null && b !== null ||
     a !== null && b === null
@@ -111,7 +173,7 @@ export function equals(a, b) {
   const aType = getType(a);
   const bType = getType(b);
 
-  if (aType !== bType) {
+  if (!isCompatible(aType, bType)) {
     return null;
   }
 
@@ -127,6 +189,24 @@ export function equals(a, b) {
     return a.every(
       (element, idx) => equals(element, b[idx])
     );
+  }
+
+  if (aType === 'date time' || aType === 'time' || aType === 'date') {
+    return a.valueOf() === b.valueOf();
+  }
+
+  if (aType === 'duration') {
+
+    // years and months duration -> months
+    if (a.as('days') > 180) {
+      return Math.round(a.minus(b).as('months')) === 0;
+    }
+
+    // days and time duration -> seconds
+    else {
+      return Math.round(a.minus(b).as('seconds')) === 0;
+    }
+
   }
 
   if (aType === 'context') {

@@ -50,7 +50,8 @@ export default [
     ],
     external: [
       'lezer',
-      'lezer-feel'
+      'lezer-feel',
+      'luxon'
     ],
     plugins: [
       typescript()

@@ -9,6 +9,7 @@ import {
 } from './types';
 
 import {
+  notImplemented,
   parseParameterNames
 } from './utils';
 
@@ -948,10 +949,6 @@ function round(n) {
   } else {
     return integral;
   }
-}
-
-function notImplemented(fn) {
-  return new Error(`not implemented: ${fn}`);
 }
 
 // adapted from https://stackoverflow.com/a/53577159

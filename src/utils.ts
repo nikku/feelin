@@ -20,3 +20,7 @@ export function parseParameterNames(fn) {
 
   return params.split(',').map(p => p.trim());
 }
+
+export function notImplemented(thing) {
+  return new Error(`not implemented: ${thing}`);
+}

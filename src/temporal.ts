@@ -6,6 +6,8 @@ import {
   Zone
 } from 'luxon';
 
+import { notImplemented } from './utils';
+
 
 export function ms(temporal) {
 
@@ -48,6 +50,10 @@ export function date(str: string = null, time: string = null, zone: Zone = null)
   }
 
   if (typeof str === 'string') {
+
+    if (str.startsWith('-')) {
+      throw notImplemented('negative date');
+    }
 
     if (!str.includes('T')) {
 

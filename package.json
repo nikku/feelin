@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@lezer/lr": "^1.2.0",
-    "lezer-feel": "^0.9.0",
+    "lezer-feel": "^0.9.1",
     "luxon": "^3.0.1"
   },
   "repository": {

@@ -442,6 +442,17 @@ describe('builtin functions', function() {
     `, true);
 
 
+    describe('properties', function() {
+
+      exprSkip('duration("P1D").months', null);
+      exprSkip('duration("P1D").years', null);
+      exprSkip('duration("P1Y").minutes', null);
+      exprSkip('duration("P1Y").hours', null);
+
+      exprSkip('time("10:30:00+05:00").time offset', 'duration("PT5H")');
+      exprSkip('date and time("2018-12-10T10:30:00+05:00").time offset', 'duration("PT5H")');
+
+    });
 
 
     describe('ranges', function() {

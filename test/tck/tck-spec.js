@@ -67,11 +67,11 @@ describe('tck', function() {
             iit(`${expression.text} === ${expectedValue} ${ context || '' }`, function() {
 
               if (a instanceof Error) {
-                expect(a).not.to.exist;
+                expect(a, 'expression parse error').not.to.exist;
               }
 
               if (b instanceof Error) {
-                expect(b).not.to.exist;
+                expect(b, 'expected value parse error').not.to.exist;
               }
 
               if (typeof a === 'number' && typeof b === 'number') {

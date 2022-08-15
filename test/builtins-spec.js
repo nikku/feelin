@@ -82,25 +82,26 @@ describe('builtin functions', function() {
     expr('string(true)', 'true');
     expr('string(false)', 'false');
 
-    exprSkip('string(date("2012-12-25"))', '2012-12-25');
-    exprSkip('string(date("2018-12-10"))', '2018-12-10');
+    expr('string(date("2012-12-25"))', '2012-12-25');
+    expr('string(date("2018-12-10"))', '2018-12-10');
     exprSkip('string(date and time("2018-12-10"))', '2018-12-10T00:00:00');
     exprSkip('string(date and time("2018-12-10T10:30:00.0001"))', '2018-12-10T10:30:00.0001');
     exprSkip('string(date and time("2018-12-10T10:30:00.0001+05:00:01"))', '2018-12-10T10:30:00.0001+05:00:01');
-    exprSkip('string(date and time("2018-12-10T10:30:00@Etc/UTC"))', '2018-12-10T10:30:00@Etc/UTC');
+    expr('string(date and time("2018-12-10T10:30:00@Etc/UTC"))', '2018-12-10T10:30:00@Etc/UTC');
+    expr('string(date and time(date and time("2017-09-05T10:20:00@Europe/Paris"),time("09:15:30.987@Europe/Paris")))', '2017-09-05T09:15:30.987@Europe/Paris');
     exprSkip('string(time("10:30:00.0001"))', '10:30:00.0001');
     exprSkip('string(time("10:30:00.0001+05:00:01"))', '10:30:00.0001+05:00:01');
-    exprSkip('string(time("10:30:00@Etc/UTC"))', '10:30:00@Etc/UTC');
-    exprSkip('string(duration("P1D"))', 'P1D');
+    expr('string(time("10:30:00@Etc/UTC"))', '10:30:00@Etc/UTC');
+    expr('string(duration("P1D"))', 'P1D');
     exprSkip('string(duration("-P1D"))', '-P1D');
-    exprSkip('string(duration("P0D"))', 'PT0S');
-    exprSkip('string(duration("P1DT2H3M4.1234S"))', 'P1DT2H3M4.1234S');
-    exprSkip('string(duration("PT49H"))', 'P2DT1H');
-    exprSkip('string(duration("P1Y"))', 'P1Y');
+    expr('string(duration("P0D"))', 'PT0S');
+    expr('string(duration("P1DT2H3M4.123S"))', 'P1DT2H3M4.123S');
+    expr('string(duration("PT49H"))', 'P2DT1H');
+    expr('string(duration("P1Y"))', 'P1Y');
     exprSkip('string(duration("-P1Y"))', '-P1Y');
     exprSkip('string(duration("P0Y"))', 'P0M');
-    exprSkip('string(duration("P1Y2M"))', 'P1Y2M');
-    exprSkip('string(duration("P25M"))', 'P2Y1M');
+    expr('string(duration("P1Y2M"))', 'P1Y2M');
+    expr('string(duration("P25M"))', 'P2Y1M');
 
     expr('string([1,2,3,"foo"])', '[1, 2, 3, \\"foo\\"]');
     expr('string([1,2,3,[4,5,"foo"]])', '[1, 2, 3, [4, 5, \\"foo\\"]]');

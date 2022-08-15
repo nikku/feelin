@@ -913,25 +913,56 @@ function escapeStr(str) {
 
 function toString(obj, wrap = false) {
 
-  if (obj === null) {
+  const type = getType(obj);
+
+  if (type === 'nil') {
     return 'null';
   }
 
-  if (typeof obj === 'string') {
+  if (type === 'string') {
     return (wrap && '\\"' || '') + escapeStr(obj) + (wrap && '\\"' || '');
   }
 
-  if (typeof obj === 'boolean' || typeof obj === 'number') {
+  if (type === 'boolean' || type === 'number') {
     return String(obj);
   }
 
-  if (Array.isArray(obj)) {
+  if (type === 'list') {
     return '[' + obj.map(toDeepString).join(', ') + ']';
   }
 
-  return '{' + Object.entries(obj).map(([ key, value ]) => {
-    return toKeyString(key) + ': ' + toDeepString(value);
-  }).join(', ') + '}';
+  if (type === 'context') {
+    return '{' + Object.entries(obj).map(([ key, value ]) => {
+      return toKeyString(key) + ': ' + toDeepString(value);
+    }).join(', ') + '}';
+  }
+
+  if (type === 'duration') {
+    return obj.shiftTo('years', 'months', 'days', 'hours', 'minutes', 'seconds').normalize().toISO();
+  }
+
+  if (type === 'date time') {
+    if (obj.zone?.zoneName) {
+      return obj.toISO({ suppressMilliseconds: true, includeOffset: false }) + '@' + obj.zone?.zoneName;
+    }
+
+    return obj.toISO({ suppressMilliseconds: true });
+  }
+
+  if (type === 'date') {
+    return obj.toISODate();
+  }
+
+  if (type === 'time') {
+
+    if (obj.zone?.zoneName) {
+      return obj.toISOTime({ suppressMilliseconds: true, includeOffset: false }) + '@' + obj.zone?.zoneName;
+    }
+
+    return obj.toISOTime({ suppressMilliseconds: true });
+  }
+
+  throw notImplemented('string(' + type + ')');
 }
 
 function countSymbols(str) {

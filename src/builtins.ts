@@ -23,9 +23,9 @@ import {
 const names = [
 
   // 10.3.4.1 Conversion functions
-  'date',
   'date and time',
   'time',
+  'date',
   'number',
   'string',
   'duration',
@@ -145,36 +145,41 @@ const builtins = {
   // date(year, month, day)
   'date': fn(function(year, month, day, from) {
 
-    if (!isNumber(year)) {
+    if (!from && !isNumber(year)) {
       from = year;
       year = null;
     }
 
+    let d;
+
     if (isString(from)) {
-      return date(from).setZone('utc').startOf('day');
+      d = date(from);
     }
 
     if (isDateTime(from)) {
-      return from.setZone('utc').startOf('day');
+      d = from;
     }
 
     if (year) {
-      return date().setZone('utc').set({
+      d = date().setZone('utc').set({
         year,
         month,
         day
-      }).startOf('day');
+      });
     }
 
-    return null;
-  }, [ 'any', 'number?', 'number?', 'string?' ]),
+    return d && ifValid(d.setZone('utc').startOf('day')) || null;
+  }, [ 'any?', 'number?', 'number?', 'any?' ]),
 
   // date and time(from) => date time string
   // date and time(date, time)
   'date and time': fn(function(d, time, from) {
 
+    let dt;
+
     if (isDateTime(d) && isDateTime(time)) {
-      return time.set({
+
+      dt = time.set({
         year: d.year,
         month: d.month,
         day: d.day
@@ -187,10 +192,10 @@ const builtins = {
     }
 
     if (isString(from)) {
-      return date(from);
+      dt = date(from);
     }
 
-    return null;
+    return dt && ifValid(dt) || null;
   }, [ 'any?', 'time?', 'string?' ], [ 'date', 'time', 'from' ]),
 
   // time(from) => time string
@@ -198,18 +203,38 @@ const builtins = {
   // time(hour, minute, second, offset?) => ...
   'time': fn(function(hour, minute, second, offset, from) {
 
+    let t;
+
+    if (offset) {
+      throw notImplemented('time(..., offset)');
+    }
+
     if (isString(hour) || isDateTime(hour)) {
       from = hour;
       hour = null;
     }
 
     if (isString(from)) {
-      return date(null, from);
+
+      t = date(null, from);
     }
 
     if (isDateTime(from)) {
+      t = from.set({
+        year: 1900,
+        month: 1,
+        day: 1
+      });
+    }
 
-      return from.set({
+    if (isNumber(hour)) {
+
+      // TODO: support offset = days and time duration
+      t = date().set({
+        hour,
+        minute,
+        second
+      }).set({
         year: 1900,
         month: 1,
         day: 1,
@@ -217,37 +242,34 @@ const builtins = {
       });
     }
 
-    // TODO: support offset = days and time duration
-    return date().set({
-      year: 1900,
-      month: 1,
-      day: 1,
-      hour,
-      minute,
-      second,
-      millisecond: 0
-    });
+    return t && ifValid(t) || null;
   }, [ 'any?', 'number?', 'number?', 'any?', 'any?' ]),
 
   'duration': fn(function(from) {
-    return duration(from);
+    return ifValid(duration(from));
   }, [ 'string' ]),
 
   'years and months duration': fn(function(from, to) {
-    return to.diff(from, [ 'years', 'months' ]);
+    return ifValid(to.diff(from, [ 'years', 'months' ]));
   }, [ 'date', 'date' ]),
 
   '@': fn(function(string) {
 
+    let t;
+
     if (/^-?P/.test(string)) {
-      return duration(string);
+      t = duration(string);
     }
 
-    if (/^[\d]{1,2}:[\d]{1,2}:[\d]{1,2}/.test(string)) {
-      return date(null, string);
+    else if (/^[\d]{1,2}:[\d]{1,2}:[\d]{1,2}/.test(string)) {
+      t = date(null, string);
     }
 
-    return date(string);
+    else {
+      t = date(string);
+    }
+
+    return t && ifValid(t) || null;
   }, [ 'string' ]),
 
   'now': fn(function() {
@@ -1030,4 +1052,8 @@ function mode(array: number[]) {
   const sorted = Object.entries(buckets).sort((a, b) => b[1] - a[1]);
 
   return sorted.filter(s => s[1] === sorted[0][1]).map(e => +e[0]);
+}
+
+function ifValid(o: DateTime | Duration) {
+  return o.isValid ? o : null;
 }

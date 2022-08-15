@@ -30,7 +30,7 @@ export function isDuration(obj): obj is Duration {
   return Duration.isDuration(obj);
 }
 
-export function duration(opts: string|number) {
+export function duration(opts: string|number) : Duration {
 
   if (typeof opts === 'number') {
     return Duration.fromMillis(opts);
@@ -39,7 +39,7 @@ export function duration(opts: string|number) {
   return Duration.fromISO(opts);
 }
 
-export function date(str: string = null, time: string = null, zone: Zone = null) {
+export function date(str: string = null, time: string = null, zone: Zone = null) : DateTime {
 
   if (time) {
     if (str) {
@@ -58,7 +58,7 @@ export function date(str: string = null, time: string = null, zone: Zone = null)
     if (!str.includes('T')) {
 
       // raw dates are in UTC time zone
-      return date(str + 'T00:00:00.000Z', null, FixedOffsetZone.utcInstance);
+      return date(str + 'T00:00:00.000Z');
     }
 
     if (str.includes('@')) {

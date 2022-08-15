@@ -1,7 +1,6 @@
 import {
   DateTime,
   Duration,
-  FixedOffsetZone,
   Info,
   Zone
 } from 'luxon';

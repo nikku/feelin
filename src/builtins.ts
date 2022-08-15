@@ -19,6 +19,8 @@ import {
   isDateTime
 } from './temporal';
 
+import { DateTime, Duration } from 'luxon';
+
 
 const names = [
 
@@ -1054,6 +1056,6 @@ function mode(array: number[]) {
   return sorted.filter(s => s[1] === sorted[0][1]).map(e => +e[0]);
 }
 
-function ifValid(o: DateTime | Duration) {
+function ifValid<T extends DateTime | Duration>(o: T) : T | null {
   return o.isValid ? o : null;
 }

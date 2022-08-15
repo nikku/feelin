@@ -6,7 +6,8 @@ import { builtins } from './builtins';
 import {
   Range,
   equals,
-  isArray
+  isArray,
+  getType
 } from './types';
 
 import {
@@ -760,8 +761,8 @@ const chars = Array.from(
 
 function isTyped(type, values) {
   return (
-    values.some(e => typeof e === type) &&
-    values.every(e => typeof e === type || e === null)
+    values.some(e => getType(e) === type) &&
+    values.every(e => e === null || getType(e) === type)
   );
 }
 

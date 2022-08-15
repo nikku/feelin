@@ -192,19 +192,21 @@ export function equals(a, b) {
   }
 
   if (aType === 'date time' || aType === 'time' || aType === 'date') {
-    return a.valueOf() === b.valueOf();
+    return (
+      a.toUTC().valueOf() === b.toUTC().valueOf()
+    );
   }
 
   if (aType === 'duration') {
 
     // years and months duration -> months
-    if (a.as('days') > 180) {
-      return Math.round(a.minus(b).as('months')) === 0;
+    if (Math.abs(a.as('days')) > 180) {
+      return Math.trunc(a.minus(b).as('months')) === 0;
     }
 
     // days and time duration -> seconds
     else {
-      return Math.round(a.minus(b).as('seconds')) === 0;
+      return Math.trunc(a.minus(b).as('seconds')) === 0;
     }
 
   }

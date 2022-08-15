@@ -20,6 +20,12 @@ describe('builtin functions', function() {
     expr('date(2012, 12, 25) = date("2012-12-25")', true);
 
     expr(`
+      date(
+        from: "2012-12-25"
+      ) = date("2012-12-25")
+    `, true);
+
+    expr(`
       date and time ("2012-12-24T23:59:00") =
         date and time (
           date("2012-12-24"), time("23:59:00")
@@ -43,7 +49,20 @@ describe('builtin functions', function() {
     `, true);
 
     expr(`
+      time(
+        date and time(
+          date and time("2017-08-10T10:20:00"),
+          time("23:59:01.987654321")
+        )
+      ) = time("23:59:01.987654321")
+    `, true);
+
+    expr(`
       time(11, 0, 0) = time("11:00:00")
+    `, true);
+
+    expr(`
+      time(from: "12:45:00") = time("12:45:00")
     `, true);
 
     exprSkip(`

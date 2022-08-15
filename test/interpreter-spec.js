@@ -791,11 +791,23 @@ describe('interpreter', function() {
 
     expr('[{b: [1]}, {b: [2.1,2.2]}, {b: [3]}, {b: [4, 5]}].b = [[1], [2.1, 2.2], [3], [4, 5]]', true);
 
-    exprSkip(`
+    exprSkip('date and time("2012-12-24") = date and time("2012-12-24T00:00:00")', true);
+
+    expr(`
       date and time("2018-12-08T00:00:00@Europe/Paris") = date and time("2018-12-08T00:00:00@Europe/Paris")
     `, true);
 
-    exprSkip('date("2018-12-08") = date("2018-12-08")', true);
+    expr(`
+      @"2002-04-02T12:00:00@Australia/Melbourne" = @"2002-04-02T12:00:00@Australia/Sydney"
+    `, true);
+
+    expr('date(year:2017,month:08,day:30) = date("2017-08-30")', true);
+
+    expr('date("2018-12-08") = date("2018-12-08")', true);
+
+    exprSkip('time("10:30:00+01:00") = time("10:30:00@Europe/Paris")', true);
+
+    expr('@"2002-04-02T12:00:00-01:00" = @"2002-04-02T17:00:00+04:00"', true);
 
     expr('(> 5) = (5 .. null_value]', true, { null_value: null });
 

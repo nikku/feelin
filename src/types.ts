@@ -81,21 +81,28 @@ export function isType(el: string, type: string): boolean {
   return getType(el) === type;
 }
 
-export function isCompatible(aType: string, bType: string) {
+export function typeCast(obj: any, type: string) {
 
-  if (aType === bType) {
-    return true;
+  if (isDateTime(obj)) {
+
+    if (type === 'time') {
+      return obj.set({
+        year: 1900,
+        month: 1,
+        day: 1
+      });
+    }
+
+    if (type === 'date') {
+      return obj.setZone('utc', { keepLocalTime: true }).startOf('day');
+    }
+
+    if (type === 'date time') {
+      return obj;
+    }
   }
 
-  return [
-    [ 'time', 'date time' ],
-    [ 'date', 'date time' ]
-  ].some(
-    e => (
-      e[0] === aType && e[1] === bType ||
-      e[1] === aType && e[0] === bType
-    )
-  );
+  return null;
 }
 
 export type RangeProps = {
@@ -173,7 +180,7 @@ export function equals(a, b) {
   const aType = getType(a);
   const bType = getType(b);
 
-  if (!isCompatible(aType, bType)) {
+  if (aType !== bType) {
     return null;
   }
 

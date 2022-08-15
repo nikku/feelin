@@ -5,7 +5,7 @@ import {
   isString,
   isNumber,
   getType,
-  isCompatible
+  typeCast
 } from './types';
 
 import {
@@ -191,7 +191,7 @@ const builtins = {
     }
 
     return null;
-  }, [ 'any', 'any?', 'string?' ], [ 'date', 'time', 'from' ]),
+  }, [ 'any?', 'time?', 'string?' ], [ 'date', 'time', 'from' ]),
 
   // time(from) => time string
   // time(from) => time, date and time
@@ -227,7 +227,7 @@ const builtins = {
       second,
       millisecond: 0
     });
-  }, [ 'any', 'number?', 'number?', 'number?', 'any?' ]),
+  }, [ 'any?', 'number?', 'number?', 'any?', 'any?' ]),
 
   'duration': fn(function(from) {
     return duration(from);
@@ -745,11 +745,11 @@ function createArgTester(arg) {
       return (optional ? obj : FALSE);
     }
 
-    if (!isCompatible(objType, type) && type !== 'any') {
-      return FALSE;
+    if (type === 'any' || type === objType) {
+      return obj;
     }
 
-    return obj;
+    return typeCast(obj, type) || FALSE;
   };
 }
 
@@ -830,6 +830,8 @@ function fn(fnDefinition, argDefinitions, parameterNames = null) {
 
   const checkArgs = createArgsValidator(argDefinitions);
 
+  parameterNames = parameterNames || parseParameterNames(fnDefinition);
+
   const wrappedFn = function(...args) {
 
     const convertedArgs = checkArgs(args);
@@ -841,7 +843,7 @@ function fn(fnDefinition, argDefinitions, parameterNames = null) {
     return fnDefinition(...convertedArgs);
   };
 
-  wrappedFn.$args = parameterNames || parseParameterNames(fnDefinition);
+  wrappedFn.$args = parameterNames;
 
   return wrappedFn;
 }

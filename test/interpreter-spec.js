@@ -40,6 +40,8 @@ describe('interpreter', function() {
 
       expr('10^5', 100000);
 
+      expr('[2] ** 4', null);
+
       expr('0.0 / 0.0', null);
 
       expr('null - 3', null);
@@ -54,9 +56,9 @@ describe('interpreter', function() {
 
       expr('10 * {}', null);
 
-      expr('[ 5 ] * 2', 10);
+      expr('[ 5 ] * 2', null);
 
-      expr('2 - [ 0 ]', 2);
+      expr('2 - [ 0 ]', null);
     });
 
 

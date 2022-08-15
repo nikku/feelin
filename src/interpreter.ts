@@ -149,15 +149,15 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
     const nullable = (op) => (a, b) => {
 
-      let left = a(context);
-      let right = b(context);
+      const left = a(context);
+      const right = b(context);
 
-      if (isArray(left) && left.length < 2) {
-        left = left[0];
+      if (isArray(left)) {
+        return null;
       }
 
-      if (isArray(right) && right.length < 2) {
-        right = right[0];
+      if (isArray(right)) {
+        return null;
       }
 
       if (

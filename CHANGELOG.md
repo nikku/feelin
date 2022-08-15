@@ -6,6 +6,14 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 0.33.0
+
+* `FEAT`: support temporal functions ([#https://github.com/nikku/feelin/issues/13](https://github.com/nikku/feelin/issues/13))
+* `FEAT`: implement `string` for temporals
+* `FEAT`: type cast built-ins
+* `FIX`: do not unbox values in `ArithmeticException`
+* `DEPS`: bump to `lezer-feel@0.9.1`
+
 ## 0.32.0
 
 * `FEAT`: implement `range` type ([#6](https://github.com/nikku/feelin/issues/6), [#10](https://github.com/nikku/feelin/issues/10), [#11](https://github.com/nikku/feelin/issues/11))

@@ -8,7 +8,7 @@ ___Note:__ Yet to be released changes appear here._
 
 ## 0.33.0
 
-* `FEAT`: support temporal functions ([#https://github.com/nikku/feelin/issues/13](https://github.com/nikku/feelin/issues/13))
+* `FEAT`: support temporal functions ([#13](https://github.com/nikku/feelin/issues/13))
 * `FEAT`: implement `string` for temporals
 * `FEAT`: type cast built-ins
 * `FIX`: do not unbox values in `ArithmeticException`

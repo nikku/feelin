@@ -440,6 +440,31 @@ describe('builtin functions', function() {
       today() = date and time(now(), @"00:00:00")
     `, true);
 
+
+
+
+    describe('ranges', function() {
+
+      exprSkip('duration("P5D") in (duration("P4D"), >=duration("P6D"))', true);
+
+      exprSkip(`
+        date and time("2018-12-08T10:30:02") in [
+          date and time("2018-12-08T10:30:02")
+          ..
+          date and time("2018-12-08T10:30:04")
+        ]
+      `, true);
+
+      exprSkip(`
+        time("10:30:05") in (time("10:30:04"), >=time("10:30:05"))
+      `, true);
+
+      exprSkip(`
+        date("2018-12-02") between date("2018-12-02") and date("2018-12-04")
+      `, true);
+
+    });
+
   });
 
 

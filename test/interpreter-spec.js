@@ -389,6 +389,14 @@ describe('interpreter', function() {
         B
       });
 
+      exprSkip('@"P10Y" instance of years and months duration', true);
+
+      exprSkip('@"P10D" instance of days and time duration', true);
+
+      exprSkip('@"10:30:11@Australia/Melbourne" instance of time', true);
+
+      exprSkip('@"2018-12-08T10:30:11+11:00" instance of date and time', true);
+
     });
 
 

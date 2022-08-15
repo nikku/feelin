@@ -10,6 +10,7 @@ import {
 } from './types';
 
 import {
+  notImplemented,
   parseParameterNames
 } from './utils';
 
@@ -344,6 +345,8 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
   case 'InExpression': return (context) => {
     return extractValue(context, args[0], args[2]);
   };
+
+  case 'SpecialType': throw notImplemented('SpecialType');
 
   case 'InstanceOfExpression': return tag((context) => {
 
@@ -762,7 +765,7 @@ function isTyped(type, values) {
   );
 }
 
-function createRange(start, end, startIncluded = true, endIncluded = true) {
+function createRange(start, end, startIncluded = true, endIncluded = true) : Range {
 
   if (isTyped('string', [ start, end ])) {
     return createStringRange(start, end, startIncluded, endIncluded);
@@ -770,6 +773,22 @@ function createRange(start, end, startIncluded = true, endIncluded = true) {
 
   if (isTyped('number', [ start, end ])) {
     return createNumberRange(start, end, startIncluded, endIncluded);
+  }
+
+  if (isTyped('duration', [ start, end ])) {
+    throw notImplemented('range<duration>');
+  }
+
+  if (isTyped('time', [ start, end ])) {
+    throw notImplemented('range<time>');
+  }
+
+  if (isTyped('date time', [ start, end ])) {
+    throw notImplemented('range<date and time>');
+  }
+
+  if (isTyped('date', [ start, end ])) {
+    throw notImplemented('range<date>');
   }
 
   throw new Error(`unsupported range: ${start}..${end}`);

@@ -128,6 +128,12 @@ describe('interpreter', function() {
         }
       });
 
+      expr('foo(a + b)', 10, {
+        foo: (n) => n,
+        a: 3,
+        b: 7
+      });
+
     });
 
 

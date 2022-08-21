@@ -6,6 +6,10 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 0.34.0
+
+* `FIX`: parse positional arguments inside functions
+
 ## 0.33.0
 
 * `FEAT`: support temporal functions ([#13](https://github.com/nikku/feelin/issues/13))

@@ -934,7 +934,7 @@ function toDeepString(obj) {
 }
 
 function escapeStr(str) {
-  return str.replace(/(([\\]?)")/g, '\\$2$1');
+  return str.replace(/("|\\)/g, '\\$1');
 }
 
 function toString(obj, wrap = false) {
@@ -946,7 +946,7 @@ function toString(obj, wrap = false) {
   }
 
   if (type === 'string') {
-    return (wrap && '\\"' || '') + escapeStr(obj) + (wrap && '\\"' || '');
+    return wrap ? `"${ escapeStr(obj) }"` : obj;
   }
 
   if (type === 'boolean' || type === 'number') {

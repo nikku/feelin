@@ -376,7 +376,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
   case 'BooleanLiteral': return tag((_context) => input === 'true' ? true : false, 'boolean');
 
-  case 'StringLiteral': return tag((_context) => input.slice(1, -1), 'string');
+  case 'StringLiteral': return tag((_context) => parseString(input), 'string');
 
   case 'PositionalParameters': return (context) => args.map(arg => arg(context));
 
@@ -1037,4 +1037,57 @@ function WrappedFn(fn, parameterNames) {
 
     return fn.call(null, ...params);
   };
+}
+
+function parseString(str: string) {
+
+  if (str.startsWith('"')) {
+    str = str.slice(1);
+  }
+
+  if (str.endsWith('"')) {
+    str = str.slice(0, -1);
+  }
+
+  return str.replace(/(\\")|(\\\\)|(\\u[a-fA-F0-9]{6})|((?:\\u[a-fA-F0-9]{4})+)/ig, function(substring: string, ...groups: any[]) {
+
+    const [
+      quotes,
+      escape,
+      codePoint,
+      charCodes
+    ] = groups;
+
+    if (quotes) {
+      return '"';
+    }
+
+    if (escape) {
+      return '\\';
+    }
+
+    if (codePoint) {
+      const codePointPattern = /\\u([a-fA-F0-9]{6})/i;
+
+      const codePointMatch = codePointPattern.exec(codePoint);
+
+      return String.fromCodePoint(parseInt(codePointMatch[1], 16));
+    }
+
+    if (charCodes) {
+      const charCodePattern = /\\u([a-fA-F0-9]{4})/ig;
+
+      const chars = [];
+
+      let charCodeMatch;
+
+      while ((charCodeMatch = charCodePattern.exec(substring)) !== null) {
+        chars.push(parseInt(charCodeMatch[1], 16));
+      }
+
+      return String.fromCharCode(...chars);
+    }
+
+    throw new Error('illegal match');
+  });
 }

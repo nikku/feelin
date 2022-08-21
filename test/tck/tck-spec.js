@@ -119,7 +119,6 @@ function skipSuite(testName) {
     '0070-feel-instance-of-test-01.xml',
     '0076-feel-external-java-test-01.xml',
     '0082-feel-coercion-test-01.xml',
-    '0083-feel-unicode-test-01.xml',
     '0092-feel-lambda-test-01.xml'
   ].includes(testName);
 }

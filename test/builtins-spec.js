@@ -103,16 +103,22 @@ describe('builtin functions', function() {
     expr('string(duration("P1Y2M"))', 'P1Y2M');
     expr('string(duration("P25M"))', 'P2Y1M');
 
-    expr('string([1,2,3,"foo"])', '[1, 2, 3, \\"foo\\"]');
-    expr('string([1,2,3,[4,5,"foo"]])', '[1, 2, 3, [4, 5, \\"foo\\"]]');
-    expr('string(["\\"foo\\""])', '[\\"\\\\\\"foo\\\\\\"\\"]');
-    expr('string({a: "foo"})', '{a: \\"foo\\"}');
-    expr('string({a: "foo", b: {bar: "baz"}})', '{a: \\"foo\\", b: {bar: \\"baz\\"}}');
-    expr('string({"{": "foo"})', '{\\"{\\": \\"foo\\"}');
-    expr('string({":": "foo"})', '{\\":\\": \\"foo\\"}');
-    expr('string({",": "foo"})', '{\\",\\": \\"foo\\"}');
-    expr('string({"}": "foo"})', '{\\"}\\": \\"foo\\"}');
-    expr('string({"\\"": "foo"})', '{\\"\\\\\\"\\": \\"foo\\"}');
+    expr('string([1,2,3,"foo"])', '[1, 2, 3, "foo"]');
+    expr('string([1,2,3,[4,5,"foo"]])', '[1, 2, 3, [4, 5, "foo"]]');
+    expr('string(["\\"foo\\""])', '["\\"foo\\""]');
+    expr('string({a: "foo"})', '{a: "foo"}');
+    expr('string({a: "foo", b: {bar: "baz"}})', '{a: "foo", b: {bar: "baz"}}');
+    expr('string({"{": "foo"})', '{"{": "foo"}');
+    expr('string({":": "foo"})', '{":": "foo"}');
+    expr('string({",": "foo"})', '{",": "foo"}');
+    expr('string({"}": "foo"})', '{"}": "foo"}');
+    expr('string({"\\"": "foo"})', '{"\\"": "foo"}');
+    expr('string("\\"")', '"');
+    expr('string("\\\\\\"")', '\\"');
+    expr('string("\\\\")', '\\');
+
+    expr('string({"{": "foo"}) = "{\\"{\\": \\"foo\\"}"', true);
+    expr('string({"\\"": "foo"}) = "{\\"\\\\\\"\\": \\"foo\\"}"', true);
 
     exprSkip(`
       date and time("2012-12-24T23:59:00") -
@@ -171,6 +177,7 @@ describe('builtin functions', function() {
     expr('string length("")', 0);
     expr('string length("123")', 3);
     expr('string length("🐎ab")', 3);
+    expr('string length(string(["\\"foo\\""]))', 11);
 
     expr('upper case("aBc4")', 'ABC4');
 

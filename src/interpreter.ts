@@ -1049,7 +1049,7 @@ function parseString(str: string) {
     str = str.slice(0, -1);
   }
 
-  return str.replace(/(\\")|(\\\\)|(\\u[a-fA-F0-9]{6})|((?:\\u[a-fA-F0-9]{4})+)/ig, function(substring: string, ...groups: any[]) {
+  return str.replace(/(\\")|(\\\\)|(\\u[a-fA-F0-9]{5,6})|((?:\\u[a-fA-F0-9]{1,4})+)/ig, function(substring: string, ...groups: any[]) {
 
     const [
       quotes,
@@ -1066,22 +1066,20 @@ function parseString(str: string) {
       return '\\';
     }
 
-    if (codePoint) {
-      const codePointPattern = /\\u([a-fA-F0-9]{6})/i;
+    const escapePattern = /\\u([a-fA-F0-9]+)/ig;
 
-      const codePointMatch = codePointPattern.exec(codePoint);
+    if (codePoint) {
+      const codePointMatch = escapePattern.exec(codePoint);
 
       return String.fromCodePoint(parseInt(codePointMatch[1], 16));
     }
 
     if (charCodes) {
-      const charCodePattern = /\\u([a-fA-F0-9]{4})/ig;
-
       const chars = [];
 
       let charCodeMatch;
 
-      while ((charCodeMatch = charCodePattern.exec(substring)) !== null) {
+      while ((charCodeMatch = escapePattern.exec(substring)) !== null) {
         chars.push(parseInt(charCodeMatch[1], 16));
       }
 

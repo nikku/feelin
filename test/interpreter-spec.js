@@ -523,6 +523,7 @@ describe('interpreter', function() {
       expr('"\\U01F40E"', '🐎');
       expr('"\\\\uD83D\\u2661"', '\\uD83D♡');
       expr('"\\\\\\u27B3\\\\uDCA9"', '\\➳\\uDCA9');
+      expr('"\\u1F4A9"', '💩');
 
       expr('-1', -1);
 

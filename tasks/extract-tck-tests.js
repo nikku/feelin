@@ -27,10 +27,15 @@ if (!fs.existsSync(tckLocation)) {
 
 const tests = glob.sync('TestCases/*/*-feel-*/*.xml', { cwd: tckLocation });
 
+const FILTER = process.env.FILTER || null;
 
 for (const testGlob of tests) {
 
   const testPath = path.join(tckLocation, testGlob);
+
+  if (FILTER && !testPath.includes(FILTER)) {
+    continue;
+  }
 
   const test = parseTestFile(testPath);
 

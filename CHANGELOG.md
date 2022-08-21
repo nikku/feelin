@@ -6,6 +6,11 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 0.35.0
+
+* `FEAT`: parse unicode escape sequences ([#5](https://github.com/nikku/feelin/issues/5))
+* `FIX`: correct `string` escaping
+
 ## 0.34.0
 
 * `FIX`: parse positional arguments inside functions

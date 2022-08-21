@@ -85,56 +85,61 @@ function parseModelFile(file) {
 
   const expressions = [];
 
-  let expression;
+  const stack = [];
+
+  Object.defineProperty(stack, 'current', {
+    get: () => {
+      return stack[stack.length - 1];
+    }
+  });
 
   let text = false;
   let description = false;
-
-  let context = false;
 
   const parser = createParser({
 
     openTag(el) {
       if (el.name === 'dmn:decision') {
-        expression = {
+        stack.push({
+          expression: true,
           name: el.attrs.name,
           text: '',
           description: ''
-        };
-      }
-
-      if (el.name === 'dmn:variable' && context) {
-        expression.text += (
-          (expression.text.endsWith('{ ') ? '' : ', ') +
-          el.attrs.name +
-          ': '
-        );
+        });
       }
 
       if (el.name === 'dmn:contextEntry') {
-        context = true;
+        stack.push({
+          contextEntry: true,
+          name: '',
+          text: ''
+        });
+      }
+
+      if (el.name === 'dmn:variable' && stack.current?.contextEntry) {
+        stack.current.name = el.attrs.name;
       }
 
       if (el.name === 'dmn:context') {
-        expression.text += '{ ';
+        stack.current.text += '{ ';
       }
 
       if (el.name === 'dmn:text') {
-        text = !!(expression);
+        text = stack.current?.expression || stack.current?.contextEntry;
       }
 
       if (el.name === 'dmn:description') {
-        description = !!expression;
+        description = stack.current?.expression;
       }
     },
 
     text(value, decodeEntities) {
       if (text) {
-        expression.text += decodeEntities(value);
+        stack.current.text += decodeEntities(value);
       }
 
       if (description) {
-        expression.description += decodeEntities(value);
+        stack.current.description += decodeEntities(value);
       }
     },
 
@@ -148,16 +153,21 @@ function parseModelFile(file) {
       }
 
       if (el.name === 'dmn:context') {
-        expression.text += ' }';
+        stack.current.text += ' }';
       }
 
       if (el.name === 'dmn:contextEntry') {
-        context = false;
+        const contextEntry = stack.pop();
+
+        if (!stack.current.text.endsWith('{ ')) {
+          stack.current.text += ', ';
+        }
+
+        stack.current.text += `${ contextEntry.name || '""'}: ${ contextEntry.text }`;
       }
 
       if (el.name === 'dmn:decision') {
-        expressions.push(expression);
-        expression = null;
+        expressions.push(stack.pop());
       }
     }
   });

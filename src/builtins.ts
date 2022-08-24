@@ -592,8 +592,13 @@ const builtins = {
   // 10.3.4.6 Date and time functions
 
   'is': fn(function(value1, value2) {
+
+    if (typeof value1 === 'undefined' || typeof value2 === 'undefined') {
+      return false;
+    }
+
     return equals(value1, value2);
-  }, [ 'any', 'any' ]),
+  }, [ 'any?', 'any?' ]),
 
   // 10.3.4.7 Range Functions
 

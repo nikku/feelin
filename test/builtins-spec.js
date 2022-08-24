@@ -371,6 +371,13 @@ describe('builtin functions', function() {
 
     expr('is(1, 1)', true);
 
+    expr('is(value1: @"2021-02-13")', false);
+    expr('is(value2: @"2021-02-13")', false);
+
+    expr('is({ a: 1 }, null)', false);
+
+    expr('is(value1: true)', false);
+
     expr('is({ a: 1 }, { a: 1 })', true);
 
   });

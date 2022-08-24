@@ -6,6 +6,10 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 0.35.2
+
+* `FIX`: correct `is` argument handling
+
 ## 0.35.1
 
 * `FIX`: actually parse that shit

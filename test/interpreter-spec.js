@@ -60,6 +60,22 @@ describe('interpreter', function() {
 
       expr('2 - [ 0 ]', null);
 
+
+      describe('string addition', function() {
+
+        expr('"a" + "b"', 'ab');
+
+        expr('"a" + null', null);
+
+        expr('null + "a"', null);
+
+        expr('"a" + string(1)', 'a1');
+
+        expr('1 + "a"', null);
+
+      });
+
+
       describe('temporal addition', function() {
 
         exprSkip(`

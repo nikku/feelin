@@ -148,7 +148,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
   switch (node.name) {
   case 'ArithOp': return (context) => {
 
-    const nullable = (op) => (a, b) => {
+    const nullable = (op, types = [ 'number' ]) => (a, b) => {
 
       const left = a(context);
       const right = b(context);
@@ -161,9 +161,12 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
         return null;
       }
 
+      const leftType = getType(left);
+      const rightType = getType(right);
+
       if (
-        typeof left !== 'number' ||
-        typeof right !== 'number'
+        leftType !== rightType ||
+        !types.includes(leftType)
       ) {
         return null;
       }
@@ -172,7 +175,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     };
 
     switch (input) {
-    case '+': return nullable((a, b) => a + b);
+    case '+': return nullable((a, b) => a + b, [ 'string', 'number' ]);
     case '-': return nullable((a, b) => a - b);
     case '*': return nullable((a, b) => a * b);
     case '/': return nullable((a, b) => !b ? null : a / b);

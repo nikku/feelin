@@ -713,6 +713,11 @@ function getBuiltin(name, _context) {
 }
 
 function getFromContext(name, context) {
+
+  if ([ 'nil', 'boolean', 'number', 'string' ].includes(getType(context))) {
+    return null;
+  }
+
   if (name in context) {
     return context[name];
   }

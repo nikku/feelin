@@ -59,6 +59,25 @@ describe('interpreter', function() {
       expr('[ 5 ] * 2', null);
 
       expr('2 - [ 0 ]', null);
+
+      describe('temporal addition', function() {
+
+        exprSkip(`
+          date and time("2012-12-24T23:59:00") + duration("PT1M") =
+          date and time("2012-12-25T00:00:00")
+        `, true);
+
+        exprSkip('date("2012-12-25") - date("2012-12-24") = duration("P1D")', true);
+
+        exprSkip('time("00:01:00@Etc/UTC") - time("23:59:00z") = duration("PT2M")', true);
+
+        exprSkip(`
+          time("23:59:00z") + duration("PT2M") =
+          time("00:01:00@Etc/UTC")
+        `, true);
+
+      });
+
     });
 
 
@@ -768,10 +787,7 @@ describe('interpreter', function() {
 
     describe.skip('DateAndTime', function() {
 
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      function Duration() {}
-
-      expr('time("10:30:00+05:00").time offset', new Duration('PT5H'));
+      expr('time("10:30:00+05:00").time offset = @"PT5H"', true);
 
     });
 

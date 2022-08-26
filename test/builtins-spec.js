@@ -9,8 +9,6 @@ describe('builtin functions', function() {
 
   describe('Conversion', function() {
 
-    exprSkip('date("2012-12-25") - date("2012-12-24") = duration("P1D")', true);
-
     expr(`
       date(
         date and time("2012-12-25T11:00:00Z")
@@ -30,16 +28,6 @@ describe('builtin functions', function() {
         date and time (
           date("2012-12-24"), time("23:59:00")
         )
-    `, true);
-
-    exprSkip(`
-      date and time("2012-12-24T23:59:00") + duration("PT1M") =
-      date and time("2012-12-25T00:00:00")
-    `, true);
-
-    exprSkip(`
-      time("23:59:00z") + duration("PT2M") =
-      time("00:01:00@Etc/UTC")
     `, true);
 
     expr(`

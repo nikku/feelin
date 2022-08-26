@@ -6,6 +6,11 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 0.36.0
+
+* `FEAT`: add `+` string concatenation
+* `FEAT`: support path on scalars (returning `null`)
+
 ## 0.35.2
 
 * `FIX`: correct `is` argument handling

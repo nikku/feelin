@@ -27,6 +27,7 @@
     "npm-run-all": "^4.1.5",
     "rollup": "^2.35.1",
     "saxen": "^8.1.2",
+    "source-map-support": "^0.5.21",
     "strip-indent": "^3.0.0",
     "tslib": "^2.0.3",
     "typescript": "^4.1.3"
@@ -50,7 +51,7 @@
     "dev": "run-p *:dev",
     "generate-typings": "tsc --emitDeclarationOnly --declaration --outDir dist",
     "prepare": "run-s build generate-typings",
-    "test": "mocha test/*-spec.js",
+    "test": "mocha -r source-map-support/register test/*-spec.js",
     "test:dev": "chokidar '{dist,test}/**/*.js' -c 'npm test'",
     "tck": "run-s tck:extract tck:test",
     "tck:extract": "node tasks/extract-tck-tests.js ../dmn-tck",

@@ -6,6 +6,10 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 0.37.0
+
+* `FEAT`: make `InExpressions` null-safe
+
 ## 0.36.0
 
 * `FEAT`: add `+` string concatenation

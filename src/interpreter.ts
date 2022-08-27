@@ -735,7 +735,7 @@ function extractValue(context, prop, _target) {
     ));
   }
 
-  throw new Error(`Cannot extract ${ prop } from ${ target }`);
+  return null;
 }
 
 function compareIn(value, tests) {
@@ -956,8 +956,8 @@ function createNumberRange(start, end, startIncluded, endIncluded) {
 
 function cartesianProduct(arrays: any[]) {
 
-  const f = (a, b) => [].concat(...a.map(d => b.map(e => [].concat(d, e))));
-  const cartesian = (a?, b?, ...c) => (b ? cartesian(f(a, b), ...c) : a);
+  const f = (a, b) => [].concat(...(a || []).map(d => (b || []).map(e => [].concat(d, e))));
+  const cartesian = (a?, b?, ...c) => (typeof b !== 'undefined' ? cartesian(f(a, b), ...c) : a || []);
 
   return cartesian(...arrays);
 }

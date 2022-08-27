@@ -230,6 +230,12 @@ describe('interpreter', function() {
 
       expr('for i in days in weekend return if i = "sunday" then true else false', [ false, true ], { 'days in weekend': [ 'saturday', 'sunday' ] });
 
+      expr('for i in null return i', []);
+
+      expr('for i in null, y in [ 1 ] return [ i, y ]', []);
+
+      expr('for y in [ 1 ], i in null return [ i, y ]', []);
+
     });
 
 
@@ -922,18 +928,11 @@ describe('interpreter', function() {
     });
 
 
-    it('should throw Error on null extraction', function() {
+    it('should NOT throw Error on null extraction', function() {
 
-      let error;
-
-      try {
+      expect(() => {
         evaluate('for i in null return i');
-      } catch (err) {
-        error = err;
-      }
-
-      expect(error).to.exist;
-      expect(error.message).to.eql('Cannot extract i from null');
+      }).not.to.throw();
     });
 
 

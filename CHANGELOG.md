@@ -6,6 +6,11 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 0.38.0
+
+* `FEAT`: generate sourcemaps
+* `DEPS`: update to `lezer-feel@0.11.0`
+
 ## 0.37.1
 
 * `FIX`: coerce incompatible `InExpression` input to `null`

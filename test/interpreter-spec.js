@@ -563,6 +563,11 @@ describe('interpreter', function() {
 
       expr('[{item: 1}, {item: 2}, {item: 3}][item >= 2]', [ { item: 2 }, { item: 3 } ]);
 
+      expr('a[1]', null, { a: null });
+
+      expr('a[1]', null);
+
+      expr('[][a]', [], { a: 1 });
     });
 
 

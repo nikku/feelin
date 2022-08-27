@@ -230,12 +230,13 @@ describe('interpreter', function() {
 
       expr('for i in days in weekend return if i = "sunday" then true else false', [ false, true ], { 'days in weekend': [ 'saturday', 'sunday' ] });
 
-      expr('for i in null return i', []);
+      expr('for i in null return i', null);
 
-      expr('for i in null, y in [ 1 ] return [ i, y ]', []);
+      expr('for i in null, y in [ 1 ] return [ i, y ]', null);
 
-      expr('for y in [ 1 ], i in null return [ i, y ]', []);
+      expr('for y in [ 1 ], i in null return [ i, y ]', null);
 
+      expr('for a in 1 return a', null);
     });
 
 
@@ -296,6 +297,10 @@ describe('interpreter', function() {
         ]
       });
 
+      expr('every e in null satisfies e != 2', null);
+
+      expr('some e in 1 satisfies e != 2', null);
+
     });
 
 
@@ -324,6 +329,8 @@ describe('interpreter', function() {
       expr('"d" in ["b".."d")', false);
       expr('"b" in ["b".."d"]', true);
       expr('"b" in ("b".."d"]', false);
+
+      expr('"d" in null', null);
 
       expr('5 in > 3', true);
 

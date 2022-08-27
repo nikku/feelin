@@ -336,6 +336,10 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
     const iterationContexts = args.map(ctx => ctx(context));
 
+    if (iterationContexts.some(ctx => getType(ctx) !== 'list')) {
+      return null;
+    }
+
     return cartesianProduct(iterationContexts).map(ctx => {
       if (!isArray(ctx)) {
         ctx = [ ctx ];
@@ -363,6 +367,11 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
   case 'every': return tag((context) => {
     return (_contexts, _condition) => {
       const contexts = _contexts(context);
+
+      if (getType(contexts) !== 'list') {
+        return contexts;
+      }
+
       return contexts.every(ctx => isTruthy(_condition(ctx)));
     };
 
@@ -371,6 +380,11 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
   case 'some': return tag((context) => {
     return (_contexts, _condition) => {
       const contexts = _contexts(context);
+
+      if (getType(contexts) !== 'list') {
+        return contexts;
+      }
+
       return contexts.some(ctx => isTruthy(_condition(ctx)));
     };
   }, Test('boolean'));
@@ -521,6 +535,10 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     const extractor = args[args.length - 1];
 
     const iterationContexts = args[1](context);
+
+    if (getType(iterationContexts) !== 'list') {
+      return iterationContexts;
+    }
 
     const partial = [];
 
@@ -729,7 +747,7 @@ function extractValue(context, prop, _target) {
 
   const target = _target(context);
 
-  if (target && 'map' in target) {
+  if ([ 'list', 'range' ].includes(getType(target))) {
     return target.map(t => (
       { [prop]: t }
     ));
@@ -741,6 +759,11 @@ function extractValue(context, prop, _target) {
 function compareIn(value, tests) {
 
   if (!isArray(tests)) {
+
+    if (getType(tests) === 'nil') {
+      return null;
+    }
+
     tests = [ tests ];
   }
 
@@ -956,8 +979,12 @@ function createNumberRange(start, end, startIncluded, endIncluded) {
 
 function cartesianProduct(arrays: any[]) {
 
-  const f = (a, b) => [].concat(...(a || []).map(d => (b || []).map(e => [].concat(d, e))));
-  const cartesian = (a?, b?, ...c) => (typeof b !== 'undefined' ? cartesian(f(a, b), ...c) : a || []);
+  if (arrays.some(arr => getType(arr) === 'nil')) {
+    return null;
+  }
+
+  const f = (a, b) => [].concat(...a.map(d => b.map(e => [].concat(d, e))));
+  const cartesian = (a?, b?, ...c) => (b ? cartesian(f(a, b), ...c) : a || []);
 
   return cartesian(...arrays);
 }

@@ -6,6 +6,11 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 0.39.0
+
+* `FEAT`: generate ES2015 bundle
+* `DEPS`: update to `lezer-feel@0.11.1`
+
 ## 0.38.0
 
 * `FEAT`: generate sourcemaps

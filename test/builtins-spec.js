@@ -108,6 +108,15 @@ describe('builtin functions', function() {
     expr('string({"{": "foo"}) = "{\\"{\\": \\"foo\\"}"', true);
     expr('string({"\\"": "foo"}) = "{\\"\\\\\\"\\": \\"foo\\"}"', true);
 
+    expr('string([1 .. 3])', '<range>');
+    expr('string(function(a) a)', '<function>');
+    expr('string(< 10)', '<range>');
+
+    expr(`string({
+      "aa +    b": 1,
+      a +    1: false
+    })`, '{"aa +    b": 1, "a + 1": false}');
+
     exprSkip(`
       date and time("2012-12-24T23:59:00") -
         date and time("2012-12-22T03:45:00") =
@@ -512,11 +521,11 @@ describe('builtin functions', function() {
 
     expr('get value({key1 : "value1"}, "key1")', 'value1');
     expr('get value({key1 : "value1"}, "unexistent-key")', null);
+    expr('get value({key+    +1 : "value1"}, "key + + 1")', 'value1');
 
     expr('get value(key:"a", m:{a: "foo"}) = "foo"', true);
 
-    // TODO(nikku): this should work, according to spec
-    // evaluate('get entries({key1: "value1"})[key="key1"].value', 'value1');
+    exprSkip('get entries({key1: "value1"})[key="key1"].value', 'value1');
 
     expr('get entries({key1: "value1"})', [ { key: 'key1', value: 'value1' } ]);
     expr('get entries({key1 : "value1", key2 : "value2"})', [

@@ -9,6 +9,7 @@ import {
 } from './types';
 
 import {
+  getFromContext,
   notImplemented,
   parseParameterNames
 } from './utils';
@@ -688,17 +689,7 @@ const builtins = {
   // 10.3.4.10 Context function
 
   'get value': fn(function(m, key) {
-
-    if (arguments.length !== 2) {
-      return null;
-    }
-
-    if (!m) {
-      return null;
-    }
-
-    return key in m ? m[key] : null;
-
+    return getFromContext(key, m);
   }, [ 'context', 'string' ]),
 
   'get entries': fn(function(m) {
@@ -984,6 +975,10 @@ function toString(obj, wrap = false) {
     return obj.toISODate();
   }
 
+  if (type === 'range') {
+    return '<range>';
+  }
+
   if (type === 'time') {
 
     if (obj.zone?.zoneName) {
@@ -991,6 +986,10 @@ function toString(obj, wrap = false) {
     }
 
     return obj.toISOTime({ suppressMilliseconds: true });
+  }
+
+  if (type === 'function') {
+    return '<function>';
   }
 
   throw notImplemented('string(' + type + ')');

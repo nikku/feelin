@@ -19,6 +19,15 @@ describe('interpreter', function() {
     });
 
 
+    describe('built-ins', function() {
+
+      expr('starts    with("a", "a")', true);
+
+      expr('starts with   ("a", "a")', true);
+
+    });
+
+
     describe('ArithmeticExpression', function() {
 
       expr('1 + 1', 2);
@@ -664,7 +673,7 @@ describe('interpreter', function() {
 
       expr('a+b', 1, { 'a + b': 1 });
 
-      expr('a  b c*d', 1, { 'a b  c * d': 1 });
+      expr('a  b c*d', 1, { 'a  b c*d': 1 });
 
       expr('Mike\'s age + walt\'s age - average age' , 40, { 'Mike\'s age + walt\'s age': 90, 'average age': 50 });
 

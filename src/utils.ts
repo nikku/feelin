@@ -1,3 +1,8 @@
+import { normalizeContextKey } from 'lezer-feel';
+
+import { getType } from './types';
+
+
 export function parseParameterNames(fn) {
 
   if (Array.isArray(fn.$args)) {
@@ -23,4 +28,37 @@ export function parseParameterNames(fn) {
 
 export function notImplemented(thing) {
   return new Error(`not implemented: ${thing}`);
+}
+
+/**
+ * @param {string} name
+ * @param {Record<string, any>} context
+ *
+ * @return {any}
+ */
+export function getFromContext(name, context) {
+
+  if ([ 'nil', 'boolean', 'number', 'string' ].includes(getType(context))) {
+    return null;
+  }
+
+  if (name in context) {
+    return context[name];
+  }
+
+  const normalizedName = normalizeContextKey(name);
+
+  if (normalizedName in context) {
+    return context[normalizedName];
+  }
+
+  const entry = Object.entries(context).find(
+    ([ key ]) => normalizedName === normalizeContextKey(key)
+  );
+
+  if (entry) {
+    return entry[1];
+  }
+
+  return null;
 }

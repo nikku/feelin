@@ -1,5 +1,4 @@
 import { Tree, SyntaxNodeRef } from '@lezer/common';
-import { normalizeContext } from 'lezer-feel';
 
 import { builtins } from './builtins';
 
@@ -12,7 +11,8 @@ import {
 
 import {
   notImplemented,
-  parseParameterNames
+  parseParameterNames,
+  getFromContext
 } from './utils';
 
 import {
@@ -120,7 +120,7 @@ export function unaryTest(expression: string, context: InterpreterContext = {}) 
   } = interpreter.unaryTest(expression, context);
 
   // root = fn(ctx) => test(val)
-  const test = root(normalizeContext(context));
+  const test = root(context);
 
   return test(value);
 }
@@ -133,7 +133,7 @@ export function evaluate(expression: string, context: InterpreterContext = {}) {
 
   // root = [ fn(ctx) ]
 
-  const results = root(normalizeContext(context));
+  const results = root(context);
 
   if (results.length === 1) {
     return results[0];
@@ -305,7 +305,9 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
   case 'SpecialFunctionName': return (context) => getBuiltin(input, context);
 
-  case 'Name': return args.join(' ');
+  // preserve spaces in name, but compact multiple
+  // spaces into one (token)
+  case 'Name': return input.replace(/\s{2,}/g, ' ');
 
   case 'VariableName': return (context) => {
     const name = args.join(' ');
@@ -727,20 +729,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 }
 
 function getBuiltin(name, _context) {
-  return builtins[name];
-}
-
-function getFromContext(name, context) {
-
-  if ([ 'nil', 'boolean', 'number', 'string' ].includes(getType(context))) {
-    return null;
-  }
-
-  if (name in context) {
-    return context[name];
-  }
-
-  return null;
+  return getFromContext(name, builtins);
 }
 
 function extractValue(context, prop, _target) {

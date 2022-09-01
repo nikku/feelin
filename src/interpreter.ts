@@ -4,6 +4,7 @@ import { builtins } from './builtins';
 
 import {
   Range,
+  FunctionWrapper,
   equals,
   isArray,
   getType
@@ -1028,7 +1029,7 @@ function Test(type: string): string {
  * @param {Function} fn
  * @param {string[]} [parameterNames]
  *
- * @return {WrappedFn}
+ * @return {FunctionWrapper}
  */
 function wrapFunction(fn, parameterNames = null) {
 
@@ -1036,31 +1037,15 @@ function wrapFunction(fn, parameterNames = null) {
     return null;
   }
 
-  if (fn instanceof WrappedFn) {
+  if (fn instanceof FunctionWrapper) {
     return fn;
   }
 
   if (fn instanceof Range) {
-    return new WrappedFn((value) => fn.includes(value), [ 'value' ]);
+    return new FunctionWrapper((value) => fn.includes(value), [ 'value' ]);
   }
 
-  return new WrappedFn(fn, parameterNames || parseParameterNames(fn));
-}
-
-function WrappedFn(fn, parameterNames) {
-
-  this.invoke = function(contextOrArgs) {
-
-    let params;
-
-    if (isArray(contextOrArgs)) {
-      params = contextOrArgs;
-    } else {
-      params = parameterNames.map(n => contextOrArgs[n]);
-    }
-
-    return fn.call(null, ...params);
-  };
+  return new FunctionWrapper(fn, parameterNames || parseParameterNames(fn));
 }
 
 function parseString(str: string) {

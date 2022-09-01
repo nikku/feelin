@@ -74,6 +74,10 @@ export function getType(e) {
     return 'range';
   }
 
+  if (e instanceof FunctionWrapper) {
+    return 'function';
+  }
+
   return 'literal';
 }
 
@@ -221,4 +225,29 @@ export function equals(a, b) {
   }
 
   return aType === bType ? false : null;
+}
+
+export class FunctionWrapper {
+
+  fn: (...args) => any;
+  parameterNames: string[];
+
+  constructor(fn: (...args) => any, parameterNames: string[]) {
+
+    this.fn = fn;
+    this.parameterNames = parameterNames;
+  }
+
+  invoke(contextOrArgs) {
+
+    let params;
+
+    if (isArray(contextOrArgs)) {
+      params = contextOrArgs;
+    } else {
+      params = this.parameterNames.map(n => contextOrArgs[n]);
+    }
+
+    return this.fn.call(null, ...params);
+  }
 }

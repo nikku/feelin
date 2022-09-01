@@ -188,6 +188,8 @@ describe('builtin functions', function() {
     expr('substring after("foo🐎bar", "🐎")', 'bar');
     expr('substring after("", "a")', '');
 
+    expr('replace(input:"abc",pattern:"[A-Z]",replacement:"#",flags:"i")', '###');
+
     expr('replace("abcd", "(ab)|(a)", "[1=$1][2=$2]")', '[1=ab][2=]cd');
     expr('replace("ab🐎cd", "(b.c)", "___")', 'a___d');
 

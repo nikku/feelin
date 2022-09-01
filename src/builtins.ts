@@ -336,9 +336,9 @@ const builtins = {
     return string.substring(index + match.length);
   }, [ 'string', 'string' ]),
 
-  'replace': fn(function(input, pattern, replacement, flags = '') {
-    return input.replace(new RegExp(pattern, 'ug' + flags.replace(/[x]/g, '')), replacement.replace(/\$0/g, '$$&'));
-  }, [ 'string', 'string', 'string' ]),
+  'replace': fn(function(input, pattern, replacement, flags) {
+    return input.replace(new RegExp(pattern, 'ug' + (flags || '').replace(/[x]/g, '')), replacement.replace(/\$0/g, '$$&'));
+  }, [ 'string', 'string', 'string', 'string?' ]),
 
   'contains': fn(function(string, match) {
     return string.includes(match);

@@ -6,6 +6,13 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 0.40.0
+
+* `FEAT`: preserve context names
+* `FIX`: safely stringify functions
+* `FIX`: coerce path expression value to singleton
+* `DEPS`: bump to `lezer-feel@0.12.1`
+
 ## 0.39.0
 
 * `FEAT`: generate ES2015 bundle

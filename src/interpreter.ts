@@ -588,7 +588,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     const pathProp = args[1];
 
     if (isArray(pathTarget)) {
-      return pathTarget.map(pathProp);
+      return coerceSingleton(pathTarget.map(pathProp));
     } else {
       return pathProp(pathTarget);
     }
@@ -1046,6 +1046,14 @@ function wrapFunction(fn, parameterNames = null) {
   }
 
   return new FunctionWrapper(fn, parameterNames || parseParameterNames(fn));
+}
+
+function coerceSingleton(values) {
+  if (Array.isArray(values) && values.length === 1) {
+    return values[0];
+  } else {
+    return values;
+  }
 }
 
 function parseString(str: string) {

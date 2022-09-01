@@ -525,7 +525,7 @@ describe('builtin functions', function() {
 
     expr('get value(key:"a", m:{a: "foo"}) = "foo"', true);
 
-    exprSkip('get entries({key1: "value1"})[key="key1"].value', 'value1');
+    expr('get entries({key1: "value1"})[key="key1"].value', 'value1');
 
     expr('get entries({key1: "value1"})', [ { key: 'key1', value: 'value1' } ]);
     expr('get entries({key1 : "value1", key2 : "value2"})', [

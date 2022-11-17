@@ -741,6 +741,8 @@ describe('interpreter', function() {
       unary(4, '(6..4)', false);
       unary(6, '(6..4)', false);
 
+      unary({ a: { b: 6 }, '?': 6 }, '(6..4)', false);
+
     });
 
 

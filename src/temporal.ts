@@ -5,6 +5,13 @@ import {
   Zone
 } from 'luxon';
 
+import { isDateTime, isDuration } from './types';
+
+export {
+  isDateTime,
+  isDuration
+};
+
 import { notImplemented } from './utils';
 
 
@@ -19,14 +26,6 @@ export function ms(temporal) {
   }
 
   return null;
-}
-
-export function isDateTime(obj): obj is DateTime {
-  return DateTime.isDateTime(obj);
-}
-
-export function isDuration(obj): obj is Duration {
-  return Duration.isDuration(obj);
 }
 
 export function duration(opts: string|number) : Duration {

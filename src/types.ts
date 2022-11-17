@@ -1,13 +1,19 @@
-import { FixedOffsetZone } from 'luxon';
-import { isDateTime, isDuration } from './temporal';
-
-export {
-  isDateTime,
-  isDuration
-};
+import {
+  DateTime,
+  Duration,
+  FixedOffsetZone
+} from 'luxon';
 
 export function isContext(e) {
   return Object.getPrototypeOf(e) === Object.prototype;
+}
+
+export function isDateTime(obj): obj is DateTime {
+  return DateTime.isDateTime(obj);
+}
+
+export function isDuration(obj): obj is Duration {
+  return Duration.isDuration(obj);
 }
 
 export function isArray(e) {

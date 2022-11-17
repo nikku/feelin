@@ -13,7 +13,7 @@
   "devDependencies": {
     "@rollup/plugin-typescript": "^8.1.0",
     "@types/chai": "^4.3.1",
-    "@types/luxon": "^3.0.0",
+    "@types/luxon": "^3.1.0",
     "@types/mocha": "^9.1.1",
     "@typescript-eslint/eslint-plugin": "^5.43.0",
     "@typescript-eslint/parser": "^5.43.0",
@@ -35,7 +35,7 @@
   "dependencies": {
     "@lezer/lr": "^1.2.0",
     "lezer-feel": "^0.15.0",
-    "luxon": "^3.0.1"
+    "luxon": "^3.1.0"
   },
   "repository": {
     "type": "git",

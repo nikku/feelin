@@ -15,8 +15,8 @@
     "@types/chai": "^4.3.1",
     "@types/luxon": "^3.0.0",
     "@types/mocha": "^9.1.1",
-    "@typescript-eslint/eslint-plugin": "^5.30.6",
-    "@typescript-eslint/parser": "^5.30.6",
+    "@typescript-eslint/eslint-plugin": "^5.43.0",
+    "@typescript-eslint/parser": "^5.43.0",
     "chai": "^4.3.6",
     "chokidar-cli": "^3.0.0",
     "eslint": "^8.27.0",
@@ -29,8 +29,8 @@
     "saxen": "^8.1.2",
     "source-map-support": "^0.5.21",
     "strip-indent": "^3.0.0",
-    "tslib": "^2.0.3",
-    "typescript": "^4.1.3"
+    "tslib": "^2.4.1",
+    "typescript": "~4.8"
   },
   "dependencies": {
     "@lezer/lr": "^1.2.0",

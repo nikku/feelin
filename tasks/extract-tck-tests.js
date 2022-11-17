@@ -1,3 +1,5 @@
+/* eslint-env node */
+
 /* eslint @typescript-eslint/no-var-requires: OFF */
 
 import path from 'path';

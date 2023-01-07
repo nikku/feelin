@@ -6,6 +6,11 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 0.43.0
+
+* `FEAT`: properly parse `List` shape
+* `DEPS`: bump to `lezer-feel@0.16.0`
+
 ## 0.42.0
 
 * `DEPS`: bump to `lezer-feel@0.15.0`

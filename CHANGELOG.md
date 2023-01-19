@@ -6,6 +6,13 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 0.43.1
+
+* `FIX`: correctly handle comparison with `null` ([#20](https://github.com/nikku/feelin/issues/20))
+* `FIX`: filter `null` values when path shorthand filtering ([#21](https://github.com/nikku/feelin/issues/21))
+* `FIX`: correct parsing of `IfExpression` (required `else` block)
+* `DEPS`: bump to `lezer-feel@0.16.1`
+
 ## 0.43.0
 
 * `FEAT`: properly parse `List` shape

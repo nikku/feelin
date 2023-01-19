@@ -584,11 +584,11 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
   case 'PathExpression': return (context) => {
 
-    const pathTarget = args[0](context);
+    const pathTarget = coerceSingleton(args[0](context));
     const pathProp = args[1];
 
     if (isArray(pathTarget)) {
-      return coerceSingleton(pathTarget.map(pathProp));
+      return pathTarget.map(pathProp).filter(e => e !== null);
     } else {
       return pathProp(pathTarget);
     }

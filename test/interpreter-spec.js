@@ -498,8 +498,9 @@ describe('interpreter', function() {
         }
       });
 
-      expr('[ {x:1, y:2}, {x:2, y:3} ].y', [ 2, 3 ]);
-      expr('[ {x:1, y:2} ].y', 2);
+      expr('[ { x: 1, y: 2}, { x: 2, y: 3} ].y', [ 2, 3 ]);
+      expr('[ { x: 1, y: null }, { x: 2 }, { y: 1 } ].y', [ 1 ]);
+      expr('[ {x: 1, y: 2} ].y', 2);
 
       expr('null.y', null);
 
@@ -572,6 +573,9 @@ describe('interpreter', function() {
       expr('[{a: 1}, {a: 2}, {a: 3}][a >= 2]', [ { a: 2 }, { a: 3 } ]);
 
       expr('[{item: 1}, {item: 2}, {item: 3}][item >= 2]', [ { item: 2 }, { item: 3 } ]);
+
+      expr('[ { x: 1, y: 2 }, { x: null, y: 3 } ][ x < 2 ]', [ { x: 1, y: 2 } ]);
+      expr('[ { x: 1, y: 2 }, { y: 3 } ][ x < 2 ]', [ { x: 1, y: 2 } ]);
 
       expr('a[1]', null, { a: null });
 

@@ -787,6 +787,19 @@ function isTyped(type, values) {
   );
 }
 
+const nullRange = new Range({
+  start: null,
+  end: null,
+  'start included': false,
+  'end included': false,
+  map() {
+    return [];
+  },
+  includes() {
+    return null;
+  }
+});
+
 function createRange(start, end, startIncluded = true, endIncluded = true) : Range {
 
   if (isTyped('string', [ start, end ])) {
@@ -811,6 +824,10 @@ function createRange(start, end, startIncluded = true, endIncluded = true) : Ran
 
   if (isTyped('date', [ start, end ])) {
     throw notImplemented('range<date>');
+  }
+
+  if (start === null && end === null) {
+    return nullRange;
   }
 
   throw new Error(`unsupported range: ${start}..${end}`);
@@ -881,6 +898,10 @@ function anyIncludes(start, end, startIncluded, endIncluded) {
 
   let tests = [];
 
+  if (start === null && end === null) {
+    return () => null;
+  }
+
   if (start !== null && end !== null) {
     if (start > end) {
       tests = [
@@ -907,7 +928,7 @@ function anyIncludes(start, end, startIncluded, endIncluded) {
     ];
   }
 
-  return (value) => tests.every(t => t(value));
+  return (value) => value === null ? null : tests.every(t => t(value));
 }
 
 function createStringRange(start, end, startIncluded = true, endIncluded = true) {

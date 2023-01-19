@@ -932,6 +932,12 @@ describe('interpreter', function() {
 
     expr('[ 1, 2, { foo: "FOO" } ] = [ 1, 2, { foo: "FOO" } ]', true);
 
+    expr('null < 2', null);
+    expr('2 < null', null);
+
+    expr('null > 2', null);
+    expr('2 > null', null);
+
   });
 
 

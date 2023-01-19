@@ -425,9 +425,9 @@ describe('interpreter', function() {
 
       expr('if 2 = 2 then 4 * 4 else 5 * 5', 16);
 
-      expr('if 5 > 10 then 15', null);
+      expr('if 5 > 10 then 15 else false', false);
 
-      expr('if 15 > 10 then 15', 15);
+      expr('if 15 > 10 then 15 else false', 15);
 
       expr('if a > 10 then 15 else 5', 15, {
         a: 12

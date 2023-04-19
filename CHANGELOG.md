@@ -6,6 +6,10 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 0.44.0
+
+* `DEPS`: update to `lezer-feel@0.17.0`
+
 ## 0.43.1
 
 * `FIX`: correctly handle comparison with `null` ([#20](https://github.com/nikku/feelin/issues/20))

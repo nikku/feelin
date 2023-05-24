@@ -98,6 +98,8 @@ function parseModelFile(file) {
   let text = false;
   let description = false;
 
+  let err = false;
+
   const parser = createParser({
 
     openTag(el) {
@@ -145,6 +147,12 @@ function parseModelFile(file) {
       }
     },
 
+    error(error, getContext) {
+      console.log('ERROR!', error, getContext());
+
+      err = true;
+    },
+
     closeTag(el) {
       if (el.name === 'dmn:text') {
         text = false;
@@ -175,6 +183,10 @@ function parseModelFile(file) {
   });
 
   parser.parse(contents);
+
+  if (err) {
+    throw new Error('failed to parse %s', file);
+  }
 
   return expressions;
 }

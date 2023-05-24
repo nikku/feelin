@@ -499,7 +499,7 @@ describe('interpreter', function() {
       });
 
       expr('[ { x: 1, y: 2}, { x: 2, y: 3} ].y', [ 2, 3 ]);
-      expr('[ { x: 1, y: null }, { x: 2 }, { y: 1 } ].y', [ 1 ]);
+      expr('[ { x: 1, y: null }, { x: 2 }, { y: 1 } ].y', [ null, null, 1 ]);
       expr('[ {x: 1, y: 2} ].y', 2);
 
       expr('null.y', null);

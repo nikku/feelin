@@ -588,7 +588,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     const pathProp = args[1];
 
     if (isArray(pathTarget)) {
-      return pathTarget.map(pathProp).filter(e => e !== null);
+      return pathTarget.map(pathProp);
     } else {
       return pathProp(pathTarget);
     }

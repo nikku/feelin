@@ -457,8 +457,11 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
     const wrappedFn = wrapFunction(args[0](context));
 
+    // TODO(nikku): indicate error at node
+    // throw new Error(`Failed to evaluate ${input}: Target is not a function`);
+
     if (!wrappedFn) {
-      throw new Error(`Failed to evaluate ${input}: Target is not a function`);
+      return null;
     }
 
     const contextOrArgs = args[2](context);

@@ -945,6 +945,13 @@ describe('interpreter', function() {
   });
 
 
+  describe('function invocation', function() {
+
+    expr('non_existing_function()', null);
+
+  });
+
+
   describe('error handling', function() {
 
     it('should throw Error on syntax errors', function() {
@@ -967,21 +974,6 @@ describe('interpreter', function() {
       expect(() => {
         evaluate('for i in null return i');
       }).not.to.throw();
-    });
-
-
-    it('should throw Error on missing function', function() {
-
-      let error;
-
-      try {
-        evaluate('foo(1)');
-      } catch (err) {
-        error = err;
-      }
-
-      expect(error).to.exist;
-      expect(error.message).to.eql('Failed to evaluate foo(1): Target is not a function');
     });
 
   });

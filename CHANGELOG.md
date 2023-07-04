@@ -6,6 +6,11 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 0.45.0
+
+* `FEAT`: return `null` on non-function invocations
+* `DEPS`: update dependencies
+
 ## 0.44.1
 
 * `FIX`: correct path extraction filtering null values

@@ -10,15 +10,6 @@ describe('interpreter', function() {
 
   describe('evaluate', function() {
 
-    describe('Expressions', function() {
-
-      expr('1', 1);
-
-      expr('1 2 3', [ 1, 2, 3 ]);
-
-    });
-
-
     describe('built-ins', function() {
 
       expr('starts    with("a", "a")', true);

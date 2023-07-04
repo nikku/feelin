@@ -8,9 +8,9 @@ import { Tree } from '@lezer/common';
 
 export type ParseContext = Record<string, any>;
 
-export function parseExpressions(expression: string, context: ParseContext = {}): Tree {
+export function parseExpression(expression: string, context: ParseContext = {}): Tree {
   return parser.configure({
-    top: 'Expressions',
+    top: 'Expression',
     contextTracker: trackVariables(context)
   }).parse(expression);
 }

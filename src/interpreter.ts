@@ -17,7 +17,7 @@ import {
 } from './utils';
 
 import {
-  parseExpressions,
+  parseExpression,
   parseUnaryTests
 } from './parser';
 
@@ -87,7 +87,7 @@ class Interpreter {
 
   evaluate(expression: string, context: InterpreterContext = {}) {
 
-    const parseTree = parseExpressions(expression, context);
+    const parseTree = parseExpression(expression, context);
 
     const root = this._buildExecutionTree(parseTree, expression);
 
@@ -113,7 +113,7 @@ class Interpreter {
 
 const interpreter = new Interpreter();
 
-export function unaryTest(expression: string, context: InterpreterContext = {}) {
+export function unaryTest(expression: string, context: InterpreterContext = {}) : boolean {
   const value = context['?'] || null;
 
   const {
@@ -126,21 +126,15 @@ export function unaryTest(expression: string, context: InterpreterContext = {}) 
   return test(value);
 }
 
-export function evaluate(expression: string, context: InterpreterContext = {}) {
+export function evaluate(expression: string, context: InterpreterContext = {}): any {
 
   const {
     root
   } = interpreter.evaluate(expression, context);
 
-  // root = [ fn(ctx) ]
+  // root = Expression :: fn(ctx)
 
-  const results = root(context);
-
-  if (results.length === 1) {
-    return results[0];
-  } else {
-    return results;
-  }
+  return root(context);
 }
 
 
@@ -703,6 +697,10 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
   case 'PositiveUnaryTests':
   case 'Expressions': return (context) => {
     return args.map(a => a(context));
+  };
+
+  case 'Expression': return (context) => {
+    return args[0](context);
   };
 
   case 'UnaryTests': return (context) => {

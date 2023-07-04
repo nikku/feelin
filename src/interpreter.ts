@@ -431,8 +431,11 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     else {
       const wrappedFn = wrapFunction(args[0](context));
 
+      // TODO(nikku): indicate as error
+      // throw new Error(`Failed to evaluate ${input}: Target is not a function`);
+
       if (!wrappedFn) {
-        throw new Error(`Failed to evaluate ${input}: Target is not a function`);
+        return null;
       }
 
       const contextOrArgs = args[2](context);
@@ -446,8 +449,11 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
     const wrappedFn = wrapFunction(getBuiltin('@', context));
 
+    // TODO(nikku): indicate as error
+    // throw new Error(`Failed to evaluate ${input}: Target is not a function`);
+
     if (!wrappedFn) {
-      throw new Error(`Failed to evaluate ${input}: Target is not a function`);
+      return null;
     }
 
     return wrappedFn.invoke([ args[0](context) ]);
@@ -1067,6 +1073,10 @@ function wrapFunction(fn, parameterNames = null) {
 
   if (fn instanceof Range) {
     return new FunctionWrapper((value) => fn.includes(value), [ 'value' ]);
+  }
+
+  if (typeof fn !== 'function') {
+    return null;
   }
 
   return new FunctionWrapper(fn, parameterNames || parseParameterNames(fn));

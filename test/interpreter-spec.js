@@ -949,6 +949,15 @@ describe('interpreter', function() {
 
     expr('non_existing_function()', null);
 
+    expr('123()', null);
+
+    expr('@"2012-12-24"()', null);
+
+    expr('false()', null);
+    expr('true()', null);
+
+    expr('"abs"(-1)', null);
+
   });
 
 

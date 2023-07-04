@@ -5,8 +5,6 @@
 import path from 'path';
 import fs from 'fs';
 
-import mkdirp from 'mkdirp';
-
 import glob from 'fast-glob';
 
 import {
@@ -51,7 +49,7 @@ for (const testGlob of tests) {
 
   const resultDir = path.join('tmp/dmn-tck', testDir.substring(testDir.lastIndexOf('/')));
 
-  mkdirp.sync(resultDir);
+  fs.mkdirSync(resultDir, { recursive: true });
 
   fs.writeFileSync(path.join(resultDir, test.testName + '.json'), JSON.stringify(result, 0, 2), 'utf8');
 

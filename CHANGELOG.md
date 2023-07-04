@@ -6,6 +6,17 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 1.0.0
+
+* `FEAT`: parse single expression rather than expressions
+* `FIX`: correct various spacing related evaluation bugs
+* `DEPS`: update to `lezer-feel@1.0.0`
+
+### Breaking Changes
+
+* We now parse a single expression rather than a list of expressions.
+  The result is the actual value, not a list of values.
+
 ## 0.45.0
 
 * `FEAT`: return `null` on non-function invocations

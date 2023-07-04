@@ -954,18 +954,63 @@ describe('interpreter', function() {
 
   describe('error handling', function() {
 
-    it('should throw Error on syntax errors', function() {
+    describe('should throw Error on syntax errors', function() {
 
-      let error;
+      it('bogus statement', function() {
+        let error;
 
-      try {
-        evaluate('1 * #3');
-      } catch (err) {
-        error = err;
-      }
+        try {
+          evaluate('1 * #3');
+        } catch (err) {
+          error = err;
+        }
 
-      expect(error).to.exist;
-      expect(error.message).to.eql('Statement unparseable at [4, 5]');
+        expect(error).to.exist;
+        expect(error.message).to.eql('Statement unparseable at [4, 5]');
+      });
+
+
+      it('multiple expressions', function() {
+        let error;
+
+        try {
+          evaluate('1 2 3');
+        } catch (err) {
+          error = err;
+        }
+
+        expect(error).to.exist;
+        expect(error.message).to.eql('Statement unparseable at [2, 3]');
+      });
+
+
+      it('empty expression', function() {
+        let error;
+
+        try {
+          evaluate('');
+        } catch (err) {
+          error = err;
+        }
+
+        expect(error).to.exist;
+        expect(error.message).to.eql('Statement unparseable at [0, 0]');
+      });
+
+
+      it('empty unary tests', function() {
+        let error;
+
+        try {
+          unaryTest('');
+        } catch (err) {
+          error = err;
+        }
+
+        expect(error).to.exist;
+        expect(error.message).to.eql('Statement unparseable at [0, 0]');
+      });
+
     });
 
 

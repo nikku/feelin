@@ -12,9 +12,9 @@
   "types": "dist/index.d.ts",
   "devDependencies": {
     "@rollup/plugin-typescript": "^8.1.0",
-    "@types/chai": "^4.3.1",
+    "@types/chai": "^4.3.5",
     "@types/luxon": "^3.1.0",
-    "@types/mocha": "^9.1.1",
+    "@types/mocha": "^10.0.1",
     "@typescript-eslint/eslint-plugin": "^5.61.0",
     "@typescript-eslint/parser": "^5.61.0",
     "chai": "^4.3.6",

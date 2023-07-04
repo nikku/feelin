@@ -29,7 +29,7 @@
     "saxen": "^8.1.2",
     "source-map-support": "^0.5.21",
     "strip-indent": "^3.0.0",
-    "tslib": "^2.4.1",
+    "tslib": "^2.6.0",
     "typescript": "^5.1.6"
   },
   "dependencies": {

@@ -25,7 +25,7 @@
     "mocha": "^10.0.0",
     "npm-run-all": "^4.1.5",
     "rollup": "^3.26.0",
-    "saxen": "^8.1.2",
+    "saxen": "^9.0.0",
     "source-map-support": "^0.5.21",
     "strip-indent": "^3.0.0",
     "tslib": "^2.6.0",

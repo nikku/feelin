@@ -2,7 +2,7 @@
   "name": "feelin",
   "version": "1.0.0",
   "description": "A FEEL parser and interpreter",
-  "main": "dist/index.js",
+  "main": "dist/index.cjs",
   "author": "Nico Rehwaldt <git_nikku@nixis.de>",
   "license": "MIT",
   "type": "module",

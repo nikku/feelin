@@ -1,6 +1,6 @@
 {
   "name": "feelin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A FEEL parser and interpreter",
   "main": "dist/index.cjs",
   "author": "Nico Rehwaldt <git_nikku@nixis.de>",

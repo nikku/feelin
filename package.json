@@ -40,6 +40,9 @@
     "type": "git",
     "url": "https://github.com/nikku/feelin"
   },
+  "engines": {
+    "node": "*"
+  },
   "sideEffects": false,
   "scripts": {
     "all": "run-s lint build generate-typings test lint:types",

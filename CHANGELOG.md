@@ -6,6 +6,11 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 1.0.1
+
+* `FIX`: correctly name `cjs` export ([#26](https://github.com/nikku/feelin/pull/26), [#23](https://github.com/nikku/feelin/issues/23))
+* `DEPS`: update to `lezer-feel@1.0.2`
+
 ## 1.0.0
 
 * `FEAT`: parse single expression rather than expressions

@@ -91,6 +91,7 @@ export function isType(el: string, type: string): boolean {
   return getType(el) === type;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function typeCast(obj: any, type: string) {
 
   if (isDateTime(obj)) {
@@ -116,12 +117,16 @@ export function typeCast(obj: any, type: string) {
 }
 
 export type RangeProps = {
-  'start included': boolean,
-  'end included': boolean,
-  start: string|number|null,
-  end: string|number|null,
-  map: <T> (fn: (val: any) => T) => T[],
-  includes: (val: any) => boolean
+  'start included': boolean;
+  'end included': boolean;
+  start: string|number|null;
+  end: string|number|null;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  map: <T> (fn: (val: any) => T) => T[];
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  includes: (val: any) => boolean;
 };
 
 export class Range {
@@ -130,8 +135,12 @@ export class Range {
   'end included': boolean;
   start: string|number|null;
   end: string|number|null;
-  map: <T> (fn: (val: any) => T) => T[];
-  includes: (val: any) => boolean;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  map: <T> (fn: (val) => T) => T[];
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  includes: (val) => boolean;
 
   constructor(props: RangeProps) {
     Object.assign(this, props);
@@ -235,9 +244,11 @@ export function equals(a, b) {
 
 export class FunctionWrapper {
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fn: (...args) => any;
   parameterNames: string[];
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(fn: (...args) => any, parameterNames: string[]) {
 
     this.fn = fn;

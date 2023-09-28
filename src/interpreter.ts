@@ -22,12 +22,14 @@ import {
 } from './parser';
 
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type InterpreterContext = Record<string, any>;
 
 class Interpreter {
 
   _buildExecutionTree(tree: Tree, input: string) {
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     type StackEntry = { args: any[], nodeInput: string };
 
     const root = { args: [], nodeInput: input };
@@ -126,6 +128,7 @@ export function unaryTest(expression: string, context: InterpreterContext = {}) 
   return test(value);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function evaluate(expression: string, context: InterpreterContext = {}): any {
 
   const {
@@ -138,6 +141,7 @@ export function evaluate(expression: string, context: InterpreterContext = {}): 
 }
 
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
   switch (node.name) {
@@ -921,15 +925,11 @@ function anyIncludes(start, end, startIncluded, endIncluded) {
         includesEnd(end, endIncluded)
       ];
     }
-  } else
-
-  if (end !== null) {
+  } else if (end !== null) {
     tests = [
       includesEnd(end, endIncluded)
     ];
-  } else
-
-  if (start !== null) {
+  } else if (start !== null) {
     tests = [
       includesStart(start, startIncluded)
     ];
@@ -995,6 +995,7 @@ function createNumberRange(start, end, startIncluded, endIncluded) {
   });
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function cartesianProduct(arrays: any[]) {
 
   if (arrays.some(arr => getType(arr) === 'nil')) {
@@ -1098,6 +1099,7 @@ function parseString(str: string) {
     str = str.slice(0, -1);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return str.replace(/(\\")|(\\\\)|(\\u[a-fA-F0-9]{5,6})|((?:\\u[a-fA-F0-9]{1,4})+)/ig, function(substring: string, ...groups: any[]) {
 
     const [

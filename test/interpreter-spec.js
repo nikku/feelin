@@ -237,6 +237,8 @@ describe('interpreter', function() {
       expr('for y in [ 1 ], i in null return [ i, y ]', null);
 
       expr('for a in 1 return a', null);
+
+      exprSkip('for x in [ [1,2], [3,4] ], y in x return y', [ 1, 2, 3, 4 ]);
     });
 
 

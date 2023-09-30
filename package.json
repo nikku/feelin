@@ -7,7 +7,6 @@
   "license": "MIT",
   "type": "module",
   "module": "dist/index.esm.js",
-  "umd:main": "dist/feelin.umd.js",
   "source": "src/index.ts",
   "types": "dist/index.d.ts",
   "devDependencies": {

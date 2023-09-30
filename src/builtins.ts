@@ -470,9 +470,20 @@ const builtins = {
     }, []);
   }, [ 'list', 'any' ]),
 
-  'union': fn(function(..._lists) {
-    throw notImplemented('union');
-  }, [ 'list' ]),
+  'union': listFn(function(lists) {
+
+    return lists.reduce((result, list) => {
+
+      return list.reduce((result, e) => {
+        if (!result.some(r => equals(e, r))) {
+          result.push(e);
+        }
+
+        return result;
+      }, result);
+    }, []);
+
+  }, 'list'),
 
   'distinct values': fn(function(_list) {
     throw notImplemented('distinct values');

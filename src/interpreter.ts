@@ -826,15 +826,15 @@ function createRange(start, end, startIncluded = true, endIncluded = true) : Ran
   }
 
   if (isTyped('time', [ start, end ])) {
-    throw notImplemented('range<time>');
+    return createDateTimeRange(start, end, startIncluded, endIncluded);
   }
 
   if (isTyped('date time', [ start, end ])) {
-    throw notImplemented('range<date and time>');
+    return createDateTimeRange(start, end, startIncluded, endIncluded);
   }
 
   if (isTyped('date', [ start, end ])) {
-    throw notImplemented('range<date>');
+    return createDateTimeRange(start, end, startIncluded, endIncluded);
   }
 
   if (start === null && end === null) {
@@ -983,6 +983,20 @@ function createStringRange(start, end, startIncluded = true, endIncluded = true)
 
 function createNumberRange(start, end, startIncluded, endIncluded) {
   const map = start !== null && end !== null ? numberMap(start, end, startIncluded, endIncluded) : noopMap();
+  const includes = anyIncludes(start, end, startIncluded, endIncluded);
+
+  return new Range({
+    start,
+    end,
+    'start included': startIncluded,
+    'end included': endIncluded,
+    map,
+    includes
+  });
+}
+
+function createDateTimeRange(start, end, startIncluded, endIncluded) {
+  const map = noopMap();
   const includes = anyIncludes(start, end, startIncluded, endIncluded);
 
   return new Range({

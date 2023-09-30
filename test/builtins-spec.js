@@ -472,21 +472,56 @@ describe('builtin functions', function() {
 
       exprSkip('duration("P5D") in (duration("P4D"), >=duration("P6D"))', true);
 
-      exprSkip(`
+      expr(`
+        date and time("2018-12-08T10:30:01") in [
+          date and time("2018-12-08T10:30:02")
+          ..
+          date and time("2018-12-08T10:30:04")
+        ]
+      `, false);
+      expr(`
         date and time("2018-12-08T10:30:02") in [
           date and time("2018-12-08T10:30:02")
           ..
           date and time("2018-12-08T10:30:04")
         ]
       `, true);
-
-      exprSkip(`
-        time("10:30:05") in (time("10:30:04"), >=time("10:30:05"))
+      expr(`
+        date and time("2018-12-08T10:30:03") in [
+          date and time("2018-12-08T10:30:02")
+          ..
+          date and time("2018-12-08T10:30:04")
+        ]
       `, true);
-
-      exprSkip(`
-        date("2018-12-02") between date("2018-12-02") and date("2018-12-04")
+      expr(`
+        date and time("2018-12-08T10:30:04") in [
+          date and time("2018-12-08T10:30:02")
+          ..
+          date and time("2018-12-08T10:30:04")
+        ]
       `, true);
+      expr(`
+        date and time("2018-12-08T10:30:05") in [
+          date and time("2018-12-08T10:30:02")
+          ..
+          date and time("2018-12-08T10:30:04")
+        ]
+      `, false);
+
+      expr('time("10:30:03") in (time("10:30:04"), >=time("10:30:05"))', false);
+      expr('time("10:30:05") in (time("10:30:04"), >=time("10:30:05"))', true);
+
+      expr('date("2018-12-01") between date("2018-12-02") and date("2018-12-04")', false);
+      expr('date("2018-12-02") between date("2018-12-02") and date("2018-12-04")', true);
+      expr('date("2018-12-03") between date("2018-12-02") and date("2018-12-04")', true);
+      expr('date("2018-12-04") between date("2018-12-02") and date("2018-12-04")', true);
+      expr('date("2018-12-05") between date("2018-12-02") and date("2018-12-04")', false);
+
+      expr('date("2018-12-01") in [date("2018-12-02") .. date("2018-12-04")]', false);
+      expr('date("2018-12-02") in [date("2018-12-02") .. date("2018-12-04")]', true);
+      expr('date("2018-12-03") in [date("2018-12-02") .. date("2018-12-04")]', true);
+      expr('date("2018-12-04") in [date("2018-12-02") .. date("2018-12-04")]', true);
+      expr('date("2018-12-05") in [date("2018-12-02") .. date("2018-12-04")]', false);
 
     });
 

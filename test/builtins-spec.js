@@ -274,7 +274,10 @@ describe('builtin functions', function() {
     expr('index of([1,2,3,2],2)', [ 2,4 ]);
     expr('index of([1, 2, 3, 2], 5)', [ ]);
 
-    exprSkip('union([1,2],[2,3])', [ 1,2,3 ]);
+    expr('union([1,2],[2,3])', [ 1,2,3 ]);
+
+    expr('union(["a", "b"],["a", "c"])', [ 'a', 'b', 'c' ]);
+    expr('union([null, { a: 1 }],[null, { a: 1}])', [ null, { a : 1 } ]);
 
     expr('distinct values([1,2,3,2,1])', [ 1,2,3 ]);
 

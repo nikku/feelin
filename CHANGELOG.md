@@ -6,6 +6,13 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 1.1.0
+
+* `FEAT`: support `distinct values` built-in ([#29](https://github.com/nikku/feelin/pull/29))
+* `FEAT`: support `union` built-in ([#30](https://github.com/nikku/feelin/pull/30))
+* `FEAT`: support temporal ranges ([#27](https://github.com/nikku/feelin/pull/27), [#15](https://github.com/nikku/feelin/issues/15))
+* `FIX`: do not unbox path expression results on lists ([#28](https://github.com/nikku/feelin/pull/28))
+
 ## 1.0.1
 
 * `FIX`: correctly name `cjs` export ([#26](https://github.com/nikku/feelin/pull/26), [#23](https://github.com/nikku/feelin/issues/23))

@@ -474,8 +474,14 @@ const builtins = {
     throw notImplemented('union');
   }, [ 'list' ]),
 
-  'distinct values': fn(function(_list) {
-    throw notImplemented('distinct values');
+  'distinct values': fn(function(list) {
+    return list.reduce((result, e) => {
+      if (!result.some(r => equals(e, r))) {
+        result.push(e);
+      }
+
+      return result;
+    }, []);
   }, [ 'list' ]),
 
   'flatten': fn(function(list) {

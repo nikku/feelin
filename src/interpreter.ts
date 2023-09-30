@@ -591,7 +591,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
   case 'PathExpression': return (context) => {
 
-    const pathTarget = coerceSingleton(args[0](context));
+    const pathTarget = args[0](context);
     const pathProp = args[1];
 
     if (isArray(pathTarget)) {
@@ -1093,14 +1093,6 @@ function wrapFunction(fn, parameterNames = null) {
   }
 
   return new FunctionWrapper(fn, parameterNames || parseParameterNames(fn));
-}
-
-function coerceSingleton(values) {
-  if (Array.isArray(values) && values.length === 1) {
-    return values[0];
-  } else {
-    return values;
-  }
 }
 
 function parseString(str: string) {

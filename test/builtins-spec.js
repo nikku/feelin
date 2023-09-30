@@ -276,7 +276,7 @@ describe('builtin functions', function() {
 
     exprSkip('union([1,2],[2,3])', [ 1,2,3 ]);
 
-    exprSkip('distinct values([1,2,3,2,1])', [ 1,2,3 ]);
+    expr('distinct values([1,2,3,2,1])', [ 1,2,3 ]);
 
     expr('flatten([[1,2],[[3]], 4])', [ 1,2,3,4 ]);
 

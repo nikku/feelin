@@ -6,6 +6,10 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 1.2.0
+
+* `DEPS`: update to `lezer-feel@1.2.0`
+
 ## 1.1.0
 
 * `FEAT`: support `distinct values` built-in ([#29](https://github.com/nikku/feelin/pull/29))

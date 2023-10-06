@@ -7,7 +7,10 @@ import {
   FunctionWrapper,
   equals,
   isArray,
-  getType
+  getType,
+  isDuration,
+  isDateTime,
+  isType
 } from './types';
 
 import {
@@ -20,6 +23,7 @@ import {
   parseExpression,
   parseUnaryTests
 } from './parser';
+import { Duration } from 'luxon';
 
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -163,10 +167,11 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
       const leftType = getType(left);
       const rightType = getType(right);
 
-      if (
-        leftType !== rightType ||
-        !types.includes(leftType)
-      ) {
+      if ((isDuration(left) || isDateTime(left)) &&
+          (isDuration(right) || isDateTime(right))) {
+        // eslint-disable-next-line lines-around-comment
+        // just to get over the return null
+      } else if (leftType !== rightType || !types.includes(leftType)) {
         return null;
       }
 
@@ -174,8 +179,32 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     };
 
     switch (input) {
-    case '+': return nullable((a, b) => a + b, [ 'string', 'number' ]);
-    case '-': return nullable((a, b) => a - b);
+    case '+': return nullable((a, b) => {
+      if (isType(a, 'time') && isDuration(b)) {
+        // eslint-disable-next-line lines-around-comment
+        // TODO with longer durations return false
+        return a.plus(b).minus(Duration.fromISO('PT24H'));
+      } else if (isDateTime(a) && isDateTime(b)) {
+        return null;
+      } else if (isDateTime(a) && isDuration(b)) {
+        return a.plus(b);
+      } else if (isDuration(a) && isDuration(b)) {
+        return a.plus(b);
+      }
+
+      return a + b;
+    }, [ 'string', 'number' ]);
+    case '-': return nullable((a, b) => {
+      if (isDateTime(a) && isDateTime(b)) {
+        return a.diff(b);
+      } else if (isDateTime(a) && isDuration(b)) {
+        return a.minus(b);
+      } else if (isDuration(a) && isDuration(b)) {
+        return a.minus(b);
+      }
+
+      return a - b;
+    });
     case '*': return nullable((a, b) => a * b);
     case '/': return nullable((a, b) => !b ? null : a / b);
     case '**':

@@ -2,7 +2,9 @@ import { expect } from './helpers.js';
 
 import {
   unaryTest,
-  evaluate
+  evaluate,
+  date,
+  duration
 } from '../dist/index.esm.js';
 
 
@@ -76,14 +78,18 @@ describe('interpreter', function() {
       });
 
 
-      describe('temporal addition', function() {
+      describe('temporal arithmetic', function() {
 
-        exprSkip(`
+        expr(`
           date and time("2012-12-24T23:59:00") + duration("PT1M") =
           date and time("2012-12-25T00:00:00")
         `, true);
 
-        exprSkip('date("2012-12-25") - date("2012-12-24") = duration("P1D")', true);
+        expr('time("23:59:00") + duration("PT2M") = time("00:01")', true);
+        expr('time("23:59:00") + duration("PT2M") + duration("P1D") = time("00:01")', true);
+        exprSkip('time("23:59:00") + duration("PT2M") + duration("P1M") = time("00:01")', false);
+        expr('date("2012-12-24") + date("2012-12-24")', null);
+        expr('date("2012-12-25") - date("2012-12-24") = duration("P1D")', true);
 
         exprSkip('time("00:01:00@Etc/UTC") - time("23:59:00z") = duration("PT2M")', true);
 
@@ -91,6 +97,21 @@ describe('interpreter', function() {
           time("23:59:00z") + duration("PT2M") =
           time("00:01:00@Etc/UTC")
         `, true);
+
+        expr('duration("P1D") + duration("P1D")', duration('P2D'));
+        expr('duration("PT1M") + duration("PT1M")', duration('PT2M'));
+        expr('date("2023-10-06") + duration("PT1H")', date('2023-10-06T01:00Z'));
+        expr('date("2023-10-06") + duration("P1D")', date('2023-10-07'));
+        expr('date("2023-10-06") + duration("P1W")', date('2023-10-13'));
+        expr('date("2023-10-06") + duration("P1M")', date('2023-11-06'));
+        expr('date("2023-10-06") + duration("P1Y")', date('2024-10-06'));
+        expr('date("2023-10-06") - duration("PT1H")', date('2023-10-05T23:00Z'));
+        expr('date("2023-10-06") - duration("P1D")', date('2023-10-05'));
+        expr('date("2023-10-06") - duration("P1W")', date('2023-09-29'));
+        expr('date("2023-10-06") - duration("P1M")', date('2023-09-06'));
+        expr('date("2023-10-06") - duration("P1Y")', date('2022-10-06'));
+        expr('date("2023-10-06") + duration("P1M") = date("2023-11-06")', true);
+        expr('date("2023-10-06") - duration("P1M") = date("2023-09-06")', true);
 
       });
 

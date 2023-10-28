@@ -25,7 +25,7 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type InterpreterContext = Record<string, any>;
 
-class Interpreter {
+export class Interpreter {
 
   _buildExecutionTree(tree: Tree, input: string) {
 

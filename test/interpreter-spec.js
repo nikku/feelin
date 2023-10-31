@@ -127,13 +127,13 @@ describe('interpreter', function() {
         }
       });
 
-      expr('foo(a: true)', true, {
+      expr('foo(a: true)', null, {
         foo: function() {
           return true;
         }
       });
 
-      expr('foo(a: true, c: "NOT_NEEDED")', [ true, undefined ], {
+      expr('foo(a: true, c: "NOT_NEEDED")', null, {
         foo: function(a, b) {
           return [ a, b ];
         }

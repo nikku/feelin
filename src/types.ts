@@ -262,6 +262,13 @@ export class FunctionWrapper {
     if (isArray(contextOrArgs)) {
       params = contextOrArgs;
     } else {
+
+      // strictly check for required parameter names,
+      // and fail on wrong parameter name
+      if (Object.keys(contextOrArgs).some(key => !this.parameterNames.includes(key))) {
+        return null;
+      }
+
       params = this.parameterNames.map(n => contextOrArgs[n]);
     }
 

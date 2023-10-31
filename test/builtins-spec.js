@@ -212,6 +212,19 @@ describe('builtin functions', function() {
 
     expr('split(string: "foo🐎bar", delimiter: "o.b")', [ 'fo', 'ar' ]);
 
+    expr('string join(123, "X")', null);
+
+    expr('string join(123, "X")', null);
+    expr('string join(null, "X")', null);
+    expr('string join([1, 2, 3])', null);
+    exprSkip('string join(["a","c"], "X", "foo")', null);
+    expr('string join(list: ["a","c"], delimitr: "X")', null);
+
+    expr('string join(list: ["a","c"])', 'ac');
+    expr('string join([])', '');
+    expr('string join(["a",null,"c"], "X")', 'aXc');
+    expr('string join(["a","b","c"], null)', 'abc');
+
   });
 
 

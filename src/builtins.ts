@@ -49,6 +49,7 @@ const names = [
   'starts with',
   'ends with',
   'split',
+  'string join',
 
   // 10.3.4.4 List functions
   'list contains',
@@ -356,6 +357,13 @@ const builtins = {
     return string.split(new RegExp(delimiter, 'u'));
   }, [ 'string', 'string' ]),
 
+  'string join': fn(function(list, delimiter) {
+    if (list.some(e => !isString(e) && e !== null)) {
+      return null;
+    }
+
+    return list.filter(l => l !== null).join(delimiter || '');
+  }, [ 'list', 'string?' ]),
 
   // 10.3.4.4 List functions
 
@@ -762,7 +770,7 @@ function createArgTester(arg) {
       } else {
 
         // implicit conversion obj => [ obj ]
-        return [ obj ];
+        return obj === null ? FALSE : [ obj ];
       }
     }
 

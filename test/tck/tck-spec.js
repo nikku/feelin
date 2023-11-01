@@ -128,16 +128,7 @@ function skipSuite(suiteName) {
 function skipTest(suiteName, testId) {
   return [
     '0057-feel-context-test-01.xml#008',
-    '0079-feel-string-function-test-01.xml#dt_duration_004',
-    '1115-feel-date-function-test-01.xml#015_1dd66594cf',
-    '1115-feel-date-function-test-01.xml#029_88f5c7c90f',
-    '1115-feel-date-function-test-01.xml#030_9184a7bfc3',
-    '1117-feel-date-and-time-function-test-01.xml#026_5ba081cd5f',
-    '1117-feel-date-and-time-function-test-01.xml#027_ae365197dd',
-    '1117-feel-date-and-time-function-test-01.xml#033_2fac4d6807',
-    '1117-feel-date-and-time-function-test-01.xml#040_d9116e1daa',
-    '1117-feel-date-and-time-function-test-01.xml#054_2561a406fc',
-    '1117-feel-date-and-time-function-test-01.xml#047_60ea7838ce'
+    '0079-feel-string-function-test-01.xml#dt_duration_004'
   ].includes(`${suiteName}#${testId}`);
 }
 

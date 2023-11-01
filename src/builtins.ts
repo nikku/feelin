@@ -132,9 +132,29 @@ const builtins = {
 
   // 10.3.4.1 Conversion functions
 
-  'number': function() {
-    throw notImplemented('number');
-  },
+  'number': fn(function(from, groupingSeparator, decimalSeparator) {
+
+    // must always provide three arguments
+    if (arguments.length !== 3) {
+      return null;
+    }
+
+    if (groupingSeparator) {
+      from = from.split(groupingSeparator).join('');
+    }
+
+    if (decimalSeparator && decimalSeparator !== '.') {
+      from = from.split('.').join('#').split(decimalSeparator).join('.');
+    }
+
+    const number = +from;
+
+    if (isNaN(number)) {
+      return null;
+    }
+
+    return number;
+  }, [ 'string', 'string?', 'string?' ], [ 'from', 'grouping separator', 'decimal separator' ]),
 
   'string': fn(function(from) {
     if (arguments.length !== 1) {

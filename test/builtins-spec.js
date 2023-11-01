@@ -58,10 +58,17 @@ describe('builtin functions', function() {
       time(23, 59, 0, duration("PT0H"))
     `, true);
 
-    exprSkip(`
+    expr(`
       number("1 000,0", " ", ",") =
       number("1,000.0", ",", ".")
     `, true);
+
+    expr('number("1,000,000", ",", null)', 1000000);
+    expr('number("1000000.01", null, ".")', 1000000.01);
+
+    expr('number("1.000.000,01", ".")', null);
+
+    expr('number(from: "1,000,000", grouping separator: ",", decimal separator: ".")', 1000000);
 
     expr('string(1.1)', '1.1');
     expr('string(null)', null);

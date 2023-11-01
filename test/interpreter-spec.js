@@ -93,7 +93,7 @@ describe('interpreter', function() {
 
         exprSkip('time("00:01:00@Etc/UTC") - time("23:59:00z") = duration("PT2M")', true);
 
-        exprSkip(`
+        expr(`
           time("23:59:00z") + duration("PT2M") =
           time("00:01:00@Etc/UTC")
         `, true);

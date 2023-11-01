@@ -208,6 +208,12 @@ describe('interpreter', function() {
         }
       });
 
+      expr('foo(varArgs: 1)', [ [ 1 ] ], {
+        foo: function(...varArgs) {
+          return [ varArgs ];
+        }
+      });
+
     });
 
 

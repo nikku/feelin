@@ -293,7 +293,10 @@ export class FunctionWrapper {
           if (!value) {
             return params;
           } else {
-            return [ ...params, ...value ];
+
+            // ensure that single arg provided for var args named
+            // parameter is wrapped in a list
+            return [ ...params, ...(isArray(value) ? value : [ value ]) ];
           }
         }
 

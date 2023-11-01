@@ -750,15 +750,44 @@ const builtins = {
     return Object.entries(m).map(([ key, value ]) => ({ key, value }));
   }, [ 'context' ]),
 
-  'context': listFn(function(..._contexts) {
-    throw notImplemented('context');
+  // eslint-disable-next-line
+  'context': listFn(function(...entries) {
+    const context = entries.reduce((context, entry) => {
+
+      if (context === FALSE || ![ 'key', 'value' ].every(e => e in entry)) {
+        return FALSE;
+      }
+
+      const key = entry.key;
+
+      if (key === null) {
+        return FALSE;
+      }
+
+      if (key in context) {
+        return FALSE;
+      }
+
+      return {
+        ...context,
+        [entry.key]: entry.value
+      };
+    }, {});
+
+    if (context === FALSE) {
+      return null;
+    }
+
+    return context;
   }, 'context'),
 
-  'context merge': listFn(function(..._contexts) {
+  // eslint-disable-next-line
+  'context merge': listFn(function(...contexts) {
     throw notImplemented('context merge');
   }, 'context'),
 
-  'context put': fn(function(_context, _keys, _value) {
+  // eslint-disable-next-line
+  'context put': fn(function(context, keys, value) {
     throw notImplemented('context put');
   }, [ 'context', 'list', 'any' ])
 

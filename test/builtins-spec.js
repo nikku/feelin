@@ -597,6 +597,17 @@ describe('builtin functions', function() {
       get entries(m:{a: "foo", b: "bar"}) = [{"key": "a", "value":"foo"},{"key":"b", "value":"bar"}]
     `, true);
 
+    expr('context([ { key: "a", value: 1 }, { key: "b", value: 2 } ])', { a: 1, b: 2 });
+
+    expr('context()', null);
+    expr('context(123)', null);
+    expr('context("123")', null);
+    expr('context({ key: "a" })', null);
+    expr('context({ value: "a" })', null);
+
+    expr('context(entries: [{key:"a", value:1}])', { 'a':1 });
+    expr('context(entries: {key:"a", value:1})', { 'a':1 });
+
   });
 
 });

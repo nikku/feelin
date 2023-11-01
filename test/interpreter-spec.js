@@ -169,6 +169,45 @@ describe('interpreter', function() {
         b: 7
       });
 
+      // call with wrong args
+      expr('foo(5)', null, {
+        foo: function() {
+          return 5;
+        }
+      });
+
+      // var args function
+      expr('foo(1, 2, 3)', [ [ 1, 2, 3 ] ], {
+        foo: function(...varArgs) {
+          return [ varArgs ];
+        }
+      });
+
+      expr('foo(1)', [ 1, [] ], {
+        foo: function(firstArg, ...varArgs) {
+          return [ firstArg, varArgs ];
+        }
+      });
+
+      expr('foo(firstArg: 1)', [ 1, [] ], {
+        foo: function(firstArg, ...varArgs) {
+          return [ firstArg, varArgs ];
+        }
+      });
+
+      expr('foo(firstArg: 1, varArgs: null)', [ 1, [] ], {
+        foo: function(firstArg, ...varArgs) {
+          return [ firstArg, varArgs ];
+        }
+      });
+
+
+      expr('foo(varArgs: [ 1, 2, 3 ])', [ [ 1, 2, 3 ] ], {
+        foo: function(...varArgs) {
+          return [ varArgs ];
+        }
+      });
+
     });
 
 

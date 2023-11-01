@@ -375,25 +375,25 @@ const builtins = {
     return list.length;
   }, [ 'list' ]),
 
-  'min': listFn(function(list) {
+  'min': listFn(function(...list) {
     return list.reduce((min, el) => min === null ? el : Math.min(min, el), null);
   }, 'number'),
 
-  'max': listFn(function(list) {
+  'max': listFn(function(...list) {
     return list.reduce((max, el) => max === null ? el : Math.max(max, el), null);
   }, 'number'),
 
-  'sum': listFn(function(list) {
+  'sum': listFn(function(...list) {
     return sum(list);
   }, 'number'),
 
-  'mean': listFn(function(list) {
+  'mean': listFn(function(...list) {
     const s = sum(list);
 
     return s === null ? s : s / list.length;
   }, 'number'),
 
-  'all': listFn(function(list) {
+  'all': listFn(function(...list) {
 
     let nonBool = false;
 
@@ -412,7 +412,7 @@ const builtins = {
 
   }, 'any?'),
 
-  'any': listFn(function(list) {
+  'any': listFn(function(...list) {
 
     let nonBool = false;
 
@@ -478,7 +478,7 @@ const builtins = {
     }, []);
   }, [ 'list', 'any' ]),
 
-  'union': listFn(function(lists) {
+  'union': listFn(function(...lists) {
 
     return lists.reduce((result, list) => {
 
@@ -507,7 +507,7 @@ const builtins = {
     return flatten(list);
   }, [ 'list' ]),
 
-  'product': listFn(function(list) {
+  'product': listFn(function(...list) {
 
     if (list.length === 0) {
       return null;
@@ -518,7 +518,7 @@ const builtins = {
     }, 1);
   }, 'number'),
 
-  'median': listFn(function(list) {
+  'median': listFn(function(...list) {
 
     if (list.length === 0) {
       return null;
@@ -527,7 +527,7 @@ const builtins = {
     return median(list);
   }, 'number'),
 
-  'stddev': listFn(function(list) {
+  'stddev': listFn(function(...list) {
 
     if (list.length < 2) {
       return null;
@@ -536,7 +536,7 @@ const builtins = {
     return stddev(list);
   }, 'number'),
 
-  'mode': listFn(function(list) {
+  'mode': listFn(function(...list) {
     return mode(list);
   }, 'number'),
 
@@ -730,11 +730,11 @@ const builtins = {
     return Object.entries(m).map(([ key, value ]) => ({ key, value }));
   }, [ 'context' ]),
 
-  'context': listFn(function(_contexts) {
+  'context': listFn(function(..._contexts) {
     throw notImplemented('context');
   }, 'context'),
 
-  'context merge': listFn(function(_contexts) {
+  'context merge': listFn(function(..._contexts) {
     throw notImplemented('context merge');
   }, 'context'),
 
@@ -856,7 +856,7 @@ function listFn(fnDefinition, type, parameterNames = null) {
       return null;
     }
 
-    return fnDefinition(args);
+    return fnDefinition(...args);
   };
 
   wrappedFn.$args = parameterNames || parseParameterNames(fnDefinition);

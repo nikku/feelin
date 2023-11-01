@@ -357,6 +357,12 @@ const builtins = {
     return string.split(new RegExp(delimiter, 'u'));
   }, [ 'string', 'string' ]),
 
+  // 10.3.4.4 List functions
+
+  'list contains': fn(function(list, element) {
+    return list.some(el => matches(el, element));
+  }, [ 'list', 'any?' ]),
+
   'string join': fn(function(list, delimiter) {
     if (list.some(e => !isString(e) && e !== null)) {
       return null;
@@ -364,12 +370,6 @@ const builtins = {
 
     return list.filter(l => l !== null).join(delimiter || '');
   }, [ 'list', 'string?' ]),
-
-  // 10.3.4.4 List functions
-
-  'list contains': fn(function(list, element) {
-    return list.some(el => matches(el, element));
-  }, [ 'list', 'any?' ]),
 
   'count': fn(function(list) {
     return list.length;

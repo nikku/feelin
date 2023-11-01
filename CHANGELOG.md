@@ -6,6 +6,20 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 2.0.0
+
+* `FEAT`: add `string join` built-in ([#35](https://github.com/nikku/feelin/pull/35))
+* `FEAT`: add `context` built-in ([`fcea4d6`](https://github.com/nikku/feelin/pull/38/commits/fcea4d6ce96a2c0c1520598505efade335ffad2d))
+* `FEAT`: add `day of week`, `day of month`, `week of year` and `day of year` built-ins ([`d408ac5`](https://github.com/nikku/feelin/pull/38/commits/d408ac5317fff203b017787dddfc55b349c0b965))
+* `FEAT`: support `number` built-in ([#19](https://github.com/nikku/feelin/issues/19))
+* `FEAT`: guard functions against too many arguments ([#12](https://github.com/nikku/feelin/issues/12))
+* `FEAT`: ensure named var-arg is a list ([`2be53bd`](https://github.com/nikku/feelin/pull/38/commits/2be53bd97c47b8e0f53781cdf7ea8e602c464afc))
+* `FEAT`: support basic temporal arithmetics ([#16](https://github.com/nikku/feelin/issues/16), [#31](https://github.com/nikku/feelin/pull/31))
+
+### Breaking Changes
+
+* Variable argument functions must now declare variable parts via `...varArg` syntax ([`8f21960`](https://github.com/nikku/feelin/pull/38/commits/8f219609b34e8527d843db9c7120961eeba7c5fe)).
+
 ## 1.2.0
 
 * `DEPS`: update to `lezer-feel@1.2.0`

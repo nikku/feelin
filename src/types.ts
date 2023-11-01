@@ -261,15 +261,44 @@ export class FunctionWrapper {
 
     if (isArray(contextOrArgs)) {
       params = contextOrArgs;
+
+      // reject
+      if (params.length > this.parameterNames.length) {
+
+        const lastParam = this.parameterNames[this.parameterNames.length - 1];
+
+        // strictly check for parameter count provided
+        // for non var-args functions
+        if (!lastParam || !lastParam.startsWith('...')) {
+          return null;
+        }
+      }
     } else {
 
       // strictly check for required parameter names,
       // and fail on wrong parameter name
-      if (Object.keys(contextOrArgs).some(key => !this.parameterNames.includes(key))) {
+      if (Object.keys(contextOrArgs).some(
+        key => !this.parameterNames.includes(key) && !this.parameterNames.includes(`...${key}`)
+      )) {
         return null;
       }
 
-      params = this.parameterNames.map(n => contextOrArgs[n]);
+      params = this.parameterNames.reduce((params, name) => {
+
+        if (name.startsWith('...')) {
+          name = name.slice(3);
+
+          const value = contextOrArgs[name];
+
+          if (!value) {
+            return params;
+          } else {
+            return [ ...params, ...value ];
+          }
+        }
+
+        return [ ...params, contextOrArgs[name] ];
+      }, []);
     }
 
     return this.fn.call(null, ...params);

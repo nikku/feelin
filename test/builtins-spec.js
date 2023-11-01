@@ -477,6 +477,26 @@ describe('builtin functions', function() {
       today() = date and time(now(), @"00:00:00")
     `, true);
 
+    expr('day of year(@"2016-01-15")', 15);
+    expr('day of year(@"2016-11-15")', 320);
+    expr('day of year(date: @"2016-11-15")', 320);
+    expr('day of year(date: 1)', null);
+
+    expr('day of week(@"2016-01-15")', 'Friday');
+    expr('day of week(@"2016-11-15")', 'Tuesday');
+    expr('day of week(date: @"2016-11-15")', 'Tuesday');
+    expr('day of week(date: 1)', null);
+
+    expr('month of year(@"2016-01-15")', 'January');
+    expr('month of year(@"2016-11-15")', 'November');
+    expr('month of year(date: @"2016-11-15")', 'November');
+    expr('month of year(date: 1)', null);
+
+    expr('week of year(@"2016-01-15")', 2);
+    expr('week of year(@"2016-11-15")', 46);
+    expr('week of year(date: @"2016-11-15")', 46);
+    expr('week of year(date: 1)', null);
+
 
     describe('properties', function() {
 

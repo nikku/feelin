@@ -707,21 +707,21 @@ const builtins = {
 
   // 10.3.4.8 Temporal built-in functions
 
-  'day of year': fn(function() {
-    throw notImplemented('day of year');
-  }, [ 'any?' ]),
+  'day of year': fn(function(date) {
+    return date.ordinal;
+  }, [ 'date time' ]),
 
-  'day of week': fn(function() {
-    throw notImplemented('day of week');
-  }, [ 'any?' ]),
+  'day of week': fn(function(date) {
+    return date.weekdayLong;
+  }, [ 'date time' ]),
 
-  'month of year': fn(function() {
-    throw notImplemented('month of year');
-  }, [ 'any?' ]),
+  'month of year': fn(function(date) {
+    return date.monthLong;
+  }, [ 'date time' ]),
 
-  'week of year': fn(function() {
-    throw notImplemented('week of year');
-  }, [ 'any?' ]),
+  'week of year': fn(function(date) {
+    return date.weekNumber;
+  }, [ 'date time' ]),
 
 
   // 10.3.4.9 Sort

@@ -657,16 +657,16 @@ const builtins = {
   }, [ 'any', 'any' ]),
 
   'meets': fn(function(a, b) {
-    return meets(a, b);
+    return meetsRange(a, b);
   }, [ 'range', 'range' ]),
 
   'met by': fn(function(a, b) {
-    return meets(b, a);
+    return meetsRange(b, a);
   }, [ 'range', 'range' ]),
 
-  'overlaps': fn(function() {
-    throw notImplemented('overlaps');
-  }, [ 'any?' ]),
+  'overlaps': fn(function(range1, range2) {
+    return !before(range1, range2) && !before(range2, range1);
+  }, [ 'range', 'range' ]),
 
   'overlaps before': fn(function() {
     throw notImplemented('overlaps before');
@@ -942,7 +942,11 @@ function fn(fnDefinition, argDefinitions, parameterNames = null) {
   return wrappedFn;
 }
 
-function meets(a, b) {
+/**
+ * @param {Range} a
+ * @param {Range} b
+ */
+function meetsRange(a, b) {
   return [
     (a.end === b.start),
     (a['end included'] === true),
@@ -950,6 +954,10 @@ function meets(a, b) {
   ].every(v => v);
 }
 
+/**
+ * @param {Range|number} a
+ * @param {Range|number} b
+ */
 function before(a, b) {
   if (a instanceof Range && b instanceof Range) {
     return (
@@ -966,7 +974,6 @@ function before(a, b) {
       )
     );
   }
-
 
   if (b instanceof Range) {
     return (

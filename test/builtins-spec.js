@@ -582,6 +582,21 @@ describe('builtin functions', function() {
     expr('before( [1..10], 10 )', false);
     expr('before( 1, (1..10] )', true);
     expr('before( [1..10), [10..20] )', true);
+
+    expr('overlaps( [1..5], [3..8] )', true);
+    expr('overlaps( [3..8], [1..5] )', true);
+    expr('overlaps( [1..8], [3..5] )', true);
+    expr('overlaps( [3..5], [1..8] )', true);
+    expr('overlaps( [1..5], [6..8] )', false);
+    expr('overlaps( [6..8], [1..5] )', false);
+    expr('overlaps( [1..5], [5..8] )', true);
+    expr('overlaps( [1..5], (5..8] )', false);
+    expr('overlaps( [1..5), [5..8] )', false);
+    expr('overlaps( [1..5), (5..8] )', false);
+    expr('overlaps( [5..8], [1..5] )', true);
+    expr('overlaps( (5..8], [1..5] )', false);
+    expr('overlaps( [5..8], [1..5) )', false);
+    expr('overlaps( (5..8], [1..5) )', false);
   });
 
 

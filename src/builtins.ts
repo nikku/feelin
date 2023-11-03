@@ -781,9 +781,8 @@ const builtins = {
     return context;
   }, 'context'),
 
-  // eslint-disable-next-line
   'context merge': listFn(function(...contexts) {
-    throw notImplemented('context merge');
+    return Object.assign({}, ...contexts);
   }, 'context'),
 
   // eslint-disable-next-line

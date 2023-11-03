@@ -647,6 +647,9 @@ describe('builtin functions', function() {
     expr('context(entries: [{key:"a", value:1}])', { 'a':1 });
     expr('context(entries: {key:"a", value:1})', { 'a':1 });
 
+    expr('context merge([{x:1}, {y:2}])', { x:1, y:2 });
+    expr('context merge([{x:1, y:0}, {y:2}])', { x:1, y:2 });
+
   });
 
 });

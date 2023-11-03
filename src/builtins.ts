@@ -784,10 +784,14 @@ const builtins = {
     return Object.assign({}, ...contexts);
   }, 'context'),
 
-  // eslint-disable-next-line
-  'context put': fn(function(context, keys, value) {
-    throw notImplemented('context put');
-  }, [ 'context', 'list', 'any' ])
+  'context put': fn(function(context, keys, value, key) {
+
+    if (typeof keys === 'undefined' && typeof key === 'undefined') {
+      return null;
+    }
+
+    return contextPut(context, keys || [ key ], value);
+  }, [ 'context', 'list?', 'any', 'string?' ], [ 'context', 'keys', 'value', 'key' ])
 
 };
 
@@ -795,6 +799,36 @@ export {
   names,
   builtins
 };
+
+/**
+ * @param {Object} context
+ * @param {string[]} keys
+ * @param {any} value
+ */
+function contextPut(context, keys, value) {
+  const [ key, ...remainingKeys ] = keys;
+
+  if (getType(key) !== 'string') {
+    return null;
+  }
+
+  if (getType(context) === 'nil') {
+    return null;
+  }
+
+  if (remainingKeys.length) {
+    value = contextPut(context[key], remainingKeys, value);
+
+    if (value === null) {
+      return null;
+    }
+  }
+
+  return {
+    ...context,
+    [key]: value
+  };
+}
 
 function matches(a, b) {
   return a === b;

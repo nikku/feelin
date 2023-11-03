@@ -650,6 +650,23 @@ describe('builtin functions', function() {
     expr('context merge([{x:1}, {y:2}])', { x:1, y:2 });
     expr('context merge([{x:1, y:0}, {y:2}])', { x:1, y:2 });
 
+    expr('context put({x:1}, "y", 2)', { x:1, y:2 });
+    expr('context put(context: {x:1}, key: "y", value: 2)', { x:1, y:2 });
+    expr('context put({x:1,y:0}, "y", 2)', { x:1, y:2 });
+    expr('context put({x:1, y:0, z:0}, "y", 2)', { x:1, y:2, z:0 });
+
+    expr('context put({}, "a", null)', { 'a': null });
+    expr('context put({}, "a")', null);
+    expr('context put({}, 1, 1)', null);
+    expr('context put({x:1 }, [null], 2)', null);
+    expr('context put({x:1, y: {a: 0} }, ["y", null], 2)', null);
+
+    expr('context put({x:1}, ["y"], 2)', { x:1, y:2 });
+    expr('context put(context: {x:1}, keys: ["y"], value: 2)', { x:1, y:2 });
+
+    expr('context put({x:1, y: {a: 0} }, ["y", "a"], 2)', { x:1, y: { a: 2 } });
+    expr('context put({x:1, y: {a: 0} }, [], 2)', null);
+
   });
 
 });

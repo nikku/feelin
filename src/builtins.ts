@@ -46,6 +46,7 @@ const names = [
   'substring after',
   'replace',
   'contains',
+  'matches',
   'starts with',
   'ends with',
   'split',
@@ -365,6 +366,11 @@ const builtins = {
   'contains': fn(function(string, match) {
     return string.includes(match);
   }, [ 'string', 'string' ]),
+
+  // eslint-disable-next-line
+  'matches': fn(function(input, pattern, flags) {
+    throw notImplemented('matches');
+  }, [ 'string', 'string', 'string?' ]),
 
   'starts with': fn(function(string, match) {
     return string.startsWith(match);

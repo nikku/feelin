@@ -750,7 +750,6 @@ const builtins = {
     return Object.entries(m).map(([ key, value ]) => ({ key, value }));
   }, [ 'context' ]),
 
-  // eslint-disable-next-line
   'context': listFn(function(...entries) {
     const context = entries.reduce((context, entry) => {
 

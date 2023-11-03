@@ -255,6 +255,10 @@ describe('interpreter', function() {
         }).bar
       `, 10);
 
+      expr(`
+        (function(x,y) x < y)(1, 3)
+      `, true);
+
     });
 
 

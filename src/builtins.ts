@@ -726,9 +726,9 @@ const builtins = {
 
   // 10.3.4.9 Sort
 
-  'sort': function() {
-    throw notImplemented('sort');
-  },
+  'sort': fn(function(list, precedes) {
+    return Array.from(list).sort((a, b) => precedes.invoke([ a, b ]) ? -1 : 1);
+  }, [ 'list', 'function' ]),
 
 
   // 10.3.4.10 Context function

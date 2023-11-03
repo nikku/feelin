@@ -327,6 +327,10 @@ describe('builtin functions', function() {
 
     expr('mode( list: [6, 1, 9, 6, 1] )', [ 1, 6 ]);
 
+    expr('sort(list: [3,1,4,5,2], precedes: function(x,y) x < y)', [ 1,2,3,4,5 ]);
+
+    expr('sort([3,1,4,5,2], function(x,y) x < y)', [ 1,2,3,4,5 ]);
+
   });
 
 

@@ -6,6 +6,13 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 2.1.0
+
+* `FEAT`: add `overlaps` built-in ([`0bf3020`](https://github.com/nikku/feelin/commit/0bf3020a721d6424ff957623f9c766ba9a01ea3c))
+* `FEAT`: add `sort` built-in ([`1330a940`](https://github.com/nikku/feelin/commit/1330a940fb4316e944f8187d1587949e6a81dab7))
+* `FEAT`: add `context merge` built-in ([`79e21f6a`](https://github.com/nikku/feelin/commit/79e21f6a1b3f0ff2b4d213fb5b183783d3381823))
+* `FEAT`: add `context put` built-in ([`89dc1b79`](https://github.com/nikku/feelin/commit/89dc1b79e4c5af4f607111ae0367a432302e9c17))
+
 ## 2.0.0
 
 * `FEAT`: add `string join` built-in ([#35](https://github.com/nikku/feelin/pull/35))

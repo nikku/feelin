@@ -157,7 +157,7 @@ const builtins = {
   }, [ 'string', 'string?', 'string?' ], [ 'from', 'grouping separator', 'decimal separator' ]),
 
   'string': fn(function(from) {
-    if (arguments.length !== 1) {
+    if (from === null) {
       return null;
     }
 
@@ -861,18 +861,14 @@ function createArgTester(arg) {
       obj = obj[0];
     }
 
-    if (type === 'range') {
-      return obj instanceof Range ? obj : FALSE;
-    }
-
     const objType = getType(obj);
+
+    if (type === 'any' || type === objType) {
+      return optional ? obj : typeof obj !== 'undefined' ? obj : FALSE;
+    }
 
     if (objType === 'nil') {
       return (optional ? obj : FALSE);
-    }
-
-    if (type === 'any' || type === objType) {
-      return obj;
     }
 
     return typeCast(obj, type) || FALSE;

@@ -55,8 +55,8 @@
     "test": "mocha -r source-map-support/register test/*-spec.js",
     "test:dev": "chokidar '{dist,test}/**/*.js' -c 'npm test'",
     "tck": "run-s tck:extract tck:test",
-    "tck:extract": "node tasks/extract-tck-tests.js ../dmn-tck",
-    "tck:test": "mocha -r source-map-support/register test/tck/*.js"
+    "tck:extract": "node tasks/extract-tck-tests.js",
+    "tck:test": "mocha --reporter=test/reporters/tck.cjs -r source-map-support/register test/tck/*.js"
   },
   "files": [
     "dist"

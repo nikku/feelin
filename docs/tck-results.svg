@@ -1,0 +1,16 @@
+<svg
+  version="1.1"
+  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 5" width="200">
+  <defs>
+    <clipPath id="round-corners">
+      <rect x="0" y="0" width="100" height="5" rx="1" />
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#round-corners)">
+    <rect width="77.98607391537226" height="5" fill="rgb(26, 127, 55)" x="0" y="0" />
+    <rect width="17.62185324049277" height="5" fill="rgb(200, 200, 200)" x="77.98607391537226" y="0" />
+    <rect width="4.392072844134976" height="5" fill="rgb(209, 36, 47)" x="95.60792715586503" y="0" />
+  </g>
+
+</svg>

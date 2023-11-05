@@ -13,16 +13,16 @@ import {
 
 const arg = process.argv[2];
 
-if (!arg || arg === '--help' || arg === '-h') {
-  console.error('Usage: extract-tck-tests <TCK_DIR>');
+if (arg === '--help' || arg === '-h' || arg) {
+  console.error('Usage: extract-tck-tests');
 
-  process.exit(!arg ? 1 : 0);
+  process.exit(arg ? 1 : 0);
 }
 
-const tckLocation = path.resolve(arg);
+const tckLocation = process.env.TCK_DIR || '../dmn-tck';
 
 if (!fs.existsSync(tckLocation)) {
-  throw new Error(`expected DMN TCK in ${ tckLocation }`);
+  throw new Error(`expected DMN TCK in <${ tckLocation }>. Customize the search path via env.TCK_DIR`);
 }
 
 const tests = glob.sync('TestCases/*/*-feel-*/*.xml', { cwd: tckLocation });

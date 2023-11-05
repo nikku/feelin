@@ -1,7 +1,8 @@
 import {
   DateTime,
   Duration,
-  FixedOffsetZone
+  FixedOffsetZone,
+  SystemZone
 } from 'luxon';
 
 export function isContext(e) {
@@ -190,9 +191,11 @@ export function equals(a, b, strict = false) {
       return null;
     }
 
-    return (
-      strict ? a.equals(b) : a.toUTC().valueOf() === b.toUTC().valueOf()
-    );
+    if (strict || a.zone === SystemZone.instance || b.zone === SystemZone.instance) {
+      return a.equals(b);
+    } else {
+      return a.toUTC().valueOf() === b.toUTC().valueOf();
+    }
   }
 
   if (aType !== bType) {

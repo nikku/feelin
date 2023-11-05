@@ -1115,6 +1115,10 @@ function toString(obj, wrap = false) {
   }
 
   if (type === 'date time') {
+    if (obj.zone === SystemZone.instance) {
+      return obj.toISO({ suppressMilliseconds: true, includeOffset: false });
+    }
+
     if (obj.zone?.zoneName) {
       return obj.toISO({ suppressMilliseconds: true, includeOffset: false }) + '@' + obj.zone?.zoneName;
     }
@@ -1131,6 +1135,9 @@ function toString(obj, wrap = false) {
   }
 
   if (type === 'time') {
+    if (obj.zone === SystemZone.instance) {
+      return obj.toISOTime({ suppressMilliseconds: true, includeOffset: false });
+    }
 
     if (obj.zone?.zoneName) {
       return obj.toISOTime({ suppressMilliseconds: true, includeOffset: false }) + '@' + obj.zone?.zoneName;

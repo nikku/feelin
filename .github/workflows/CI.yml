@@ -16,3 +16,28 @@ jobs:
       run: npm ci
     - name: Build
       run: npm run all
+  TCK:
+    needs: Build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Checkout TCK repo
+      uses: actions/checkout@v4
+      with:
+        repository: dmn-tck/tck
+        path: tmp/dmn-tck
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 20
+        cache: 'npm'
+    - name: Install dependencies
+      run: npm ci
+    - name: Build
+      run: npm run build
+    - name: Execute TCK tests
+      run: npm run tck
+      env:
+        TCK_DIR: tmp/dmn-tck

@@ -331,6 +331,13 @@ describe('builtin functions', function() {
 
     expr('sort([3,1,4,5,2], function(x,y) x < y)', [ 1,2,3,4,5 ]);
 
+    expr('list replace( [2, 4, 7, 8], 3, 6)', [ 2, 4, 6, 8 ]);
+
+    expr('list replace(list: [2, 4, 7, 8], position: 3, newItem: 6)', [ 2, 4, 6, 8 ]);
+
+    expr('list replace ( [2, 4, 7, 8], function(item, newItem) item < newItem, 5)', [ 5, 5, 7, 8 ]);
+    expr('list replace(list: [2, 4, 7, 8], match: function(item, newItem) item < newItem, newItem: 5)', [ 5, 5, 7, 8 ]);
+
   });
 
 

@@ -6,6 +6,15 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 2.2.0
+
+* `FEAT`: add `list replace` built-in ([#41](https://github.com/nikku/feelin/pull/41))
+* `FIX`: correct `time` arithmentics ([#43](https://github.com/nikku/feelin/pull/43))
+* `FIX`: make `is` compare temporals strictly ([#43](https://github.com/nikku/feelin/pull/43))
+* `FIX`: correct local temporal type handling in UTC timezone ([#43](https://github.com/nikku/feelin/pull/43))
+* `FIX`: `string` serialize local time without offset ([#43](https://github.com/nikku/feelin/pull/43))
+* `CHORE`: execute DMN TCK tests against CI
+
 ## 2.1.0
 
 * `FEAT`: add `overlaps` built-in ([`0bf3020`](https://github.com/nikku/feelin/commit/0bf3020a721d6424ff957623f9c766ba9a01ea3c))

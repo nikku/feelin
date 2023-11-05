@@ -226,7 +226,7 @@ describe('builtin functions', function() {
     expr('string join(123, "X")', null);
     expr('string join(null, "X")', null);
     expr('string join([1, 2, 3])', null);
-    exprSkip('string join(["a","c"], "X", "foo")', null);
+    expr('string join(["a","c"], "X", "foo")', null);
     expr('string join(list: ["a","c"], delimitr: "X")', null);
 
     expr('string join(list: ["a","c"])', 'ac');

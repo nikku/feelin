@@ -35,8 +35,8 @@ evaluate('every rate in rates() satisfies rate < 10', {
 * [x] Recognizes full FEEL grammar
 * [x] Context sensitive (incl. names with spaces)
 * [x] Recovers on errors
-* [ ] Temporal types and operations
-* [ ] Built-in FEEL functions
+* [x] Temporal types and operations
+* [x] Built-in FEEL functions
 * [ ] Full [DMN TCK](https://github.com/dmn-tck/tck) compliance
 
 

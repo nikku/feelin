@@ -431,6 +431,8 @@ describe('builtin functions', function() {
     expr('@"2019-03-30" = @"PT01H"', null);
 
     expr('@"15:00:00" = time("15:00:00")', true);
+    expr('@"15:00:00z" = time("15:00:00z")', true);
+    expr('@"15:00:00" = time("15:00:00z")', false);
 
     expr('@"PT01H" = duration("PT01H")', true);
     expr('@"-PT01H" = duration("-PT01H")', true);
@@ -448,6 +450,9 @@ describe('builtin functions', function() {
     expr('is(time("23:00:50z"), time("23:00:50+01:30"))', false);
     expr('is(time("23:00:50z"), time("23:00:50+01:00"))', false);
 
+    exprSkip('is(@"2012-12-25", @"2012-12-25T00:00:00Z")', null);
+    exprSkip('is(@"2012-12-25", @"2012-12-25T00:00:00")', true);
+
     expr(`
       years and months duration(
         from:date("2016-01-21"),
@@ -464,11 +469,7 @@ describe('builtin functions', function() {
 
     expr('duration("-P1Y") = duration("-P365D")', true);
 
-    expr(`
-      date and time(
-        "2016-01-21"
-      ) = date and time("2016-01-21T00:00:00z")
-    `, true);
+    expr('date and time("2012-12-24") = date and time("2012-12-24T00:00:00")', true);
 
     expr(`
       date and time(
@@ -608,18 +609,6 @@ describe('builtin functions', function() {
     expr('overlaps( (5..8], [1..5] )', false);
     expr('overlaps( [5..8], [1..5) )', false);
     expr('overlaps( (5..8], [1..5) )', false);
-  });
-
-
-  // TODO(nikku): support this
-  describe.skip('Temporal');
-
-
-  // TODO(nikku): support this
-  describe.skip('Sort', function() {
-
-    expr('sort()', null);
-
   });
 
 

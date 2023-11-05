@@ -20,7 +20,7 @@ import {
   isDateTime
 } from './temporal';
 
-import { DateTime, Duration } from 'luxon';
+import { DateTime, Duration, SystemZone } from 'luxon';
 
 
 const names = [
@@ -205,10 +205,12 @@ const builtins = {
 
     if (isDateTime(d) && isDateTime(time)) {
 
+      const dLocal = d.toLocal();
+
       dt = time.set({
-        year: d.year,
-        month: d.month,
-        day: d.day
+        year: dLocal.year,
+        month: dLocal.month,
+        day: dLocal.day
       });
     }
 
@@ -218,7 +220,7 @@ const builtins = {
     }
 
     if (isString(from)) {
-      dt = date(from);
+      dt = date(from, null, from.includes('@') ? null : SystemZone.instance);
     }
 
     return dt && ifValid(dt) || null;
@@ -683,7 +685,7 @@ const builtins = {
       return false;
     }
 
-    return equals(value1, value2);
+    return equals(value1, value2, true);
   }, [ 'any?', 'any?' ]),
 
   // 10.3.4.7 Range Functions

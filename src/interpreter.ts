@@ -23,7 +23,6 @@ import {
   parseExpression,
   parseUnaryTests
 } from './parser';
-import { Duration } from 'luxon';
 
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -167,10 +166,12 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
       const leftType = getType(left);
       const rightType = getType(right);
 
-      if ((isDuration(left) || isDateTime(left)) &&
-          (isDuration(right) || isDateTime(right))) {
-        // eslint-disable-next-line lines-around-comment
-        // just to get over the return null
+      const temporal = [ 'date', 'time', 'date time', 'duration' ];
+
+      if (temporal.includes(leftType)) {
+        if (!temporal.includes(rightType)) {
+          return null;
+        }
       } else if (leftType !== rightType || !types.includes(leftType)) {
         return null;
       }
@@ -181,9 +182,11 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     switch (input) {
     case '+': return nullable((a, b) => {
       if (isType(a, 'time') && isDuration(b)) {
-        // eslint-disable-next-line lines-around-comment
-        // TODO with longer durations return false
-        return a.plus(b).minus(Duration.fromISO('PT24H'));
+        return a.plus(b).set({
+          year: 1900,
+          month: 1,
+          day: 1
+        });
       } else if (isDateTime(a) && isDateTime(b)) {
         return null;
       } else if (isDateTime(a) && isDuration(b)) {
@@ -193,9 +196,15 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
       }
 
       return a + b;
-    }, [ 'string', 'number' ]);
+    }, [ 'string', 'number', 'date', 'time', 'duration', 'date time' ]);
     case '-': return nullable((a, b) => {
-      if (isDateTime(a) && isDateTime(b)) {
+      if (isType(a, 'time') && isDuration(b)) {
+        return a.minus(b).set({
+          year: 1900,
+          month: 1,
+          day: 1
+        });
+      } else if (isDateTime(a) && isDateTime(b)) {
         return a.diff(b);
       } else if (isDateTime(a) && isDuration(b)) {
         return a.minus(b);
@@ -204,7 +213,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
       }
 
       return a - b;
-    });
+    }, [ 'number', 'date', 'time', 'duration', 'date time' ]);
     case '*': return nullable((a, b) => a * b);
     case '/': return nullable((a, b) => !b ? null : a / b);
     case '**':

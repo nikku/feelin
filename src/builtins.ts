@@ -610,6 +610,26 @@ const builtins = {
     return Math.abs(n);
   }, [ 'number' ]),
 
+  // eslint-disable-next-line
+  'round up': fn(function(n, scale) {
+    throw notImplemented('round up');
+  }, [ 'number', 'number' ]),
+
+  // eslint-disable-next-line
+  'round down': fn(function(n, scale) {
+    throw notImplemented('round down');
+  }, [ 'number', 'number' ]),
+
+  // eslint-disable-next-line
+  'round half up': fn(function(n, scale) {
+    throw notImplemented('round half up');
+  }, [ 'number', 'number' ]),
+
+  // eslint-disable-next-line
+  'round half down': fn(function(n, scale) {
+    throw notImplemented('round half down');
+  }, [ 'number', 'number' ]),
+
   'modulo': fn(function(dividend, divisor) {
 
     if (!divisor) {

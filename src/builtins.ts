@@ -398,10 +398,18 @@ const builtins = {
     return list.some(el => matches(el, element));
   }, [ 'list', 'any?' ]),
 
-  // eslint-disable-next-line
+  // list replace(list, position, newItem)
+  // list replace(list, match, newItem)
   'list replace': fn(function(list, position, newItem, match) {
-    throw notImplemented('list replace');
-  }, [ 'list', 'number?', 'any', 'function?' ]),
+
+    const matcher = position || match;
+
+    if (![ 'number', 'function' ].includes(getType(matcher))) {
+      return null;
+    }
+
+    return listReplace(list, position || match, newItem);
+  }, [ 'list', 'any?', 'any', 'function?' ]),
 
   'count': fn(function(list) {
     return list.length;
@@ -1146,6 +1154,22 @@ function stddev(array) {
       (a, b) => a + b
     ) / (n - 1)
   );
+}
+
+function listReplace(list, matcher, newItem) {
+
+  if (isNumber(matcher)) {
+    return [ ...list.slice(0, matcher - 1), newItem, ...list.slice(matcher) ];
+  }
+
+  return list.map((item, _idx) => {
+
+    if (matcher.invoke([ item, newItem ])) {
+      return newItem;
+    } else {
+      return item;
+    }
+  });
 }
 
 function median(array) {

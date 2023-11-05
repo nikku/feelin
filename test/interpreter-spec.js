@@ -80,26 +80,46 @@ describe('interpreter', function() {
 
       describe('temporal arithmetic', function() {
 
+        expr('time("23:59:00") + duration("PT2M") = time("00:01")', true);
+        expr('time("00:01") - duration("PT2M") = time("23:59:00")', true);
+
+        expr('time("23:59:00") + duration("PT2M") + duration("P1D") = time("00:01")', true);
+        expr('time("23:59:00") + duration("PT2M") + duration("P1M") = time("00:01")', true);
+
+        // TODO(nikku): figure out semantics in accordance with DMN spec
+        exprSkip('time("00:01:00@Etc/UTC") - time("23:59:00z") = duration("PT2M")', true);
+
+        expr(`
+          time("23:59:00z") + duration("PT2M") =
+          time("00:01:00z")
+        `, true);
+
+        expr('date("2012-12-24") + date("2012-12-24")', null);
+        expr('date("2012-12-25") - date("2012-12-24") = duration("P1D")', true);
+
+        expr(`
+          date and time("2012-12-24T23:59:00") +
+          date and time("2012-12-25T00:00:00")
+        `, null);
+
         expr(`
           date and time("2012-12-24T23:59:00") + duration("PT1M") =
           date and time("2012-12-25T00:00:00")
         `, true);
 
-        expr('time("23:59:00") + duration("PT2M") = time("00:01")', true);
-        expr('time("23:59:00") + duration("PT2M") + duration("P1D") = time("00:01")', true);
-        exprSkip('time("23:59:00") + duration("PT2M") + duration("P1M") = time("00:01")', false);
-        expr('date("2012-12-24") + date("2012-12-24")', null);
-        expr('date("2012-12-25") - date("2012-12-24") = duration("P1D")', true);
-
-        exprSkip('time("00:01:00@Etc/UTC") - time("23:59:00z") = duration("PT2M")', true);
+        expr(`
+          date and time("2012-12-25T00:00:00") - duration("PT1M") =
+          date and time("2012-12-24T23:59:00")
+        `, true);
 
         expr(`
-          time("23:59:00z") + duration("PT2M") =
-          time("00:01:00@Etc/UTC")
+          date and time("2012-12-25T00:00:00z") - duration("PT1M") =
+          date and time("2012-12-24T23:59:00z")
         `, true);
 
         expr('duration("P1D") + duration("P1D")', duration('P2D'));
         expr('duration("PT1M") + duration("PT1M")', duration('PT2M'));
+
         expr('date("2023-10-06") + duration("PT1H")', date('2023-10-06T01:00Z'));
         expr('date("2023-10-06") + duration("P1D")', date('2023-10-07'));
         expr('date("2023-10-06") + duration("P1W")', date('2023-10-13'));
@@ -952,23 +972,45 @@ describe('interpreter', function() {
 
     expr('[{b: [1]}, {b: [2.1,2.2]}, {b: [3]}, {b: [4, 5]}].b = [[1], [2.1, 2.2], [3], [4, 5]]', true);
 
-    exprSkip('date and time("2012-12-24") = date and time("2012-12-24T00:00:00")', true);
+    expr('date and time("2012-12-24") = date and time("2012-12-24T00:00:00")', true);
 
     expr(`
-      date and time("2018-12-08T00:00:00@Europe/Paris") = date and time("2018-12-08T00:00:00@Europe/Paris")
+      date and time("2018-12-08T00:00:00+00:00") = date and time("2018-12-08T00:00:00@Etc/UTC")
+    `, true);
+
+    expr(`
+      @"2002-04-02T12:00:00@Australia/Melbourne" = @"2002-04-02T12:00:00@Australia/Melbourne"
     `, true);
 
     expr(`
       @"2002-04-02T12:00:00@Australia/Melbourne" = @"2002-04-02T12:00:00@Australia/Sydney"
     `, true);
 
+    expr(`
+      @"23:00:50@Australia/Melbourne" = @"23:00:50@Australia/Melbourne"
+    `, true);
+
+    expr(`
+      @"23:00:50@Australia/Melbourne" = @"23:00:50@Australia/Sydney"
+    `, true);
+
+    expr('@"2002-04-02T23:00:00-04:00" = @"2002-04-03T02:00:00-01:00"', true);
+    expr('@"2002-04-02T12:00:00-01:00" = @"2002-04-02T17:00:00+04:00"', true);
+
     expr('date(year:2017,month:08,day:30) = date("2017-08-30")', true);
 
     expr('date("2018-12-08") = date("2018-12-08")', true);
 
+    expr('time("00:01") = time("00:01:00")', true);
+
+    // TODO(nikku): investigate me
     exprSkip('time("10:30:00+01:00") = time("10:30:00@Europe/Paris")', true);
 
     expr('@"2002-04-02T12:00:00-01:00" = @"2002-04-02T17:00:00+04:00"', true);
+
+    expr('@"23:00:50" = @"23:00:50Z"', false);
+    expr('@"23:00:50" = @"23:00:50"', true);
+    expr('@"23:00:50z" = @"23:00:50Z"', true);
 
     expr('(> 5) = (5 .. null_value]', true, { null_value: null });
 

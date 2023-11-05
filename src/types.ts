@@ -155,7 +155,7 @@ export function isString(obj) : obj is string {
   return typeof obj === 'string';
 }
 
-export function equals(a, b) {
+export function equals(a, b, strict = false) {
   if (
     a === null && b !== null ||
     a !== null && b === null
@@ -174,6 +174,27 @@ export function equals(a, b) {
   const aType = getType(a);
   const bType = getType(b);
 
+  const temporalTypes = [ 'date time', 'time', 'date' ];
+
+  if (temporalTypes.includes(aType)) {
+
+    if (!temporalTypes.includes(bType)) {
+      return null;
+    }
+
+    if (aType === 'time' && bType !== 'time') {
+      return null;
+    }
+
+    if (bType === 'time' && aType !== 'time') {
+      return null;
+    }
+
+    return (
+      strict ? a.equals(b) : a.toUTC().valueOf() === b.toUTC().valueOf()
+    );
+  }
+
   if (aType !== bType) {
     return null;
   }
@@ -189,12 +210,6 @@ export function equals(a, b) {
 
     return a.every(
       (element, idx) => equals(element, b[idx])
-    );
-  }
-
-  if (aType === 'date time' || aType === 'time' || aType === 'date') {
-    return (
-      a.toUTC().valueOf() === b.toUTC().valueOf()
     );
   }
 

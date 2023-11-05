@@ -1,6 +1,7 @@
 import {
   DateTime,
   Duration,
+  FixedOffsetZone,
   Info,
   Zone
 } from 'luxon';
@@ -44,7 +45,7 @@ export function date(str: string = null, time: string = null, zone: Zone = null)
       throw new Error('<str> and <time> provided');
     }
 
-    return date(`1900-01-01T${ time }`);
+    return date(`1900-01-01T${ time }`, null);
   }
 
   if (typeof str === 'string') {
@@ -56,7 +57,7 @@ export function date(str: string = null, time: string = null, zone: Zone = null)
     if (!str.includes('T')) {
 
       // raw dates are in UTC time zone
-      return date(str + 'T00:00:00.000Z');
+      return date(str + 'T00:00:00', null, zone || FixedOffsetZone.utcInstance);
     }
 
     if (str.includes('@')) {

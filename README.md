@@ -46,6 +46,9 @@ evaluate('every rate in rates() satisfies rate < 10', {
 # build the library and run all tests
 npm run all
 
+# spin up for local development
+npm run dev
+
 # execute FEEL tests in DMN TCK
 npm run tck
 ```

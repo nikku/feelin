@@ -6,12 +6,44 @@ const fs = require('node:fs');
 const SpecReporter = Mocha.reporters.Spec;
 
 const {
-  EVENT_RUN_END
+  EVENT_RUN_END,
+  EVENT_TEST_FAIL
 } = Mocha.Runner.constants;
 
 const resultsImgPath = 'docs/tck-results.svg';
 const resultsJSONPath = 'docs/tck-results.json';
 
+function testDiff(tests, oldTests=[]) {
+
+  let diff = '';
+
+  for (const test of tests) {
+    if (!oldTests.includes(test)) {
+      diff += `\n
+  + ${test}`;
+    }
+  }
+
+  for (const test of oldTests) {
+    if (!tests.includes(test)) {
+      diff += `\n
+  - ${test}`;
+    }
+  }
+
+  return diff;
+}
+
+function testTitle(test, suffix = '') {
+
+  suffix = test.title + (suffix ? ' - ' + suffix : '');
+
+  if (test.parent && test.parent.title) {
+    return testTitle(test.parent, suffix);
+  }
+
+  return suffix;
+}
 
 /**
  * @param {Mocha.Runner} runner
@@ -19,6 +51,12 @@ const resultsJSONPath = 'docs/tck-results.json';
  */
 function TckReporter(runner, options) {
   SpecReporter.call(this, runner, options);
+
+  const failedTests = [];
+
+  runner.on(EVENT_TEST_FAIL, function(test) {
+    failedTests.push(testTitle(test));
+  });
 
   runner.on(EVENT_RUN_END, function() {
     const {
@@ -49,12 +87,12 @@ function TckReporter(runner, options) {
 
 </svg>`;
 
-
     const results = {
       passes,
       pending,
       failures,
-      tests
+      tests,
+      failedTests
     };
 
     const oldResults = (function() {
@@ -67,7 +105,9 @@ function TckReporter(runner, options) {
       }
     })();
 
-    console.log(`Completed with ${results.failures} ${oldResults.failures == results.failures ? 'expected' : `${oldResults.failures > results.failures ? '-' : '+'} ${Math.abs(results.failures - oldResults.failures)}`} failures.`);
+    const diff = testDiff(failedTests, oldResults.failedTests);
+
+    console.log(`Completed with ${results.failures}${oldResults.failures == results.failures ? '' : ` (${oldResults.failures > results.failures ? '-' : '+'}${Math.abs(results.failures - oldResults.failures)})`} failures${diff ? ':' + diff : '.'}`);
 
     if (process.env.DRY_RUN === 'false') {
       console.log('Writing test results.');

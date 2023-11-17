@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+
 const { inherits } = require('node:util');
 
 const Mocha = require('mocha');
@@ -13,7 +15,7 @@ const {
 const resultsImgPath = 'docs/tck-results.svg';
 const resultsJSONPath = 'docs/tck-results.json';
 
-function testDiff(tests, oldTests=[]) {
+function testDiff(tests, oldTests = []) {
 
   let diff = '';
 

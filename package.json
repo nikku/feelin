@@ -45,7 +45,7 @@
   "sideEffects": false,
   "scripts": {
     "all": "run-s lint build generate-typings test lint:types",
-    "lint": "eslint . --ext js,ts",
+    "lint": "eslint . --ext js,ts,cjs",
     "lint:types": "tsc --noEmit --lib es2019 test/types.ts",
     "build": "rollup -c --bundleConfigAsCjs",
     "build:dev": "npm run build -- --watch",

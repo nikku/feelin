@@ -595,12 +595,16 @@ const builtins = {
     return round(n * offset) / (offset);
   }, [ 'number', 'number' ]),
 
-  'floor': fn(function(n) {
-    return Math.floor(n);
-  }, [ 'number' ]),
+  'floor': fn(function(n, scale = 0) {
+    const adjust = Math.pow(10, scale);
 
-  'ceiling': fn(function(n) {
-    return Math.ceil(n) + 0;
+    return Math.floor(n * adjust) / adjust;
+  }, [ 'number', 'number?' ]),
+
+  'ceiling': fn(function(n, scale = 0) {
+    const adjust = Math.pow(10, scale);
+
+    return Math.ceil(n * adjust) / adjust;
   }, [ 'number' ]),
 
   'abs': fn(function(n) {

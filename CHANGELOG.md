@@ -6,6 +6,11 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 2.3.0
+
+* `FEAT`: add duration ranges ([#47](https://github.com/nikku/feelin/pull/47))
+* `FIX`: correct `floor` and `ceiling` scale + invalid argument handling ([`fe1d458`](https://github.com/nikku/feelin/commit/fe1d458a93493b6a8784eb466301cc02081ee1ec), [`c283cbe`]](https://github.com/nikku/feelin/commit/c283cbeb66620d9a944f533b68455fe1893457ec))
+
 ## 2.2.0
 
 * `FEAT`: add `list replace` built-in ([#41](https://github.com/nikku/feelin/pull/41))

@@ -1,8 +1,8 @@
 {
-  "passes": 1494,
-  "pending": 395,
+  "passes": 1516,
+  "pending": 398,
   "failures": 82,
-  "tests": 1971,
+  "tests": 1996,
   "failedTests": [
     "tck - 0050-feel-abs-function-test-01.xml - 011 - abs(duration(\"-P1D\")) === duration(\"P1D\") ",
     "tck - 0050-feel-abs-function-test-01.xml - 011_a - abs(duration(\"P1D\")) === duration(\"P1D\") ",
@@ -362,6 +362,9 @@
     "tck - 0082-feel-coercion-test-01.xml - decisionService_002_a - decisionService_002(10) === null ",
     "tck - 0082-feel-coercion-test-01.xml - decisionService_002_b - decisionService_002_input_1 === \"foo\" { decisionService_002_input_1: [\"foo\"] }",
     "tck - 0082-feel-coercion-test-01.xml - decisionService_002_c - decisionService_002([\"foo\"]) === \"foo\" ",
+    "tck - 0082-feel-coercion-test-01.xml - decision_context_01 - context(entries: [{key:\"a\", value:1}, {key:\"b\", value:2}]) === {\"a\":1, \"b\":2} ",
+    "tck - 0082-feel-coercion-test-01.xml - decision_context_02 - context(entries: [{key:\"a\", value:1}, {key:\"b\", value:2}]) === {\"a\":1, \"b\":2} ",
+    "tck - 0082-feel-coercion-test-01.xml - decision_context_03 - context(entries: [{key:\"a\", value:1}, {key:\"b\", value:2}]) === null ",
     "tck - 0092-feel-lambda-test-01.xml - 001 - decision_001_2(2) === 3 ",
     "tck - 0092-feel-lambda-test-01.xml - 002 - decision_002_2(3) === 4 ",
     "tck - 0092-feel-lambda-test-01.xml - 003 - bkm_003_1()(4) === 5 ",

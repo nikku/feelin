@@ -359,11 +359,15 @@ describe('builtin functions', function() {
     expr('floor(-1.5)', -2);
     expr('floor(1.56, 1)',1.5);
     expr('floor(-1.56, 1)',-1.6);
+    expr('floor(1.56, null)', null);
+    expr('floor(1.56, "1")', null);
 
     expr('ceiling(1.5)', 2);
     expr('ceiling(-1.5)', -1);
     expr('ceiling(1.56, 1)', 1.6);
     expr('ceiling(-1.56, 1)', -1.5);
+    expr('ceiling(1.56, null)', null);
+    expr('ceiling(1.56, "1")', null);
 
     expr('abs( 10 )', 10);
     expr('abs(-1)', 1);

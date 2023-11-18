@@ -596,16 +596,26 @@ const builtins = {
   }, [ 'number', 'number' ]),
 
   'floor': fn(function(n, scale = 0) {
+
+    if (scale === null) {
+      return null;
+    }
+
     const adjust = Math.pow(10, scale);
 
     return Math.floor(n * adjust) / adjust;
   }, [ 'number', 'number?' ]),
 
   'ceiling': fn(function(n, scale = 0) {
+
+    if (scale === null) {
+      return null;
+    }
+
     const adjust = Math.pow(10, scale);
 
     return Math.ceil(n * adjust) / adjust;
-  }, [ 'number' ]),
+  }, [ 'number', 'number?' ]),
 
   'abs': fn(function(n) {
 

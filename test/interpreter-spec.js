@@ -422,9 +422,6 @@ describe('interpreter', function() {
       expr('"b" in ["b".."d"]', true);
       expr('"b" in ("b".."d"]', false);
 
-      exprSkip('duration("P10D") in < duration("P10D")', false);
-      exprSkip('duration("P10D") in <= duration("P10D")', true);
-
       expr('"d" in null', null);
 
       expr('5 in > 3', true);
@@ -456,6 +453,22 @@ describe('interpreter', function() {
       expr('{a: "foo"} in [{b: "bar"}, {a: "foo"}]', true);
 
       expr('{a: "foo"} in {a: "foo"}', true);
+
+      expr('date("2023-08-10") in > date("2023-08-09")', true);
+      expr('date("2023-08-10") in >= date("2023-08-10")', true);
+      expr('date("2023-08-10") in < date("2023-08-11")', true);
+      expr('date("2023-08-10") in <= date("2023-08-10")', true);
+
+      expr('duration("P10D") in < duration("P10D")', false);
+      expr('duration("P10D") in <= duration("P10D")', true);
+      expr('duration("P10D") in > duration("P10D")', false);
+      expr('duration("P10D") in >= duration("P10D")', true);
+
+      expr('duration("P3Y") in [duration("P2Y")..duration("P4Y")]', true);
+      expr('duration("P2Y") in [duration("P2Y")..duration("P4Y")]', true);
+      expr('duration("P4Y") in [duration("P2Y")..duration("P4Y")]', true);
+
+      expr('duration("P4Y1D") in [duration("P2Y")..duration("P4Y")]', false);
     });
 
 
@@ -924,7 +937,6 @@ describe('interpreter', function() {
 
       expr('(<= 10).end included', true);
       expr('(<= 10).end', 10);
-
     });
 
 

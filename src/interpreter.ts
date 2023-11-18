@@ -24,6 +24,8 @@ import {
   parseUnaryTests
 } from './parser';
 
+import { Duration } from 'luxon';
+
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type InterpreterContext = Record<string, any>;
@@ -860,7 +862,7 @@ function createRange(start, end, startIncluded = true, endIncluded = true) : Ran
   }
 
   if (isTyped('duration', [ start, end ])) {
-    throw notImplemented('range<duration>');
+    return createDurationRange(start, end, startIncluded, endIncluded);
   }
 
   if (isTyped('time', [ start, end ])) {
@@ -943,7 +945,7 @@ function includesEnd(n, inclusive) {
   }
 }
 
-function anyIncludes(start, end, startIncluded, endIncluded) {
+function anyIncludes(start, end, startIncluded, endIncluded, conversion = (v) => v) {
 
   let tests = [];
 
@@ -973,7 +975,7 @@ function anyIncludes(start, end, startIncluded, endIncluded) {
     ];
   }
 
-  return (value) => value === null ? null : tests.every(t => t(value));
+  return (value) => value === null ? null : tests.every(t => t(conversion(value)));
 }
 
 function createStringRange(start, end, startIncluded = true, endIncluded = true) {
@@ -1032,6 +1034,31 @@ function createNumberRange(start, end, startIncluded, endIncluded) {
     includes
   });
 }
+
+/**
+ * @param {Duration} start
+ * @param {Duration} end
+ * @param {boolean} startIncluded
+ * @param {boolean} endIncluded
+ */
+function createDurationRange(start, end, startIncluded, endIncluded) {
+
+  const toMillis = (d) => d ? Duration.fromDurationLike(d).toMillis() : null;
+
+  const map = noopMap();
+  const includes = anyIncludes(toMillis(start), toMillis(end), startIncluded, endIncluded, toMillis);
+
+  return new Range({
+    start,
+    end,
+    'start included': startIncluded,
+    'end included': endIncluded,
+    map,
+    includes
+  });
+
+}
+
 
 function createDateTimeRange(start, end, startIncluded, endIncluded) {
   const map = noopMap();

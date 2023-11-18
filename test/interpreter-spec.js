@@ -422,6 +422,9 @@ describe('interpreter', function() {
       expr('"b" in ["b".."d"]', true);
       expr('"b" in ("b".."d"]', false);
 
+      exprSkip('duration("P10D") in < duration("P10D")', false);
+      exprSkip('duration("P10D") in <= duration("P10D")', true);
+
       expr('"d" in null', null);
 
       expr('5 in > 3', true);

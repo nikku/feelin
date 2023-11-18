@@ -9,7 +9,8 @@ const SpecReporter = Mocha.reporters.Spec;
 
 const {
   EVENT_RUN_END,
-  EVENT_TEST_FAIL
+  EVENT_TEST_FAIL,
+  EVENT_TEST_PENDING
 } = Mocha.Runner.constants;
 
 const resultsImgPath = 'docs/tck-results.svg';
@@ -56,8 +57,14 @@ function TckReporter(runner, options) {
 
   const failedTests = [];
 
+  const pendingTests = [];
+
   runner.on(EVENT_TEST_FAIL, function(test) {
     failedTests.push(testTitle(test));
+  });
+
+  runner.on(EVENT_TEST_PENDING, function(test) {
+    pendingTests.push(testTitle(test));
   });
 
   runner.on(EVENT_RUN_END, function() {
@@ -94,7 +101,8 @@ function TckReporter(runner, options) {
       pending,
       failures,
       tests,
-      failedTests
+      failedTests,
+      pendingTests
     };
 
     const oldResults = (function() {

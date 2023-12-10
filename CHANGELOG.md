@@ -6,6 +6,10 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 3.0.0
+
+* `FEAT`: report parse errors as `SyntaxError`, exposing additional details
+
 ## 2.3.0
 
 * `FEAT`: add duration ranges ([#47](https://github.com/nikku/feelin/pull/47))

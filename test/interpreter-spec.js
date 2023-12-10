@@ -1086,59 +1086,68 @@ describe('interpreter', function() {
 
     describe('should throw Error on syntax errors', function() {
 
-      it('bogus statement', function() {
-        let error;
+      const _it = it;
 
-        try {
-          evaluate('1 * #3');
-        } catch (err) {
-          error = err;
-        }
+      function verifyError({ it = _it, error, fn, expectedMessage }) {
 
-        expect(error).to.exist;
-        expect(error.message).to.eql('Statement unparseable at [4, 5]');
+        it(error, () => {
+          let error;
+
+          try {
+            fn();
+          } catch (err) {
+            error = err;
+          }
+
+          expect(error).to.exist;
+          expect(error).to.have.keys([ 'position', 'input' ]);
+
+          const actualMessage =
+            `${error.message} parsing <${error.input}> at [${error.position.from}, ${error.position.to}]`;
+
+          expect(actualMessage, 'error message').to.eql(expectedMessage);
+        });
+      }
+
+      verifyError({
+        error: 'bogus statement',
+        fn: () => evaluate('1 * #3'),
+        expectedMessage: 'Unrecognized token in <ArithmeticExpression> parsing <#> at [4, 5]'
       });
 
 
-      it('multiple expressions', function() {
-        let error;
-
-        try {
-          evaluate('1 2 3');
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).to.exist;
-        expect(error.message).to.eql('Statement unparseable at [2, 3]');
+      verifyError({
+        error: 'multiple expressions',
+        fn: () => evaluate('1 2 3'),
+        expectedMessage: 'Unrecognized token in <Expression> parsing <2> at [2, 3]'
       });
 
 
-      it('empty expression', function() {
-        let error;
-
-        try {
-          evaluate('');
-        } catch (err) {
-          error = err;
-        }
-
-        expect(error).to.exist;
-        expect(error.message).to.eql('Statement unparseable at [0, 0]');
+      verifyError({
+        error: 'empty expression',
+        fn: () => evaluate(''),
+        expectedMessage: 'Incomplete <Expression> parsing <> at [0, 0]'
       });
 
 
-      it('empty unary tests', function() {
-        let error;
+      verifyError({
+        error: 'incomplete if expression',
+        fn: () => evaluate('if true'),
+        expectedMessage: 'Incomplete <IfExpression> parsing <> at [7, 7]'
+      });
 
-        try {
-          unaryTest('');
-        } catch (err) {
-          error = err;
-        }
 
-        expect(error).to.exist;
-        expect(error.message).to.eql('Statement unparseable at [0, 0]');
+      verifyError({
+        error: 'broken if expression',
+        fn: () => evaluate('if true { a: 10 }'),
+        expectedMessage: 'Unrecognized token <Context> in <IfExpression> parsing <{ a: 10 }> at [8, 17]'
+      });
+
+
+      verifyError({
+        error: 'empty unary tests',
+        fn: () => unaryTest(''),
+        expectedMessage: 'Incomplete <UnaryTests> parsing <> at [0, 0]'
       });
 
     });

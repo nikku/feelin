@@ -1,4 +1,4 @@
-import { Tree, SyntaxNodeRef } from '@lezer/common';
+import { Tree, SyntaxNodeRef, SyntaxNode } from '@lezer/common';
 
 import { builtins } from './builtins';
 
@@ -26,6 +26,33 @@ import {
 
 import { Duration } from 'luxon';
 
+
+type SyntaxErrorDetails = {
+  input: string,
+  position: {
+    from: number,
+    to: number
+  }
+};
+
+export class SyntaxError extends Error {
+
+  input: string;
+
+  position: {
+    from: number,
+    to: number
+  };
+
+  constructor(
+      message: string,
+      details: SyntaxErrorDetails
+  ) {
+    super(message);
+
+    Object.assign(this, details);
+  }
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type InterpreterContext = Record<string, any>;
@@ -55,7 +82,23 @@ class Interpreter {
         } = nodeRef;
 
         if (isError) {
-          throw new Error(`Statement unparseable at [${from}, ${to}]`);
+
+          const {
+            from,
+            to,
+            message
+          } = lintError(nodeRef);
+
+          throw new SyntaxError(
+            message,
+            {
+              input: input.slice(from, to),
+              position: {
+                from,
+                to
+              }
+            }
+          );
         }
 
         if (isSkipped) {
@@ -1210,4 +1253,62 @@ function parseString(str: string) {
 
     throw new Error('illegal match');
   });
+}
+
+
+type LintError = {
+  from: number,
+  to: number,
+  message: string
+};
+
+export function lintError(nodeRef: SyntaxNodeRef): LintError {
+
+  const node = nodeRef.node;
+  const parent = node.parent;
+
+  if (node.from !== node.to) {
+    return {
+      from: node.from,
+      to: node.to,
+      message: `Unrecognized token in <${parent.name}>`
+    };
+  }
+
+  const next = findNext(node);
+
+  if (next) {
+    return {
+      from: node.from,
+      to: next.to,
+      message: `Unrecognized token <${next.name}> in <${parent.name}>`
+    };
+  } else {
+    const unfinished = parent.enterUnfinishedNodesBefore(nodeRef.to);
+
+    return {
+      from: node.from,
+      to: node.to,
+      message: `Incomplete <${ (unfinished || parent).name }>`
+    };
+  }
+}
+
+function findNext(nodeRef: SyntaxNodeRef) : SyntaxNode | null {
+
+  const node = nodeRef.node;
+
+  let next, parent = node;
+
+  do {
+    next = parent.nextSibling;
+
+    if (next) {
+      return next;
+    }
+
+    parent = parent.parent;
+  } while (parent);
+
+  return null;
 }

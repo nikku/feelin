@@ -681,7 +681,20 @@ describe('interpreter', function() {
 
       expr('a[1]', null);
 
-      expr('[][a]', [], { a: 1 });
+      expr('[][a]', null, { a: 1 });
+
+      expr('[][a]', [], { a: '1' });
+
+      expr('["A", "B", "C"][i]', 'A', { i: 1 });
+      expr('["A", "B", "C"][i]', 'C', { i: -1 });
+
+      expr('["A", "B", "C"][a + b]', 'B', { a: 1, b: 1 });
+      expr('["A", "B", "C"][a - b]', 'B', { a: 3, b: 1 });
+
+      expr('["A", "B", "C"][a()]', 'B', {
+        a() { return 2; }
+      });
+
     });
 
 

@@ -10,7 +10,8 @@ import {
   getType,
   isDuration,
   isDateTime,
-  isType
+  isType,
+  isNumber
 } from './types';
 
 import {
@@ -702,6 +703,20 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     // null[..]
     if (target === null) {
       return null;
+    }
+
+    // a[variable=number]
+    if (typeof filterFn.type === 'undefined') {
+      try {
+        const value = filterFn(context);
+
+        if (isNumber(value)) {
+          filterFn.type = 'number';
+        }
+      } catch (err) {
+
+        // ignore
+      }
     }
 
     // a[1]

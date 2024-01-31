@@ -699,7 +699,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     }
 
     // a[1]
-    if (filterFn.type === 'number') {
+    if (filterFn.type === 'number' || typeof(filterFn(context)) == 'number') {
       const idx = filterFn(context);
 
       const value = filterTarget[idx < 0 ? filterTarget.length + idx : idx - 1];

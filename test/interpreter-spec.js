@@ -681,7 +681,14 @@ describe('interpreter', function() {
 
       expr('a[1]', null);
 
-      expr('[][a]', [], { a: 1 });
+      expr('[][a]', [], { a: "1" });
+
+      expr('[][a]', null, { a: 1 });
+
+      expr('["a", "b", "c"][x]', 'c', { x: 3 });
+
+      expr('["a", "b", "c"][x]', null, { x: 4 });
+
     });
 
 

@@ -1082,6 +1082,40 @@ describe('interpreter', function() {
   });
 
 
+  describe.only('builtin context overrides', function() {
+
+    // variables should be taken from context
+    expr('date', '13-11-1996', { date: '13-11-1996' });
+
+    // primitives should not be overridable
+    expr('date("2020-07-31")', o => o != '13-11-1996', { date: '13-11-1996' });
+
+    // regular functions should be overridable from context
+    expr('abs(-1)', 'absolute of -1', { abs: (a) => `absolute of ${a}` });
+
+    // composed variable names should be derivable from context
+    exprSkip(
+      `{
+        foo: date and time,
+        bar: date,
+        date and time: 10,
+        date: 100
+      }`,
+      {
+        foo: 1,
+        bar: 1,
+        ['date and time']: 10,
+        ['date']: 100
+      },
+      {
+        ['date and time']: 1,
+        ['date']: 1
+      }
+    );
+
+  });
+
+
   describe('error handling', function() {
 
     describe('should throw Error on syntax errors', function() {
@@ -1176,7 +1210,7 @@ function createExprVerifier(options) {
 
   const [
     expression,
-    expectedOutput,
+    outputExpectation,
     context
   ] = args;
 
@@ -1185,7 +1219,13 @@ function createExprVerifier(options) {
   it(name, function() {
     const output = evaluate(expression, context || {});
 
-    expect(output).to.eql(expectedOutput);
+    if (typeof(outputExpectation) !== 'function') {
+      expect(output).to.eql(outputExpectation);
+    }
+    else {
+      expect(outputExpectation(output)).to.eql(true);
+    }
+
   });
 
 }
@@ -1197,7 +1237,7 @@ function createUnaryVerifier(options) {
     it
   } = options;
 
-  const [ inputOrContext, test, expectedOutput ] = args;
+  const [ inputOrContext, test, outputExpectation ] = args;
 
   const context = typeof inputOrContext === 'object' ? inputOrContext : null;
 
@@ -1212,7 +1252,13 @@ function createUnaryVerifier(options) {
       '?': input
     });
 
-    expect(output).to.eql(expectedOutput);
+    if (typeof(outputExpectation) !== 'function') {
+      expect(output).to.eql(outputExpectation);
+    }
+    else {
+      expect(outputExpectation(output)).to.eql(true);
+    }
+
   });
 
 }

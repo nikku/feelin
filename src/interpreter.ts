@@ -394,7 +394,9 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
   case 'VariableName': return (context) => {
     const name = args.join(' ');
 
-    return getBuiltin(name, context) || getFromContext(name, context);
+    // should we differentiate between null and undefined?
+    const contextVariable = getFromContext(name, context);
+    return contextVariable === null ? getBuiltin(name, context) : contextVariable;
   };
 
   case 'QualifiedName': return (context) => {

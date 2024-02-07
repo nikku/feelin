@@ -31,15 +31,17 @@ export function notImplemented(thing) {
 }
 
 /**
+ * Returns a name from context or undefined if it does not exist.
+ *
  * @param {string} name
  * @param {Record<string, any>} context
  *
- * @return {any}
+ * @return {any|undefined}
  */
 export function getFromContext(name, context) {
 
   if ([ 'nil', 'boolean', 'number', 'string' ].includes(getType(context))) {
-    return null;
+    return undefined;
   }
 
   if (name in context) {
@@ -60,5 +62,5 @@ export function getFromContext(name, context) {
     return entry[1];
   }
 
-  return null;
+  return undefined;
 }

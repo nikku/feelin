@@ -394,7 +394,13 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
   case 'VariableName': return (context) => {
     const name = args.join(' ');
 
-    return getBuiltin(name, context) || getFromContext(name, context);
+    const contextValue = getFromContext(name, context);
+
+    return (
+      typeof contextValue !== 'undefined'
+        ? contextValue
+        : getBuiltin(name, context) || null
+    );
   };
 
   case 'QualifiedName': return (context) => {

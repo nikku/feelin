@@ -6,6 +6,12 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 3.0.1
+
+* `FIX`: correct overriding of `date and time` and other built-ins ([#https://github.com/nikku/feelin/issues/62](https://github.com/nikku/feelin/issues/62))
+* `FIX`: correct list indexing with variables ([#59](https://github.com/nikku/feelin/issues/59))
+* `DEPS`: update to `lezer-feel@1.2.5`
+
 ## 3.0.0
 
 * `FEAT`: report parse errors as `SyntaxError`, exposing additional details

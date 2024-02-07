@@ -788,6 +788,34 @@ describe('interpreter', function() {
 
     });
 
+
+    describe('VariableName', function() {
+
+      describe('special name overrides', function() {
+
+        expr(`
+          {
+            foo: date and time,
+            bar: date,
+            date and time: 10,
+            date: 100,
+            sum: date and time + date
+          }
+        `, {
+          'foo': 'DATE AND TIME',
+          'bar': 'DATE',
+          'date and time': 10,
+          'date': 100,
+          'sum': 110
+        }, {
+          'date and time': 'DATE AND TIME',
+          'date': 'DATE'
+        });
+
+      });
+
+    });
+
   });
 
 

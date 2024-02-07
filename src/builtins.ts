@@ -790,7 +790,7 @@ const builtins = {
   // 10.3.4.10 Context function
 
   'get value': fn(function(m, key) {
-    return getFromContext(key, m);
+    return getFromContext(key, m) || null;
   }, [ 'context', 'string' ]),
 
   'get entries': fn(function(m) {

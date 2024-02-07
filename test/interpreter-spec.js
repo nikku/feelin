@@ -814,6 +814,22 @@ describe('interpreter', function() {
 
       });
 
+
+      describe('built-in function overrides', function() {
+
+        expr('date', '13-11-1996', { date: '13-11-1996' });
+
+        // if you override a variable, bad things can happen
+        expr('date("2020-07-31")', null, { date: '13-11-1996' });
+
+        expr('abs(-1)', 'absolute of -1', {
+          abs(num) {
+            return `absolute of ${num}`;
+          }
+        });
+
+      });
+
     });
 
   });

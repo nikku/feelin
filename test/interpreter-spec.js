@@ -850,6 +850,8 @@ describe('interpreter', function() {
 
   describe('unaryTest', function() {
 
+    unary(0, '< 5', true);
+
     unary(5, '>= 10', false);
 
     unary(5, '5', true);

@@ -165,7 +165,8 @@ class Interpreter {
 const interpreter = new Interpreter();
 
 export function unaryTest(expression: string, context: InterpreterContext = {}) : boolean {
-  const value = context['?'] || null;
+
+  const value = context['?'] !== undefined ? context['?'] : null;
 
   const {
     root

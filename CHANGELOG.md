@@ -6,6 +6,12 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 3.1.0
+
+* `FIX`: properly handle unary test against `0` ([#50](https://github.com/nikku/feelin/issues/50))
+* `DEPS`: update to luxon@3.4.0
+* `DEPS`: update to `lezer-feel@1.2.8`
+
 ## 3.0.1
 
 * `FIX`: correct overriding of `date and time` and other built-ins ([#https://github.com/nikku/feelin/issues/62](https://github.com/nikku/feelin/issues/62))

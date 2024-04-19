@@ -64,9 +64,9 @@ function createParser(handlers) {
   // elements in other namespaces will still be processed
   parser.ns({
     'http://www.omg.org/spec/DMN/20160719/testcase': 'test',
-    'https://www.omg.org/spec/DMN/20211108/MODEL/': 'dmn',
+    'https://www.omg.org/spec/DMN/20230324/MODEL/': 'dmn',
     'http://www.omg.org/spec/DMN/20180521/DI/': 'di',
-    'https://www.omg.org/spec/DMN/20191111/DMNDI/': 'dmndi',
+    'https://www.omg.org/spec/DMN/20230324/DMNDI/': 'dmndi',
     'http://www.omg.org/spec/DMN/20180521/DC/': 'dc',
     'http://www.w3.org/2001/XMLSchema': 'xs',
     'http://www.w3.org/2001/XMLSchema-instance': 'xsi'

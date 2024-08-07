@@ -346,14 +346,15 @@ describe('builtin functions', function() {
   describe('Numeric', function() {
 
     expr('decimal(1/3, 2)', .33);
-    expr('decimal(1.5, 0)', 1);
-
-    // TODO(nikku): according to the DMN spec half-even
-    // rounding should be used
-    // evaluate('decimal(1.5, 0)', 2);
-    exprSkip('decimal(2.5, 0)', 2);
+    expr('decimal(0.267, 2)', .27);
+    expr('decimal(1.5, 0)', 2);
+    expr('decimal(2.5, 0)', 2);
+    expr('decimal(-1.5, 0)', -2);
+    expr('decimal(-2.5, 0)', -2);
     expr('decimal(0.505, 2)', 0.50);
-    exprSkip('decimal(0.515, 2)', 0.52);
+    expr('decimal(0.515, 2)', 0.52);
+    expr('decimal(-0.505, 2)', -0.50);
+    expr('decimal(-0.515, 2)', -0.52);
 
     expr('floor(1.5)', 1);
     expr('floor(-1.5)', -2);

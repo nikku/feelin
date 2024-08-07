@@ -587,12 +587,12 @@ const builtins = {
   'decimal': fn(function(n, scale) {
 
     if (!scale) {
-      return round(n);
+      return bankersRound(n);
     }
 
     const offset = 10 ** scale;
 
-    return round(n * offset) / (offset);
+    return bankersRound(n * offset) / offset;
   }, [ 'number', 'number' ]),
 
   'floor': fn(function(n, scale = 0) {
@@ -1173,15 +1173,15 @@ function countSymbols(str) {
   return str.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '_').length;
 }
 
-function round(n) {
+function bankersRound(n) {
+  const floored = Math.floor(n);
+  const decimalPart = n - floored;
 
-  const integral = Math.trunc(n);
-
-  if (n - integral > .5) {
-    return integral + 1;
-  } else {
-    return integral;
+  if (decimalPart === 0.5) {
+    return (floored % 2 === 0) ? floored : floored + 1;
   }
+
+  return Math.round(n);
 }
 
 // adapted from https://stackoverflow.com/a/53577159

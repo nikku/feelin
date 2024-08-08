@@ -599,14 +599,8 @@ const builtins = {
 
   // 10.3.4.5 Numeric functions
   'decimal': fn(function(n, scale) {
-
-    if (!scale) {
-      return bankersRound(n);
-    }
-
-    const offset = 10 ** scale;
-
-    return bankersRound(n * offset) / offset;
+    if (n === null || scale === null) return null;
+    return offsetted(bankersRound, n, scale);
   }, [ 'number', 'number' ]),
 
   'floor': fn(function(n, scale = 0) {
@@ -615,7 +609,7 @@ const builtins = {
       return null;
     }
 
-    const adjust = Math.pow(10, scale);
+    const adjust = 10 ** scale;
 
     return Math.floor(n * adjust) / adjust;
   }, [ 'number', 'number?' ]),
@@ -626,7 +620,7 @@ const builtins = {
       return null;
     }
 
-    const adjust = Math.pow(10, scale);
+    const adjust = 10 ** scale;
 
     return Math.ceil(n * adjust) / adjust;
   }, [ 'number', 'number?' ]),
@@ -640,24 +634,32 @@ const builtins = {
     return Math.abs(n);
   }, [ 'number' ]),
 
-  // eslint-disable-next-line
   'round up': fn(function(n, scale) {
-    throw notImplemented('round up');
+    if (n === null || scale === null) return null;
+    return n > 0 ? offsetted(Math.ceil, n, scale) : offsetted(Math.floor, n, scale);
   }, [ 'number', 'number' ]),
 
-  // eslint-disable-next-line
   'round down': fn(function(n, scale) {
-    throw notImplemented('round down');
+    if (n === null || scale === null) return null;
+    return n > 0 ? offsetted(Math.floor, n, scale) : offsetted(Math.ceil, n, scale);
   }, [ 'number', 'number' ]),
 
-  // eslint-disable-next-line
   'round half up': fn(function(n, scale) {
-    throw notImplemented('round half up');
+    if (n === null || scale === null) return null;
+    const remainder = (n * 10 ** scale) % 1;
+    if (Math.abs(remainder) === 0.5) {
+      return offsetted(n > 0 ? Math.ceil : Math.floor, n, scale);
+    }
+    return offsetted(Math.round, n, scale);
   }, [ 'number', 'number' ]),
 
-  // eslint-disable-next-line
   'round half down': fn(function(n, scale) {
-    throw notImplemented('round half down');
+    if (n === null || scale === null) return null;
+    const remainder = (n * 10 ** scale) % 1;
+    if (Math.abs(remainder) === 0.5) {
+      return offsetted(n > 0 ? Math.floor : Math.ceil, n, scale);
+    }
+    return offsetted(Math.round, n, scale);
   }, [ 'number', 'number' ]),
 
   'modulo': fn(function(dividend, divisor) {
@@ -1186,6 +1188,10 @@ function countSymbols(str) {
 
   // cf. https://mathiasbynens.be/notes/javascript-unicode
   return str.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, '_').length;
+}
+
+function offsetted(func, n, scale) {
+  return func(n * 10 ** scale) / 10 ** scale;
 }
 
 function bankersRound(n) {

@@ -6,6 +6,13 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 3.1.1
+
+* `FIX`: use bankers round for decimal ([#77](https://github.com/nikku/feelin/issues/77))
+* `DEPS`: update to `lezer-feel@1.2.9`
+* `DEPS`: update to `luxon@3.5.0`
+* `DEPS`: update to `@lezer/lr@1.4.2`
+
 ## 3.1.0
 
 * `FIX`: properly handle unary test against `0` ([#50](https://github.com/nikku/feelin/issues/50))

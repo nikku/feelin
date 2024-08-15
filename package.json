@@ -33,7 +33,7 @@
   "dependencies": {
     "@lezer/lr": "^1.4.2",
     "lezer-feel": "^1.2.8",
-    "luxon": "^3.4.4"
+    "luxon": "^3.5.0"
   },
   "repository": {
     "type": "git",

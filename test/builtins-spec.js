@@ -626,6 +626,8 @@ describe('builtin functions', function() {
   describe('Context', function() {
 
     expr('get value({key1 : "value1"}, "key1")', 'value1');
+    expr('get value({key1 : 0}, "key1")', 0);
+    expr('get value({key1 : false}, "key1")', false);
     expr('get value({key1 : "value1"}, "unexistent-key")', null);
     expr('get value({key+    +1 : "value1"}, "key + + 1")', 'value1');
 

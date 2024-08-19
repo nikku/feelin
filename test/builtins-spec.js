@@ -520,6 +520,13 @@ describe('builtin functions', function() {
     expr('week of year(date: @"2016-11-15")', 46);
     expr('week of year(date: 1)', null);
 
+    expr('date("2020-04-06") + duration("P1D") = date("2020-04-07")', true);
+    expr('duration("P1D") + date("2020-04-06") = date("2020-04-07")', true);
+    expr('time("08:00:00") + duration("PT1H") = time("09:00:00")', true);
+    expr('duration("PT1H") + time("08:00:00") = time("09:00:00")', true);
+    expr('date and time("2020-04-06T08:00:00") + duration("P7D") = date and time("2020-04-13T08:00:00")', true);
+    expr('duration("P7D") + date and time("2020-04-06T08:00:00") = date and time("2020-04-13T08:00:00")', true);
+    expr('duration("P2D") + duration("P5D") = duration("P7D")', true);
 
     describe('properties', function() {
 

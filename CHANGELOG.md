@@ -6,6 +6,11 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 3.1.2
+
+* `FIX`: correctly `get value` not returning falsy values ([#76](https://github.com/nikku/feelin/issues/76))
+* `FIX`: correct addition of temporal and duration ([#56](https://github.com/nikku/feelin/issues/56))
+
 ## 3.1.1
 
 * `FIX`: use bankers round for decimal ([#77](https://github.com/nikku/feelin/issues/77))

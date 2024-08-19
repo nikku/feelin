@@ -228,6 +228,14 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
     switch (input) {
     case '+': return nullable((a, b) => {
+
+      // flip these as luxon operations with durations aren't commutative
+      if (isDuration(a) && !isDuration(b)) {
+        const tmp = a;
+        a = b;
+        b = tmp;
+      }
+
       if (isType(a, 'time') && isDuration(b)) {
         return a.plus(b).set({
           year: 1900,

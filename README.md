@@ -16,8 +16,8 @@ import {
 unaryTest('1', { '?': 1 }); // true
 unaryTest('[1..end]', { '?': 1, end: 10 }); // true
 
-evaluate("Mike's dauther.name", {
-  'Mike\'s dauther.name': 'Lisa'
+evaluate("Mike's daughter.name", {
+  'Mike\'s daughter.name': 'Lisa'
 }); // "Lisa"
 
 evaluate('for a in [1, 2, 3] return a * 2'); // [ 2, 4, 6 ]

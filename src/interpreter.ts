@@ -136,9 +136,9 @@ class Interpreter {
     return root.args[root.args.length - 1];
   }
 
-  evaluate(expression: string, context: InterpreterContext = {}) {
+  evaluate(expression: string, context: InterpreterContext = {}, dialect?: string) {
 
-    const parseTree = parseExpression(expression, context);
+    const parseTree = parseExpression(expression, context, dialect);
 
     const root = this._buildExecutionTree(parseTree, expression);
 
@@ -179,11 +179,11 @@ export function unaryTest(expression: string, context: InterpreterContext = {}) 
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function evaluate(expression: string, context: InterpreterContext = {}): any {
+export function evaluate(expression: string, context: InterpreterContext = {}, dialect?: string): any {
 
   const {
     root
-  } = interpreter.evaluate(expression, context);
+  } = interpreter.evaluate(expression, context, dialect);
 
   // root = Expression :: fn(ctx)
 
@@ -288,6 +288,8 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     }
 
   }, Test('boolean'));
+
+  case 'BacktickIdentifier': return input.replace(/`/g, '');
 
   case 'Wildcard': return (_context) => true;
 

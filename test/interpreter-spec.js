@@ -843,6 +843,28 @@ describe('interpreter', function() {
 
       });
 
+      describe('dialect', function() {
+
+        // simple test
+        expr('`foo`', 'result', { 'foo': 'result' }, 'camunda');
+
+        // complex test
+        expr(
+          '`expression with special chars = 1 () - 2`',
+          'result',
+          { 'expression with special chars = 1 () - 2' : 'result' },
+          'camunda'
+        );
+
+        // nested variable test
+        expr(
+          'foo.`bar`',
+          'result',
+          { 'foo' : { 'bar' : 'result' } },
+          'camunda'
+        );
+      });
+
     });
 
   });
@@ -1236,13 +1258,14 @@ function createExprVerifier(options) {
   const [
     expression,
     expectedOutput,
-    context
+    context,
+    dialect
   ] = args;
 
   const name = `${expression}${context ? ' { ' + Object.keys(context).join(', ') + ' }' : ''}`;
 
   it(name, function() {
-    const output = evaluate(expression, context || {});
+    const output = evaluate(expression, context || {}, dialect);
 
     expect(output).to.eql(expectedOutput);
   });

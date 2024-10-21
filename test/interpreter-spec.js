@@ -843,6 +843,26 @@ describe('interpreter', function() {
 
       });
 
+
+      describe('<camunda> dialect', function() {
+
+        expr('`foo`', 'result', { 'foo': 'result' }, 'camunda');
+
+        expr(
+          '`expr statement = 1 () - 2`',
+          'result',
+          { 'expr statement = 1 () - 2' : 'result' },
+          'camunda'
+        );
+
+        expr(
+          'foo.`bar`',
+          'result',
+          { 'foo' : { 'bar' : 'result' } },
+          'camunda'
+        );
+      });
+
     });
 
   });
@@ -934,6 +954,13 @@ describe('interpreter', function() {
       unary(null, 'null', null);
 
       unary(null, '3 > 1', true);
+
+    });
+
+
+    describe('<camunda> dialect', function() {
+
+      unary({ '?': 3, 'foo': 3 }, '`foo`', true, 'camunda');
 
     });
 
@@ -1236,13 +1263,14 @@ function createExprVerifier(options) {
   const [
     expression,
     expectedOutput,
-    context
+    context,
+    dialect
   ] = args;
 
   const name = `${expression}${context ? ' { ' + Object.keys(context).join(', ') + ' }' : ''}`;
 
   it(name, function() {
-    const output = evaluate(expression, context || {});
+    const output = evaluate(expression, context || {}, dialect);
 
     expect(output).to.eql(expectedOutput);
   });
@@ -1256,7 +1284,12 @@ function createUnaryVerifier(options) {
     it
   } = options;
 
-  const [ inputOrContext, test, expectedOutput ] = args;
+  const [
+    inputOrContext,
+    test,
+    expectedOutput,
+    dialect
+  ] = args;
 
   const context = typeof inputOrContext === 'object' ? inputOrContext : null;
 
@@ -1269,7 +1302,7 @@ function createUnaryVerifier(options) {
     const output = unaryTest(test, {
       ...(context || {}),
       '?': input
-    });
+    }, dialect);
 
     expect(output).to.eql(expectedOutput);
   });

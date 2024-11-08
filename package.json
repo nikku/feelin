@@ -14,12 +14,10 @@
     "@types/chai": "^4.3.20",
     "@types/luxon": "^3.4.2",
     "@types/mocha": "^10.0.9",
-    "@typescript-eslint/eslint-plugin": "^7.18.0",
-    "@typescript-eslint/parser": "^7.18.0",
     "chai": "^4.5.0",
     "chokidar-cli": "^3.0.0",
-    "eslint": "^8.57.0",
-    "eslint-plugin-bpmn-io": "^1.0.1",
+    "eslint": "^9.14.0",
+    "eslint-plugin-bpmn-io": "^2.0.2",
     "fast-glob": "^3.3.2",
     "mocha": "^10.8.2",
     "npm-run-all2": "^7.0.1",
@@ -28,7 +26,8 @@
     "source-map-support": "^0.5.21",
     "strip-indent": "^4.0.0",
     "tslib": "^2.6.3",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.13.0"
   },
   "dependencies": {
     "@lezer/lr": "^1.4.2",
@@ -45,7 +44,7 @@
   "sideEffects": false,
   "scripts": {
     "all": "run-s lint build generate-typings test lint:types",
-    "lint": "eslint . --ext js,ts,cjs",
+    "lint": "eslint .",
     "lint:types": "tsc --noEmit --lib es2019 test/types.ts",
     "build": "rollup -c --bundleConfigAsCjs",
     "build:dev": "npm run build -- --watch",

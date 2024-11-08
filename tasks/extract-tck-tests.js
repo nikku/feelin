@@ -1,6 +1,4 @@
-/* eslint-env node */
-
-/* eslint @typescript-eslint/no-var-requires: OFF */
+/* eslint @typescript-eslint/no-var-requires: off */
 
 import path from 'path';
 import fs from 'fs';
@@ -289,7 +287,9 @@ function parseTestFile(file) {
 
     openElement(type, closeDelimiter);
 
-    printType && addToken(type);
+    if (printType) {
+      addToken(type);
+    }
 
     addToken(openDelimiter);
   }

@@ -722,7 +722,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
         if (isNumber(value)) {
           filterFn.type = 'number';
         }
-      } catch (err) {
+      } catch (_err) {
 
         // ignore
       }
@@ -1243,7 +1243,7 @@ function parseString(str: string) {
     str = str.slice(0, -1);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   return str.replace(/(\\")|(\\\\)|(\\u[a-fA-F0-9]{5,6})|((?:\\u[a-fA-F0-9]{1,4})+)/ig, function(substring: string, ...groups: any[]) {
 
     const [

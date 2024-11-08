@@ -137,10 +137,10 @@ export class Range {
   start: string|number|null;
   end: string|number|null;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   map: <T> (fn: (val) => T) => T[];
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   includes: (val) => boolean;
 
   constructor(props: RangeProps) {

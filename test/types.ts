@@ -6,11 +6,11 @@ import {
 import { expect } from 'chai';
 
 
-describe('types', () => {
+describe('types', function() {
 
-  describe('evaluate', () => {
+  describe('evaluate', function() {
 
-    it('should evaluate', () => {
+    it('should evaluate', function() {
 
       // when
       const value = evaluate('hello', {
@@ -24,9 +24,9 @@ describe('types', () => {
   });
 
 
-  describe('unaryTest', () => {
+  describe('unaryTest', function() {
 
-    it('should test', () => {
+    it('should test', function() {
 
       // when
       const value = unaryTest('[10, 20]', {

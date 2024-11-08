@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint @typescript-eslint/no-require-imports: off */
 
 const { inherits } = require('node:util');
 

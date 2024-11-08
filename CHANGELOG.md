@@ -6,6 +6,11 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 3.2.0
+
+* `FEAT`: support passing parser dialect ([#86](https://github.com/nikku/feelin/issues/86))
+* `DEPS`: update to `lezer-feel@1.4.0`
+
 ## 3.1.2
 
 * `FIX`: correctly `get value` not returning falsy values ([#76](https://github.com/nikku/feelin/issues/76))

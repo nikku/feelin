@@ -26,12 +26,12 @@ ___Note:__ Yet to be released changes appear here._
 ## 3.1.0
 
 * `FIX`: properly handle unary test against `0` ([#50](https://github.com/nikku/feelin/issues/50))
-* `DEPS`: update to luxon@3.4.0
+* `DEPS`: update to `luxon@3.4.0`
 * `DEPS`: update to `lezer-feel@1.2.8`
 
 ## 3.0.1
 
-* `FIX`: correct overriding of `date and time` and other built-ins ([#https://github.com/nikku/feelin/issues/62](https://github.com/nikku/feelin/issues/62))
+* `FIX`: correct overriding of `date and time` and other built-ins ([#62](https://github.com/nikku/feelin/issues/62))
 * `FIX`: correct list indexing with variables ([#59](https://github.com/nikku/feelin/issues/59))
 * `DEPS`: update to `lezer-feel@1.2.5`
 
@@ -42,7 +42,7 @@ ___Note:__ Yet to be released changes appear here._
 ## 2.3.0
 
 * `FEAT`: add duration ranges ([#47](https://github.com/nikku/feelin/pull/47))
-* `FIX`: correct `floor` and `ceiling` scale + invalid argument handling ([`fe1d458`](https://github.com/nikku/feelin/commit/fe1d458a93493b6a8784eb466301cc02081ee1ec), [`c283cbe`]](https://github.com/nikku/feelin/commit/c283cbeb66620d9a944f533b68455fe1893457ec))
+* `FIX`: correct `floor` and `ceiling` scale + invalid argument handling ([`fe1d458`](https://github.com/nikku/feelin/commit/fe1d458a93493b6a8784eb466301cc02081ee1ec), [`c283cbe`](https://github.com/nikku/feelin/commit/c283cbeb66620d9a944f533b68455fe1893457ec))
 
 ## 2.2.0
 

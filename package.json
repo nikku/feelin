@@ -13,7 +13,7 @@
     "@rollup/plugin-typescript": "^12.1.1",
     "@types/chai": "^4.3.20",
     "@types/luxon": "^3.4.2",
-    "@types/mocha": "^10.0.9",
+    "@types/mocha": "^10.0.10",
     "chai": "^4.5.0",
     "chokidar-cli": "^3.0.0",
     "eslint": "^9.17.0",

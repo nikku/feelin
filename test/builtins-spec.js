@@ -1,6 +1,10 @@
 import { expect } from './helpers.js';
 
 import {
+  inspect
+} from 'node:util';
+
+import {
   evaluate
 } from '../dist/index.esm.js';
 
@@ -703,7 +707,7 @@ function createExprVerifier(options) {
     context
   ] = args;
 
-  const name = `${expression}${context ? ' { ' + Object.keys(context).join(', ') + ' }' : ''}`;
+  const name = `${expression}${context ? ` ${ inspect(context) }` : ''}`;
 
   it(name, function() {
     const output = evaluate(expression, context || {});

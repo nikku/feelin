@@ -1,6 +1,7 @@
-import glob from 'fast-glob';
+import { inspect } from 'node:util';
+import { readFileSync } from 'node:fs';
 
-import fs from 'fs';
+import glob from 'fast-glob';
 
 import {
   expect
@@ -20,7 +21,7 @@ describe('tck', function() {
 
   for (const suitePath of suitePaths) {
 
-    const suite = JSON.parse(fs.readFileSync(suitePath, 'utf8'));
+    const suite = JSON.parse(readFileSync(suitePath, 'utf8'));
 
     const descSuite = (skipSuite(suite.testName) ? describe.skip : describe);
 
@@ -66,7 +67,7 @@ describe('tck', function() {
               iit = it.skip;
             }
 
-            iit(`${expression.text} === ${expectedValue} ${ context || '' }`, function() {
+            iit(`${expression.text} === ${expectedValue}${ context ? ` ${ inspect(context) }` : '' }`, function() {
 
               if (a instanceof Error) {
                 expect(a, 'expression parse error').not.to.exist;

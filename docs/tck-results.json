@@ -1,7 +1,7 @@
 {
   "passes": 1615,
-  "pending": 294,
-  "failures": 107,
+  "pending": 302,
+  "failures": 99,
   "tests": 2016,
   "failedTests": [
     "tck - 0050-feel-abs-function-test-01.xml - 011 - abs(duration(\"-P1D\")) === duration(\"P1D\")",
@@ -56,10 +56,6 @@
     "tck - 0103-feel-is-function-test-01.xml - date_005 - is(@\"2012-12-25\", @\"2012-12-25T00:00:00Z\") === false",
     "tck - 0103-feel-is-function-test-01.xml - zero_duration_001 - is(@\"P0Y\", @\"P0D\") === false",
     "tck - 1100-feel-decimal-function-test-01.xml - 002_f4ed9cd487 - decimal(1/3, 2.5) === 0.33",
-    "tck - 1111-feel-matches-function-test-01.xml - caselessmatch08 - matches(\"x\", \"[A-Z-[OI]]\", \"i\") === true",
-    "tck - 1111-feel-matches-function-test-01.xml - caselessmatch09 - matches(\"X\", \"[A-Z-[OI]]\", \"i\") === true",
-    "tck - 1111-feel-matches-function-test-01.xml - caselessmatch10 - matches(\"O\", \"[A-Z-[OI]]\", \"i\") === false",
-    "tck - 1111-feel-matches-function-test-01.xml - caselessmatch11 - matches(\"i\", \"[A-Z-[OI]]\", \"i\") === false",
     "tck - 1111-feel-matches-function-test-01.xml - K2-MatchesFunc-13 - matches(\"abcd\", \"(asd)[asd\\0]\") === null",
     "tck - 1111-feel-matches-function-test-01.xml - K2-MatchesFunc-14 - matches(\"abcd\", \"1[asd\\0]\") === null",
     "tck - 1115-feel-date-function-test-01.xml - 004_f24ed41117 - date(2017,null,1) === null",
@@ -106,10 +102,6 @@
     "tck - 1130-feel-interval-test-01.xml - starts - { startsPRT: starts( 1, [1..10] ), startsPRF: starts( 1, (1..10] ), startsPRF2: starts( 2, [1..10] ), startsRRT: starts( [1..5], [1..10] ), startsRRT2: starts( (1..5], (1..10] ), startsRRF: starts( (1..5], [1..10] ), startsRRF2: starts( [1..5], (1..10] ), startsRRT3: starts( [1..10], [1..10] ), startsRRT4: starts( [1..10), [1..10] ), startsRRT5: starts( (1..10), (1..10) ) } === {\"startsPRT\":true, \"startsPRF\":false, \"startsPRF2\":false, \"startsRRT\":true, \"startsRRT2\":true, \"startsRRF\":false, \"startsRRF2\":false, \"startsRRT3\":true, \"startsRRT4\":true, \"startsRRT5\":true}",
     "tck - 1130-feel-interval-test-01.xml - coincides - { coincidesPPT: coincides( 5, 5 ), coincidesPPF: coincides( 3, 4 ), coincidesRRT: coincides( [1..5], [1..5] ), coincidesRRF: coincides( (1..5), [1..5] ), coincidesRRF2: coincides( [1..5], [2..6] ) } === {\"coincidesPPT\":true, \"coincidesPPF\":false, \"coincidesRRT\":true, \"coincidesRRF\":false, \"coincidesRRF2\":false}",
     "tck - 1130-feel-interval-test-01.xml - overlaps after - { overlapsafterRRT: overlaps after( [3..8], [1..5]), overlapsafterRRF: overlaps after( [6..8], [1..5]), overlapsafterRRT2: overlaps after( [5..8], [1..5]), overlapsafterRRF2: overlaps after( (5..8], [1..5]), overlapsafterRRF3: overlaps after( [5..8], [1..5)), overlapsafterRRT3: overlaps after( (1..5], [1..5) ), overlapsafterRRT4: overlaps after( (1..5], [1..5] ), overlapsafterRRF4: overlaps after( [1..5], [1..5) ), overlapsafterRRF5: overlaps after( [1..5], [1..5] ) } === {\"overlapsafterRRT\":true, \"overlapsafterRRF\":false, \"overlapsafterRRT2\":true, \"overlapsafterRRF2\":false, \"overlapsafterRRF3\":false, \"overlapsafterRRT3\":true, \"overlapsafterRRT4\":true, \"overlapsafterRRF4\":false, \"overlapsafterRRF5\":false}",
-    "tck - 1146-feel-context-put-function-test-01.xml - 014 - context put(context01, \"a\", 2) === {\"a\":2}",
-    "tck - 1146-feel-context-put-function-test-01.xml - 015 - { context01: context01, copied: context put(context01, \"a\", 2) } === {\"context01\":{\"a\":1}, \"copied\":{\"a\":2}}",
-    "tck - 1146-feel-context-put-function-test-01.xml - nested010 - context put(nestedContext01, [\"a\", \"b\"], 2) === {\"a\":{\"b\":2}}",
-    "tck - 1146-feel-context-put-function-test-01.xml - nested011 - { nestedContext01: nestedContext01, copied: context put(nestedContext01, [\"a\", \"b\"], 2) } === {\"nestedContext01\":{\"a\":{\"b\":1}}, \"copied\":{\"a\":{\"b\":2}}}",
     "tck - 1149-feel-today-function-test-01.xml - 001 - today() instance of date === true"
   ],
   "pendingTests": [
@@ -337,6 +329,10 @@
     "tck - 0093-feel-at-literals-test-01.xml - ym_duration_001 - @\"P10Y\" instance of years and months duration === true",
     "tck - 1109-feel-replace-function-test-01.xml - 023_5c337d3725 - replace(\"a b c d \",\"[a-z]\",\"#\",\"x\") === \"# # # # \"",
     "tck - 1109-feel-replace-function-test-01.xml - 028_96e8c698af - replace(input:\"abc\",pattern:\".^[d-z]*\",replacement:\"#\",flags:\"smix\") === \"abc\"",
+    "tck - 1111-feel-matches-function-test-01.xml - caselessmatch08 - matches(\"x\", \"[A-Z-[OI]]\", \"i\") === true",
+    "tck - 1111-feel-matches-function-test-01.xml - caselessmatch09 - matches(\"X\", \"[A-Z-[OI]]\", \"i\") === true",
+    "tck - 1111-feel-matches-function-test-01.xml - caselessmatch10 - matches(\"O\", \"[A-Z-[OI]]\", \"i\") === false",
+    "tck - 1111-feel-matches-function-test-01.xml - caselessmatch11 - matches(\"i\", \"[A-Z-[OI]]\", \"i\") === false",
     "tck - 1111-feel-matches-function-test-01.xml - K2-MatchesFunc-1 - matches(\"hello world\", \"hello\\ sworld\", \"x\") === true",
     "tck - 1111-feel-matches-function-test-01.xml - K2-MatchesFunc-2 - matches(\"hello world\", \" hello[ ]world\", \"x\") === true",
     "tck - 1111-feel-matches-function-test-01.xml - K2-MatchesFunc-3 - matches(\"hello world\", \"hello[ ]world \", \"x\") === true",
@@ -406,6 +402,10 @@
     "tck - 1144-feel-round-half-down-function-test-01.xml - 016_b - round half down(5.5, (-6111 - 1)) === null",
     "tck - 1144-feel-round-half-down-function-test-01.xml - 017_a - round half down(5.5, 6176) === 5.5",
     "tck - 1144-feel-round-half-down-function-test-01.xml - 017_b - round half down(5.5, (6176 + 1)) === null",
+    "tck - 1146-feel-context-put-function-test-01.xml - 014 - context put(context01, \"a\", 2) === {\"a\":2}",
+    "tck - 1146-feel-context-put-function-test-01.xml - 015 - { context01: context01, copied: context put(context01, \"a\", 2) } === {\"context01\":{\"a\":1}, \"copied\":{\"a\":2}}",
+    "tck - 1146-feel-context-put-function-test-01.xml - nested010 - context put(nestedContext01, [\"a\", \"b\"], 2) === {\"a\":{\"b\":2}}",
+    "tck - 1146-feel-context-put-function-test-01.xml - nested011 - { nestedContext01: nestedContext01, copied: context put(nestedContext01, [\"a\", \"b\"], 2) } === {\"nestedContext01\":{\"a\":{\"b\":1}}, \"copied\":{\"a\":{\"b\":2}}}",
     "tck - 1148-feel-now-function-test-01.xml - 001 - now() instance of date and time === true"
   ]
 }

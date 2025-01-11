@@ -30,6 +30,10 @@ export function notImplemented(thing) {
   return new Error(`not implemented: ${thing}`);
 }
 
+export function isNotImplemented(err) {
+  return /^not implemented/.test(err.message);
+}
+
 /**
  * Returns a name from context or undefined if it does not exist.
  *

@@ -209,18 +209,58 @@ describe('builtin functions', function() {
     expr('replace("abracadabra","bra","*")', 'a*cada*');
     expr('replace("facetiously","[iouy]","[$0]")', 'facet[i][o][u]sl[y]');
     expr('replace("abc","[A-Z]","#", "i")', '###');
-    expr('replace("ab","AB","CD","ugi")','CD');
+
+    // TODO(nikku): remove, as <ug> are not valid flags and should yield null
+    expr('replace("ab","ab","CD","ug")', 'CD');
+    exprSkip('replace("ab","AB","CD","u")', null);
+    exprSkip('replace("ab","AB","CD","g")', null);
+    expr('replace("ab","AB","CD","i")', 'CD');
+    expr('replace("ab","ab","CD", null)', 'CD');
+    expr('replace("ab","ab","CD", "")', 'CD');
+    expr('replace("a\\na",".","x","s")', 'xxx');
+    expr('replace("a\\na\\nb\\na","^a$", "CD", "m")', 'CD\nCD\nb\nCD');
+
+    expr('matches("abab", "ab")', true);
+    expr('matches("abc", "abc")', true);
+
+    // TODO(nikku): remove, as <ug> are not valid flags and should yield null
+    expr('matches("abc", "abc", "ug")', true);
+    exprSkip('matches("abc", "abc", "u")', null);
+    exprSkip('matches("abc", "abc", "g")', null);
+
+    expr('matches("abc", "abc", "y")', null);
+
+    expr('matches("123", "\\d+", "")', true);
+    expr('matches("😀", "\\u{1F600}")', true);
 
     expr('matches("abc", "abc", "")', true);
-    expr('matches("ABC", "abc", "i")', true);
-    expr('matches("abab", "ab", "g")', true);
-    expr('matches("123", "\\d+", "")', true);
-    expr('matches("😀", "\\u{1F600}", "u")', true);
+    expr('matches("\\n", ".", "s")', true);
     expr('matches("abab", "^ab", "m")', true);
-    expr('matches("cat or dog", "cat|dog|fish", "")', true);
-    expr('matches("a123b456", "a.*?b", "")', true);
-    expr('matches("ab", "ab", "y")', true);
-    expr('matches("aab", "ab", "y")', false);
+    expr('matches("ABC", "abc", "i")', true);
+    expr('matches("abc", "abc", null)', true);
+
+    expr('matches("cat or dog", "cat|dog|fish")', true);
+    expr('matches("a123b456", "a.*?b")', true);
+    expr('matches("foobar", "^fo*b")', true);
+
+    expr('matches("abcd", "(asd)[\\1]")', null);
+    exprSkip('matches("abcd", "(asd)[asd\\0]")', null);
+    exprSkip('matches("abcd", "1[asd\\0]")', null);
+
+    expr('matches("bad pattern","[0-9")', null);
+
+    expr('matches(input:"abc",pattern:"[A-Z]", flags:"i")', true);
+
+    expr('matches(a, "^$", "m")', true, { a: '\nabcd\ndefg\n' });
+    expr('matches("\\nabcd", "^$", "m")', true);
+    expr('matches("abcd\\n", "^$", "m")', true);
+    expr('matches("abcd\\n\\ndefg", "^$", "m")', true);
+    expr('matches("a\\n\\nb", "^$", "m")', true);
+
+    exprSkip('matches("x", "[A-Z-[OI]]", "i")', true);
+    exprSkip('matches("X", "[A-Z-[OI]]", "i")', true);
+    exprSkip('matches("O", "[A-Z-[OI]]", "i")', false);
+    exprSkip('matches("i", "[A-Z-[OI]]", "i")', false);
 
     expr('contains("foobar", "of")', false);
     expr('contains("foobar", "ob")', true);

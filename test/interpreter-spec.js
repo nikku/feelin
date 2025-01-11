@@ -329,6 +329,9 @@ describe('interpreter', function() {
       expr('for a in 1 return a', null);
 
       exprSkip('for x in [ [1,2], [3,4] ], y in x return y', [ 1, 2, 3, 4 ]);
+
+      exprSkip('for i in [2..1] return i', null);
+
     });
 
 
@@ -721,6 +724,10 @@ describe('interpreter', function() {
 
       expr('-1', -1);
 
+      exprSkip('1.23e4', 1.23e4);
+      exprSkip('1.23e+4', 1.23e+4);
+      exprSkip('1.23e-4', 1.23e-4);
+
       expr('false', false);
 
       expr('true', true);
@@ -1057,6 +1064,9 @@ describe('interpreter', function() {
 
     expr('-0 = 0', true);
 
+    exprSkip('12300 = 1.23e4', true);
+    exprSkip('12300 = 1.23e+4', true);
+
     expr('[1,2,3] = [1,2,3]', true);
 
     expr('[1] = [2]', false);
@@ -1126,6 +1136,15 @@ describe('interpreter', function() {
     expr('(>= 5) = [5 .. null_value]', true, { null_value: null });
 
     expr('(5..10) = ]5 .. 10[', true);
+
+    exprSkip('(< 10) = (null..10)', false);
+    exprSkip('(<= 10) = (null..10]', false);
+    exprSkip('(> 10) = (10..null)', false);
+    exprSkip('(>= 10) = [10..null)', false);
+
+    exprSkip('(=10) = [10..10]', false);
+    exprSkip('(=10) = (=10)', true);
+    exprSkip('(!=10) = (!=10)', true);
 
   });
 

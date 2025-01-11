@@ -209,6 +209,18 @@ describe('builtin functions', function() {
     expr('replace("abracadabra","bra","*")', 'a*cada*');
     expr('replace("facetiously","[iouy]","[$0]")', 'facet[i][o][u]sl[y]');
     expr('replace("abc","[A-Z]","#", "i")', '###');
+    expr('replace("ab","AB","CD","ugi")','CD');
+
+    expr('matches("abc", "abc", "")', true);
+    expr('matches("ABC", "abc", "i")', true);
+    expr('matches("abab", "ab", "g")', true);
+    expr('matches("123", "\\d+", "")', true);
+    expr('matches("😀", "\\u{1F600}", "u")', true);
+    expr('matches("abab", "^ab", "m")', true);
+    expr('matches("cat or dog", "cat|dog|fish", "")', true);
+    expr('matches("a123b456", "a.*?b", "")', true);
+    expr('matches("ab", "ab", "y")', true);
+    expr('matches("aab", "ab", "y")', false);
 
     expr('contains("foobar", "of")', false);
     expr('contains("foobar", "ob")', true);

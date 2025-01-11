@@ -1265,9 +1265,6 @@ function ifValid<T extends DateTime | Duration>(o: T) : T | null {
  */
 export function buildFlags(flags: string, defaultFlags: string) {
 
-  // TODO(nikku): ug flags are implicit, illegal in pure FEEL
-  flags = flags.replace(/[ug]/g, '');
-
   const unsupportedFlags = flags.replace(/[smix]/g, '');
 
   if (unsupportedFlags) {

@@ -274,6 +274,8 @@ describe('builtin functions', function() {
 
     expr('split(string: "foo🐎bar", delimiter: "o.b")', [ 'fo', 'ar' ]);
 
+    expr('split("foo bar", "[a-z")', null);
+
     expr('string join(123, "X")', null);
 
     expr('string join(123, "X")', null);

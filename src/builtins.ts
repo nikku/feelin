@@ -387,7 +387,9 @@ const builtins = {
   }, [ 'string', 'string' ]),
 
   'split': fn(function(string, delimiter) {
-    return string.split(new RegExp(delimiter, 'u'));
+    const regexp = createRegexp(delimiter, '', '');
+
+    return regexp && string.split(regexp);
   }, [ 'string', 'string' ]),
 
   'string join': fn(function(list, delimiter) {

@@ -362,16 +362,17 @@ const builtins = {
   }, [ 'string', 'string' ]),
 
   'replace': fn(function(input, pattern, replacement, flags) {
-    return input.replace(new RegExp(pattern, 'ug' + (flags || '').replace(/[x]/g, '')), replacement.replace(/\$0/g, '$$&'));
+    return input.replace(new RegExp(pattern, buildFlags('ug', flags)), replacement.replace(/\$0/g, '$$&'));
   }, [ 'string', 'string', 'string', 'string?' ]),
 
   'contains': fn(function(string, match) {
     return string.includes(match);
   }, [ 'string', 'string' ]),
 
-  // eslint-disable-next-line
   'matches': fn(function(input, pattern, flags) {
-    throw notImplemented('matches');
+    const regExp = new RegExp(pattern, buildFlags('ug', flags));
+
+    return regExp.test(input);
   }, [ 'string', 'string', 'string?' ]),
 
   'starts with': fn(function(string, match) {
@@ -1251,4 +1252,29 @@ function mode(array: number[]) {
 
 function ifValid<T extends DateTime | Duration>(o: T) : T | null {
   return o.isValid ? o : null;
+}
+
+/**
+ * Concatenates flags for a regular expression.
+ *
+ * Ensures that default flags are included without duplication, even if
+ * user-specified flags overlap with the defaults.
+ */
+export function buildFlags(flags: string, defaultFlags: string) {
+
+  // TODO(nikku): ug flags are implicit, illegal in pure FEEL
+  flags = flags.replace(/[ug]/g, '');
+
+  const unsupportedFlags = flags.replace(/[smix]/g, '');
+
+  if (unsupportedFlags) {
+    throw new Error('illegal flags: ' + unsupportedFlags);
+  }
+
+  // we don't implement the <x> flag
+  if (/x/.test(flags)) {
+    throw notImplemented('matches <x> flag');
+  }
+
+  return flags + defaultFlags;
 }

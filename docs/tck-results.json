@@ -1,16 +1,13 @@
 {
-  "passes": 1615,
+  "passes": 1618,
   "pending": 302,
-  "failures": 99,
+  "failures": 96,
   "tests": 2016,
   "failedTests": [
     "tck - 0050-feel-abs-function-test-01.xml - 011 - abs(duration(\"-P1D\")) === duration(\"P1D\")",
     "tck - 0050-feel-abs-function-test-01.xml - 011_a - abs(duration(\"P1D\")) === duration(\"P1D\")",
     "tck - 0050-feel-abs-function-test-01.xml - 012 - abs(duration(\"-P1Y\")) === duration(\"P1Y\")",
     "tck - 0050-feel-abs-function-test-01.xml - 012_a - abs(duration(\"P1Y\")) === duration(\"P1Y\")",
-    "tck - 0068-feel-equality-test-01.xml - number_008 - 12300 = 1.23e4 === true",
-    "tck - 0068-feel-equality-test-01.xml - number_009 - 12300 = 1.23e+4 === true",
-    "tck - 0068-feel-equality-test-01.xml - number_010 - 0.000123 = 1.23e-4 === true",
     "tck - 0068-feel-equality-test-01.xml - ym_duration_006 - duration(\"P1Y\") = duration(\"P365D\") === null",
     "tck - 0068-feel-equality-test-01.xml - range_006 - (< 10) = (null..10) === false",
     "tck - 0068-feel-equality-test-01.xml - range_007 - (<= 10) = (null..10] === false",

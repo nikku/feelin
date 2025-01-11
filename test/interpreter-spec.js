@@ -724,9 +724,10 @@ describe('interpreter', function() {
 
       expr('-1', -1);
 
-      exprSkip('1.23e4', 1.23e4);
-      exprSkip('1.23e+4', 1.23e+4);
-      exprSkip('1.23e-4', 1.23e-4);
+      expr('1.23e4', 1.23e4);
+      expr('1.23E4', 1.23e4);
+      expr('1.23e+4', 1.23e+4);
+      expr('1.23e-4', 1.23e-4);
 
       expr('false', false);
 
@@ -886,8 +887,22 @@ describe('interpreter', function() {
   describe('unaryTest', function() {
 
     unary(0, '< 5', true);
+    unary(5, '< 5', false);
 
-    unary(5, '>= 10', false);
+    unary(0, '<= 5', true);
+    unary(5, '<= 5', true);
+
+    unary(0, '> 5', false);
+    unary(5, '> 5', false);
+
+    unary(0, '>= 5', false);
+    unary(5, '>= 5', true);
+
+    unary(0, '= 5', false);
+    unary(5, '= 5', true);
+
+    unary(0, '!= 5', true);
+    unary(5, '!= 5', false);
 
     unary(5, '5', true);
 
@@ -1064,8 +1079,8 @@ describe('interpreter', function() {
 
     expr('-0 = 0', true);
 
-    exprSkip('12300 = 1.23e4', true);
-    exprSkip('12300 = 1.23e+4', true);
+    expr('12300 = 1.23e4', true);
+    expr('12300 = 1.23e+4', true);
 
     expr('[1,2,3] = [1,2,3]', true);
 

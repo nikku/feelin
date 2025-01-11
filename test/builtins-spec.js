@@ -236,6 +236,8 @@ describe('builtin functions', function() {
     expr('matches("ABC", "abc", "i")', true);
     expr('matches("abc", "abc", null)', true);
 
+    exprSkip('matches("hello world", "hello\\ sworld", "x")', true);
+
     expr('matches("cat or dog", "cat|dog|fish")', true);
     expr('matches("a123b456", "a.*?b")', true);
     expr('matches("foobar", "^fo*b")', true);

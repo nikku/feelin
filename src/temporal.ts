@@ -6,14 +6,14 @@ import {
   Zone
 } from 'luxon';
 
-import { isDateTime, isDuration } from './types';
+import { isDateTime, isDuration } from './types.js';
 
 export {
   isDateTime,
   isDuration
 };
 
-import { notImplemented } from './utils';
+import { notImplemented } from './utils.js';
 
 
 export function ms(temporal) {

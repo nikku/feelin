@@ -6,20 +6,20 @@ import {
   isNumber,
   getType,
   typeCast
-} from './types';
+} from './types.js';
 
 import {
   getFromContext,
   isNotImplemented,
   notImplemented,
   parseParameterNames
-} from './utils';
+} from './utils.js';
 
 import {
   duration,
   date,
   isDateTime
-} from './temporal';
+} from './temporal.js';
 
 import { DateTime, Duration, SystemZone } from 'luxon';
 

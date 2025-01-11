@@ -1,6 +1,6 @@
 import { normalizeContextKey } from 'lezer-feel';
 
-import { getType } from './types';
+import { getType } from './types.js';
 
 
 export function parseParameterNames(fn) {

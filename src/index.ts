@@ -1,5 +1,5 @@
-export * from './interpreter';
+export * from './interpreter.js';
 
-export * from './parser';
+export * from './parser.js';
 
-export { date, duration } from './temporal';
+export { date, duration } from './temporal.js';

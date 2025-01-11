@@ -1,6 +1,6 @@
 import { Tree, SyntaxNodeRef, SyntaxNode } from '@lezer/common';
 
-import { builtins } from './builtins';
+import { builtins } from './builtins.js';
 
 import {
   Range,
@@ -12,18 +12,18 @@ import {
   isDateTime,
   isType,
   isNumber
-} from './types';
+} from './types.js';
 
 import {
   notImplemented,
   parseParameterNames,
   getFromContext
-} from './utils';
+} from './utils.js';
 
 import {
   parseExpression,
   parseUnaryTests
-} from './parser';
+} from './parser.js';
 
 import { Duration } from 'luxon';
 

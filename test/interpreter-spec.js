@@ -703,7 +703,15 @@ describe('interpreter', function() {
       expr('"foo"', 'foo');
 
       expr('"\\""', '"');
+      expr('"\\n"', '\n');
+      expr('"\\"', '\\');
+      expr('"\\t"', '\t');
+      expr('"\\r"', '\r');
+
+      expr('"\\\\n"', '\\n');
       expr('"\\\\"', '\\');
+
+      expr('"\\s"', '\\s');
 
       expr('"\\ud83d\\udc0e\\uD83D\\UDE00"', '🐎😀');
       expr('"\\U01F40E"', '🐎');

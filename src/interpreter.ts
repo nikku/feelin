@@ -1245,12 +1245,14 @@ function parseString(str: string) {
     str = str.slice(0, -1);
   }
 
-
-  return str.replace(/(\\")|(\\\\)|(\\u[a-fA-F0-9]{5,6})|((?:\\u[a-fA-F0-9]{1,4})+)/ig, function(substring: string, ...groups: any[]) {
+  return str.replace(/(\\")|(\\\\)|(\\n)|(\\r)|(\\t)|(\\u[a-fA-F0-9]{5,6})|((?:\\u[a-fA-F0-9]{1,4})+)/ig, function(substring: string, ...groups: any[]) {
 
     const [
       quotes,
-      escape,
+      backslash,
+      newline,
+      carriageReturn,
+      tab,
       codePoint,
       charCodes
     ] = groups;
@@ -1259,7 +1261,19 @@ function parseString(str: string) {
       return '"';
     }
 
-    if (escape) {
+    if (newline) {
+      return '\n';
+    }
+
+    if (carriageReturn) {
+      return '\r';
+    }
+
+    if (tab) {
+      return '\t';
+    }
+
+    if (backslash) {
       return '\\';
     }
 

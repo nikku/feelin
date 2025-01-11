@@ -117,10 +117,10 @@ function TckReporter(runner, options) {
 
     const diff = testDiff(failedTests, oldResults.failedTests);
 
-    console.log(`Completed with ${results.failures}${oldResults.failures == results.failures ? '' : ` (${oldResults.failures > results.failures ? '-' : '+'}${Math.abs(results.failures - oldResults.failures)})`} failures${diff ? ':' + diff : '.'}`);
+    console.log(`INFO: Completed with ${results.failures}${oldResults.failures == results.failures ? '' : ` (${oldResults.failures > results.failures ? '-' : '+'}${Math.abs(results.failures - oldResults.failures)})`} failures${diff ? ':' + diff : '.'}`);
 
     if (process.env.DRY_RUN === 'false') {
-      console.log('Writing test results.');
+      console.log('INFO: Writing test results.');
 
       fs.writeFileSync(resultsImgPath, resultsSvg, 'utf8');
       fs.writeFileSync(resultsJSONPath, JSON.stringify(results, null, 2), 'utf8');

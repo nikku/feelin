@@ -670,9 +670,7 @@ describe('interpreter', function() {
 
       expr('[ {x:1, y:2}, {x:2, y:3} ][x=1]', [ { x:1, y:2 } ]);
 
-      // TODO(nikku): part of DMN spec
-      exprSkip('[{a: 1}, {a: 2}, {a: 3}][item.a >= 2]', [ 2, 3 ]);
-
+      expr('[{a: 1}, {a: 2}, {a: 3}][item.a >= 2]', [ { a: 2 }, { a: 3 } ]);
       expr('[{a: 1}, {a: 2}, {a: 3}][a >= 2]', [ { a: 2 }, { a: 3 } ]);
 
       expr('[{item: 1}, {item: 2}, {item: 3}][item >= 2]', [ { item: 2 }, { item: 3 } ]);

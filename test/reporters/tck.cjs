@@ -124,9 +124,18 @@ function TckReporter(runner, options) {
 
       fs.writeFileSync(resultsImgPath, resultsSvg, 'utf8');
       fs.writeFileSync(resultsJSONPath, JSON.stringify(results, null, 2), 'utf8');
+    } else {
+
+      // indicate failure if test failures != expected failures
+      if (oldResults.failures < results.failures) {
+        console.log();
+        console.log('INFO: Execute with DRY_RUN=false to update TCK test snapshots');
+
+        process.exit(101);
+      }
     }
 
-    process.exit(oldResults.failures < results.failures ? 101 : 0);
+    process.exit(0);
   });
 
 }

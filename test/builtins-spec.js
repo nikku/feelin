@@ -210,24 +210,21 @@ describe('builtin functions', function() {
     expr('replace("facetiously","[iouy]","[$0]")', 'facet[i][o][u]sl[y]');
     expr('replace("abc","[A-Z]","#", "i")', '###');
 
-    // TODO(nikku): remove, as <ug> are not valid flags and should yield null
-    expr('replace("ab","ab","CD","ug")', 'CD');
-    exprSkip('replace("ab","AB","CD","u")', null);
-    exprSkip('replace("ab","AB","CD","g")', null);
     expr('replace("ab","AB","CD","i")', 'CD');
     expr('replace("ab","ab","CD", null)', 'CD');
     expr('replace("ab","ab","CD", "")', 'CD');
     expr('replace("a\\na",".","x","s")', 'xxx');
     expr('replace("a\\na\\nb\\na","^a$", "CD", "m")', 'CD\nCD\nb\nCD');
 
+    expr('replace("ab","AB","CD","u")', null);
+    expr('replace("ab","AB","CD","g")', null);
+    expr('replace("ab","AB","CD","y")', null);
+
     expr('matches("abab", "ab")', true);
     expr('matches("abc", "abc")', true);
 
-    // TODO(nikku): remove, as <ug> are not valid flags and should yield null
-    expr('matches("abc", "abc", "ug")', true);
-    exprSkip('matches("abc", "abc", "u")', null);
-    exprSkip('matches("abc", "abc", "g")', null);
-
+    expr('matches("abc", "abc", "u")', null);
+    expr('matches("abc", "abc", "g")', null);
     expr('matches("abc", "abc", "y")', null);
 
     expr('matches("123", "\\d+", "")', true);

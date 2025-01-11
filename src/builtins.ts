@@ -10,6 +10,7 @@ import {
 
 import {
   getFromContext,
+  isNotImplemented,
   notImplemented,
   parseParameterNames
 } from './utils';
@@ -362,7 +363,9 @@ const builtins = {
   }, [ 'string', 'string' ]),
 
   'replace': fn(function(input, pattern, replacement, flags) {
-    return input.replace(new RegExp(pattern, buildFlags('ug', flags)), replacement.replace(/\$0/g, '$$&'));
+    const regexp = createRegexp(pattern, flags || '', 'g');
+
+    return regexp && input.replace(regexp, replacement.replace(/\$0/g, '$$&'));
   }, [ 'string', 'string', 'string', 'string?' ]),
 
   'contains': fn(function(string, match) {
@@ -370,9 +373,9 @@ const builtins = {
   }, [ 'string', 'string' ]),
 
   'matches': fn(function(input, pattern, flags) {
-    const regExp = new RegExp(pattern, buildFlags('ug', flags));
+    const regexp = createRegexp(pattern, flags || '', '');
 
-    return regExp.test(input);
+    return regexp && regexp.test(input);
   }, [ 'string', 'string', 'string?' ]),
 
   'starts with': fn(function(string, match) {
@@ -1277,4 +1280,19 @@ export function buildFlags(flags: string, defaultFlags: string) {
   }
 
   return flags + defaultFlags;
+}
+
+/**
+ * Creates a regular expression from a given pattern
+ */
+function createRegexp(pattern: string, flags: string, defaultFlags: string = '') : RegExp | null {
+  try {
+    return new RegExp(pattern, 'u' + buildFlags(flags, defaultFlags));
+  } catch (_err) {
+    if (isNotImplemented(_err)) {
+      throw _err;
+    }
+  }
+
+  return null;
 }

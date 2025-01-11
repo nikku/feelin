@@ -6,6 +6,18 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 4.0.0
+
+* `FEAT`: support `matches` built-in ([#22](https://github.com/nikku/feelin/issues/22), [#96](https://github.com/nikku/feelin/pull/96))
+* `FEAT`: improve pattern parsing for `matches`, `replace`, and `split` built-ins ([#100](https://github.com/nikku/feelin/pull/100), [#96](https://github.com/nikku/feelin/pull/96))
+* `FIX`: strictly parse regular expression flags ([#99](https://github.com/nikku/feelin/pull/99))
+* `FIX`: correct parsing of `\r\n\t` special characters ([#97](https://github.com/nikku/feelin/pull/97))
+
+### Breaking Changes
+
+* Special characters `\r\n\t` are now parsed in accordance with the DMN specification ([#97](https://github.com/nikku/feelin/pull/97)).
+* Flags not supported by the DMN specification are no longer accepted ([#99](https://github.com/nikku/feelin/pull/99)).
+
 ## 3.2.0
 
 * `FEAT`: support passing parser dialect ([#86](https://github.com/nikku/feelin/issues/86))

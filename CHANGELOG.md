@@ -6,6 +6,12 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 4.1.0
+
+* `FEAT`: support `!=` and `=` as unary test comparators ([nikku/lezer-feel#48](https://github.com/nikku/lezer-feel/pull/48))
+* `FEAT`: support exponential notation for numbers ([nikku/lezer-feel#49](https://github.com/nikku/lezer-feel/pull/49))
+* `DEPS`: update to `lezer-feel@1.6.0`
+
 ## 4.0.0
 
 * `FEAT`: support `matches` built-in ([#22](https://github.com/nikku/feelin/issues/22), [#96](https://github.com/nikku/feelin/pull/96))

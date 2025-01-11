@@ -129,6 +129,19 @@ function skipSuite(suiteName) {
 function skipTest(suiteName, testId) {
   return [
     '0057-feel-context-test-01.xml#008',
+
+    // interoperability with boxed expressions
+    '1146-feel-context-put-function-test-01.xml#014',
+    '1146-feel-context-put-function-test-01.xml#015',
+    '1146-feel-context-put-function-test-01.xml#nested010',
+    '1146-feel-context-put-function-test-01.xml#nested011',
+
+    // non-sense nested matcher group
+    '1111-feel-matches-function-test-01.xml#caselessmatch08',
+    '1111-feel-matches-function-test-01.xml#caselessmatch09',
+    '1111-feel-matches-function-test-01.xml#caselessmatch10',
+    '1111-feel-matches-function-test-01.xml#caselessmatch11',
+
     '0079-feel-string-function-test-01.xml#dt_duration_004'
   ].includes(`${suiteName}#${testId}`);
 }

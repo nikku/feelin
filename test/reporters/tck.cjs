@@ -127,7 +127,7 @@ function TckReporter(runner, options) {
     } else {
 
       // indicate failure if test failures != expected failures
-      if (oldResults.failures < results.failures) {
+      if (oldResults.failures !== results.failures) {
         console.log();
         console.log('INFO: Execute with DRY_RUN=false to update TCK test snapshots');
 

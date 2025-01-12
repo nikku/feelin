@@ -6,6 +6,10 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 4.3.0
+
+* `FEAT`: improve `date` and `time` input validation ([#102](https://github.com/nikku/feelin/pull/102))
+
 ## 4.2.0
 
 * `FEAT`: support dependent evaluation inside `InExpressions` ([#101](https://github.com/nikku/feelin/pull/101))

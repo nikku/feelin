@@ -6,6 +6,8 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+* `DEPS`: update to `lezer-feel@1.7.0`
+
 ## 4.3.0
 
 * `FEAT`: improve `date` and `time` input validation ([#102](https://github.com/nikku/feelin/pull/102))

@@ -1,3 +1,5 @@
+import { inspect } from 'node:util';
+
 import { expect } from './helpers.js';
 
 import {
@@ -1335,7 +1337,7 @@ function createExprVerifier(options) {
     dialect
   ] = args;
 
-  const name = `${expression}${context ? ' { ' + Object.keys(context).join(', ') + ' }' : ''}`;
+  const name = `${expression}${context ? ` ${ inspect(context) }` : ''}`;
 
   it(name, function() {
     const output = evaluate(expression, context || {}, dialect);
@@ -1359,18 +1361,15 @@ function createUnaryVerifier(options) {
     dialect
   ] = args;
 
-  const context = typeof inputOrContext === 'object' ? inputOrContext : null;
+  const context = typeof inputOrContext === 'object' && inputOrContext !== null ? inputOrContext : {
+    '?': inputOrContext
+  };
 
-  const input = context ? context['?'] : inputOrContext;
-
-  const name = `${test} => ${input} ${context ? ' { ' + Object.keys(context).join(', ') + ' }' : ''}`;
+  const name = `${test} ${ inspect(context) }`;
 
   it(name, function() {
 
-    const output = unaryTest(test, {
-      ...(context || {}),
-      '?': input
-    }, dialect);
+    const output = unaryTest(test, context, dialect);
 
     expect(output).to.eql(expectedOutput);
   });

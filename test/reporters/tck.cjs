@@ -1,9 +1,9 @@
 /* eslint @typescript-eslint/no-require-imports: off */
 
 const { inherits } = require('node:util');
+const { readFileSync, writeFileSync } = require('node:fs');
 
 const Mocha = require('mocha');
-const fs = require('node:fs');
 
 const SpecReporter = Mocha.reporters.Spec;
 
@@ -107,7 +107,7 @@ function TckReporter(runner, options) {
 
     const oldResults = (function() {
       try {
-        return JSON.parse(fs.readFileSync(resultsJSONPath, 'utf8'));
+        return JSON.parse(readFileSync(resultsJSONPath, 'utf8'));
       } catch (e) {
         console.warn('could not read tck-results.json', e);
 
@@ -122,8 +122,8 @@ function TckReporter(runner, options) {
     if (process.env.DRY_RUN === 'false') {
       console.log('INFO: Writing test results.');
 
-      fs.writeFileSync(resultsImgPath, resultsSvg, 'utf8');
-      fs.writeFileSync(resultsJSONPath, JSON.stringify(results, null, 2), 'utf8');
+      writeFileSync(resultsImgPath, resultsSvg, 'utf8');
+      writeFileSync(resultsJSONPath, JSON.stringify(results, null, 2), 'utf8');
     } else {
 
       // indicate failure if test failures != expected failures

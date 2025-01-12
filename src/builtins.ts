@@ -188,6 +188,11 @@ const builtins = {
     }
 
     if (year) {
+
+      if (!isNumber(month) || !isNumber(day)) {
+        return null;
+      }
+
       d = date().setZone('utc').set({
         year,
         month,
@@ -243,8 +248,7 @@ const builtins = {
       hour = null;
     }
 
-    if (isString(from)) {
-
+    if (isString(from) && from) {
       t = date(null, from);
     }
 
@@ -257,6 +261,10 @@ const builtins = {
     }
 
     if (isNumber(hour)) {
+
+      if (!isNumber(minute) || !isNumber(second)) {
+        return null;
+      }
 
       // TODO: support offset = days and time duration
       t = date().set({

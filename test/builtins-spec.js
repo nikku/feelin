@@ -553,6 +553,22 @@ describe('builtin functions', function() {
       date(2016, 1, 15) = date and time("2016-01-15T00:00:00z")
     `, true);
 
+    expr('date(1)', null);
+    exprSkip('date(2017,8,-2)', null);
+    exprSkip('date(2017,-8,2)', null);
+    exprSkip('date(2017,12,32)', null);
+    exprSkip('date(2017,13,31)', null);
+    exprSkip('date(2016, 1, 15, 100)', null);
+
+    expr('date("")', null);
+    expr('date(2017,null,1)', null);
+    expr('date(2017,1,null)', null);
+    expr('date(2017,null,null)', null);
+
+    expr('time("")', null);
+    expr('time(12,null,null,null)', null);
+    expr('time(12,11,null,null)', null);
+
     expr(`
       today() = date and time(now(), @"00:00:00")
     `, true);
@@ -584,6 +600,7 @@ describe('builtin functions', function() {
     expr('date and time("2020-04-06T08:00:00") + duration("P7D") = date and time("2020-04-13T08:00:00")', true);
     expr('duration("P7D") + date and time("2020-04-06T08:00:00") = date and time("2020-04-13T08:00:00")', true);
     expr('duration("P2D") + duration("P5D") = duration("P7D")', true);
+
 
     describe('properties', function() {
 

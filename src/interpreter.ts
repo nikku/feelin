@@ -58,6 +58,7 @@ export class SyntaxError extends Error {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type InterpreterContext = Record<string, any>;
 
+
 class Interpreter {
 
   _buildExecutionTree(tree: Tree, input: string) {
@@ -434,20 +435,79 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
   case 'Type': return args[0];
 
+  // (x in [ [1,2], [3,4] ]), (y in x)
   case 'InExpressions': return (context) => {
 
-    const iterationContexts = args.map(ctx => ctx(context));
+    // we build up evaluation contexts from left to right,
+    // ending up with the cartesian product over all available contexts
+    //
+    // previous context is provided to later context providers
+    // producing <null> as a context during evaluation causes the
+    // whole result to turn <null>
 
-    if (iterationContexts.some(ctx => getType(ctx) !== 'list')) {
-      return null;
-    }
+    type Context = InterpreterContext;
+    type MaybeContext = (Context | null);
+    type ContextsProducer = (context: Context) => (MaybeContext[] | null);
 
-    return cartesianProduct(iterationContexts).map(ctx => {
-      if (!isArray(ctx)) {
-        ctx = [ ctx ];
+    const isValidContexts = (
+        contexts: MaybeContext[] | null
+    ) => {
+      if (contexts === null || contexts.some(arr => getType(arr) === 'nil')) {
+        return false;
       }
 
-      return Object.assign({}, context, ...ctx);
+      return true;
+    };
+
+    const join = (
+        aContexts: InterpreterContext[],
+        bContextProducer: ContextsProducer
+    ) => {
+
+      return [].concat(...aContexts.map(aContext => {
+
+        const bContexts = bContextProducer({ ...context, ...aContext });
+
+        if (!isValidContexts(bContexts)) {
+          return null;
+        }
+
+        return bContexts.map(bContext => {
+          return { ...aContext, ...bContext };
+        });
+      }));
+    };
+
+    const cartesian = (
+        aContexts: MaybeContext[],
+        bContextProducer?: ContextsProducer,
+        ...otherContextProducers: ContextsProducer[]
+    ) : (MaybeContext[] | null) => {
+
+      if (!isValidContexts(aContexts)) {
+        return null;
+      }
+
+      if (!bContextProducer) {
+        return aContexts;
+      }
+
+      return cartesian(join(aContexts, bContextProducer), ...otherContextProducers);
+    };
+
+    const cartesianProduct = (contextProducers: ContextsProducer[]) => {
+
+      const [ aContextProducer, ...otherContextProducers ] = contextProducers;
+
+      const aContexts = aContextProducer(context);
+
+      return cartesian(aContexts, ...otherContextProducers);
+    };
+
+    const product = cartesianProduct(args);
+
+    return product && product.map(p => {
+      return { ...context, ...p };
     });
   };
 
@@ -1147,19 +1207,6 @@ function createDateTimeRange(start, end, startIncluded, endIncluded) {
     map,
     includes
   });
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function cartesianProduct(arrays: any[]) {
-
-  if (arrays.some(arr => getType(arr) === 'nil')) {
-    return null;
-  }
-
-  const f = (a, b) => [].concat(...a.map(d => b.map(e => [].concat(d, e))));
-  const cartesian = (a?, b?, ...c) => (b ? cartesian(f(a, b), ...c) : a || []);
-
-  return cartesian(...arrays);
 }
 
 

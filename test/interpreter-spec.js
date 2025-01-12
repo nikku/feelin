@@ -316,6 +316,10 @@ describe('interpreter', function() {
         'b': 10
       });
 
+      expr('for i in numbers return i * 10', [ 10, 20 ], {
+        'numbers': [ 1, 2 ]
+      });
+
       expr('for condition in [ > 5, [1..3], 5 ] return 6 in condition', [ true, false, false ]);
 
       expr('for i in days in weekend return if i = "sunday" then true else false', [ false, true ], { 'days in weekend': [ 'saturday', 'sunday' ] });
@@ -328,7 +332,19 @@ describe('interpreter', function() {
 
       expr('for a in 1 return a', null);
 
-      exprSkip('for x in [ [1,2], [3,4] ], y in x return y', [ 1, 2, 3, 4 ]);
+      expr('for x in [ [1,2], [3,4] ], y in x return y', [ 1, 2, 3, 4 ]);
+      expr('for x in [ [ a, b ], c ], y in x, z in y return z', [ 1, 2, 3, 4, 5, 6, 7, 8 ], {
+        a: [ 1, 2 ],
+        b: [ 3, 4 ],
+        c: [ [ 5, 6 ], [ 7,8 ] ]
+      });
+      expr('for x in [ [ i + 1, i + 2 ], [ i + 3, i + 4] ], y in x return y', [ 1, 2, 3, 4 ], {
+        i: 0
+      });
+
+      expr('for x in [ 1 ], y in [x + 1] return y', [ 2 ]);
+
+      expr('for x in [ 1, null ], y in [ x + 1 ] return y', [ 2, null ]);
 
       exprSkip('for i in [2..1] return i', null);
 
@@ -368,6 +384,9 @@ describe('interpreter', function() {
         ]
       });
 
+      expr('every x in [ [1, 2], [3, 4] ], y in x satisfies y < 5', true);
+      expr('every x in [ [1, 2], [3, 4] ], y in x satisfies y > 3', false);
+
       expr('every e in [0] satisfies e = 0', true);
 
       expr('every e in [2] satisfies e = b * 2', true, {
@@ -391,6 +410,9 @@ describe('interpreter', function() {
           20
         ]
       });
+
+      expr('some x in [ [1, 2], [3, 4] ], y in x satisfies y > 5', false);
+      expr('some x in [ [1, 2], [3, 4] ], y in x satisfies y > 3', true);
 
       expr('every e in null satisfies e != 2', null);
 

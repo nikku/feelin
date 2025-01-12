@@ -6,6 +6,10 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 4.2.0
+
+* `FEAT`: support dependent evaluation inside `InExpressions` ([#101](https://github.com/nikku/feelin/pull/101))
+
 ## 4.1.0
 
 * `FEAT`: support `!=` and `=` as unary test comparators ([nikku/lezer-feel#48](https://github.com/nikku/lezer-feel/pull/48))

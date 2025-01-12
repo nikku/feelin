@@ -953,6 +953,18 @@ describe('interpreter', function() {
 
     unary(5, '? * 2 = 10', true);
 
+    unary({}, 'false', false);
+
+    unary(null, 'null', null);
+    unary(null, '[null]', true);
+    unary(null, '> 20', null);
+    unary(null, '? > 20', null);
+
+    unarySkip(null, 'null > 20', true);
+    unarySkip(null, 'not(null > 20)', false);
+
+    unary(null, '3 > 1', true);
+
 
     describe('Interval', function() {
 
@@ -998,12 +1010,6 @@ describe('interpreter', function() {
       unary({ '?': {} }, 'not(1)', null);
 
       unary({ '?': {} }, 'not("true")', null);
-
-      unary({ '?': {} }, 'false', false);
-
-      unary(null, 'null', null);
-
-      unary(null, '3 > 1', true);
 
     });
 
@@ -1402,6 +1408,13 @@ function unaryOnly(...args) {
   return createUnaryVerifier({
     args,
     it: it.only
+  });
+}
+
+function unarySkip(...args) {
+  return createUnaryVerifier({
+    args,
+    it: it.skip
   });
 }
 

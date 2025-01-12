@@ -1,7 +1,7 @@
 {
-  "passes": 1618,
+  "passes": 1619,
   "pending": 302,
-  "failures": 96,
+  "failures": 95,
   "tests": 2016,
   "failedTests": [
     "tck - 0050-feel-abs-function-test-01.xml - 011 - abs(duration(\"-P1D\")) === duration(\"P1D\")",
@@ -32,7 +32,6 @@
     "tck - 0079-feel-string-function-test-01.xml - dt_duration_002 - string(duration(\"-P1D\")) === \"-P1D\"",
     "tck - 0079-feel-string-function-test-01.xml - ym_duration_002 - string(duration(\"-P1Y\")) === \"-P1Y\"",
     "tck - 0079-feel-string-function-test-01.xml - ym_duration_003 - string(duration(\"P0Y\")) === \"P0M\"",
-    "tck - 0084-feel-for-loops-test-01.xml - decision_015 - for x in [ [1,2], [3,4] ], y in x return y === [1,2,3,4]",
     "tck - 0084-feel-for-loops-test-01.xml - decision_017 - for i in @\"1980-01-01\"..@\"1980-01-03\" return i === [date(\"1980-01-01\"),date(\"1980-01-02\"),date(\"1980-01-03\")]",
     "tck - 0084-feel-for-loops-test-01.xml - decision_018 - for i in @\"1980-01-03\"..@\"1980-01-01\" return i === [date(\"1980-01-03\"),date(\"1980-01-02\"),date(\"1980-01-01\")]",
     "tck - 0084-feel-for-loops-test-01.xml - decision_019 - for i in \"a\"..\"z\" return i === null",

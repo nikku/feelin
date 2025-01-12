@@ -8,9 +8,9 @@
   </defs>
 
   <g clip-path="url(#round-corners)">
-    <rect width="80.2579365079365" height="5" fill="rgb(26, 127, 55)" x="0" y="0" />
-    <rect width="14.98015873015873" height="5" fill="rgb(200, 200, 200)" x="80.2579365079365" y="0" />
-    <rect width="4.761904761904762" height="5" fill="rgb(209, 36, 47)" x="95.23809523809524" y="0" />
+    <rect width="80.30753968253968" height="5" fill="rgb(26, 127, 55)" x="0" y="0" />
+    <rect width="14.98015873015873" height="5" fill="rgb(200, 200, 200)" x="80.30753968253968" y="0" />
+    <rect width="4.712301587301587" height="5" fill="rgb(209, 36, 47)" x="95.28769841269842" y="0" />
   </g>
 
 </svg>

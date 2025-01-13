@@ -37,7 +37,7 @@ evaluate('every rate in rates() satisfies rate < 10', {
 * [x] Recovers on errors
 * [x] Temporal types and operations
 * [x] Built-in FEEL functions
-* [ ] Full [DMN TCK](./docs/DMN_TCK.md) compliance
+* [ ] Full [DMN TCK](https://github.com/dmn-tck/tck) compliance (cf. [coverage](./docs/DMN_TCK.md))
 
 
 ## Build and Run

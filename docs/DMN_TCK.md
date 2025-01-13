@@ -8,3 +8,5 @@ Known issues are tagged via the [`tck` label](https://github.com/nikku/feelin/is
 ## Test Results
 
 [![DMN TCK test results](./tck-results.svg)](https://github.com/nikku/feelin/actions/workflows/DMN_TCK.yml?query=branch%3Amain)
+
+🟢 = Passing, 🔴 = Failing, 🩶 = Pending (i.e. because being intentionally unsupported).

@@ -957,7 +957,7 @@ describe('interpreter', function() {
 
     unary({}, 'false', false);
 
-    unary(null, 'null', null);
+    unary(null, 'null', true);
     unary(null, '[null]', true);
     unary(null, '> 20', null);
     unary(null, '? > 20', null);
@@ -1003,7 +1003,19 @@ describe('interpreter', function() {
 
       unary(5, 'not([5..6], 1)', false);
 
-      unary(5, 'not(null)', null);
+      unary(5, 'not(null)', true);
+
+      unary(null, 'not(null)', false);
+
+      unary(null, 'not("someValue", null)', false);
+
+      unary('"someValue"', 'not("someValue", null)', false);
+
+      unary('"otherValue"', 'not("someValue", null)', true);
+
+      unary('"value1"', 'not("value1", "value2")', false);
+
+      unary('"value3"', 'not("value1", "value2")', true);
 
       unary({ '?': {} }, 'not(null)', null);
 

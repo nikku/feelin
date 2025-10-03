@@ -2,6 +2,8 @@ import { Tree, SyntaxNodeRef, SyntaxNode } from '@lezer/common';
 
 import { builtins } from './builtins.js';
 
+import { has } from 'min-dash';
+
 import {
   Range,
   FunctionWrapper,
@@ -746,7 +748,16 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     }
   })();
 
-  case 'PositiveUnaryTest': return args[0];
+  case 'PositiveUnaryTest': return (context) => {
+
+    // ensure that we strictly compare boolean values
+    // with the implicit context value, if we match a unary test
+    if (args[0].type === 'boolean' && has(context, '?')) {
+      return args[0](context) === context['?'];
+    }
+
+    return args[0](context);
+  };
 
   case 'ParenthesizedExpression': return args[1];
 
@@ -896,16 +907,12 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
           return test.includes(value);
         }
 
-        if (test === null) {
-          return null;
-        }
-
         if (typeof test === 'boolean') {
           return test;
         }
 
         return compareValue(test, value);
-      }).reduce(combineResult, undefined);
+      }).some(v => v === true);
 
       return matches === null ? null : (negate ? !matches : matches);
     };
@@ -1236,15 +1243,6 @@ function tag<Z, T extends ContextFn<Z>>(fn: T, type: string) : T & TaggedFn {
       return `TaggedFunction[${type}] ${Function.prototype.toString.call(fn)}`;
     }
   });
-}
-
-function combineResult(result, match) {
-
-  if (!result) {
-    return match;
-  }
-
-  return result;
 }
 
 function isTruthy(obj) {

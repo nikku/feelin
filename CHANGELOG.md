@@ -9,7 +9,7 @@ ___Note:__ Yet to be released changes appear here._
 ## 4.4.0
 
 * `FIX`: correct unary test handling of `null` and `boolean` values ([#117](https://github.com/nikku/feelin/pull/117), [#71](https://github.com/nikku/feelin/issues/71), [#115](https://github.com/nikku/feelin/issues/115))
-* `DEPS`: update to `lezer-feel@1.7.0`
+* `DEPS`: update to `lezer-feel@1.9.0`
 
 ## 4.3.0
 

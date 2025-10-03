@@ -957,15 +957,33 @@ describe('interpreter', function() {
 
     unary({}, 'false', false);
 
-    unary(null, 'null', null);
+    unary(null, 'null', true);
+    unary(null, '= null', true);
     unary(null, '[null]', true);
-    unary(null, '> 20', null);
-    unary(null, '? > 20', null);
+    unary(null, '> 20', false);
+    unary(null, '? > 20', true);
 
-    unarySkip(null, 'null > 20', true);
-    unarySkip(null, 'not(null > 20)', false);
+    unary(null, '> 20', false);
+    unary(null, '? > 20', true);
+
+    unary(null, '= "A"', false);
+    unary(null, '> 5', false);
+    unary(null, 'not (> 5)', true);
+    unary(null, '[1..10], null', true);
+    unary(null, '> 5, = null', true);
+    unary(null, '> 5 and = null', false);
+    unary(null, 'not(= null)', false);
+
+    unary(null, 'null > 20', true);
+    unary(null, 'not(null > 20)', false);
 
     unary(null, '3 > 1', true);
+
+    unary(null, 'true', false);
+    unary(null, 'false', false);
+
+    unary(false, 'false', true);
+    unary(true, 'true', true);
 
 
     describe('Interval', function() {
@@ -995,7 +1013,7 @@ describe('interpreter', function() {
 
     describe('negation', function() {
 
-      unary({ '?': {} }, 'not(true)', false);
+      unary({ '?': {} }, 'not(true)', true);
 
       unary({ '?': {} }, 'not(false)', true);
 
@@ -1003,15 +1021,24 @@ describe('interpreter', function() {
 
       unary(5, 'not([5..6], 1)', false);
 
-      unary(5, 'not(null)', null);
+      unary(5, 'not(null)', true);
 
-      unary({ '?': {} }, 'not(null)', null);
+      unary({ '?': {} }, 'not(null)', true);
 
-      unary({ '?': {} }, 'not(0)', null);
+      unary({ '?': {} }, 'not(0)', true);
 
-      unary({ '?': {} }, 'not(1)', null);
+      unary({ '?': {} }, 'not(1)', true);
 
-      unary({ '?': {} }, 'not("true")', null);
+      unary({ '?': {} }, 'not("true")', true);
+
+      unary(null, 'not(null)', false);
+      unary(null, 'not("someValue", null)', false);
+
+      unary('someValue', 'not("someValue", null)', false);
+      unary('otherValue', 'not("someValue", null)', true);
+
+      unary('value1', 'not("value1", "value2")', false);
+      unary('value1', 'not("value2", "value3")', true);
 
     });
 
@@ -1410,6 +1437,7 @@ function unaryOnly(...args) {
   });
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function unarySkip(...args) {
   return createUnaryVerifier({
     args,

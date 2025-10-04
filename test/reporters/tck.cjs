@@ -89,9 +89,15 @@ function TckReporter(runner, options) {
   </defs>
 
   <g clip-path="url(#round-corners)">
-    <rect width="${ passesPercentage }" height="5" fill="rgb(26, 127, 55)" x="0" y="0" />
-    <rect width="${ pendingPercentage }" height="5" fill="rgb(200, 200, 200)" x="${ passesPercentage }" y="0" />
-    <rect width="${ failuresPercentage }" height="5" fill="rgb(209, 36, 47)" x="${ passesPercentage + pendingPercentage }" y="0" />
+    <rect width="${ passesPercentage }" height="5" fill="rgb(26, 127, 55)" x="0" y="0">
+      <title>${passes} tests passing</title>
+    </rect>
+    <rect width="${ pendingPercentage }" height="5" fill="rgb(200, 200, 200)" x="${ passesPercentage }" y="0">
+      <title>${pending} tests pending</title>
+    </rect>
+    <rect width="${ failuresPercentage }" height="5" fill="rgb(209, 36, 47)" x="${ passesPercentage + pendingPercentage }" y="0">
+      <title>${failures} tests failing</title>
+    </rect>
   </g>
 
 </svg>`;

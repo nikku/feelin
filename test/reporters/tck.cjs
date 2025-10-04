@@ -121,9 +121,12 @@ function TckReporter(runner, options) {
       }
     })();
 
-    const diff = testDiff(failedTests, oldResults.failedTests);
+    console.error(`INFO: Executed ${tests} tests (${passes} passing, ${pending} pending, ${failures} failures)`);
+    if (oldResults.failures !== results.failures) {
+      const diff = testDiff(failedTests, oldResults.failedTests);
 
-    console.log(`INFO: Completed with ${results.failures}${oldResults.failures == results.failures ? '' : ` (${oldResults.failures > results.failures ? '-' : '+'}${Math.abs(results.failures - oldResults.failures)})`} failures${diff ? ':' + diff : '.'}`);
+      console.log(`WARN: Diff (${oldResults.failures > results.failures ? '-' : '+'}${Math.abs(results.failures - oldResults.failures)}) from expected failures: ${diff}`);
+    }
 
     if (process.env.DRY_RUN === 'false') {
       console.log('INFO: Writing test results.');

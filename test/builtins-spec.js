@@ -433,6 +433,8 @@ describe('builtin functions', function() {
     expr('round up(-5.5, 0)', -6);
     expr('round up(1.121, 2)', 1.13);
     expr('round up(-1.126, 2)', -1.13);
+    expr('round up(1.000000000000121, 14)', 1.00000000000013);
+    expr('round up(-1.000000000000126, 14)', -1.00000000000013);
     expr('round up(null, 2)', null);
     expr('round up(1.121, null)', null);
 
@@ -440,6 +442,8 @@ describe('builtin functions', function() {
     expr('round down(-5.5, 0)', -5);
     expr('round down(1.121, 2)', 1.12);
     expr('round down(-1.126, 2)', -1.12);
+    expr('round down(1.000000000000121, 14)', 1.00000000000012);
+    expr('round down(-1.000000000000126, 14)', -1.00000000000012);
     expr('round down(null, 2)', null);
     expr('round down(1.121, null)', null);
 
@@ -447,6 +451,8 @@ describe('builtin functions', function() {
     expr('round half up(-5.5, 0)', -6);
     expr('round half up(1.121, 2)', 1.12);
     expr('round half up(-1.126, 2)', -1.13);
+    expr('round half up(1.000000000000121, 14)', 1.00000000000012);
+    expr('round half up(-1.000000000000126, 14)', -1.00000000000013);
     expr('round half up(null, 2)', null);
     expr('round half up(1.121, null)', null);
 
@@ -454,6 +460,8 @@ describe('builtin functions', function() {
     expr('round half down(-5.5, 0)', -5);
     expr('round half down(1.121, 2)', 1.12);
     expr('round half down(-1.126, 2)', -1.13);
+    expr('round half down(1.000000000000121, 14)', 1.00000000000012);
+    expr('round half down(-1.000000000000126, 14)', -1.00000000000013);
     expr('round half down(null, 2)', null);
     expr('round half down(1.121, null)', null);
 

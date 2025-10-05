@@ -8,10 +8,6 @@ jobs:
   Build:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: read
-      issues: write
-
     steps:
     - name: Checkout
       uses: actions/checkout@v5
@@ -34,12 +30,21 @@ jobs:
       env:
         TCK_DIR: tmp/dmn-tck
         DRY_RUN: false
-    - name: Propose update to TCK results
+    - name: Generate API Token
+      id: app-token
+      uses: actions/create-github-app-token@v2
+      with:
+        app-id: ${{ secrets.TOKEN_APP_ID }}
+        private-key: ${{ secrets.TOKEN_APP_KEY }}
+    - name: Create TCK results update PR
       uses: peter-evans/create-pull-request@v7
       with:
+        token: ${{ steps.app-token.outputs.token }}
         commit-message: |
           test(tck): update results
         branch: update-dmn-tck-status
-        title: Update DMN_TCK test results
+        title: Update results of DMN TCK tests
         body: |
-          Updating DMN_TCK results after test failure in [this action](https://github.com/nikku/feelin/actions/runs/${{ github.run_id }}).
+          ### Proposed changes
+
+          Triggered by [this action](https://github.com/nikku/feelin/actions/runs/${{ github.run_id }}) this PR updates the DMN TCK test results.

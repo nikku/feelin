@@ -1,7 +1,5 @@
 name: DMN_TCK
 on:
-  schedule:
-    - cron: '* 1 * * *'
   push:
   pull_request:
 
@@ -30,29 +28,3 @@ jobs:
       run: npm run tck
       env:
         TCK_DIR: tmp/dmn-tck
-
-  Propose_TCK_Update:
-    runs-on: ubuntu-latest
-    if: ${{ failure() }}
-
-    needs: Build
-
-    permissions:
-      contents: read
-      issues: write
-
-    steps:
-    - name: Update TCK results
-      run: npm run tck
-      env:
-        TCK_DIR: tmp/dmn-tck
-        DRY_RUN: false
-    - name: Propose update to TCK results
-      uses: peter-evans/create-pull-request@v7
-      with:
-        commit-message: |
-          test(tck): update results
-        branch: update-dmn-tck-status
-        title: Update DMN_TCK test results
-        body: |
-          Updating DMN_TCK results after test failure in [this action](https://github.com/nikku/feelin/actions/runs/${{ github.run_id }}).

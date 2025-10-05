@@ -6,6 +6,10 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 4.5.0
+
+* `FEAT`: add `round*` builtins ([#40](https://github.com/nikku/feelin/issues/40), [#79](https://github.com/nikku/feelin/pull/79))
+
 ## 4.4.0
 
 * `FIX`: correct unary test handling of `null` and `boolean` values ([#117](https://github.com/nikku/feelin/pull/117), [#71](https://github.com/nikku/feelin/issues/71), [#115](https://github.com/nikku/feelin/issues/115))

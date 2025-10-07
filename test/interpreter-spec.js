@@ -420,6 +420,15 @@ describe('interpreter', function() {
 
       expr('some e in 1 satisfies e != 2', null);
 
+      expr('some x in [true] satisfies true', true);
+      expr('some x in true satisfies true', null);
+
+      expr('some x in [false] satisfies true', true);
+      expr('some x in false satisfies true', null);
+
+      expr('some x in [false] satisfies false', false);
+      expr('some x in false satisfies false', null);
+
     });
 
 
@@ -984,6 +993,17 @@ describe('interpreter', function() {
 
     unary(false, 'false', true);
     unary(true, 'true', true);
+    unary(null, '1 + null', true);
+
+    // cf. https://github.com/nikku/feelin/issues/121
+    // the result of the expression <some ...> is matched to the input value
+    // <null> testing for equality
+    unary(null, 'some x in null satisfies true', true);
+    unary(null, 'some x in [] satisfies true', false);
+    unary([ true ], 'some x in ? satisfies true', true);
+    unary(true, 'some x in ? satisfies true', false);
+    unary([ false ], 'some x in ? satisfies true', true);
+    unary(false, 'some x in ? satisfies true', false);
 
 
     describe('Interval', function() {

@@ -756,9 +756,9 @@ const builtins = {
     throw notImplemented('finished by');
   }, [ 'any?' ]),
 
-  'includes': fn(function() {
-    throw notImplemented('includes');
-  }, [ 'any?' ]),
+  'includes': fn(function(range, value) {
+    return includesRange(range, value);
+  }, [ 'range', 'any' ]),
 
   'during': fn(function() {
     throw notImplemented('during');
@@ -1085,6 +1085,52 @@ function before(a, b) {
   }
 
   return a < b;
+}
+
+/**
+ * @param {Range} container - The range that should contain the other value
+ * @param {Range|number} value - The range or point to check if contained
+ */
+function includesRange(container, value) {
+  if (!(container instanceof Range)) {
+    return false;
+  }
+
+  // Range includes another range
+  if (value instanceof Range) {
+    const startOk = (
+      container.start < value.start ||
+      (
+        container.start === value.start &&
+        (container['start included'] || !value['start included'])
+      )
+    );
+
+    // Check end boundary: container.end >= value.end
+    const endOk = (
+      container.end > value.end ||
+      (
+        container.end === value.end &&
+        (container['end included'] || !value['end included'])
+      )
+    );
+
+    return startOk && endOk;
+  }
+
+  // Range includes a point
+  // Check if point is within [start, end] considering inclusive/exclusive
+  const afterStart = (
+    value > container.start ||
+    (value === container.start && container['start included'])
+  );
+
+  const beforeEnd = (
+    value < container.end ||
+    (value === container.end && container['end included'])
+  );
+
+  return afterStart && beforeEnd;
 }
 
 function sum(list) {

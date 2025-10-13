@@ -739,6 +739,28 @@ describe('builtin functions', function() {
     expr('overlaps( (5..8], [1..5] )', false);
     expr('overlaps( [5..8], [1..5) )', false);
     expr('overlaps( (5..8], [1..5) )', false);
+
+    // includes tests
+    expr('includes( [1..10], [4..6] )', true);
+    expr('includes( [1..10], [1..10] )', true);
+    expr('includes( [1..10], (1..10) )', true);
+    expr('includes( (1..10), [1..10] )', false);
+    expr('includes( [1..10], [1..5] )', true);
+    expr('includes( [1..10], [5..10] )', true);
+    expr('includes( [1..10], (1..5] )', true);
+    expr('includes( [1..10], [5..10) )', true);
+    expr('includes( [1..10], [0..5] )', false);
+    expr('includes( [1..10], [5..11] )', false);
+    expr('includes( [1..10], 5 )', true);
+    expr('includes( [1..10], 1 )', true);
+    expr('includes( [1..10], 10 )', true);
+    expr('includes( (1..10), 1 )', false);
+    expr('includes( (1..10], 10 )', true);
+    expr('includes( [1..10), 10 )', false);
+    expr('includes( [1..10], 0 )', false);
+    expr('includes( [1..10], 11 )', false);
+    expr('includes( [1..a], 11 )', true, { a: 11 });
+    expr('includes( [1..a], 11 )', false, { a: 10 });
   });
 
 

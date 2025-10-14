@@ -6,6 +6,10 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 4.6.0
+
+* `FEAT`: implement `includes` function ([#123](https://github.com/nikku/feelin/pull/123))
+
 ## 4.5.0
 
 * `FEAT`: add `round*` builtins ([#40](https://github.com/nikku/feelin/issues/40), [#79](https://github.com/nikku/feelin/pull/79))

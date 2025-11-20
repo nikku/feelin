@@ -10,9 +10,9 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
     - name: Checkout TCK repo
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
       with:
         repository: dmn-tck/tck
         path: tmp/dmn-tck

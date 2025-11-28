@@ -6,8 +6,18 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 5.0.0
+
+* `FEAT`: turn into ESM only package ([#133](https://github.com/nikku/feelin/pull/133))
+* `FIX`: make named function parameters minification safe ([#132](https://github.com/nikku/feelin/pull/132), [#14](https://github.com/nikku/feelin/issue/14))
+* `FIX`: correct various named parameters for built-ins ([#132](https://github.com/nikku/feelin/pull/132))
+* `DEPS`: explicitly depend on `min-dash@4.2.3` ([#134](https://github.com/nikku/feelin/pull/134))
 * `DEPS`: update to `@lezer/lr@1.4.3`
 * `DEPS`: update to `luxon@3.7.2`
+
+### Breaking Changes
+
+* Require `Node >= 20.12.0` to consume ESM module from CJS ([#133](https://github.com/nikku/feelin/pull/133))
 
 ## 4.6.0
 

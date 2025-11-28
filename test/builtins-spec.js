@@ -173,6 +173,8 @@ describe('builtin functions', function() {
     expr('not(true)', false);
     expr('not(false)', true);
 
+    expr('not(negand: true)', false);
+
   });
 
 

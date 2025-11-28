@@ -318,8 +318,8 @@ const builtins = {
   }, []),
 
   // 10.3.4.2 Boolean function
-  'not': fn(function(bool) {
-    return isType(bool, 'boolean') ? !bool : null;
+  'not': fn(function(negand) {
+    return isType(negand, 'boolean') ? !negand : null;
   }, [ 'any' ]),
 
   // 10.3.4.3 String functions

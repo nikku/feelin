@@ -165,7 +165,7 @@ const builtins = {
     }
 
     return toString(from);
-  }, [ 'any' ]),
+  }, [ 'any' ], [ 'from' ]),
 
   // date(from) => date string
   // date(from) => date and time
@@ -201,7 +201,7 @@ const builtins = {
     }
 
     return d && ifValid(d.setZone('utc').startOf('day')) || null;
-  }, [ 'any?', 'number?', 'number?', 'any?' ]),
+  }, [ 'any?', 'number?', 'number?', 'any?' ], [ 'year', 'month', 'day', 'from' ]),
 
   // date and time(from) => date time string
   // date and time(date, time)
@@ -280,15 +280,15 @@ const builtins = {
     }
 
     return t && ifValid(t) || null;
-  }, [ 'any?', 'number?', 'number?', 'any?', 'any?' ]),
+  }, [ 'any?', 'number?', 'number?', 'any?', 'any?' ], [ 'hour', 'minute', 'second', 'offset', 'from' ]),
 
   'duration': fn(function(from) {
     return ifValid(duration(from));
-  }, [ 'string' ]),
+  }, [ 'string' ], [ 'from' ]),
 
   'years and months duration': fn(function(from, to) {
     return ifValid(to.diff(from, [ 'years', 'months' ]));
-  }, [ 'date', 'date' ]),
+  }, [ 'date', 'date' ], [ 'from', 'to' ]),
 
   '@': fn(function(string) {
 
@@ -311,16 +311,16 @@ const builtins = {
 
   'now': fn(function() {
     return date();
-  }, []),
+  }, [], []),
 
   'today': fn(function() {
     return date().startOf('day');
-  }, []),
+  }, [], []),
 
   // 10.3.4.2 Boolean function
   'not': fn(function(negand) {
     return isType(negand, 'boolean') ? !negand : null;
-  }, [ 'any' ]),
+  }, [ 'any' ], [ 'negand' ]),
 
   // 10.3.4.3 String functions
   'substring': fn(function(string, start, length) {
@@ -338,15 +338,15 @@ const builtins = {
 
   'string length': fn(function(string) {
     return countSymbols(string);
-  }, [ 'string' ]),
+  }, [ 'string' ], [ 'string' ]),
 
   'upper case': fn(function(string) {
     return string.toUpperCase();
-  }, [ 'string' ]),
+  }, [ 'string' ], [ 'string' ]),
 
   'lower case': fn(function(string) {
     return string.toLowerCase();
-  }, [ 'string' ]),
+  }, [ 'string' ], [ 'string' ]),
 
   'substring before': fn(function(string, match) {
 
@@ -357,7 +357,7 @@ const builtins = {
     }
 
     return string.substring(0, index);
-  }, [ 'string', 'string' ]),
+  }, [ 'string', 'string' ], [ 'string', 'match' ]),
 
   'substring after': fn(function(string, match) {
 
@@ -368,37 +368,37 @@ const builtins = {
     }
 
     return string.substring(index + match.length);
-  }, [ 'string', 'string' ]),
+  }, [ 'string', 'string' ], [ 'string', 'match' ]),
 
   'replace': fn(function(input, pattern, replacement, flags) {
     const regexp = createRegexp(pattern, flags || '', 'g');
 
     return regexp && input.replace(regexp, replacement.replace(/\$0/g, '$$&'));
-  }, [ 'string', 'string', 'string', 'string?' ]),
+  }, [ 'string', 'string', 'string', 'string?' ], [ 'input', 'pattern', 'replacement', 'flags' ]),
 
   'contains': fn(function(string, match) {
     return string.includes(match);
-  }, [ 'string', 'string' ]),
+  }, [ 'string', 'string' ], [ 'string', 'match' ]),
 
   'matches': fn(function(input, pattern, flags) {
     const regexp = createRegexp(pattern, flags || '', '');
 
     return regexp && regexp.test(input);
-  }, [ 'string', 'string', 'string?' ]),
+  }, [ 'string', 'string', 'string?' ], [ 'input', 'pattern', 'flags' ]),
 
   'starts with': fn(function(string, match) {
     return string.startsWith(match);
-  }, [ 'string', 'string' ]),
+  }, [ 'string', 'string' ], [ 'string', 'match' ]),
 
   'ends with': fn(function(string, match) {
     return string.endsWith(match);
-  }, [ 'string', 'string' ]),
+  }, [ 'string', 'string' ], [ 'string', 'match' ]),
 
   'split': fn(function(string, delimiter) {
     const regexp = createRegexp(delimiter, '', '');
 
     return regexp && string.split(regexp);
-  }, [ 'string', 'string' ]),
+  }, [ 'string', 'string' ], [ 'string', 'delimiter' ]),
 
   'string join': fn(function(list, delimiter) {
     if (list.some(e => !isString(e) && e !== null)) {
@@ -406,13 +406,13 @@ const builtins = {
     }
 
     return list.filter(l => l !== null).join(delimiter || '');
-  }, [ 'list', 'string?' ]),
+  }, [ 'list', 'string?' ], [ 'list', 'delimiter' ]),
 
   // 10.3.4.4 List functions
 
   'list contains': fn(function(list, element) {
     return list.some(el => matches(el, element));
-  }, [ 'list', 'any?' ]),
+  }, [ 'list', 'any?' ], [ 'list', 'element' ]),
 
   // list replace(list, position, newItem)
   // list replace(list, match, newItem)
@@ -425,29 +425,29 @@ const builtins = {
     }
 
     return listReplace(list, position || match, newItem);
-  }, [ 'list', 'any?', 'any', 'function?' ]),
+  }, [ 'list', 'any?', 'any', 'function?' ], [ 'list', 'position', 'newItem', 'match' ]),
 
   'count': fn(function(list) {
     return list.length;
-  }, [ 'list' ]),
+  }, [ 'list' ], [ 'list' ]),
 
   'min': listFn(function(...list) {
     return list.reduce((min, el) => min === null ? el : Math.min(min, el), null);
-  }, 'number'),
+  }, 'number', [ '...list' ]),
 
   'max': listFn(function(...list) {
     return list.reduce((max, el) => max === null ? el : Math.max(max, el), null);
-  }, 'number'),
+  }, 'number', [ '...list' ]),
 
   'sum': listFn(function(...list) {
     return sum(list);
-  }, 'number'),
+  }, 'number', [ '...list' ]),
 
   'mean': listFn(function(...list) {
     const s = sum(list);
 
     return s === null ? s : s / list.length;
-  }, 'number'),
+  }, 'number', [ '...list' ]),
 
   'all': listFn(function(...list) {
 
@@ -466,7 +466,7 @@ const builtins = {
 
     return nonBool ? null : true;
 
-  }, 'any?'),
+  }, 'any?', [ '...list' ]),
 
   'any': listFn(function(...list) {
 
@@ -484,7 +484,7 @@ const builtins = {
     }
 
     return nonBool ? null : false;
-  }, 'any?'),
+  }, 'any?', [ '...list' ]),
 
   'sublist': fn(function(list, start, length) {
 
@@ -496,11 +496,11 @@ const builtins = {
         : list.slice(_start)
     );
 
-  }, [ 'list', 'number', 'number?' ]),
+  }, [ 'list', 'number', 'number?' ], [ 'list', 'start', 'length' ]),
 
   'append': fn(function(list, ...items) {
     return list.concat(items);
-  }, [ 'list', 'any?' ]),
+  }, [ 'list', 'any?' ], [ 'list', '...item' ]),
 
   'concatenate': fn(function(...list) {
 
@@ -508,19 +508,19 @@ const builtins = {
       return result.concat(arg);
     }, []);
 
-  }, [ 'any' ]),
+  }, [ 'any' ], [ '...list' ]),
 
   'insert before': fn(function(list, position, newItem) {
     return list.slice(0, position - 1).concat([ newItem ], list.slice(position - 1));
-  }, [ 'list', 'number', 'any?' ]),
+  }, [ 'list', 'number', 'any?' ], [ 'list', 'position', 'newItem' ]),
 
   'remove': fn(function(list, position) {
     return list.slice(0, position - 1).concat(list.slice(position));
-  }, [ 'list', 'number' ]),
+  }, [ 'list', 'number' ], [ 'list', 'position' ]),
 
   'reverse': fn(function(list) {
     return list.slice().reverse();
-  }, [ 'list' ]),
+  }, [ 'list' ], [ 'list' ]),
 
   'index of': fn(function(list, match) {
 
@@ -532,7 +532,7 @@ const builtins = {
 
       return result;
     }, []);
-  }, [ 'list', 'any' ]),
+  }, [ 'list', 'any' ], [ 'list', 'match' ]),
 
   'union': listFn(function(...lists) {
 
@@ -547,7 +547,7 @@ const builtins = {
       }, result);
     }, []);
 
-  }, 'list'),
+  }, 'list', [ '...list' ]),
 
   'distinct values': fn(function(list) {
     return list.reduce((result, e) => {
@@ -557,11 +557,11 @@ const builtins = {
 
       return result;
     }, []);
-  }, [ 'list' ]),
+  }, [ 'list' ], [ 'list' ]),
 
   'flatten': fn(function(list) {
     return flatten(list);
-  }, [ 'list' ]),
+  }, [ 'list' ], [ 'list' ]),
 
   'product': listFn(function(...list) {
 
@@ -572,7 +572,7 @@ const builtins = {
     return list.reduce((result, n) => {
       return result * n;
     }, 1);
-  }, 'number'),
+  }, 'number', [ '...list' ]),
 
   'median': listFn(function(...list) {
 
@@ -581,7 +581,7 @@ const builtins = {
     }
 
     return median(list);
-  }, 'number'),
+  }, 'number', [ '...list' ]),
 
   'stddev': listFn(function(...list) {
 
@@ -590,18 +590,18 @@ const builtins = {
     }
 
     return stddev(list);
-  }, 'number'),
+  }, 'number', [ '...list' ]),
 
   'mode': listFn(function(...list) {
     return mode(list);
-  }, 'number'),
+  }, 'number', [ '...list' ]),
 
 
   // 10.3.4.5 Numeric functions
   'decimal': fn(function(n, scale) {
     if (n === null || scale === null) return null;
     return offsetted(bankersRound, n, scale);
-  }, [ 'number', 'number' ]),
+  }, [ 'number', 'number' ], [ 'n', 'scale' ]),
 
   'floor': fn(function(n, scale = 0) {
 
@@ -612,7 +612,7 @@ const builtins = {
     const adjust = 10 ** scale;
 
     return Math.floor(n * adjust) / adjust;
-  }, [ 'number', 'number?' ]),
+  }, [ 'number', 'number?' ], [ 'n', 'scale' ]),
 
   'ceiling': fn(function(n, scale = 0) {
 
@@ -623,7 +623,7 @@ const builtins = {
     const adjust = 10 ** scale;
 
     return Math.ceil(n * adjust) / adjust;
-  }, [ 'number', 'number?' ]),
+  }, [ 'number', 'number?' ], [ 'n', 'scale' ]),
 
   'abs': fn(function(n) {
 
@@ -632,17 +632,17 @@ const builtins = {
     }
 
     return Math.abs(n);
-  }, [ 'number' ]),
+  }, [ 'number' ], [ 'n' ]),
 
   'round up': fn(function(n, scale) {
     if (n === null || scale === null) return null;
     return n > 0 ? offsetted(Math.ceil, n, scale) : offsetted(Math.floor, n, scale);
-  }, [ 'number', 'number' ]),
+  }, [ 'number', 'number' ], [ 'n', 'scale' ]),
 
   'round down': fn(function(n, scale) {
     if (n === null || scale === null) return null;
     return n > 0 ? offsetted(Math.floor, n, scale) : offsetted(Math.ceil, n, scale);
-  }, [ 'number', 'number' ]),
+  }, [ 'number', 'number' ], [ 'n', 'scale' ]),
 
   'round half up': fn(function(n, scale) {
     if (n === null || scale === null) return null;
@@ -651,7 +651,7 @@ const builtins = {
       return offsetted(n > 0 ? Math.ceil : Math.floor, n, scale);
     }
     return offsetted(Math.round, n, scale);
-  }, [ 'number', 'number' ]),
+  }, [ 'number', 'number' ], [ 'n', 'scale' ]),
 
   'round half down': fn(function(n, scale) {
     if (n === null || scale === null) return null;
@@ -660,7 +660,7 @@ const builtins = {
       return offsetted(n > 0 ? Math.floor : Math.ceil, n, scale);
     }
     return offsetted(Math.round, n, scale);
-  }, [ 'number', 'number' ]),
+  }, [ 'number', 'number' ], [ 'n', 'scale' ]),
 
   'modulo': fn(function(dividend, divisor) {
 
@@ -675,7 +675,7 @@ const builtins = {
     // need to round here as using this custom modulo
     // variant is prone to rounding errors
     return Math.round((dividend % divisor + divisor) % divisor * adjust) / adjust;
-  }, [ 'number', 'number' ]),
+  }, [ 'number', 'number' ], [ 'dividend', 'divisor' ]),
 
   'sqrt': fn(function(number) {
 
@@ -684,7 +684,7 @@ const builtins = {
     }
 
     return Math.sqrt(number);
-  }, [ 'number' ]),
+  }, [ 'number' ], [ 'number' ]),
 
   'log': fn(function(number) {
     if (number <= 0) {
@@ -692,19 +692,19 @@ const builtins = {
     }
 
     return Math.log(number);
-  }, [ 'number' ]),
+  }, [ 'number' ], [ 'number' ]),
 
   'exp': fn(function(number) {
     return Math.exp(number);
-  }, [ 'number' ]),
+  }, [ 'number' ], [ 'number' ]),
 
   'odd': fn(function(number) {
     return Math.abs(number) % 2 === 1;
-  }, [ 'number' ]),
+  }, [ 'number' ], [ 'number' ]),
 
   'even': fn(function(number) {
     return Math.abs(number) % 2 === 0;
-  }, [ 'number' ]),
+  }, [ 'number' ], [ 'number' ]),
 
 
   // 10.3.4.6 Date and time functions
@@ -716,29 +716,29 @@ const builtins = {
     }
 
     return equals(value1, value2, true);
-  }, [ 'any?', 'any?' ]),
+  }, [ 'any?', 'any?' ], [ 'value1', 'value2' ]),
 
   // 10.3.4.7 Range Functions
 
   'before': fn(function(a, b) {
     return before(a, b);
-  }, [ 'any', 'any' ]),
+  }, [ 'any', 'any' ], [ 'a', 'b' ]),
 
   'after': fn(function(a, b) {
     return before(b, a);
-  }, [ 'any', 'any' ]),
+  }, [ 'any', 'any' ], [ 'a', 'b' ]),
 
   'meets': fn(function(range1, range2) {
     return meetsRange(range1, range2);
-  }, [ 'range', 'range' ]),
+  }, [ 'range', 'range' ], [ 'range1', 'range2' ]),
 
   'met by': fn(function(range1, range2) {
     return meetsRange(range2, range1);
-  }, [ 'range', 'range' ]),
+  }, [ 'range', 'range' ], [ 'range1', 'range2' ]),
 
   'overlaps': fn(function(range1, range2) {
     return !before(range1, range2) && !before(range2, range1);
-  }, [ 'range', 'range' ]),
+  }, [ 'range', 'range' ], [ 'range1', 'range2' ]),
 
   'overlaps before': fn(function() {
     throw notImplemented('overlaps before');
@@ -758,7 +758,7 @@ const builtins = {
 
   'includes': fn(function(range, value) {
     return includesRange(range, value);
-  }, [ 'range', 'any' ]),
+  }, [ 'range', 'any' ], [ 'range', 'value' ]),
 
   'during': fn(function() {
     throw notImplemented('during');
@@ -781,26 +781,26 @@ const builtins = {
 
   'day of year': fn(function(date) {
     return date.ordinal;
-  }, [ 'date time' ]),
+  }, [ 'date time' ], [ 'date' ]),
 
   'day of week': fn(function(date) {
     return date.weekdayLong;
-  }, [ 'date time' ]),
+  }, [ 'date time' ], [ 'date' ]),
 
   'month of year': fn(function(date) {
     return date.monthLong;
-  }, [ 'date time' ]),
+  }, [ 'date time' ], [ 'date' ]),
 
   'week of year': fn(function(date) {
     return date.weekNumber;
-  }, [ 'date time' ]),
+  }, [ 'date time' ], [ 'date' ]),
 
 
   // 10.3.4.9 Sort
 
   'sort': fn(function(list, precedes) {
     return Array.from(list).sort((a, b) => precedes.invoke([ a, b ]) ? -1 : 1);
-  }, [ 'list', 'function' ]),
+  }, [ 'list', 'function' ], [ 'list', 'precedes' ]),
 
 
   // 10.3.4.10 Context function
@@ -808,7 +808,7 @@ const builtins = {
   'get value': fn(function(m, key) {
     const value = getFromContext(key, m);
     return value != undefined ? value : null;
-  }, [ 'context', 'string' ]),
+  }, [ 'context', 'string' ], [ 'm', 'key' ]),
 
   'get entries': fn(function(m) {
 
@@ -821,7 +821,7 @@ const builtins = {
     }
 
     return Object.entries(m).map(([ key, value ]) => ({ key, value }));
-  }, [ 'context' ]),
+  }, [ 'context' ], [ 'm' ]),
 
   'context': listFn(function(...entries) {
     const context = entries.reduce((context, entry) => {
@@ -851,11 +851,11 @@ const builtins = {
     }
 
     return context;
-  }, 'context'),
+  }, 'context', [ '...entries' ]),
 
   'context merge': listFn(function(...contexts) {
     return Object.assign({}, ...contexts);
-  }, 'context'),
+  }, 'context', [ '...contexts' ]),
 
   'context put': fn(function(context, keys, value, key) {
 

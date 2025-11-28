@@ -19,7 +19,7 @@
     "eslint-plugin-bpmn-io": "^2.2.0",
     "fast-glob": "^3.3.2",
     "mocha": "^11.7.5",
-    "npm-run-all2": "^8.0.0",
+    "npm-run-all2": "^8.0.4",
     "rollup": "^4.53.3",
     "saxen": "^10.0.0",
     "source-map-support": "^0.5.21",

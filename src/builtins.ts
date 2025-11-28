@@ -502,9 +502,9 @@ const builtins = {
     return list.concat(items);
   }, [ 'list', 'any?' ]),
 
-  'concatenate': fn(function(...args) {
+  'concatenate': fn(function(...list) {
 
-    return args.reduce((result, arg) => {
+    return list.reduce((result, arg) => {
       return result.concat(arg);
     }, []);
 

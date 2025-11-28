@@ -6,6 +6,9 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+* `DEPS`: update to `@lezer/lr@1.4.3`
+* `DEPS`: update to `luxon@3.7.2`
+
 ## 4.6.0
 
 * `FEAT`: implement `includes` function ([#123](https://github.com/nikku/feelin/pull/123))

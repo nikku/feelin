@@ -5,10 +5,12 @@
   "author": "Nico Rehwaldt <git_nikku@nixis.de>",
   "license": "MIT",
   "type": "module",
-  "main": "dist/index.cjs",
-  "module": "dist/index.esm.js",
   "source": "src/index.ts",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json"
+  },
   "devDependencies": {
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.3.0",
@@ -39,7 +41,7 @@
     "url": "https://github.com/nikku/feelin"
   },
   "engines": {
-    "node": "*"
+    "node": ">= 20.12.0"
   },
   "sideEffects": false,
   "scripts": {
@@ -51,7 +53,7 @@
     "dev": "run-p *:dev",
     "generate-typings": "tsc --emitDeclarationOnly --declaration --outDir dist",
     "prepare": "run-s build generate-typings",
-    "test": "mocha -r source-map-support/register test/*-spec.js",
+    "test": "mocha -r source-map-support/register test/*-spec.js test/*-spec.cjs",
     "test:dev": "chokidar '{dist,test}/**/*.js' -c 'npm test'",
     "tck": "run-s tck:extract tck:test",
     "tck:extract": "node tasks/extract-tck-tests.js",

@@ -7,7 +7,7 @@ import {
   evaluate,
   date,
   duration
-} from '../dist/index.esm.js';
+} from 'feelin';
 
 
 describe('interpreter', function() {

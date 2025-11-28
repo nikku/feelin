@@ -739,6 +739,11 @@ function describeBuiltins(name, evaluate) {
       expr('meets([0..5), [5..10])', false);
       expr('meets([0..5], [4..10])', false);
 
+      expr('met by( [5..10], [1..5] )', true);
+      expr('met by( [5..10],  [1..5) )', false);
+      expr('met by( (5..10], [1..5] )', false);
+      expr('met by( [6..10], [1..5] )', false);
+
       expr('before( 1, 10 )', true);
       expr('before( 10, 1 )', false);
       expr('before( [1..10], 10 )', false);

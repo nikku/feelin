@@ -9,7 +9,7 @@ import {
 
 import {
   evaluate
-} from '../../dist/index.esm.js';
+} from 'feelin';
 
 
 const NOT_IMPLEMENTED = {};

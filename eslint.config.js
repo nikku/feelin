@@ -83,5 +83,13 @@ export default [
       '@typescript-eslint/no-unused-expressions': 'off'
     },
     files: files.test
+  },
+  {
+    rules: {
+      '@typescript-eslint/no-require-imports': 'off'
+    },
+    files: [
+      '**/*.cjs'
+    ]
   }
 ];

@@ -14,12 +14,7 @@ export default [
     input: srcEntry,
     output: [
       {
-        file: pkg.main,
-        format: 'cjs',
-        sourcemap: true
-      },
-      {
-        file: pkg.module,
+        file: pkg.exports['.'],
         format: 'es',
         sourcemap: true
       }

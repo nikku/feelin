@@ -6,7 +6,7 @@ import {
 
 import {
   evaluate
-} from '../dist/index.esm.js';
+} from 'feelin';
 
 import {
   evaluate as evaluateMinified

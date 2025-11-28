@@ -732,8 +732,8 @@ const builtins = {
     return meetsRange(range1, range2);
   }, [ 'range', 'range' ]),
 
-  'met by': fn(function(a, b) {
-    return meetsRange(b, a);
+  'met by': fn(function(range1, range2) {
+    return meetsRange(range2, range1);
   }, [ 'range', 'range' ]),
 
   'overlaps': fn(function(range1, range2) {

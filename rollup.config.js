@@ -5,13 +5,19 @@ import terser from '@rollup/plugin-terser';
 import pkg from './package.json';
 
 
-const srcEntry = pkg.source;
+const input = pkg.source;
+
+const external = [
+  'lezer',
+  'lezer-feel',
+  'luxon'
+];
 
 export default [
 
   // library builds
   {
-    input: srcEntry,
+    input,
     output: [
       {
         file: pkg.exports['.'],
@@ -19,11 +25,7 @@ export default [
         sourcemap: true
       }
     ],
-    external: [
-      'lezer',
-      'lezer-feel',
-      'luxon'
-    ],
+    external,
     plugins: [
       typescript()
     ]
@@ -31,7 +33,7 @@ export default [
 
   // test build (minified)
   {
-    input: srcEntry,
+    input,
     output: [
       {
         file: 'tmp/feelin.min.js',
@@ -39,11 +41,7 @@ export default [
         sourcemap: true
       }
     ],
-    external: [
-      'lezer',
-      'lezer-feel',
-      'luxon'
-    ],
+    external,
     plugins: [
       typescript(),
       terser()

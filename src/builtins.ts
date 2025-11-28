@@ -728,8 +728,8 @@ const builtins = {
     return before(b, a);
   }, [ 'any', 'any' ]),
 
-  'meets': fn(function(a, b) {
-    return meetsRange(a, b);
+  'meets': fn(function(range1, range2) {
+    return meetsRange(range1, range2);
   }, [ 'range', 'range' ]),
 
   'met by': fn(function(a, b) {

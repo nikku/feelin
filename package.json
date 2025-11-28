@@ -11,7 +11,7 @@
   "types": "dist/index.d.ts",
   "devDependencies": {
     "@rollup/plugin-typescript": "^12.1.2",
-    "@types/luxon": "^3.4.2",
+    "@types/luxon": "^3.7.1",
     "@types/mocha": "^10.0.10",
     "chai": "^6.2.1",
     "chokidar-cli": "^3.0.0",
@@ -31,7 +31,7 @@
   "dependencies": {
     "@lezer/lr": "^1.4.2",
     "lezer-feel": "^1.9.0",
-    "luxon": "^3.5.0"
+    "luxon": "^3.7.2"
   },
   "repository": {
     "type": "git",

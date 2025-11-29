@@ -33,7 +33,7 @@
     "typescript-eslint": "^8.48.0"
   },
   "dependencies": {
-    "@lezer/lr": "^1.4.3",
+    "@lezer/common": "^1.4.0",
     "lezer-feel": "^1.9.0",
     "luxon": "^3.7.2",
     "min-dash": "^4.2.3"

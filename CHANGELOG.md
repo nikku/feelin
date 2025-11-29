@@ -6,6 +6,8 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 5.1.0
+
 * `DEPS`: update to `lezer-feel@2.0.0`
 
 ## 5.0.2

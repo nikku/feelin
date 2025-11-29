@@ -1,6 +1,6 @@
 {
   "name": "feelin",
-  "version": "5.0.2",
+  "version": "5.1.0",
   "description": "A FEEL parser and interpreter",
   "author": "Nico Rehwaldt <git_nikku@nixis.de>",
   "license": "MIT",

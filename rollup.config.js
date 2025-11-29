@@ -8,7 +8,6 @@ import pkg from './package.json';
 const input = pkg.source;
 
 const external = [
-  'lezer',
   'lezer-feel',
   'luxon',
   'min-dash'

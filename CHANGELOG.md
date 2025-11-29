@@ -6,6 +6,10 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 5.0.1
+
+* `CHORE`: restore `main` export
+
 ## 5.0.0
 
 * `FEAT`: turn into ESM only package ([#133](https://github.com/nikku/feelin/pull/133))

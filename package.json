@@ -7,6 +7,7 @@
   "type": "module",
   "source": "src/index.ts",
   "types": "dist/index.d.ts",
+  "main": "./dist/index.js",
   "exports": {
     ".": "./dist/index.js",
     "./package.json": "./package.json"

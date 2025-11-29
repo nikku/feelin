@@ -6,6 +6,10 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 5.0.2
+
+* `DEPS`: depend on `@lezer/common` instead of `@lezer/lr`
+
 ## 5.0.1
 
 * `CHORE`: restore `main` export

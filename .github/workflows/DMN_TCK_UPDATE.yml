@@ -37,7 +37,7 @@ jobs:
         app-id: ${{ secrets.TOKEN_APP_ID }}
         private-key: ${{ secrets.TOKEN_APP_KEY }}
     - name: Create TCK results update PR
-      uses: peter-evans/create-pull-request@v7
+      uses: peter-evans/create-pull-request@v8
       with:
         token: ${{ steps.app-token.outputs.token }}
         commit-message: |

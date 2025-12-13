@@ -36,7 +36,7 @@
     "@lezer/common": "^1.4.0",
     "lezer-feel": "^2.1.0",
     "luxon": "^3.7.2",
-    "min-dash": "^4.2.3"
+    "min-dash": "^5.0.0"
   },
   "repository": {
     "type": "git",

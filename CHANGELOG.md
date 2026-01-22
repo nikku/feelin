@@ -6,6 +6,15 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 6.0.0
+
+* `FEAT`: report `null` conversion with cause as warnings ([#37](https://github.com/nikku/feelin/issues/37), [#126](https://github.com/nikku/feelin/issues/126), [#139](https://github.com/nikku/feelin/pull/139))
+
+### Breaking Changes
+
+* API changed to return `{ value, warnings }` ([#139](https://github.com/nikku/feelin/pull/139))
+* `InterpreterContext` type renamed to `EvalContext` ([#139](https://github.com/nikku/feelin/pull/139))
+
 ## 5.3.0
 
 * `DEPS`: update to `lezer-feel@2.2.0`

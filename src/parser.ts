@@ -6,10 +6,9 @@ import {
 import { Tree } from '@lezer/common';
 
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ParseContext = Record<string, any>;
+export type ParseContext = Record<string, unknown>;
 
-export function parseExpression(expression: string, context: ParseContext = {}, dialect?: string): Tree {
+export function parseExpression(expression: string, context: ParseContext = {}, dialect: string | undefined): Tree {
   return parser.configure({
     top: 'Expression',
     contextTracker: trackVariables(context),
@@ -17,7 +16,7 @@ export function parseExpression(expression: string, context: ParseContext = {}, 
   }).parse(expression);
 }
 
-export function parseUnaryTests(expression: string, context: ParseContext = {}, dialect?: string): Tree {
+export function parseUnaryTests(expression: string, context: ParseContext = {}, dialect: string | undefined): Tree {
   return parser.configure({
     top: 'UnaryTests',
     contextTracker: trackVariables(context),

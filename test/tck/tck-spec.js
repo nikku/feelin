@@ -101,7 +101,7 @@ describe('tck', function() {
 
 function tryEval(expr, context = {}) {
   try {
-    return evaluate(expr, context);
+    return evaluate(expr, context).value;
   } catch (err) {
     if (err.message.startsWith('not implemented')) {
       return NOT_IMPLEMENTED;

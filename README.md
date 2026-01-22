@@ -13,22 +13,36 @@ import {
   evaluate
 } from 'feelin';
 
-unaryTest('1', { '?': 1 }); // true
-unaryTest('[1..end]', { '?': 1, end: 10 }); // true
+unaryTest('1', { '?': 1 }); // { value: true, warnings: [] }
+unaryTest('[1..end]', { '?': 1, end: 10 }); // { value: true, warnings: [] }
 
 evaluate("Mike's daughter.name", {
   'Mike\'s daughter.name': 'Lisa'
-}); // "Lisa"
+}); // { value: 'Lisa', warnings: [] }
 
-evaluate('for a in [1, 2, 3] return a * 2'); // [ 2, 4, 6 ]
+evaluate('for a in [1, 2, 3] return a * 2'); // { value: [ 2, 4, 6 ], ... }
 
 evaluate('every rate in rates() satisfies rate < 10', {
   rates() {
     return [ 10, 20 ];
   }
-}); // false
+}); // { value: false, warnings: [] }
 ```
 
+To understand `null` conversions due to errors, inspect `warnings` returned:
+
+```javascript
+const { value, warnings } = evaluate('x');
+
+console.log(warnings);
+// [
+//   {
+//     message: "Variable 'x' not found",
+//     type: 'NO_VARIABLE_FOUND',
+//     position: { from: 0, to: 1 },
+//   }
+// ]
+```
 
 ## Features
 

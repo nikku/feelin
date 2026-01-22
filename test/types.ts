@@ -13,12 +13,13 @@ describe('types', function() {
     it('should evaluate', function() {
 
       // when
-      const value = evaluate('hello', {
+      const { value, warnings } = evaluate('hello', {
         hello: 'HELLO'
       });
 
       // then
       expect(value).to.eql('HELLO');
+      expect(warnings).to.eql([]);
     });
 
   });
@@ -29,12 +30,13 @@ describe('types', function() {
     it('should test', function() {
 
       // when
-      const value = unaryTest('[10, 20]', {
+      const { value, warnings } = unaryTest('[10, 20]', {
         '?': 5
       });
 
       // then
-      expect(value).to.be.true;
+      expect(value).to.be.false;
+      expect(warnings).to.be.an('array');
     });
 
   });

@@ -5,8 +5,12 @@ import {
   SystemZone
 } from 'luxon';
 
+export function isNil(e) {
+  return e === null || e === undefined;
+}
+
 export function isContext(e) {
-  return Object.getPrototypeOf(e) === Object.prototype;
+  return !isNil(e) && Object.getPrototypeOf(e) === Object.prototype;
 }
 
 export function isDateTime(obj): obj is DateTime {
@@ -27,7 +31,7 @@ export function isBoolean(e) {
 
 export function getType(e) {
 
-  if (e === null || e === undefined) {
+  if (isNil(e)) {
     return 'nil';
   }
 
@@ -260,6 +264,9 @@ export function equals(a, b, strict = false) {
   return aType === bType ? false : null;
 }
 
+export const FUNCTION_PARAMETER_MISSMATCH = {};
+
+
 export class FunctionWrapper {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -288,7 +295,7 @@ export class FunctionWrapper {
         // strictly check for parameter count provided
         // for non var-args functions
         if (!lastParam || !lastParam.startsWith('...')) {
-          return null;
+          return FUNCTION_PARAMETER_MISSMATCH;
         }
       }
     } else {
@@ -298,7 +305,7 @@ export class FunctionWrapper {
       if (Object.keys(contextOrArgs).some(
         key => !this.parameterNames.includes(key) && !this.parameterNames.includes(`...${key}`)
       )) {
-        return null;
+        return FUNCTION_PARAMETER_MISSMATCH;
       }
 
       params = this.parameterNames.reduce((params, name) => {

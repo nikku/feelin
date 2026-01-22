@@ -12,15 +12,21 @@ describe('interpreter', function() {
 
     it('should evaluate', function() {
 
+      // when
+      const { value } = evaluate('1 < 2');
+
       // then
-      expect(evaluate('1 < 2')).to.be.true;
+      expect(value).to.be.true;
     });
 
 
     it('should unaryTest', function() {
 
+      // when
+      const { value } = unaryTest('< 2', { '?': 1 });
+
       // then
-      expect(unaryTest('< 2', { '?': 1 })).to.be.true;
+      expect(value).to.be.true;
     });
 
   });

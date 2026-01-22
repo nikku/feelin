@@ -7,13 +7,15 @@ import { has } from 'min-dash';
 import {
   Range,
   FunctionWrapper,
+  FUNCTION_PARAMETER_MISSMATCH,
   equals,
   isArray,
   getType,
   isDuration,
   isDateTime,
   isType,
-  isNumber
+  isNumber,
+  isContext
 } from './types.js';
 
 import {
@@ -30,26 +32,52 @@ import {
 import { Duration } from 'luxon';
 
 
-type SyntaxErrorDetails = {
-  input: string,
-  position: {
-    from: number,
-    to: number
+export type WarningType =
+  | 'NO_VARIABLE_FOUND'
+  | 'NO_CONTEXT_ENTRY_FOUND'
+  | 'NO_PROPERTY_FOUND'
+  | 'NOT_COMPARABLE'
+  | 'INVALID_TYPE'
+  | 'NO_FUNCTION_FOUND'
+  | 'FUNCTION_INVOCATION_FAILURE';
+
+export type SourceLocation = {
+  from: number,
+  to: number
+};
+
+export type Warning = {
+  type: WarningType;
+  message: string;
+  position: SourceLocation;
+  details: {
+    template: string,
+    values: Record<string, unknown>
   }
 };
+
+export type EvaluationResult<T> = {
+  value: T;
+  warnings: Warning[];
+};
+
+/**
+ * Context passed to the interpreter as global variables.
+ */
+export type EvalContext = Record<string, unknown>;
 
 export class SyntaxError extends Error {
 
   input: string;
 
-  position: {
-    from: number,
-    to: number
-  };
+  position: SourceLocation;
 
   constructor(
       message: string,
-      details: SyntaxErrorDetails
+      details: {
+        input: string,
+        position: SourceLocation
+      }
   ) {
     super(message);
 
@@ -58,17 +86,58 @@ export class SyntaxError extends Error {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type InterpreterContext = Record<string, any>;
+function formatDetails(template: string, values: Record<string, any>) {
 
+  return Object.keys(values).reduce((message, key) => {
+    return message.replace(`{${key}}`, `'${ formatValue(values[key]) }'`);
+  }, template);
+}
+
+class InterpreterContext {
+  warnings: Warning[] = [];
+
+  addWarning(node: Node, type: WarningType, details: { template: string, values: Record<string, unknown> }): void {
+
+    this.warnings.push({
+      type,
+      message: formatDetails(details.template, details.values),
+      details,
+      position: node.position
+    });
+  }
+
+  getWarnings(): Warning[] {
+    return this.warnings;
+  }
+
+}
+
+type Node = {
+  name: string,
+  input: string,
+  position: SourceLocation
+};
+
+type StackEntry = {
+  args: unknown[],
+  node: Node
+};
 
 class Interpreter {
 
-  _buildExecutionTree(tree: Tree, input: string) {
+  _buildExecutionTree(tree: Tree, input: string, interpreterContext: InterpreterContext) {
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    type StackEntry = { args: any[], nodeInput: string };
-
-    const root = { args: [], nodeInput: input };
+    const root = {
+      args: [],
+      node: {
+        name: '__ROOT',
+        input,
+        position: {
+          from: 0,
+          to: input.length
+        }
+      }
+    };
 
     const stack: StackEntry[] = [ root ];
 
@@ -80,40 +149,30 @@ class Interpreter {
           isSkipped
         } = nodeRef.type;
 
-        const {
-          from,
-          to
-        } = nodeRef;
-
         if (isError) {
-
-          const {
-            from,
-            to,
-            message
-          } = lintError(nodeRef);
-
-          throw new SyntaxError(
-            message,
-            {
-              input: input.slice(from, to),
-              position: {
-                from,
-                to
-              }
-            }
-          );
+          throw lintError(input, nodeRef);
         }
 
         if (isSkipped) {
           return false;
         }
 
-        const nodeInput = input.slice(from, to);
+        const {
+          from,
+          to,
+          name
+        } = nodeRef;
 
         stack.push({
-          nodeInput,
-          args: []
+          args: [],
+          node: {
+            name,
+            input: input.slice(from, to),
+            position: {
+              from,
+              to
+            }
+          }
         });
       },
 
@@ -124,26 +183,33 @@ class Interpreter {
         }
 
         const {
-          nodeInput,
+          node,
           args
         } = stack.pop();
 
         const parent = stack[stack.length - 1];
 
-        const expr = evalNode(nodeRef, nodeInput, args);
+        const expr = evalNode(node, args, interpreterContext);
 
         parent.args.push(expr);
       }
     });
 
-    return root.args[root.args.length - 1];
+    return {
+      root: root.args[root.args.length - 1]
+    };
   }
 
-  evaluate(expression: string, context: InterpreterContext = {}, dialect?: string) {
+  evaluate(
+      expression: string,
+      evalContext: EvalContext,
+      dialect: string | undefined,
+      interpreterContext: InterpreterContext
+  ) {
 
-    const parseTree = parseExpression(expression, context, dialect);
+    const parseTree = parseExpression(expression, evalContext, dialect);
 
-    const root = this._buildExecutionTree(parseTree, expression);
+    const { root } = this._buildExecutionTree(parseTree, expression, interpreterContext);
 
     return {
       parseTree,
@@ -151,11 +217,16 @@ class Interpreter {
     };
   }
 
-  unaryTest(expression: string, context: InterpreterContext = {}, dialect?: string) {
+  unaryTest(
+      expression: string,
+      evalContext: EvalContext,
+      dialect: string | undefined,
+      interpreterContext: InterpreterContext
+  ) {
 
-    const parseTree = parseUnaryTests(expression, context, dialect);
+    const parseTree = parseUnaryTests(expression, evalContext, dialect);
 
-    const root = this._buildExecutionTree(parseTree, expression);
+    const { root } = this._buildExecutionTree(parseTree, expression, interpreterContext);
 
     return {
       parseTree,
@@ -167,49 +238,74 @@ class Interpreter {
 
 const interpreter = new Interpreter();
 
-export function unaryTest(expression: string, context: InterpreterContext = {}, dialect?: string) : boolean {
+export function unaryTest(
+    expression: string,
+    evalContext: EvalContext = {},
+    dialect?: string
+) : EvaluationResult<boolean | null> {
 
-  const value = context['?'] !== undefined ? context['?'] : null;
+  const interpreterContext = new InterpreterContext();
+
+  const value = evalContext['?'] !== undefined ? evalContext['?'] : null;
 
   const {
     root
-  } = interpreter.unaryTest(expression, context, dialect);
+  } = interpreter.unaryTest(expression, evalContext, dialect, interpreterContext);
 
   // root = fn(ctx) => test(val)
-  const test = root(context);
+  const test = root(evalContext);
 
-  return test(value);
+  const testResult = test(value);
+
+  return {
+    value: testResult,
+    warnings: interpreterContext.getWarnings()
+  };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function evaluate(expression: string, context: InterpreterContext = {}, dialect?: string): any {
+export function evaluate(
+    expression: string,
+    evalContext: EvalContext = {},
+    dialect?: string
+): EvaluationResult<unknown> {
+
+  const interpreterContext = new InterpreterContext();
 
   const {
     root
-  } = interpreter.evaluate(expression, context, dialect);
+  } = interpreter.evaluate(expression, evalContext, dialect, interpreterContext);
 
   // root = Expression :: fn(ctx)
 
-  return root(context);
+  const result = root(evalContext);
+
+  return {
+    value: result,
+    warnings: interpreterContext.getWarnings()
+  };
 }
 
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
+function evalNode(node: Node, args: any[], interpreterContext: InterpreterContext) {
 
   switch (node.name) {
   case 'ArithOp': return (context) => {
 
-    const nullable = (op, types = [ 'number' ]) => (a, b) => {
+    const nullable = (op, opName, types = [ 'number' ]) => (a, b) => {
 
       const left = a(context);
       const right = b(context);
 
-      if (isArray(left)) {
-        return null;
-      }
+      if (isArray(left) || isArray(right)) {
+        interpreterContext.addWarning(node, 'INVALID_TYPE', {
+          template: `Can't ${opName} {right} to {left}`,
+          values: {
+            left,
+            right
+          }
+        });
 
-      if (isArray(right)) {
         return null;
       }
 
@@ -220,16 +316,32 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
       if (temporal.includes(leftType)) {
         if (!temporal.includes(rightType)) {
+          interpreterContext.addWarning(node, 'INVALID_TYPE', {
+            template: `Can't ${opName} {right} to {left}`,
+            values: {
+              left,
+              right
+            }
+          });
+
           return null;
         }
       } else if (leftType !== rightType || !types.includes(leftType)) {
+        interpreterContext.addWarning(node, 'INVALID_TYPE', {
+          template: `Can't ${opName} {right} to {left}`,
+          values: {
+            left,
+            right
+          }
+        });
+
         return null;
       }
 
       return op(left, right);
     };
 
-    switch (input) {
+    switch (node.input) {
     case '+': return nullable((a, b) => {
 
       // flip these as luxon operations with durations aren't commutative
@@ -254,7 +366,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
       }
 
       return a + b;
-    }, [ 'string', 'number', 'date', 'time', 'duration', 'date time' ]);
+    }, 'add', [ 'string', 'number', 'date', 'time', 'duration', 'date time' ]);
     case '-': return nullable((a, b) => {
       if (isType(a, 'time') && isDuration(b)) {
         return a.minus(b).set({
@@ -271,17 +383,17 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
       }
 
       return a - b;
-    }, [ 'number', 'date', 'time', 'duration', 'date time' ]);
-    case '*': return nullable((a, b) => a * b);
-    case '/': return nullable((a, b) => !b ? null : a / b);
+    }, 'subtract', [ 'number', 'date', 'time', 'duration', 'date time' ]);
+    case '*': return nullable((a, b) => a * b, 'multiply', [ 'number' ]);
+    case '/': return nullable((a, b) => !b ? null : a / b, 'divide', [ 'number' ]);
     case '**':
-    case '^': return nullable((a, b) => a ** b);
+    case '^': return nullable((a, b) => a ** b, 'exponentiate', [ 'number' ]);
     }
   };
 
   case 'CompareOp': return tag(() => {
 
-    switch (input) {
+    switch (node.input) {
     case '>': return (b) => createRange(b, null, false, false);
     case '>=': return (b) => createRange(b, null, true, false);
     case '<': return (b) => createRange(null, b, false, false);
@@ -292,7 +404,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
   }, Test('boolean'));
 
-  case 'BacktickIdentifier': return input.replace(/`/g, '');
+  case 'BacktickIdentifier': return node.input.replace(/`/g, '');
 
   case 'Wildcard': return (_context) => true;
 
@@ -398,24 +510,54 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
   case 'Key': return args[0];
 
-  case 'Identifier': return input;
+  case 'Identifier': return node.input;
 
-  case 'SpecialFunctionName': return (context) => getBuiltin(input, context);
+  case 'SpecialFunctionName': return (context) => getBuiltin(node.input, context);
 
   // preserve spaces in name, but compact multiple
   // spaces into one (token)
-  case 'Name': return input.replace(/\s{2,}/g, ' ');
+  case 'Name': return node.input.replace(/\s{2,}/g, ' ');
 
-  case 'VariableName': return (context) => {
+  case 'VariableName': return (context, local = false) => {
     const name = args.join(' ');
 
     const contextValue = getFromContext(name, context);
 
-    return (
-      typeof contextValue !== 'undefined'
-        ? contextValue
-        : getBuiltin(name, context) || null
-    );
+    if (typeof contextValue !== 'undefined') {
+      return contextValue;
+    }
+
+    const builtin = getBuiltin(name, context);
+
+    if (builtin) {
+      return builtin;
+    }
+
+    if (local) {
+
+      if (isContext(context)) {
+        interpreterContext.addWarning(node, 'NO_CONTEXT_ENTRY_FOUND', {
+          template: `Key '${name}' not found in {target}`,
+          values: {
+            target: context
+          }
+        });
+      } else {
+        interpreterContext.addWarning(node, 'NO_PROPERTY_FOUND', {
+          template: `Property '${name}' not found in {target}`,
+          values: {
+            target: context
+          }
+        });
+      }
+    } else {
+      interpreterContext.addWarning(node, 'NO_VARIABLE_FOUND', {
+        template: `Variable '${name}' not found`,
+        values: {}
+      });
+    }
+
+    return null;
   };
 
   case 'QualifiedName': return (context) => {
@@ -447,7 +589,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     // producing <null> as a context during evaluation causes the
     // whole result to turn <null>
 
-    type Context = InterpreterContext;
+    type Context = EvalContext;
     type MaybeContext = (Context | null);
     type ContextsProducer = (context: Context) => (MaybeContext[] | null);
 
@@ -462,7 +604,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     };
 
     const join = (
-        aContexts: InterpreterContext[],
+        aContexts: EvalContext[],
         bContextProducer: ContextsProducer
     ) => {
 
@@ -553,11 +695,11 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     };
   }, Test('boolean'));
 
-  case 'NumericLiteral': return tag((_context) => input.includes('.') ? parseFloat(input) : parseInt(input), 'number');
+  case 'NumericLiteral': return tag((_context) => node.input.includes('.') ? parseFloat(node.input) : parseInt(node.input), 'number');
 
-  case 'BooleanLiteral': return tag((_context) => input === 'true' ? true : false, 'boolean');
+  case 'BooleanLiteral': return tag((_context) => node.input === 'true' ? true : false, 'boolean');
 
-  case 'StringLiteral': return tag((_context) => parseString(input), 'string');
+  case 'StringLiteral': return tag((_context) => parseString(node.input), 'string');
 
   case 'PositionalParameters': return (context) => args.map(arg => arg(context));
 
@@ -578,7 +720,7 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
   }, {});
 
   case 'DateTimeConstructor': return (context) => {
-    return getBuiltin(input, context);
+    return getBuiltin(node.input, context);
   };
 
   case 'DateTimeLiteral': return (context) => {
@@ -590,18 +732,37 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
     // FunctionInvocation
     else {
-      const wrappedFn = wrapFunction(args[0](context));
-
-      // TODO(nikku): indicate as error
-      // throw new Error(`Failed to evaluate ${input}: Target is not a function`);
+      const target = args[0](context);
+      const wrappedFn = wrapFunction(target);
 
       if (!wrappedFn) {
+        interpreterContext.addWarning(node, 'NO_FUNCTION_FOUND', {
+          template: 'Cannot invoke {target}',
+          values: {
+            target
+          }
+        });
+
         return null;
       }
 
       const contextOrArgs = args[2](context);
 
-      return wrappedFn.invoke(contextOrArgs);
+      const result = wrappedFn.invoke(contextOrArgs);
+
+      if (result === FUNCTION_PARAMETER_MISSMATCH) {
+        interpreterContext.addWarning(node, 'FUNCTION_INVOCATION_FAILURE', {
+          template: 'Cannot invoke {target} with parameters {params}',
+          values: {
+            target: wrappedFn,
+            params: contextOrArgs
+          }
+        });
+
+        return null;
+      }
+
+      return result;
     }
 
   };
@@ -610,10 +771,12 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
     const wrappedFn = wrapFunction(getBuiltin('@', context));
 
-    // TODO(nikku): indicate as error
-    // throw new Error(`Failed to evaluate ${input}: Target is not a function`);
-
     if (!wrappedFn) {
+      interpreterContext.addWarning(node, 'NO_FUNCTION_FOUND', {
+        template: "Cannot invoke '@'",
+        values: {}
+      });
+
       return null;
     }
 
@@ -622,18 +785,38 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
 
   case 'FunctionInvocation': return (context) => {
 
-    const wrappedFn = wrapFunction(args[0](context));
+    const target = args[0](context);
 
-    // TODO(nikku): indicate error at node
-    // throw new Error(`Failed to evaluate ${input}: Target is not a function`);
+    const wrappedFn = wrapFunction(target);
 
     if (!wrappedFn) {
+      interpreterContext.addWarning(node, 'NO_FUNCTION_FOUND', {
+        template: 'Cannot invoke {target}',
+        values: {
+          target
+        }
+      });
+
       return null;
     }
 
     const contextOrArgs = args[2](context);
 
-    return wrappedFn.invoke(contextOrArgs);
+    const result = wrappedFn.invoke(contextOrArgs);
+
+    if (result === FUNCTION_PARAMETER_MISSMATCH) {
+      interpreterContext.addWarning(node, 'FUNCTION_INVOCATION_FAILURE', {
+        template: 'Cannot invoke {target} with parameters {params}',
+        values: {
+          target: wrappedFn,
+          params: contextOrArgs
+        }
+      });
+
+      return null;
+    }
+
+    return result;
   };
 
   case 'IfExpression': return (function() {
@@ -767,9 +950,9 @@ function evalNode(node: SyntaxNodeRef, input: string, args: any[]) {
     const pathProp = args[1];
 
     if (isArray(pathTarget)) {
-      return pathTarget.map(pathProp);
+      return pathTarget.map(value => pathProp(value, true));
     } else {
-      return pathProp(pathTarget);
+      return pathProp(pathTarget, true);
     }
   };
 
@@ -1348,21 +1531,29 @@ function parseString(str: string) {
 
 
 type LintError = {
-  from: number,
-  to: number,
   message: string
 };
 
-export function lintError(nodeRef: SyntaxNodeRef): LintError {
+function lintErrorDetails(errorNodeRef: SyntaxNodeRef) : {
+  message: string,
+  position: SourceLocation
+} {
 
-  const node = nodeRef.node;
+  const node = errorNodeRef.node;
   const parent = node.parent;
+
+  const {
+    from,
+    to
+  } = node;
 
   if (node.from !== node.to) {
     return {
-      from: node.from,
-      to: node.to,
-      message: `Unrecognized token in <${parent.name}>`
+      message: `Unrecognized token in <${parent.name}>`,
+      position: {
+        from,
+        to
+      }
     };
   }
 
@@ -1370,19 +1561,39 @@ export function lintError(nodeRef: SyntaxNodeRef): LintError {
 
   if (next) {
     return {
-      from: node.from,
-      to: next.to,
-      message: `Unrecognized token <${next.name}> in <${parent.name}>`
+      message: `Unrecognized token <${next.name}> in <${parent.name}>`,
+      position: {
+        from: next.from,
+        to: next.to
+      }
     };
   } else {
-    const unfinished = parent.enterUnfinishedNodesBefore(nodeRef.to);
+    const unfinished = parent.enterUnfinishedNodesBefore(errorNodeRef.to);
 
     return {
-      from: node.from,
-      to: node.to,
-      message: `Incomplete <${ (unfinished || parent).name }>`
+      message: `Incomplete <${ (unfinished || parent).name }>`,
+      position: {
+        from,
+        to
+      }
     };
   }
+}
+
+function lintError(input: string, errorNodeRef: SyntaxNodeRef): LintError {
+
+  const {
+    message,
+    position
+  } = lintErrorDetails(errorNodeRef);
+
+  return new SyntaxError(
+    message,
+    {
+      input: input.slice(position.from, position.to),
+      position
+    }
+  );
 }
 
 function findNext(nodeRef: SyntaxNodeRef) : SyntaxNode | null {
@@ -1403,3 +1614,37 @@ function findNext(nodeRef: SyntaxNodeRef) : SyntaxNode | null {
 
   return null;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function formatValue(value: any) {
+  const type = getType(value);
+
+  if (type === 'string') {
+    return `"${ String(value) }"`;
+  }
+
+  if (type === 'list') {
+    return `[${value.length} items]`;
+  }
+
+  if (type === 'context') {
+    return '{...}';
+  }
+
+  if (type === 'function') {
+
+    const parameterNames = value.parameterNames;
+
+    if (parameterNames) {
+      return `function(${ parameterNames.join(', ') })`;
+    }
+
+    return 'function';
+  }
+
+  if (type === 'nil') {
+    return 'null';
+  }
+
+  return String(value);
+};

@@ -31,7 +31,7 @@ describe('interpreter', function() {
 
           const [ term, context ] = t;
 
-          evaluate(term, context);
+          evaluate(term, context).value;
         }
 
       }

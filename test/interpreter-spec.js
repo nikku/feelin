@@ -1365,6 +1365,363 @@ describe('interpreter', function() {
 
   });
 
+
+  describe('warnings', function() {
+
+    describe('should indicate warning', function() {
+
+      it('NO_VARIABLE_FOUND', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('x');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.eql([
+          {
+            message: "Variable 'x' not found",
+            type: 'NO_VARIABLE_FOUND',
+            position: { from: 0, to: 1 },
+            details: {
+              template: "Variable 'x' not found",
+              values: {}
+            }
+          }
+        ]);
+      });
+
+
+      it('NO_CONTEXT_ENTRY_FOUND in context', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('{ a: 10 }.x');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.eql([
+          {
+            message: "Key 'x' not found in '{...}'",
+            type: 'NO_CONTEXT_ENTRY_FOUND',
+            position: { from: 10, to: 11 },
+            details: {
+              template: "Key 'x' not found in {target}",
+              values: {
+                target: { a: 10 }
+              }
+            }
+          }
+        ]);
+      });
+
+
+      it('NO_PROPERTY_FOUND in number', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('1.x');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.eql([
+          {
+            message: "Property 'x' not found in '1'",
+            type: 'NO_PROPERTY_FOUND',
+            position: { from: 2, to: 3 },
+            details: {
+              template: "Property 'x' not found in {target}",
+              values: {
+                target: 1
+              }
+            }
+          }
+        ]);
+      });
+
+
+      it('INVALID_TYPE for basic arithmetic', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('"foo" + 10');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.eql([
+          {
+            type: 'INVALID_TYPE',
+            message: "Can't add '10' to '\"foo\"'",
+            position: { from: 6, to: 7 },
+            details: {
+              template: "Can't add {right} to {left}",
+              values: {
+                left: 'foo',
+                right: 10
+              }
+            }
+          }
+        ]);
+      });
+
+
+      it('INVALID_TYPE for array arithmetic', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('[1, 2] * 3');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.eql([
+          {
+            type: 'INVALID_TYPE',
+            message: "Can't multiply '3' to '[2 items]'",
+            position: { from: 7, to: 8 },
+            details: {
+              template: "Can't multiply {right} to {left}",
+              values: {
+                left: [ 1, 2 ],
+                right: 3
+              }
+            }
+          }
+        ]);
+      });
+
+
+      it('INVALID_TYPE for date arithmetic', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('@"2025-12-12" ** 10');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.eql([
+          {
+            type: 'INVALID_TYPE',
+            message: "Can't exponentiate '10' to '2025-12-12T00:00:00.000Z'",
+            position: { from: 14, to: 16 },
+            details: {
+              template: "Can't exponentiate {right} to {left}",
+              values: {
+                right: 10,
+                left: date('2025-12-12')
+              }
+            }
+          }
+        ]);
+      });
+
+
+      it.skip('NOT_COMPARABLE for basic comparison');
+
+
+      it.skip('NOT_COMPARABLE for <between> comparison');
+
+
+      it.skip('NOT_COMPARABLE for <in> comparison');
+
+
+      it('NOT_CALLABLE for non-function', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('x()', { x: 5 });
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.eql([
+          {
+            type: 'NO_FUNCTION_FOUND',
+            message: "Cannot invoke '5'",
+            position: { from: 0, to: 3 },
+            details: {
+              template: 'Cannot invoke {target}',
+              values: {
+                target: 5
+              }
+            }
+          }
+        ]);
+      });
+
+
+      it('FUNCTION_INVOCATION_FAILURE on array args mis-match', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('not(1, 2)');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.have.length(1);
+
+        expect(warnings[0]).to.deep.include({
+          type: 'FUNCTION_INVOCATION_FAILURE',
+          message: "Cannot invoke 'function(negand)' with parameters '[2 items]'",
+          position: { from: 0, to: 9 }
+        });
+
+        expect(warnings[0].details.values).to.have.keys('target', 'params');
+      });
+
+
+      it('FUNCTION_INVOCATION_FAILURE on named parameter mis-match', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('not(foo: 1)');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.have.length(1);
+
+        expect(warnings[0]).to.deep.include({
+          type: 'FUNCTION_INVOCATION_FAILURE',
+          message: "Cannot invoke 'function(negand)' with parameters '{...}'",
+          position: { from: 0, to: 11 }
+        });
+
+        expect(warnings[0].details.values).to.have.keys('target', 'params');
+      });
+
+
+      it('FUNCTION_INVOCATION_FAILURE on date fn args mis-match', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('date(1, 2, 3, 4, 5, 6)');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.have.length(1);
+
+        expect(warnings[0]).to.deep.include({
+          type: 'FUNCTION_INVOCATION_FAILURE',
+          message: "Cannot invoke 'function(year, month, day, from)' with parameters '[6 items]'",
+          position: { from: 0, to: 22 }
+        });
+
+        expect(warnings[0].details.values).to.have.keys('target', 'params');
+      });
+
+
+      it('FUNCTION_INVOCATION_FAILURE on date fn named parameter mis-match', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('date(foo: 1)');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.have.length(1);
+
+        expect(warnings[0]).to.deep.include({
+          type: 'FUNCTION_INVOCATION_FAILURE',
+          message: "Cannot invoke 'function(year, month, day, from)' with parameters '{...}'",
+          position: { from: 0, to: 12 }
+        });
+
+        expect(warnings[0].details.values).to.have.keys('target', 'params');
+      });
+
+    });
+
+
+    describe('should not indicate warning', function() {
+
+      it('for out of bounds access', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('[1, 2, 3][10]');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.be.empty;
+      });
+
+
+      it('valid expressions', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('1 + 2');
+
+        // then
+        expect(value).to.equal(3);
+        expect(warnings).to.be.empty;
+      });
+
+    });
+
+
+    it('should expose warnings in unaryTest', function() {
+
+      // when
+      const {
+        value,
+        warnings
+      } = unaryTest('x', { '?': 5 });
+
+      // then
+      expect(value).to.eql(false);
+
+      expect(warnings).to.eql([
+        {
+          message: "Variable 'x' not found",
+          type: 'NO_VARIABLE_FOUND',
+          position: { from: 0, to: 1 },
+          details: {
+            template: "Variable 'x' not found",
+            values: {}
+          }
+        }
+      ]);
+    });
+
+  });
+
 });
 
 
@@ -1387,7 +1744,7 @@ function createExprVerifier(options) {
   const name = `${expression}${context ? ` ${ inspect(context) }` : ''}`;
 
   it(name, function() {
-    const output = evaluate(expression, context || {}, dialect);
+    const output = evaluate(expression, context || {}, dialect).value;
 
     expect(output).to.eql(expectedOutput);
   });
@@ -1416,7 +1773,7 @@ function createUnaryVerifier(options) {
 
   it(name, function() {
 
-    const output = unaryTest(test, context, dialect);
+    const output = unaryTest(test, context, dialect).value;
 
     expect(output).to.eql(expectedOutput);
   });

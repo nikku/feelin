@@ -475,6 +475,7 @@ function describeBuiltins(name, evaluate) {
       expr('round half up(-1.000000000000126, 14)', -1.00000000000013);
       expr('round half up(null, 2)', null);
       expr('round half up(1.121, null)', null);
+      expr('round half up(5.5, 6176)', 5.5);
 
       expr('round half down(5.5, 0)', 5);
       expr('round half down(-5.5, 0)', -5);
@@ -484,6 +485,7 @@ function describeBuiltins(name, evaluate) {
       expr('round half down(-1.000000000000126, 14)', -1.00000000000013);
       expr('round half down(null, 2)', null);
       expr('round half down(1.121, null)', null);
+      expr('round half down(5.5, 6176)', 5.5);
 
       expr('abs( 10 )', 10);
       expr('abs(-1)', 1);

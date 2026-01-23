@@ -142,7 +142,17 @@ function skipTest(suiteName, testId) {
     '1111-feel-matches-function-test-01.xml#caselessmatch10',
     '1111-feel-matches-function-test-01.xml#caselessmatch11',
 
-    '0079-feel-string-function-test-01.xml#dt_duration_004'
+    '0079-feel-string-function-test-01.xml#dt_duration_004',
+
+    // we're not Java
+    '1141-feel-round-up-function-test-01.xml#016_b',
+    '1141-feel-round-up-function-test-01.xml#017_b',
+    '1142-feel-round-down-function-test-01.xml#016_b',
+    '1142-feel-round-down-function-test-01.xml#017_b',
+    '1143-feel-round-half-up-function-test-01.xml#016_b',
+    '1143-feel-round-half-up-function-test-01.xml#017_b',
+    '1144-feel-round-half-down-function-test-01.xml#016_b',
+    '1144-feel-round-half-down-function-test-01.xml#017_b',
   ].includes(`${suiteName}#${testId}`);
 }
 

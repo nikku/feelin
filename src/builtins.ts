@@ -1237,7 +1237,9 @@ function countSymbols(str) {
 }
 
 function offsetted(func, n, scale) {
-  return func(n * 10 ** scale) / 10 ** scale;
+  const result = func(n * 10 ** scale) / 10 ** scale;
+
+  return isNaN(result) ? n : result;
 }
 
 function bankersRound(n) {

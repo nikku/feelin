@@ -306,6 +306,10 @@ describe('interpreter', function() {
         ]
       });
 
+      expr('for i in 2..count(l) return l[i] + l[i-1]', [ 5, 8, 13, 21 ], {
+        l: [ 2, 3, 5, 8, 13 ]
+      });
+
       expr('for a in 1 .. -1 return a', [ 1, 0, -1 ]);
 
       expr('for a in 1 .. 3 return a', [ 1, 2, 3 ]);

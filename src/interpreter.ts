@@ -15,7 +15,8 @@ import {
   isDateTime,
   isType,
   isNumber,
-  isContext
+  isContext,
+  isBoolean
 } from './types.js';
 
 import {
@@ -402,15 +403,15 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     case '!=': return (b) => (a) => !equals(a, b);
     }
 
-  }, Test('boolean'));
+  }, 'test');
 
   case 'BacktickIdentifier': return node.input.replace(/`/g, '');
 
   case 'Wildcard': return (_context) => true;
 
-  case 'null': return (_context) => {
+  case 'null': return tag((_context) => {
     return null;
-  };
+  }, 'nil');
 
   case 'Disjunction': return tag((context) => {
 
@@ -433,7 +434,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     const b = typeof right === 'boolean' ? right : null;
 
     return matrix.find(el => el[0] === a && el[1] === b)[2];
-  }, Test('boolean'));
+  }, 'test');
 
   case 'Conjunction': return tag((context) => {
     const left = args[0](context);
@@ -455,7 +456,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     const b = typeof right === 'boolean' ? right : null;
 
     return matrix.find(el => el[0] === a && el[1] === b)[2];
-  }, Test('boolean'));
+  }, 'test');
 
   case 'Context': return (context) => {
 
@@ -518,7 +519,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
   // spaces into one (token)
   case 'Name': return node.input.replace(/\s{2,}/g, ' ');
 
-  case 'VariableName': return (context, local = false) => {
+  case 'VariableName': return tag((context, local = false) => {
     const name = args.join(' ');
 
     const contextValue = getFromContext(name, context);
@@ -558,7 +559,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     }
 
     return null;
-  };
+  }, 'any');
 
   case 'QualifiedName': return (context) => {
     return args.reduce((context, arg) => arg(context), context);
@@ -668,7 +669,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     const b = args[3](context);
 
     return a instanceof b;
-  }, Test('boolean'));
+  }, 'test');
 
   case 'every': return tag((context) => {
     return (_contexts, _condition) => {
@@ -681,7 +682,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
       return contexts.every(ctx => isTruthy(_condition(ctx)));
     };
 
-  }, Test('boolean'));
+  }, 'test');
 
   case 'some': return tag((context) => {
     return (_contexts, _condition) => {
@@ -693,7 +694,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
 
       return contexts.some(ctx => isTruthy(_condition(ctx)));
     };
-  }, Test('boolean'));
+  }, 'test');
 
   case 'NumericLiteral': return tag((_context) => node.input.includes('.') ? parseFloat(node.input) : parseInt(node.input), 'number');
 
@@ -723,7 +724,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     return getBuiltin(node.input, context);
   };
 
-  case 'DateTimeLiteral': return (context) => {
+  case 'DateTimeLiteral': return tag((context) => {
 
     // AtLiteral
     if (args.length === 1) {
@@ -765,9 +766,9 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
       return result;
     }
 
-  };
+  }, 'date');
 
-  case 'AtLiteral': return (context) => {
+  case 'AtLiteral': return tag((context) => {
 
     const wrappedFn = wrapFunction(getBuiltin('@', context));
 
@@ -781,9 +782,9 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     }
 
     return wrappedFn.invoke([ args[0](context) ]);
-  };
+  }, 'date');
 
-  case 'FunctionInvocation': return (context) => {
+  case 'FunctionInvocation': return tag((context) => {
 
     const target = args[0](context);
 
@@ -817,7 +818,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     }
 
     return result;
-  };
+  }, 'any');
 
   case 'IfExpression': return (function() {
 
@@ -841,7 +842,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
 
   case 'Parameters': return args.length === 3 ? args[1] : (_context) => [];
 
-  case 'Comparison': return (context) => {
+  case 'Comparison': return tag((context) => {
 
     const operator = args[1];
 
@@ -872,7 +873,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     const test = operator()(right);
 
     return compareValue(test, left);
-  };
+  }, 'test');
 
   case 'QuantifiedExpression': return (context) => {
 
@@ -944,7 +945,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
 
   case 'ParenthesizedExpression': return args[1];
 
-  case 'PathExpression': return (context) => {
+  case 'PathExpression': return tag((context) => {
 
     const pathTarget = args[0](context);
     const pathProp = args[1];
@@ -954,10 +955,10 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     } else {
       return pathProp(pathTarget, true);
     }
-  };
+  }, 'any');
 
   // expression !filter "[" expression "]"
-  case 'FilterExpression': return (context) => {
+  case 'FilterExpression': return tag((context) => {
 
     const target = args[0](context);
 
@@ -970,23 +971,27 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
       return null;
     }
 
-    // a[variable=number]
-    if (typeof filterFn.type === 'undefined') {
-      try {
-        const value = filterFn(context);
-
-        if (isNumber(value)) {
-          filterFn.type = 'number';
-        }
-      } catch (_err) {
-
-        // ignore
-      }
-    }
+    const type = filterFn.type;
 
     // a[1]
-    if (filterFn.type === 'number') {
+    // a[true]
+    // a[b]
+    // a[b()]
+    // a[1 + 3]
+    if ([ 'number', 'boolean', 'any' ].includes(type)) {
       const idx = filterFn(context);
+
+      if (isBoolean(idx)) {
+        if (idx === true) {
+          return target;
+        } else {
+          return [];
+        }
+      }
+
+      if (!isNumber(idx)) {
+        return [];
+      }
 
       const value = filterTarget[idx < 0 ? filterTarget.length + idx : idx - 1];
 
@@ -997,49 +1002,50 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
       }
     }
 
-    // a[true]
-    if (filterFn.type === 'boolean') {
-      if (filterFn(context)) {
-        return filterTarget;
-      } else {
-        return [];
-      }
-    }
-
-    if (filterFn.type === 'string') {
+    // TODO(nikku): not covered by spec
+    // a["attr"]
+    if (type === 'string') {
 
       const value = filterFn(context);
 
       return filterTarget.filter(el => el === value);
     }
 
-    // a[test]
-    return filterTarget.map(el => {
+    // a[b=c]
+    // a[>10]
+    if (type === 'test') {
 
-      const iterationContext = {
-        ...context,
-        item: el,
-        ...el
-      };
+      return filterTarget.map(el => {
 
-      let result = filterFn(iterationContext);
+        const iterationContext = {
+          ...context,
+          item: el,
+          ...el
+        };
 
-      // test is fn(val) => boolean SimpleUnaryTest
-      if (typeof result === 'function') {
-        result = result(el);
-      }
+        let result = filterFn(iterationContext);
 
-      if (result instanceof Range) {
-        result = result.includes(el);
-      }
+        // test is fn(val) => boolean SimpleUnaryTest
+        if (typeof result === 'function') {
+          result = result(el);
+        }
 
-      if (result === true) {
-        return el;
-      }
+        if (result instanceof Range) {
+          result = result.includes(el);
+        }
 
-      return result;
-    }).filter(isTruthy);
-  };
+        if (result === true) {
+          return el;
+        }
+
+        return result;
+      }).filter(isTruthy);
+    }
+
+    // a[null]
+    // a[@"2026-12-12"]
+    return null;
+  }, 'any');
 
   case 'SimplePositiveUnaryTest': return tag((context) => {
 
@@ -1065,7 +1071,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     const endIncluded = right !== null && args[3] === ']';
 
     return createRange(left, right, startIncluded, endIncluded);
-  }, Test('boolean'));
+  }, 'test');
 
   case 'PositiveUnaryTests':
   case 'Expressions': return (context) => {
@@ -1430,10 +1436,6 @@ function tag<Z, T extends ContextFn<Z>>(fn: T, type: string) : T & TaggedFn {
 
 function isTruthy(obj) {
   return obj !== false && obj !== null;
-}
-
-function Test(type: string): string {
-  return `Test<${type}>`;
 }
 
 /**

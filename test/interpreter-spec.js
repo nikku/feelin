@@ -663,6 +663,18 @@ describe('interpreter', function() {
 
       expr('[1, 2, 3][4]', null);
 
+      expr('[1, 2, 3][1 + 2]', 3);
+
+      expr('[1, 2, 3][1 + a]', 2, { a: 1 });
+
+      expr('[1, 2, 3][a.b]', 2, { a: { b: 2 } });
+
+      expr('[1, 2, 3][a[1]]', 2, { a: [ 2 ] });
+
+      expr('[1, 2, 3][a()]', 2, {
+        a() { return 2; }
+      });
+
       expr('[1,2,3][true]', [ 1, 2, 3 ]);
 
       expr('[1,2,3][false]', []);
@@ -714,6 +726,9 @@ describe('interpreter', function() {
       expr('a[1]', null, { a: null });
 
       expr('a[1]', null);
+
+      expr('a[date("2002-04-02")]', null);
+      expr('a[@"2002-04-02"]', null);
 
       expr('[][a]', null, { a: 1 });
 
@@ -1677,6 +1692,23 @@ describe('interpreter', function() {
         expect(value).to.be.null;
 
         expect(warnings).to.be.empty;
+      });
+
+
+      it('for filter expression', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('list[a=b]', {
+          list: [ { a: 1, b: 1 } ]
+        });
+
+        // then
+        expect(value).to.eql([ { a: 1, b: 1 } ]);
+
+        expect(warnings).to.eql([]);
       });
 
 

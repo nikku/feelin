@@ -528,7 +528,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
       return contextValue;
     }
 
-    const builtin = getBuiltin(name, context);
+    const builtin = !local && getBuiltin(name, context);
 
     if (builtin) {
       return builtin;

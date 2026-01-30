@@ -648,6 +648,14 @@ describe('interpreter', function() {
 
       expr('{ a: 1 }.a.b', null);
 
+      expr('number(a.string)', 10, { a: { string: '10' } });
+      expr('number(a.string)', null);
+      expr('a.string', null);
+
+      expr('string(a.number)', '10', { a: { number: 10 } });
+      expr('string(a.number)', null);
+      expr('a.number', null);
+
     });
 
 
@@ -1499,6 +1507,33 @@ describe('interpreter', function() {
               template: "Property 'x' not found in {target}",
               values: {
                 target: 1
+              }
+            }
+          }
+        ]);
+      });
+
+
+      it('NO_PROPERTY_FOUND for built-in named property', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('null.string');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.eql([
+          {
+            message: "Property 'string' not found in 'null'",
+            type: 'NO_PROPERTY_FOUND',
+            position: { from: 5, to: 11 },
+            details: {
+              template: "Property 'string' not found in {target}",
+              values: {
+                target: null
               }
             }
           }

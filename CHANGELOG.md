@@ -6,6 +6,10 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 6.0.2
+
+* `FIX`: ensure `QuantifiedExpression` can be used in filter ([#142](https://github.com/nikku/feelin/issues/142))
+
 ## 6.0.1
 
 * `FIX`: correct incorrect warnings for `FilterExpression` ([#140](https://github.com/nikku/feelin/issues/140), [#141](https://github.com/nikku/feelin/pull/141))

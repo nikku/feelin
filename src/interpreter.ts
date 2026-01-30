@@ -875,7 +875,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     return compareValue(test, left);
   }, 'test');
 
-  case 'QuantifiedExpression': return (context) => {
+  case 'QuantifiedExpression': return tag((context) => {
 
     const testFn = args[0](context);
 
@@ -884,7 +884,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     const condition = args[3];
 
     return testFn(contexts, condition);
-  };
+  }, 'test');
 
   // DMN 1.2 - 10.3.2.14
   // kw<"for"> commaSep1<InExpression<IterationContext>> kw<"return"> expression

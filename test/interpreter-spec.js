@@ -717,7 +717,7 @@ describe('interpreter', function() {
 
       expr('[1, 2, 3, 4][item > 2]', [ 3, 4 ]);
 
-      expr('[ {x:1, y:2}, {x:2, y:3} ][x=1]', [ { x:1, y:2 } ]);
+      expr('[{x:1, y:2}, {x:2, y:3}][x=1]', [ { x:1, y:2 } ]);
 
       expr('[{a: 1}, {a: 2}, {a: 3}][item.a >= 2]', [ { a: 2 }, { a: 3 } ]);
       expr('[{a: 1}, {a: 2}, {a: 3}][a >= 2]', [ { a: 2 }, { a: 3 } ]);
@@ -748,6 +748,44 @@ describe('interpreter', function() {
         a() { return 2; }
       });
 
+      expr('items[some t in item satisfies t = 1]', [
+        [ 1 ]
+      ], {
+        items: [
+          [ 1 ],
+          [ 2 ]
+        ]
+      });
+
+      expr('items[if (a = 1) then (= 1) else (=2)]', [
+        [ 1 ]
+      ], {
+        a: 1,
+        items: [
+          [ 1 ],
+          [ 2 ]
+        ]
+      });
+
+      expr('items[item = 1 or item = 3]', [
+        [ 1 ],
+        [ 3 ]
+      ], {
+        items: [
+          [ 1 ],
+          [ 2 ],
+          [ 3 ]
+        ]
+      });
+
+      expr('items[item = 1 and item < 3]', [
+        [ 1 ]
+      ], {
+        items: [
+          [ 1 ],
+          [ 2 ]
+        ]
+      });
     });
 
 

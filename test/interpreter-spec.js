@@ -442,6 +442,32 @@ describe('interpreter', function() {
 
       expr('5 >= 5', true);
 
+      expr('"A" < "Z"', true);
+      expr('"A" <= "Z"', true);
+      expr('"A" > "Z"', false);
+      expr('"A" >= "Z"', false);
+
+      expr('"A" < "A"', false);
+      expr('"A" <= "A"', true);
+      expr('"A" > "A"', false);
+      expr('"A" >= "A"', true);
+
+      expr('"AA" < "ZZ"', true);
+      expr('"AA" <= "ZZ"', true);
+      expr('"AA" > "ZZ"', false);
+      expr('"AA" >= "ZZ"', false);
+
+      expr('"AA" < "AA"', false);
+      expr('"AA" <= "AA"', true);
+      expr('"AA" > "AA"', false);
+      expr('"AA" >= "AA"', true);
+
+      expr('"1016AB" >= "1015CJ" and "1016AB" <= "1020ZZ"', true);
+      expr('"1015CJ" >= "1015CJ" and "1015CJ" <= "1020ZZ"', true);
+      expr('"1020ZZ" >= "1015CJ" and "1020ZZ" <= "1020ZZ"', true);
+      expr('"1014AA" >= "1015CJ" and "1014AA" <= "1020ZZ"', false);
+      expr('"1021AA" >= "1015CJ" and "1021AA" <= "1020ZZ"', false);
+
       expr('1 between -1 and 5', true);
 
       expr('1 between 5 and -1', true);
@@ -461,6 +487,19 @@ describe('interpreter', function() {
       expr('"d" in ["b".."d")', false);
       expr('"b" in ["b".."d"]', true);
       expr('"b" in ("b".."d"]', false);
+
+      expr('"1016AB" in ["1015CJ".."1020ZZ"]', true);
+      expr('"1015CJ" in ["1015CJ".."1020ZZ"]', true);
+      expr('"1020ZZ" in ["1015CJ".."1020ZZ"]', true);
+      expr('"1015CJ" in ("1015CJ".."1020ZZ"]', false);
+      expr('"1020ZZ" in ["1015CJ".."1020ZZ")', false);
+      expr('"1014AA" in ["1015CJ".."1020ZZ"]', false);
+      expr('"1021AA" in ["1015CJ".."1020ZZ"]', false);
+      expr('"CC" in ["AA".."ZZ"]', true);
+      expr('"AA" in ["AA".."ZZ"]', true);
+      expr('"ZZ" in ["AA".."ZZ"]', true);
+      expr('"AAA" in ["AA".."ZZ"]', true);
+      expr('"ZZZ" in ["AA".."ZZ"]', false);
 
       expr('"d" in null', null);
 

@@ -1311,17 +1311,12 @@ function anyIncludes(start, end, startIncluded, endIncluded, conversion = (v) =>
 
 function createStringRange(start, end, startIncluded = true, endIncluded = true) {
 
-  if (start !== null && !chars.includes(start)) {
-    throw new Error('illegal range start: ' + start);
-  }
-
-  if (end !== null && !chars.includes(end)) {
-    throw new Error('illegal range end: ' + end);
-  }
+  const singleStartChar = start !== null && chars.includes(start);
+  const singleEndChar = end !== null && chars.includes(end);
 
   let values;
 
-  if (start !== null && end !== null) {
+  if (singleStartChar && singleEndChar) {
 
     let startIdx = chars.indexOf(start);
     let endIdx = chars.indexOf(end);

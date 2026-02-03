@@ -6,7 +6,7 @@ import {
 
 import {
   evaluate
-} from 'feelin';
+} from '@bpmn-io/feelin';
 
 import {
   evaluate as evaluateMinified

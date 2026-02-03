@@ -1,5 +1,5 @@
 {
-  "name": "feelin",
+  "name": "@bpmn-io/feelin",
   "version": "6.1.0",
   "description": "A FEEL parser and interpreter",
   "author": "Nico Rehwaldt <git_nikku@nixis.de>",

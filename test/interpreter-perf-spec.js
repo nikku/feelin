@@ -4,7 +4,7 @@ import {
 
 import {
   evaluate
-} from 'feelin';
+} from '@bpmn-io/feelin';
 
 
 describe('interpreter', function() {

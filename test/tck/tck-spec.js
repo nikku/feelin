@@ -9,7 +9,7 @@ import {
 
 import {
   evaluate
-} from 'feelin';
+} from '@bpmn-io/feelin';
 
 
 const NOT_IMPLEMENTED = {};

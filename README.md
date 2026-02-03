@@ -1,6 +1,9 @@
-# feelin
+# @bpmn-io/feelin
 
-[![CI](https://github.com/nikku/feelin/actions/workflows/CI.yml/badge.svg)](https://github.com/nikku/feelin/actions/workflows/CI.yml)
+[![CI](https://github.com/bpmn-io/feelin/actions/workflows/CI.yml/badge.svg)](https://github.com/bpmn-io/feelin/actions/workflows/CI.yml)
+
+> [!NOTE]
+> This is a fork of [feelin](https://github.com/nikku/feelin)
 
 A [DMN](https://www.omg.org/spec/DMN/) FEEL parser and interpreter written in JavaScript. [__:arrow_right: Try it out__](https://nikku.github.io/feel-playground).
 
@@ -11,7 +14,7 @@ A [DMN](https://www.omg.org/spec/DMN/) FEEL parser and interpreter written in Ja
 import {
   unaryTest,
   evaluate
-} from 'feelin';
+} from '@bpmn-io/feelin';
 
 unaryTest('1', { '?': 1 }); // { value: true, warnings: [] }
 unaryTest('[1..end]', { '?': 1, end: 10 }); // { value: true, warnings: [] }

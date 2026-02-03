@@ -3,7 +3,7 @@ const { expect } = require('./helpers.js');
 const {
   unaryTest,
   evaluate
-} = require('feelin');
+} = require('@bpmn-io/feelin');
 
 
 describe('interpreter', function() {

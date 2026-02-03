@@ -7,7 +7,7 @@ import {
   evaluate,
   date,
   duration
-} from 'feelin';
+} from '@bpmn-io/feelin';
 
 
 describe('interpreter', function() {

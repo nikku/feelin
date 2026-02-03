@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to [feelin](https://github.com/nikku/feelin) are documented here. We use [semantic versioning](http://semver.org/) for releases.
+All notable changes to [@bpmn-io/feelin](https://github.com/bpmn-io/feelin) are documented here. We use [semantic versioning](http://semver.org/) for releases.
 
 ## Unreleased
 

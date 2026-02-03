@@ -8,6 +8,8 @@ ___Note:__ Yet to be released changes appear here._
 
 ## 6.1.0
 
+_Tracking upstream `feelin@6.1.0`._
+
 * `FEAT`: allow comparison of strings ([#94](https://github.com/nikku/feelin/issues/94), [#73](https://github.com/nikku/feelin/issues/73), [#145](https://github.com/nikku/feelin/pull/145))
 * `DEPS`: use `@bpmn-io/lezer-feel@2.1.0`
 

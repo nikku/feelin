@@ -1,7 +1,7 @@
 import {
   parser,
   trackVariables
-} from 'lezer-feel';
+} from '@bpmn-io/lezer-feel';
 
 import { Tree } from '@lezer/common';
 

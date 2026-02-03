@@ -1,4 +1,4 @@
-import { normalizeContextKey } from 'lezer-feel';
+import { normalizeContextKey } from '@bpmn-io/lezer-feel';
 
 import { getType } from './types.js';
 

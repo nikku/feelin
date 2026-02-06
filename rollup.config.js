@@ -9,8 +9,8 @@ const input = pkg.source;
 
 const external = [
   'lezer-feel',
-  'luxon',
-  'min-dash'
+  'min-dash',
+  'temporal-polyfill'
 ];
 
 export default [

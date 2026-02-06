@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "lib": [
-      "es2019"
+      "ES2022"
     ],
     "strict": false,
     "target": "ES2015",

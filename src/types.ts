@@ -1,9 +1,20 @@
+import { isArray } from 'min-dash';
+
 import {
-  DateTime,
-  Duration,
-  FixedOffsetZone,
-  SystemZone
-} from 'luxon';
+  isDate,
+  isTime,
+  isDateConvertible,
+  isDateTime,
+  isDuration
+} from './temporal.js';
+
+export {
+  isDate,
+  isTime,
+  isDateConvertible,
+  isDuration,
+  isDateTime
+};
 
 export function isNil(e) {
   return e === null || e === undefined;
@@ -13,20 +24,20 @@ export function isContext(e) {
   return !isNil(e) && Object.getPrototypeOf(e) === Object.prototype;
 }
 
-export function isDateTime(obj): obj is DateTime {
-  return DateTime.isDateTime(obj);
+export function isList(obj) : obj is Array<unknown> {
+  return isArray(obj);
 }
 
-export function isDuration(obj): obj is Duration {
-  return Duration.isDuration(obj);
+export function isBoolean(obj) : obj is boolean {
+  return typeof obj === 'boolean';
 }
 
-export function isArray(e) {
-  return Array.isArray(e);
+export function isFunction(obj) : obj is FunctionWrapper {
+  return obj instanceof FunctionWrapper;
 }
 
-export function isBoolean(e) {
-  return typeof e === 'boolean';
+export function isRange(obj) : obj is Range {
+  return obj instanceof Range;
 }
 
 export function getType(e) {
@@ -51,7 +62,7 @@ export function getType(e) {
     return 'context';
   }
 
-  if (isArray(e)) {
+  if (isList(e)) {
     return 'list';
   }
 
@@ -59,33 +70,23 @@ export function getType(e) {
     return 'duration';
   }
 
+  if (isDate(e)) {
+    return 'date';
+  }
+
+  if (isTime(e)) {
+    return 'time';
+  }
+
   if (isDateTime(e)) {
-    if (
-      e.year === 1900 &&
-      e.month === 1 &&
-      e.day === 1
-    ) {
-      return 'time';
-    }
-
-    if (
-      e.hour === 0 &&
-      e.minute === 0 &&
-      e.second === 0 &&
-      e.millisecond === 0 &&
-      e.zone === FixedOffsetZone.utcInstance
-    ) {
-      return 'date';
-    }
-
     return 'date time';
   }
 
-  if (e instanceof Range) {
+  if (isRange(e)) {
     return 'range';
   }
 
-  if (e instanceof FunctionWrapper) {
+  if (isFunction(e)) {
     return 'function';
   }
 
@@ -100,17 +101,12 @@ export function isType(el: string, type: string): boolean {
 export function typeCast(obj: any, type: string) {
 
   if (isDateTime(obj)) {
-
     if (type === 'time') {
-      return obj.set({
-        year: 1900,
-        month: 1,
-        day: 1
-      });
+      return obj.getTime();
     }
 
     if (type === 'date') {
-      return obj.setZone('utc', { keepLocalTime: true }).startOf('day');
+      return obj.getDate();
     }
 
     if (type === 'date time') {
@@ -161,56 +157,68 @@ export function isString(obj) : obj is string {
 }
 
 export function equals(a, b, strict = false) {
-  if (
-    a === null && b !== null ||
-    a !== null && b === null
-  ) {
-    return false;
-  }
 
-  if (isArray(a) && a.length < 2) {
+  if (isList(a) && a.length === 1) {
     a = a[0];
   }
 
-  if (isArray(b) && b.length < 2) {
+  if (isList(b) && b.length === 1) {
     b = b[0];
   }
 
-  const aType = getType(a);
-  const bType = getType(b);
+  console.log('equals', { a, b });
 
-  const temporalTypes = [ 'date time', 'time', 'date' ];
+  if (isNil(a)) {
+    return isNil(b);
+  }
 
-  if (temporalTypes.includes(aType)) {
+  if (isNil(b)) {
+    return isNil(a);
+  }
 
-    if (!temporalTypes.includes(bType)) {
+  // implicit conversion from date to date and time
+
+  if (!strict && (isDate(a) && isDateTime(b))) {
+    return equals(a, b.getDate());
+  }
+
+  if (!strict && (isDateTime(a) && isDate(b))) {
+    return equals(a.getDate(), b);
+  }
+
+  if (isDate(a)) {
+
+    if (!isDate(b)) {
       return null;
     }
 
-    if (aType === 'time' && bType !== 'time') {
+    return a.equals(b);
+  }
+
+  if (isTime(a)) {
+
+    if (!isTime(b)) {
       return null;
     }
 
-    if (bType === 'time' && aType !== 'time') {
+    return a.equals(b);
+  }
+
+  if (isDateTime(a)) {
+
+    if (!isDateTime(b)) {
       return null;
     }
 
-    if (strict || a.zone === SystemZone.instance || b.zone === SystemZone.instance) {
-      return a.equals(b);
-    } else {
-      return a.toUTC().valueOf() === b.toUTC().valueOf();
+    return a.equals(b);
+  }
+
+  if (isList(a)) {
+
+    if (!isList(b)) {
+      return null;
     }
-  }
 
-  if (aType !== bType) {
-    return null;
-  }
-
-  if (aType === 'nil') {
-    return true;
-  }
-
-  if (aType === 'list') {
     if (a.length !== b.length) {
       return false;
     }
@@ -220,21 +228,28 @@ export function equals(a, b, strict = false) {
     );
   }
 
-  if (aType === 'duration') {
+  if (isDuration(a)) {
 
-    // years and months duration -> months
-    if (Math.abs(a.as('days')) > 180) {
-      return Math.trunc(a.minus(b).as('months')) === 0;
+    if (!isDuration(b)) {
+      return null;
     }
 
-    // days and time duration -> seconds
-    else {
-      return Math.trunc(a.minus(b).as('seconds')) === 0;
-    }
+    if (a.years || a.months) {
 
+      // years and months duration -> months
+      return a.total('months') === b.total('months');
+    } else {
+
+      // days and time duration -> seconds
+      return a.total('seconds') === b.total('seconds');
+    }
   }
 
-  if (aType === 'context') {
+  if (isContext(a)) {
+
+    if (!isContext(b)) {
+      return null;
+    }
 
     const aEntries = Object.entries(a);
     const bEntries = Object.entries(b);
@@ -248,7 +263,12 @@ export function equals(a, b, strict = false) {
     );
   }
 
-  if (aType === 'range') {
+  if (isRange(a)) {
+
+    if (!isRange(b)) {
+      return null;
+    }
+
     return [
       [ a.start, b.start ],
       [ a.end, b.end ],
@@ -257,11 +277,34 @@ export function equals(a, b, strict = false) {
     ].every(([ a, b ]) => a === b);
   }
 
-  if (a == b) {
-    return true;
+  if (isString(a)) {
+
+    if (!isString(b)) {
+      return null;
+    }
+
+    return a === b;
   }
 
-  return aType === bType ? false : null;
+  if (isNumber(a)) {
+
+    if (!isNumber(b)) {
+      return null;
+    }
+
+    return a === b;
+  }
+
+  if (isBoolean(a)) {
+
+    if (!isBoolean(b)) {
+      return null;
+    }
+
+    return a === b;
+  }
+
+  return a == b;
 }
 
 export const FUNCTION_PARAMETER_MISSMATCH = {};
@@ -284,7 +327,7 @@ export class FunctionWrapper {
 
     let params;
 
-    if (isArray(contextOrArgs)) {
+    if (isList(contextOrArgs)) {
       params = contextOrArgs;
 
       // reject
@@ -321,7 +364,7 @@ export class FunctionWrapper {
 
             // ensure that single arg provided for var args named
             // parameter is wrapped in a list
-            return [ ...params, ...(isArray(value) ? value : [ value ]) ];
+            return [ ...params, ...(isList(value) ? value : [ value ]) ];
           }
         }
 

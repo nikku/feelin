@@ -6,6 +6,8 @@ import {
   unaryTest,
   evaluate,
   date,
+  dateTime,
+  time,
   duration
 } from 'feelin';
 
@@ -119,19 +121,19 @@ describe('interpreter', function() {
           date and time("2012-12-24T23:59:00z")
         `, true);
 
-        expr('duration("P1D") + duration("P1D")', duration('P2D'));
-        expr('duration("PT1M") + duration("PT1M")', duration('PT2M'));
+        expr('duration("P1D") + duration("P1D")', duration({ from: 'P2D' }));
+        expr('duration("PT1M") + duration("PT1M")', duration({ from: 'PT2M' }));
 
-        expr('date("2023-10-06") + duration("PT1H")', date('2023-10-06T01:00Z'));
-        expr('date("2023-10-06") + duration("P1D")', date('2023-10-07'));
-        expr('date("2023-10-06") + duration("P1W")', date('2023-10-13'));
-        expr('date("2023-10-06") + duration("P1M")', date('2023-11-06'));
-        expr('date("2023-10-06") + duration("P1Y")', date('2024-10-06'));
-        expr('date("2023-10-06") - duration("PT1H")', date('2023-10-05T23:00Z'));
-        expr('date("2023-10-06") - duration("P1D")', date('2023-10-05'));
-        expr('date("2023-10-06") - duration("P1W")', date('2023-09-29'));
-        expr('date("2023-10-06") - duration("P1M")', date('2023-09-06'));
-        expr('date("2023-10-06") - duration("P1Y")', date('2022-10-06'));
+        expr('date("2023-10-06") + duration("PT1H")', dateTime({ from: '2023-10-06T01:00:00' }));
+        expr('date("2023-10-06") + duration("P1D")', date({ from: '2023-10-07' }));
+        expr('date("2023-10-06") + duration("P1W")', date({ from: '2023-10-13' }));
+        expr('date("2023-10-06") + duration("P1M")', date({ from: '2023-11-06' }));
+        expr('date("2023-10-06") + duration("P1Y")', date({ from: '2024-10-06' }));
+        expr('date("2023-10-06") - duration("PT1H")', dateTime({ from: '2023-10-05T23:00:00' }));
+        expr('date("2023-10-06") - duration("P1D")', date({ from: '2023-10-05' }));
+        expr('date("2023-10-06") - duration("P1W")', date({ from: '2023-09-29' }));
+        expr('date("2023-10-06") - duration("P1M")', date({ from: '2023-09-06' }));
+        expr('date("2023-10-06") - duration("P1Y")', date({ from: '2022-10-06' }));
         expr('date("2023-10-06") + duration("P1M") = date("2023-11-06")', true);
         expr('date("2023-10-06") - duration("P1M") = date("2023-09-06")', true);
 
@@ -1269,6 +1271,10 @@ describe('interpreter', function() {
 
     expr('[] = null', false);
 
+    expr('null = null', true);
+
+    expr('[null] = null', true);
+
     expr('[] = 0', null);
 
     expr('{} = {}', true);
@@ -1658,7 +1664,7 @@ describe('interpreter', function() {
               template: "Can't exponentiate {right} to {left}",
               values: {
                 right: 10,
-                left: date('2025-12-12')
+                left: date({ from: '2025-12-12' })
               }
             }
           }

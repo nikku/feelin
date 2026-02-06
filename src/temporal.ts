@@ -1,81 +1,304 @@
-import {
-  DateTime,
-  Duration,
-  FixedOffsetZone,
-  Info,
-  Zone
-} from 'luxon';
-
-import { isDateTime, isDuration } from './types.js';
-
-export {
-  isDateTime,
-  isDuration
-};
+import { Temporal } from 'temporal-polyfill';
 
 import { notImplemented } from './utils.js';
 
+class FTBase<R extends Temporal.Duration | Temporal.PlainDate | Temporal.PlainDateTime | Temporal.ZonedDateTime, T extends string> {
 
-export function ms(temporal) {
+  type: T;
+  raw: R;
 
-  if (isDateTime(temporal)) {
-    return temporal.valueOf();
+  constructor(type: T, raw: R) {
+    this.type = type;
+    this.raw = raw;
   }
 
-  if (isDuration(temporal)) {
-    return temporal.valueOf();
+  equals(other: unknown) {
+
+    if (isTemporal(other)) {
+
+      // @ts-expect-error "weak cast"
+      return this.raw.equals(other.raw);
+    }
+
+    return false;
   }
 
-  return null;
+  toJSON() {
+    return this.toString();
+  }
 }
 
-export function duration(opts: string|number) : Duration {
-
-  if (typeof opts === 'number') {
-    return Duration.fromMillis(opts);
-  }
-
-  return Duration.fromISO(opts);
+export interface FDateConvertible {
+  getDate(): FDate;
 }
 
-export function date(str: string = null, time: string = null, zone: Zone = null) : DateTime {
+export interface FTimeConvertible {
+  getTime(): FTime;
+}
 
-  if (time) {
-    if (str) {
-      throw new Error('<str> and <time> provided');
-    }
+export class FDuration extends FTBase<Temporal.Duration, 'duration'> {
 
-    return date(`1900-01-01T${ time }`, null);
+  constructor(raw: Temporal.Duration) {
+    super('duration', raw);
   }
 
-  if (typeof str === 'string') {
+  toString() {
+    return this.raw.toString();
+  }
+}
 
-    if (str.startsWith('-')) {
-      throw notImplemented('negative date');
-    }
+type TemporalType = 'date' | 'date time' | 'time';
 
-    if (!str.includes('T')) {
+class FTemporal<R extends Temporal.PlainDate | Temporal.PlainDateTime | Temporal.ZonedDateTime> extends FTBase<R, TemporalType> { }
 
-      // raw dates are in UTC time zone
-      return date(str + 'T00:00:00', null, zone || FixedOffsetZone.utcInstance);
-    }
+export class FDateTime extends FTemporal<Temporal.PlainDateTime | Temporal.ZonedDateTime> implements FDateConvertible, FTimeConvertible {
 
-    if (str.includes('@')) {
+  constructor(raw: Temporal.PlainDateTime | Temporal.ZonedDateTime) {
+    super('date time', raw);
+  }
 
-      if (zone) {
-        throw new Error('<zone> already provided');
-      }
+  getDate() {
+    return new FDate(this.raw.toPlainDate());
+  }
 
-      const [ datePart, zonePart ] = str.split('@');
+  getTime() {
+    return new FTime(this.raw);
+  }
 
-      return date(datePart, null, Info.normalizeZone(zonePart));
-    }
+  toString() {
+    return this.raw.toString();
+  }
+}
 
-    return DateTime.fromISO(str.toUpperCase(), {
-      setZone: true,
-      zone
+export class FDate extends FTemporal<Temporal.PlainDate> implements FDateConvertible {
+
+  constructor(raw: Temporal.PlainDate) {
+    super('date', raw);
+  }
+
+  substract(other: FDate) {
+    return new FDuration(this.raw.since(other.raw));
+  }
+
+  getDate() {
+    return this;
+  }
+
+  toString() {
+    return this.raw.toString();
+  }
+}
+
+export class FTime extends FTemporal<Temporal.ZonedDateTime | Temporal.PlainDateTime> {
+
+  constructor(raw: Temporal.ZonedDateTime | Temporal.PlainDateTime) {
+    super('time', raw);
+  }
+
+  setDate(convertible: FDateConvertible) {
+
+    const {
+      day,
+      month,
+      year
+    } = convertible.getDate().raw;
+
+    return new FDateTime(this.raw.with({
+      day,
+      month,
+      year
+    }));
+  }
+
+  toString() {
+    return this.raw.toString().split('T')[1];
+  }
+}
+
+export function isTemporal(obj) : obj is FDuration | FTime | FDate | FDateTime {
+  return obj instanceof FTBase;
+}
+
+export function isDate(obj) : obj is FDate {
+  return obj instanceof FDate;
+}
+
+export function isDuration(obj) : obj is FDuration {
+  return obj instanceof FDuration;
+}
+
+export function isDateTime(obj) : obj is FDateTime {
+  return obj instanceof FDateTime;
+}
+
+export function isTime(obj) : obj is FTime {
+  return obj instanceof FTime;
+}
+
+export function isDateConvertible(obj) : obj is FDateConvertible {
+  return [ FDate, FDateTime ].some(T => obj instanceof T);
+}
+
+export function duration(options: { from: string } | { from: FDateConvertible, to: FDateConvertible }) : FDuration {
+
+  console.log('duration', { options });
+
+  if ('to' in options) {
+    const {
+      from,
+      to
+    } = options;
+
+    return to.getDate().substract(from.getDate());
+  } else {
+    const {
+      from
+    } = options;
+
+    return tryParse(() => {
+      const raw = Temporal.Duration.from(from);
+
+      return new FDuration(raw);
     });
   }
+}
 
-  return DateTime.now();
+export function date(options: { from: string | FDateConvertible } | { year: number, month: number, day: number }) : FDate {
+
+  if ('from' in options) {
+    const {
+      from
+    } = options;
+
+    if (isDateConvertible(from)) {
+      return from.getDate();
+    } else {
+
+      if (from.startsWith('-')) {
+        throw notImplemented('negative date');
+      }
+
+      return tryParse(() => {
+        const raw = Temporal.PlainDate.from(from);
+
+        return new FDate(raw);
+      });
+    }
+  } else {
+    const {
+      year,
+      month,
+      day
+    } = options;
+
+    const raw = Temporal.PlainDate.from({
+      year,
+      month,
+      day
+    });
+
+    return new FDate(raw);
+  }
+}
+
+export function time(options: { from: string } | { hour: number, minute: number, second: number }) : FTime {
+
+  if ('from' in options) {
+
+    const {
+      from
+    } = options;
+
+    if (from.startsWith('-')) {
+      throw notImplemented('negative time');
+    }
+
+    const todayStr = Temporal.Now.plainDateISO().toString();
+
+    return tryParse(() => {
+      if (isZoned(from)) {
+        const raw = Temporal.ZonedDateTime.from(`${todayStr}T${from}`);
+
+        return new FTime(raw);
+      } else {
+        const raw = Temporal.PlainDateTime.from(`${todayStr}T${from}`);
+
+        return new FTime(raw);
+      }
+    });
+  } else {
+    const {
+      hour,
+      minute,
+      second
+    } = options;
+
+    const raw = Temporal.PlainDateTime.from({ hour, minute, second });
+
+    return new FTime(raw);
+  }
+}
+
+export function now() {
+  return new FDateTime(Temporal.Now.plainDateTimeISO());
+}
+
+export function dateTime(options: { from: string }) : FDateTime {
+
+  const {
+    from
+  } = options;
+
+  if (from.startsWith('-')) {
+    throw notImplemented('negative date time');
+  }
+
+  return tryParse(() => {
+    if (isZoned(from)) {
+      const raw = Temporal.ZonedDateTime.from(from);
+
+      return new FDateTime(raw);
+    } else {
+      const raw = Temporal.PlainDateTime.from(from);
+
+      return new FDateTime(raw);
+    }
+  });
+}
+
+export function temporal(options: { from: string }) : FDate | FTime | FDateTime {
+
+  const {
+    from
+  } = options;
+
+  if (from.includes('T')) {
+    return dateTime({ from });
+  }
+
+  if (/\d{1,2}:\d{1,2}:\d{1,2}/.test(from)) {
+    return time({ from });
+  }
+
+  return date({ from });
+}
+
+function isZoned(from: string) {
+  return from.includes('@') || from.includes('+') || from.toLowerCase().includes('z');
+}
+
+function tryParse<T>(fn: () => T) : T {
+
+  try {
+    return fn();
+  } catch (err) {
+    if (err instanceof RangeError) {
+
+      console.warn('tryParse', err);
+
+      return null;
+    }
+
+    throw err;
+  }
 }

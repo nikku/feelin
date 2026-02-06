@@ -2,14 +2,14 @@ import { Tree, SyntaxNodeRef, SyntaxNode } from '@lezer/common';
 
 import { builtins } from './builtins.js';
 
-import { has } from 'min-dash';
+import { has, isNil } from 'min-dash';
 
 import {
   Range,
   FunctionWrapper,
   FUNCTION_PARAMETER_MISSMATCH,
   equals,
-  isArray,
+  isList,
   getType,
   isDuration,
   isDateTime,
@@ -29,9 +29,6 @@ import {
   parseExpression,
   parseUnaryTests
 } from './parser.js';
-
-import { Duration } from 'luxon';
-
 
 export type WarningType =
   | 'NO_VARIABLE_FOUND'
@@ -298,7 +295,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
       const left = a(context);
       const right = b(context);
 
-      if (isArray(left) || isArray(right)) {
+      if (isList(left) || isList(right)) {
         interpreterContext.addWarning(node, 'INVALID_TYPE', {
           template: `Can't ${opName} {right} to {left}`,
           values: {
@@ -353,7 +350,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
       }
 
       if (isType(a, 'time') && isDuration(b)) {
-        return a.plus(b).set({
+        return a.add(b).with({
           year: 1900,
           month: 1,
           day: 1
@@ -361,26 +358,26 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
       } else if (isDateTime(a) && isDateTime(b)) {
         return null;
       } else if (isDateTime(a) && isDuration(b)) {
-        return a.plus(b);
+        return a.add(b);
       } else if (isDuration(a) && isDuration(b)) {
-        return a.plus(b);
+        return a.add(b);
       }
 
       return a + b;
     }, 'add', [ 'string', 'number', 'date', 'time', 'duration', 'date time' ]);
     case '-': return nullable((a, b) => {
       if (isType(a, 'time') && isDuration(b)) {
-        return a.minus(b).set({
+        return a.subtract(b).with({
           year: 1900,
           month: 1,
           day: 1
         });
       } else if (isDateTime(a) && isDateTime(b)) {
-        return a.diff(b);
+        return a.since(b);
       } else if (isDateTime(a) && isDuration(b)) {
-        return a.minus(b);
+        return a.subtract(b);
       } else if (isDuration(a) && isDuration(b)) {
-        return a.minus(b);
+        return a.subtract(b);
       }
 
       return a - b;
@@ -950,7 +947,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     const pathTarget = args[0](context);
     const pathProp = args[1];
 
-    if (isArray(pathTarget)) {
+    if (isList(pathTarget)) {
       return pathTarget.map(value => pathProp(value, true));
     } else {
       return pathProp(pathTarget, true);
@@ -964,7 +961,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
 
     const filterFn = args[2];
 
-    const filterTarget = isArray(target) ? target : [ target ];
+    const filterTarget = isList(target) ? target : [ target ];
 
     // null[..]
     if (target === null) {
@@ -1092,7 +1089,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
 
       const matches = tests.map(test => test(context)).flat(1).map(test => {
 
-        if (isArray(test)) {
+        if (isList(test)) {
           return test.includes(value);
         }
 
@@ -1130,7 +1127,7 @@ function extractValue(context, prop, _target) {
 
 function compareIn(value, tests) {
 
-  if (!isArray(tests)) {
+  if (!isList(tests)) {
 
     if (getType(tests) === 'nil') {
       return null;
@@ -1276,6 +1273,10 @@ function includesEnd(n, inclusive) {
   }
 }
 
+function compare(a, b) {
+
+  if (a instalnce )
+}
 function anyIncludes(start, end, startIncluded, endIncluded, conversion = (v) => v) {
 
   let tests = [];
@@ -1369,7 +1370,24 @@ function createNumberRange(start, end, startIncluded, endIncluded) {
  */
 function createDurationRange(start, end, startIncluded, endIncluded) {
 
-  const toMillis = (d) => d ? Duration.fromDurationLike(d).toMillis() : null;
+  const type = getType(start || end);
+
+  const toMillis = (d) => {
+
+    if (isNil(d)) {
+      return null;
+    }
+
+    if (!isType(d, type)) {
+      return null;
+    }
+
+    if (!isDuration(d)) {
+      return null;
+    }
+
+    return d.toTimestamp();
+  };
 
   const map = noopMap();
   const includes = anyIncludes(toMillis(start), toMillis(end), startIncluded, endIncluded, toMillis);
@@ -1387,8 +1405,10 @@ function createDurationRange(start, end, startIncluded, endIncluded) {
 
 
 function createDateTimeRange(start, end, startIncluded, endIncluded) {
+  const toMillis = (d) => d ? d.epochMilliseconds : null;
+
   const map = noopMap();
-  const includes = anyIncludes(start, end, startIncluded, endIncluded);
+  const includes = anyIncludes(toMillis(start), toMillis(end), startIncluded, endIncluded, toMillis);
 
   return new Range({
     start,

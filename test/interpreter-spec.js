@@ -399,6 +399,8 @@ describe('interpreter', function() {
         b: 1
       });
 
+      expr('every e in 0 .. 1 satisfies e != 2', true);
+
       expr('some b in a satisfies b < 10', true, {
         a: [
           12,
@@ -419,6 +421,8 @@ describe('interpreter', function() {
 
       expr('some x in [ [1, 2], [3, 4] ], y in x satisfies y > 5', false);
       expr('some x in [ [1, 2], [3, 4] ], y in x satisfies y > 3', true);
+
+      expr('some e in 0 .. 1 satisfies e = 1', true);
 
       expr('every e in null satisfies e != 2', null);
 

@@ -6,6 +6,11 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 6.2.0
+
+* `FEAT`: support `IterationContext` in `QuantifiedExpression` ([#79](https://github.com/nikku/lezer-feel/pull/79))
+* `DEPS`: update to `lezer-feel@2.3.0`
+
 ## 6.1.0
 
 * `FEAT`: allow comparison of strings ([#94](https://github.com/nikku/feelin/issues/94), [#73](https://github.com/nikku/feelin/issues/73), [#145](https://github.com/nikku/feelin/pull/145))

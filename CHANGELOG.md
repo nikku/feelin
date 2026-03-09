@@ -29,6 +29,7 @@ ___Note:__ Yet to be released changes appear here._
 * `FIX`: cannot access list item within an expression ([#127](https://github.com/nikku/feelin/issues/127), [#141](https://github.com/nikku/feelin/pull/141))
 * `FIX`: correct filter expression creating new variables ([#107](https://github.com/nikku/feelin/issues/107))
 * `FIX`: correct `round*` built-ins for out-of-range scale ([`fa0cc388`](https://github.com/nikku/feelin/pull/141/commits/fa0cc38819226a7e43dc740f666afcb28bc0808a))
+* `FIX`: correc filtering by variable names not covered by spec ([#18](https://github.com/nikku/feelin/issues/18))
 
 ## 6.0.0
 

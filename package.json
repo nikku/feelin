@@ -13,7 +13,7 @@
     "./package.json": "./package.json"
   },
   "devDependencies": {
-    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-terser": "^1.0.0",
     "@rollup/plugin-typescript": "^12.3.0",
     "@types/luxon": "^3.7.1",
     "@types/mocha": "^10.0.10",

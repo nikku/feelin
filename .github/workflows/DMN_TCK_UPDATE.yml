@@ -32,7 +32,7 @@ jobs:
         DRY_RUN: false
     - name: Generate API Token
       id: app-token
-      uses: actions/create-github-app-token@v2
+      uses: actions/create-github-app-token@v3
       with:
         app-id: ${{ secrets.TOKEN_APP_ID }}
         private-key: ${{ secrets.TOKEN_APP_KEY }}

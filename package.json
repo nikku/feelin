@@ -19,7 +19,7 @@
     "@types/mocha": "^10.0.10",
     "chai": "^6.2.2",
     "chokidar-cli": "^3.0.0",
-    "eslint": "^9.39.4",
+    "eslint": "^10.0.0",
     "eslint-plugin-bpmn-io": "^2.2.0",
     "fast-glob": "^3.3.3",
     "mocha": "^11.7.5",

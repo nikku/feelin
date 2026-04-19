@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "@lezer/common": "^1.5.2",
-    "lezer-feel": "^2.3.0",
+    "lezer-feel": "^2.4.0",
     "luxon": "^3.7.2",
     "min-dash": "^5.0.0"
   },

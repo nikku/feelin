@@ -519,7 +519,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
   // spaces into one (token)
   case 'Name': return node.input.replace(/\s{2,}/g, ' ');
 
-  case 'VariableName': return tag((context, local = false) => {
+  case 'PathName': return tag((context) => {
     const name = args.join(' ');
 
     const contextValue = getFromContext(name, context);
@@ -528,35 +528,44 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
       return contextValue;
     }
 
-    const builtin = !local && getBuiltin(name, context);
+    if (isContext(context)) {
+      interpreterContext.addWarning(node, 'NO_CONTEXT_ENTRY_FOUND', {
+        template: `Key '${name}' not found in {target}`,
+        values: {
+          target: context
+        }
+      });
+    } else {
+      interpreterContext.addWarning(node, 'NO_PROPERTY_FOUND', {
+        template: `Property '${name}' not found in {target}`,
+        values: {
+          target: context
+        }
+      });
+    }
+
+    return null;
+  }, 'any');
+
+  case 'VariableName': return tag((context) => {
+    const name = args.join(' ');
+
+    const contextValue = getFromContext(name, context);
+
+    if (typeof contextValue !== 'undefined') {
+      return contextValue;
+    }
+
+    const builtin = getBuiltin(name, context);
 
     if (builtin) {
       return builtin;
     }
 
-    if (local) {
-
-      if (isContext(context)) {
-        interpreterContext.addWarning(node, 'NO_CONTEXT_ENTRY_FOUND', {
-          template: `Key '${name}' not found in {target}`,
-          values: {
-            target: context
-          }
-        });
-      } else {
-        interpreterContext.addWarning(node, 'NO_PROPERTY_FOUND', {
-          template: `Property '${name}' not found in {target}`,
-          values: {
-            target: context
-          }
-        });
-      }
-    } else {
-      interpreterContext.addWarning(node, 'NO_VARIABLE_FOUND', {
-        template: `Variable '${name}' not found`,
-        values: {}
-      });
-    }
+    interpreterContext.addWarning(node, 'NO_VARIABLE_FOUND', {
+      template: `Variable '${name}' not found`,
+      values: {}
+    });
 
     return null;
   }, 'any');
@@ -948,12 +957,14 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
   case 'PathExpression': return tag((context) => {
 
     const pathTarget = args[0](context);
+
+    // PathName
     const pathProp = args[1];
 
     if (isArray(pathTarget)) {
-      return pathTarget.map(value => pathProp(value, true));
+      return pathTarget.map(value => pathProp(value));
     } else {
-      return pathProp(pathTarget, true);
+      return pathProp(pathTarget);
     }
   }, 'any');
 

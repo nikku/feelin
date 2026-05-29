@@ -6,6 +6,11 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 7.0.1
+
+* `FIX`: adjust for dots in parse tree
+* `DEPS`: update to `lezer-feel@3.0.1`
+
 ## 7.0.0
 
 * `CHORE`: recognize `PathName` token

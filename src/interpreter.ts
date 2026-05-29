@@ -582,7 +582,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
 
     const a = args[0](context);
 
-    const b = args[1] && args[1](context);
+    const b = args[2] && args[2](context);
 
     return b ? createRange(a, b) : a;
   };
@@ -954,12 +954,13 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
 
   case 'ParenthesizedExpression': return args[1];
 
+  // expr "."" pathName
   case 'PathExpression': return tag((context) => {
 
     const pathTarget = args[0](context);
 
     // PathName
-    const pathProp = args[1];
+    const pathProp = args[2];
 
     if (isArray(pathTarget)) {
       return pathTarget.map(value => pathProp(value));
@@ -1073,13 +1074,14 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     return args.slice(1, -1).map(arg => arg(context));
   };
 
+  // "[" endpoint ".." endpoint "]"
   case 'Interval': return tag((context) => {
 
     const left = args[1](context);
-    const right = args[2](context);
+    const right = args[3](context);
 
     const startIncluded = left !== null && args[0] === '[';
-    const endIncluded = right !== null && args[3] === ']';
+    const endIncluded = right !== null && args[4] === ']';
 
     return createRange(left, right, startIncluded, endIncluded);
   }, 'test');

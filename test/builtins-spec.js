@@ -503,9 +503,8 @@ function describeBuiltins(name, evaluate) {
       expr('abs(-1)', 1);
       expr('abs(n: -1)', 1);
 
-      // TODO(nikku): support this
-      exprSkip('abs(@"PT5H") = @"PT5H"', true);
-      exprSkip('abs(@"-PT5H") = @"PT5H"', true);
+      expr('abs(@"PT5H") = @"PT5H"', true);
+      expr('abs(@"-PT5H") = @"PT5H"', true);
 
       expr('modulo( 12, 5 )', 2);
       expr('modulo(-12,5)', 3);

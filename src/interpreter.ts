@@ -25,7 +25,6 @@ import {
 } from './function.js';
 
 import {
-  notImplemented,
   getFromContext
 } from './utils.js';
 
@@ -613,8 +612,16 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     return null;
   }, 'any');
 
-  case 'QualifiedName': return (context) => {
-    return args.reduce((context, arg) => arg(context), context);
+  case 'QualifiedName': return {
+    kind: 'name',
+    name: normalizeTypeName(node.input),
+
+    // fall back to a user-provided constructor / value resolved from
+    // context, preserving the historic `x instance of SomeClass` behavior
+    resolve: (context) => args.reduce(
+      (context, arg) => typeof arg === 'function' ? arg(context) : context,
+      context
+    )
   };
 
   case '?': return (context) => getFromContext('?', context);
@@ -713,14 +720,39 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     return extractValue(context, args[0], args[2]);
   };
 
-  case 'SpecialType': throw notImplemented('SpecialType');
+  case 'SpecialType': return {
+    kind: 'name',
+    name: normalizeTypeName(node.input)
+  };
+
+  case 'ListType': return {
+    kind: 'list',
+    element: args.find(isTypeDescriptor)
+  };
+
+  case 'ContextType': return {
+    kind: 'context',
+    entries: args.find(Array.isArray) || []
+  };
+
+  case 'ContextEntryTypes': return args.filter(
+    arg => arg && arg.name
+  );
+
+  case 'ContextEntryType': return {
+    name: args[0],
+    type: args.find(isTypeDescriptor)
+  };
+
+  case 'FunctionType': return {
+    kind: 'function'
+  };
 
   case 'InstanceOfExpression': return tag((context) => {
 
-    const a = args[0](context);
-    const b = args[3](context);
+    const value = args[0](context);
 
-    return a instanceof b;
+    return matchesType(value, args[3], context);
   }, 'test');
 
   case 'every': return tag((context) => {
@@ -1220,6 +1252,94 @@ function tag<Z, T extends ContextFn<Z>>(fn: T, type: string) : T & TaggedFn {
 
 function isTruthy(obj) {
   return obj !== false && obj !== null;
+}
+
+
+// instance of //////////////////////////////////////////////////////
+
+/**
+ * A parsed FEEL type, as it appears on the right-hand side of an
+ * `instance of` expression.
+ *
+ * @typedef {(
+ *   { kind: 'name', name: string, resolve?: (context) => any } |
+ *   { kind: 'list', element: TypeDescriptor } |
+ *   { kind: 'context', entries: { name: string, type: TypeDescriptor }[] } |
+ *   { kind: 'function' }
+ * )} TypeDescriptor
+ */
+
+const anyType = (value) => getType(value) !== 'nil';
+
+/**
+ * Predicates for the named FEEL types, all built on the {@link getType}
+ * oracle (the single source of truth for type identity). The two duration
+ * variants additionally inspect the duration's kind.
+ */
+const NAMED_TYPE_CHECKS = {
+  'Any': anyType,
+  'Null': (value) => value === null,
+  'number': (value) => getType(value) === 'number',
+  'string': (value) => getType(value) === 'string',
+  'boolean': (value) => getType(value) === 'boolean',
+  'date': (value) => getType(value) === 'date',
+  'time': (value) => getType(value) === 'time',
+  'date and time': (value) => getType(value) === 'date time',
+  'duration': (value) => getType(value) === 'duration',
+  'days and time duration': (value) => isDuration(value) && !value.yearsMonths,
+  'years and months duration': (value) => isDuration(value) && value.yearsMonths,
+  'context': (value) => getType(value) === 'context',
+  'list': (value) => getType(value) === 'list',
+  'range': (value) => getType(value) === 'range',
+  'function': (value) => getType(value) === 'function'
+};
+
+function normalizeTypeName(name: string) : string {
+  return name.replace(/\s+/g, ' ').trim();
+}
+
+function isTypeDescriptor(obj) : boolean {
+  return obj && typeof obj === 'object' && typeof obj.kind === 'string';
+}
+
+/**
+ * Whether `value` is an instance of the given FEEL type, per the DMN
+ * `instance of` operator. Composite types (`list<T>`, `context<...>`) are
+ * matched structurally; named types delegate to {@link getType}, and an
+ * unknown name falls back to a JavaScript constructor resolved from the
+ * evaluation context.
+ */
+function matchesType(value, descriptor, context) : boolean {
+
+  if (!isTypeDescriptor(descriptor)) {
+    return false;
+  }
+
+  switch (descriptor.kind) {
+  case 'name': {
+    const check = NAMED_TYPE_CHECKS[descriptor.name];
+
+    if (check) {
+      return check(value);
+    }
+
+    const target = descriptor.resolve ? descriptor.resolve(context) : null;
+
+    return typeof target === 'function' && value instanceof target;
+  }
+  case 'list':
+    return getType(value) === 'list' && value.every(
+      element => matchesType(element, descriptor.element, context)
+    );
+  case 'context':
+    return getType(value) === 'context' && descriptor.entries.every(
+      ({ name, type }) => has(value, name) && matchesType(value[name], type, context)
+    );
+  case 'function':
+    return getType(value) === 'function';
+  }
+
+  return false;
 }
 
 function parseString(str: string) {

@@ -717,13 +717,56 @@ describe('interpreter', function() {
         B
       });
 
-      exprSkip('@"P10Y" instance of years and months duration', true);
+      expr('a instance of B', false, {
+        a: 5,
+        B
+      });
 
-      exprSkip('@"P10D" instance of days and time duration', true);
+      // primitives
+      expr('1 instance of number', true);
+      expr('"foo" instance of number', false);
+      expr('"foo" instance of string', true);
+      expr('true instance of boolean', true);
+      expr('1 instance of boolean', false);
 
-      exprSkip('@"10:30:11@Australia/Melbourne" instance of time', true);
+      // Any / Null (null safety, see #7)
+      expr('1 instance of Any', true);
+      expr('"x" instance of Any', true);
+      expr('null instance of Any', false);
+      expr('null instance of Null', true);
+      expr('null instance of boolean', false);
+      expr('null instance of number', false);
 
-      exprSkip('@"2018-12-08T10:30:11+11:00" instance of date and time', true);
+      // temporal
+      expr('date("2018-12-08") instance of date', true);
+      expr('date("2018-12-08") instance of time', false);
+      expr('@"P10Y" instance of years and months duration', true);
+      expr('@"P10D" instance of days and time duration', true);
+      expr('@"P10Y" instance of days and time duration', false);
+      expr('@"P10D" instance of years and months duration', false);
+      expr('@"10:30:11@Australia/Melbourne" instance of time', true);
+      expr('@"2018-12-08T10:30:11+11:00" instance of date and time', true);
+
+      // range
+      expr('[1..10] instance of range', true);
+      expr('5 instance of range', false);
+
+      // list
+      expr('[1, 2] instance of list', true);
+      expr('[1, 2] instance of list<number>', true);
+      expr('[1, "a"] instance of list<number>', false);
+      expr('[] instance of list<number>', true);
+      expr('[[1], [2, 3]] instance of list<list<number>>', true);
+
+      // context
+      expr('{a: 1} instance of context', true);
+      expr('{a: 1} instance of context<a: number>', true);
+      expr('{a: "x"} instance of context<a: number>', false);
+      expr('{a: 1} instance of context<a: number, b: string>', false);
+
+      // function
+      expr('(function(x) x) instance of function<number>->number', true);
+      expr('5 instance of function<number>->number', false);
 
     });
 

@@ -1011,6 +1011,10 @@ function createArgTester(arg) {
     if (type === 'list') {
       if (arr || optional && typeof obj === 'undefined') {
         return obj;
+      } else if (typeof obj === 'undefined') {
+
+        // reject a missing required list argument
+        return FALSE;
       } else {
 
         // implicit conversion obj => [ obj ]

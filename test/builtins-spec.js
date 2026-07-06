@@ -706,7 +706,11 @@ function describeBuiltins(name, evaluate) {
 
       describe('ranges', function() {
 
-        exprSkip('duration("P5D") in (duration("P4D"), >=duration("P6D"))', true);
+        // `in (a, b)` is a disjunction of unary tests: P5D is neither equal
+        // to P4D nor >= P6D, so the membership test is false
+        expr('duration("P5D") in (duration("P4D"), >=duration("P6D"))', false);
+        expr('duration("P7D") in (duration("P4D"), >=duration("P6D"))', true);
+        expr('duration("P4D") in (duration("P4D"), >=duration("P6D"))', true);
 
         expr(`
           date and time("2018-12-08T10:30:01") in [

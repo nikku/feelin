@@ -20,8 +20,7 @@ import {
 } from './range.js';
 
 import {
-  FUNCTION_PARAMETER_MISMATCH,
-  isInvalidArguments,
+  isInvocationFailure,
   wrapFunction
 } from './function.js';
 
@@ -326,24 +325,12 @@ function coerceContext(value) {
 function evalNode(node: Node, args: any[], interpreterContext: InterpreterContext) {
 
   // resolve a raw function invocation result: emit the appropriate
-  // warning for a sentinel value and normalise it to `null`, so the
-  // sentinel never leaks into an enclosing expression
-  const resolveInvocation = (result, wrappedFn, contextOrArgs) => {
+  // warning for a failure signal and normalise it to `null`, so the
+  // signal never leaks into an enclosing expression
+  const resolveInvocation = (result) => {
 
-    if (result === FUNCTION_PARAMETER_MISMATCH) {
-      interpreterContext.addWarning(node, 'FUNCTION_INVOCATION_FAILURE', {
-        template: 'Cannot invoke {target} with parameters {params}',
-        values: {
-          target: wrappedFn,
-          params: contextOrArgs
-        }
-      });
-
-      return null;
-    }
-
-    if (isInvalidArguments(result)) {
-      interpreterContext.addWarning(node, 'INVALID_ARGUMENTS', {
+    if (isInvocationFailure(result)) {
+      interpreterContext.addWarning(node, result.warning as WarningType, {
         template: result.template,
         values: result.values
       });
@@ -816,7 +803,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
 
       const result = wrappedFn.invoke(contextOrArgs);
 
-      return resolveInvocation(result, wrappedFn, contextOrArgs);
+      return resolveInvocation(result);
     }
 
   }, 'date');
@@ -858,7 +845,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
 
     const result = wrappedFn.invoke(contextOrArgs);
 
-    return resolveInvocation(result, wrappedFn, contextOrArgs);
+    return resolveInvocation(result);
   }, 'any');
 
   case 'IfExpression': return (function() {

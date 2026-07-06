@@ -19,7 +19,7 @@ import {
 
 import {
   invalidArguments,
-  isInvalidArguments,
+  isInvocationFailure,
   parseParameterNames
 } from './function.js';
 
@@ -982,7 +982,7 @@ function contextPut(context, keys, value) {
   if (remainingKeys.length) {
     value = contextPut(context[key], remainingKeys, value);
 
-    if (isInvalidArguments(value)) {
+    if (isInvocationFailure(value)) {
       return value;
     }
   }
@@ -1105,7 +1105,7 @@ function listFn(fnDefinition, type, parameterNames = null) {
 }
 
 /**
- * Return an {@link InvalidArguments} signal unless the condition holds,
+ * Return an {@link invalidArguments} signal unless the condition holds,
  * so builtins can express argument validation as a flat guard chain
  * (`guard(...) || guard(...)`), short-circuiting on the first failure.
  *
@@ -1113,7 +1113,7 @@ function listFn(fnDefinition, type, parameterNames = null) {
  * @param {string} template
  * @param {Record<string, unknown>} [values]
  *
- * @return {import('./function.js').InvalidArguments | null}
+ * @return {import('./function.js').InvocationFailure | null}
  */
 function guard(condition, template, values = {}) {
   return condition ? null : invalidArguments(template, values);

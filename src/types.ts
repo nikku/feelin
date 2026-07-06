@@ -157,6 +157,12 @@ export class FeelRange {
 
   constructor(props: FeelRangeProps) {
     Object.assign(this, props);
+
+    // `map` / `includes` are behavior, not identity; keep them
+    // non-enumerable so structural equality and serialization rely on
+    // the range bounds (start / end and their inclusion)
+    Object.defineProperty(this, 'map', { enumerable: false });
+    Object.defineProperty(this, 'includes', { enumerable: false });
   }
 }
 
@@ -278,6 +284,11 @@ export class FeelFunction {
 
     this.fn = fn;
     this.parameterNames = parameterNames;
+
+    // the wrapped implementation is an internal detail; keep it
+    // non-enumerable so serialization and structural comparison rely on
+    // the public parameter names rather than the opaque closure
+    Object.defineProperty(this, 'fn', { enumerable: false });
   }
 
   invoke(contextOrArgs) {

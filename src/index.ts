@@ -5,7 +5,7 @@ export * from './parser.js';
 export {
   FeelFunction,
   isFunction
-} from './types.js';
+} from './function.js';
 
 export {
   FeelRange,

@@ -5,8 +5,6 @@ import { builtins } from './builtins.js';
 import { has } from 'min-dash';
 
 import {
-  FeelFunction,
-  FUNCTION_PARAMETER_MISSMATCH,
   equals,
   isArray,
   getType,
@@ -22,8 +20,12 @@ import {
 } from './range.js';
 
 import {
+  FUNCTION_PARAMETER_MISSMATCH,
+  wrapFunction
+} from './function.js';
+
+import {
   notImplemented,
-  parseParameterNames,
   getFromContext
 } from './utils.js';
 
@@ -1220,33 +1222,6 @@ function tag<Z, T extends ContextFn<Z>>(fn: T, type: string) : T & TaggedFn {
 
 function isTruthy(obj) {
   return obj !== false && obj !== null;
-}
-
-/**
- * @param {Function} fn
- * @param {string[]} [parameterNames]
- *
- * @return {FeelFunction}
- */
-function wrapFunction(fn, parameterNames = null) {
-
-  if (!fn) {
-    return null;
-  }
-
-  if (fn instanceof FeelFunction) {
-    return fn;
-  }
-
-  if (isRange(fn)) {
-    return new FeelFunction((value) => fn.includes(value), [ 'value' ]);
-  }
-
-  if (typeof fn !== 'function') {
-    return null;
-  }
-
-  return new FeelFunction(fn, parameterNames || parseParameterNames(fn));
 }
 
 function parseString(str: string) {

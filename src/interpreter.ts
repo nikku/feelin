@@ -5,7 +5,6 @@ import { builtins } from './builtins.js';
 import { has } from 'min-dash';
 
 import {
-  FeelRange,
   FeelFunction,
   FUNCTION_PARAMETER_MISSMATCH,
   equals,
@@ -16,6 +15,11 @@ import {
   isContext,
   isBoolean
 } from './types.js';
+
+import {
+  FeelRange,
+  createRange
+} from './range.js';
 
 import {
   notImplemented,
@@ -29,7 +33,6 @@ import {
 } from './parser.js';
 
 import {
-  toComparable,
   isTemporal,
   addDuration,
   subtractTemporals,
@@ -1184,252 +1187,6 @@ function compareValue(test, value) {
   }
 
   return equals(test, value);
-}
-
-
-const chars = Array.from(
-  'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
-);
-
-function isTyped(type, values) {
-  return (
-    values.some(e => getType(e) === type) &&
-    values.every(e => e === null || getType(e) === type)
-  );
-}
-
-const nullRange = new FeelRange({
-  start: null,
-  end: null,
-  'start included': false,
-  'end included': false,
-  map() {
-    return [];
-  },
-  includes() {
-    return null;
-  }
-});
-
-function createRange(start, end, startIncluded = true, endIncluded = true) : FeelRange {
-
-  if (isTyped('string', [ start, end ])) {
-    return createStringRange(start, end, startIncluded, endIncluded);
-  }
-
-  if (isTyped('number', [ start, end ])) {
-    return createNumberRange(start, end, startIncluded, endIncluded);
-  }
-
-  if (isTyped('duration', [ start, end ])) {
-    return createDurationRange(start, end, startIncluded, endIncluded);
-  }
-
-  if (isTyped('time', [ start, end ])) {
-    return createDateTimeRange(start, end, startIncluded, endIncluded);
-  }
-
-  if (isTyped('date time', [ start, end ])) {
-    return createDateTimeRange(start, end, startIncluded, endIncluded);
-  }
-
-  if (isTyped('date', [ start, end ])) {
-    return createDateTimeRange(start, end, startIncluded, endIncluded);
-  }
-
-  if (start === null && end === null) {
-    return nullRange;
-  }
-
-  throw new Error(`unsupported range: ${start}..${end}`);
-}
-
-function noopMap() {
-  return () => {
-    throw new Error('unsupported range operation: map');
-  };
-}
-
-function valuesMap(values) {
-  return (fn) => values.map(fn);
-}
-
-function valuesIncludes(values) {
-  return (value) => values.includes(value);
-}
-
-function numberMap(start, end, startIncluded, endIncluded) {
-
-  const direction = start > end ? -1 : 1;
-
-  return (fn) => {
-
-    const result = [];
-
-    for (let i = start;; i += direction) {
-
-      if (i === 0 && !startIncluded) {
-        continue;
-      }
-
-      if (i === end && !endIncluded) {
-        break;
-      }
-
-      result.push(fn(i));
-
-      if (i === end) {
-        break;
-      }
-    }
-
-    return result;
-  };
-}
-
-function includesStart(n, inclusive) {
-
-  if (inclusive) {
-    return (value) => n <= value;
-  } else {
-    return (value) => n < value;
-  }
-}
-
-function includesEnd(n, inclusive) {
-
-  if (inclusive) {
-    return (value) => n >= value;
-  } else {
-    return (value) => n > value;
-  }
-}
-
-function anyIncludes(start, end, startIncluded, endIncluded, conversion = (v) => v) {
-
-  let tests = [];
-
-  if (start === null && end === null) {
-    return () => null;
-  }
-
-  if (start !== null && end !== null) {
-    if (start > end) {
-      tests = [
-        includesStart(end, endIncluded),
-        includesEnd(start, startIncluded)
-      ];
-    } else {
-      tests = [
-        includesStart(start, startIncluded),
-        includesEnd(end, endIncluded)
-      ];
-    }
-  } else if (end !== null) {
-    tests = [
-      includesEnd(end, endIncluded)
-    ];
-  } else if (start !== null) {
-    tests = [
-      includesStart(start, startIncluded)
-    ];
-  }
-
-  return (value) => value === null ? null : tests.every(t => t(conversion(value)));
-}
-
-function createStringRange(start, end, startIncluded = true, endIncluded = true) {
-
-  const singleStartChar = start !== null && chars.includes(start);
-  const singleEndChar = end !== null && chars.includes(end);
-
-  let values;
-
-  if (singleStartChar && singleEndChar) {
-
-    let startIdx = chars.indexOf(start);
-    let endIdx = chars.indexOf(end);
-
-    const direction = startIdx > endIdx ? -1 : 1;
-
-    if (startIncluded === false) {
-      startIdx += direction;
-    }
-
-    if (endIncluded === false) {
-      endIdx -= direction;
-    }
-
-    values = chars.slice(startIdx, endIdx + 1);
-  }
-
-  const map = values ? valuesMap(values) : noopMap();
-  const includes = values ? valuesIncludes(values) : anyIncludes(start, end, startIncluded, endIncluded);
-
-  return new FeelRange({
-    start,
-    end,
-    'start included': startIncluded,
-    'end included': endIncluded,
-    map,
-    includes
-  });
-}
-
-function createNumberRange(start, end, startIncluded, endIncluded) {
-  const map = start !== null && end !== null ? numberMap(start, end, startIncluded, endIncluded) : noopMap();
-  const includes = anyIncludes(start, end, startIncluded, endIncluded);
-
-  return new FeelRange({
-    start,
-    end,
-    'start included': startIncluded,
-    'end included': endIncluded,
-    map,
-    includes
-  });
-}
-
-/**
- * @param {FeelDuration} start
- * @param {FeelDuration} end
- * @param {boolean} startIncluded
- * @param {boolean} endIncluded
- */
-function createDurationRange(start, end, startIncluded, endIncluded) {
-
-  const toMillis = (d) => d ? toComparable(d) : null;
-
-  const map = noopMap();
-  const includes = anyIncludes(toMillis(start), toMillis(end), startIncluded, endIncluded, toMillis);
-
-  return new FeelRange({
-    start,
-    end,
-    'start included': startIncluded,
-    'end included': endIncluded,
-    map,
-    includes
-  });
-
-}
-
-
-function createDateTimeRange(start, end, startIncluded, endIncluded) {
-
-  const toMillis = (d) => d ? toComparable(d) : null;
-
-  const map = noopMap();
-  const includes = anyIncludes(toMillis(start), toMillis(end), startIncluded, endIncluded, toMillis);
-
-  return new FeelRange({
-    start,
-    end,
-    'start included': startIncluded,
-    'end included': endIncluded,
-    map,
-    includes
-  });
 }
 
 

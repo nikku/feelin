@@ -1,7 +1,6 @@
 import {
   isType,
   equals,
-  FeelRange,
   isString,
   isNumber,
   getType,
@@ -11,6 +10,12 @@ import {
   isDateTime,
   isDuration
 } from './types.js';
+
+import {
+  before,
+  meets,
+  includes as includesRange
+} from './range.js';
 
 import {
   getFromContext,
@@ -728,11 +733,11 @@ const builtins = {
   }, [ 'any', 'any' ], [ 'a', 'b' ]),
 
   'meets': fn(function(range1, range2) {
-    return meetsRange(range1, range2);
+    return meets(range1, range2);
   }, [ 'range', 'range' ], [ 'range1', 'range2' ]),
 
   'met by': fn(function(range1, range2) {
-    return meetsRange(range2, range1);
+    return meets(range2, range1);
   }, [ 'range', 'range' ], [ 'range1', 'range2' ]),
 
   'overlaps': fn(function(range1, range2) {
@@ -1040,96 +1045,6 @@ function fn(fnDefinition, argDefinitions, parameterNames = null) {
   wrappedFn.$args = parameterNames;
 
   return wrappedFn;
-}
-
-/**
- * @param {FeelRange} a
- * @param {FeelRange} b
- */
-function meetsRange(a, b) {
-  return [
-    (a.end === b.start),
-    (a['end included'] === true),
-    (b['start included'] === true)
-  ].every(v => v);
-}
-
-/**
- * @param {FeelRange|number} a
- * @param {FeelRange|number} b
- */
-function before(a, b) {
-  if (a instanceof FeelRange && b instanceof FeelRange) {
-    return (
-      a.end < b.start || (
-        !a['end included'] || !b['start included']
-      ) && a.end == b.start
-    );
-  }
-
-  if (a instanceof FeelRange) {
-    return (
-      a.end < b || (
-        !a['end included'] && a.end === b
-      )
-    );
-  }
-
-  if (b instanceof FeelRange) {
-    return (
-      b.start > a || (
-        !b['start included'] && b.start === a
-      )
-    );
-  }
-
-  return a < b;
-}
-
-/**
- * @param {FeelRange} container - The range that should contain the other value
- * @param {FeelRange|number} value - The range or point to check if contained
- */
-function includesRange(container, value) {
-  if (!(container instanceof FeelRange)) {
-    return false;
-  }
-
-  // Range includes another range
-  if (value instanceof FeelRange) {
-    const startOk = (
-      container.start < value.start ||
-      (
-        container.start === value.start &&
-        (container['start included'] || !value['start included'])
-      )
-    );
-
-    // Check end boundary: container.end >= value.end
-    const endOk = (
-      container.end > value.end ||
-      (
-        container.end === value.end &&
-        (container['end included'] || !value['end included'])
-      )
-    );
-
-    return startOk && endOk;
-  }
-
-  // Range includes a point
-  // Check if point is within [start, end] considering inclusive/exclusive
-  const afterStart = (
-    value > container.start ||
-    (value === container.start && container['start included'])
-  );
-
-  const beforeEnd = (
-    value < container.end ||
-    (value === container.end && container['end included'])
-  );
-
-  return afterStart && beforeEnd;
 }
 
 function sum(list) {

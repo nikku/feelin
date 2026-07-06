@@ -8,8 +8,7 @@ import {
   typeCast,
   isDate,
   isTime,
-  isDateTime,
-  isZonedTime
+  isDateTime
 } from './types.js';
 
 import {
@@ -20,24 +19,18 @@ import {
 } from './utils.js';
 
 import {
-  Temporal
-} from 'temporal-polyfill';
-
-import {
   duration,
   parseDate,
   parseTime,
   parseDateTime,
-  zonedTime,
   now,
   today,
-  normalizeDuration,
-  zoneSuffix,
-  ZonedTime
-} from './temporal.js';
-
-import type {
-  FeelDateTime
+  dateFrom,
+  timeFrom,
+  dateOf,
+  timeOf,
+  combine,
+  yearsAndMonthsDuration
 } from './temporal.js';
 
 
@@ -201,7 +194,7 @@ const builtins = {
     } else if (isDate(from)) {
       d = from;
     } else if (isDateTime(from)) {
-      d = from.toPlainDate();
+      d = dateOf(from);
     }
 
     if (year) {
@@ -210,7 +203,7 @@ const builtins = {
         return null;
       }
 
-      d = plainDate(year, month, day);
+      d = dateFrom(year, month, day);
     }
 
     return d || null;
@@ -223,17 +216,7 @@ const builtins = {
     let dt;
 
     if ((isDate(d) || isDateTime(d)) && isTime(time)) {
-
-      const datePart = isDate(d) ? d : d.toPlainDate();
-
-      if (isZonedTime(time)) {
-        dt = datePart.toZonedDateTime({
-          plainTime: time.value.toPlainTime(),
-          timeZone: time.value.timeZoneId
-        });
-      } else {
-        dt = datePart.toPlainDateTime(time);
-      }
+      dt = combine(d, time);
     }
 
     if (isString(d)) {
@@ -283,7 +266,7 @@ const builtins = {
       }
 
       // TODO: support offset = days and time duration
-      t = plainTime(hour, minute, second);
+      t = timeFrom(hour, minute, second);
     }
 
     return t || null;
@@ -294,7 +277,7 @@ const builtins = {
   }, [ 'string' ], [ 'from' ]),
 
   'years and months duration': fn(function(from, to) {
-    return from.until(to, { largestUnit: 'month' });
+    return yearsAndMonthsDuration(from, to);
   }, [ 'date', 'date' ], [ 'from', 'to' ]),
 
   '@': fn(function(string) {
@@ -791,19 +774,19 @@ const builtins = {
   // 10.3.4.8 Temporal built-in functions
 
   'day of year': fn(function(date) {
-    return date.dayOfYear;
+    return date.value.dayOfYear;
   }, [ 'date time' ], [ 'date' ]),
 
   'day of week': fn(function(date) {
-    return WEEKDAY_NAMES[date.dayOfWeek - 1];
+    return WEEKDAY_NAMES[date.value.dayOfWeek - 1];
   }, [ 'date time' ], [ 'date' ]),
 
   'month of year': fn(function(date) {
-    return MONTH_NAMES[date.month - 1];
+    return MONTH_NAMES[date.value.month - 1];
   }, [ 'date time' ], [ 'date' ]),
 
   'week of year': fn(function(date) {
-    return date.weekOfYear;
+    return date.value.weekOfYear;
   }, [ 'date time' ], [ 'date' ]),
 
 
@@ -1199,15 +1182,10 @@ function toString(obj, wrap = false) {
   }
 
   if (type === 'duration') {
-    return normalizeDuration(obj).toString();
+    return obj.toString();
   }
 
   if (type === 'date time') {
-
-    if (obj instanceof Temporal.ZonedDateTime) {
-      return obj.toPlainDateTime().toString() + zoneSuffix(obj);
-    }
-
     return obj.toString();
   }
 
@@ -1220,11 +1198,6 @@ function toString(obj, wrap = false) {
   }
 
   if (type === 'time') {
-
-    if (obj instanceof ZonedTime) {
-      return obj.value.toPlainTime().toString() + zoneSuffix(obj.value);
-    }
-
     return obj.toString();
   }
 
@@ -1320,40 +1293,6 @@ function mode(array: number[]) {
   const sorted = Object.entries(buckets).sort((a, b) => b[1] - a[1]);
 
   return sorted.filter(s => s[1] === sorted[0][1]).map(e => +e[0]);
-}
-
-/**
- * Construct a {@link Temporal.PlainDate}, returning null for invalid input.
- */
-function plainDate(year, month, day) : Temporal.PlainDate | null {
-  try {
-    return Temporal.PlainDate.from({ year, month, day }, { overflow: 'reject' });
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Construct a {@link Temporal.PlainTime}, returning null for invalid input.
- */
-function plainTime(hour, minute, second) : Temporal.PlainTime | null {
-  try {
-    return Temporal.PlainTime.from({ hour, minute, second }, { overflow: 'reject' });
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Extract the time-of-day of a date time, preserving its time zone.
- */
-function timeOf(dateTime: FeelDateTime) : Temporal.PlainTime | ZonedTime {
-
-  if (dateTime instanceof Temporal.ZonedDateTime) {
-    return zonedTime(dateTime.toPlainTime(), dateTime.timeZoneId);
-  }
-
-  return dateTime.toPlainTime();
 }
 
 const WEEKDAY_NAMES = [

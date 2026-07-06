@@ -12,10 +12,6 @@ import {
   isArray,
   getType,
   isDuration,
-  isDate,
-  isTime,
-  isZonedTime,
-  isDateTime,
   isNumber,
   isContext,
   isBoolean
@@ -34,8 +30,11 @@ import {
 
 import {
   toComparable,
-  zonedTime,
-  ZonedTime
+  isTemporal,
+  addDuration,
+  subtractTemporals,
+  addDurations,
+  toFeel
 } from './temporal.js';
 
 
@@ -253,6 +252,8 @@ export function unaryTest(
 
   const interpreterContext = new InterpreterContext();
 
+  evalContext = coerceContext(evalContext);
+
   const value = evalContext['?'] !== undefined ? evalContext['?'] : null;
 
   const {
@@ -278,6 +279,8 @@ export function evaluate(
 
   const interpreterContext = new InterpreterContext();
 
+  evalContext = coerceContext(evalContext);
+
   const {
     root
   } = interpreter.evaluate(expression, evalContext, dialect, interpreterContext);
@@ -290,6 +293,25 @@ export function evaluate(
     value: result,
     warnings: interpreterContext.getWarnings()
   };
+}
+
+/**
+ * Deep-coerce raw Temporal and JS Date values in a user context into
+ * FEEL-native wrapper values, so that consumers may pass either flavor.
+ */
+function coerceContext(value) {
+
+  if (isArray(value)) {
+    return value.map(coerceContext);
+  }
+
+  if (isContext(value)) {
+    return Object.fromEntries(
+      Object.entries(value).map(([ key, entry ]) => [ key, coerceContext(entry) ])
+    );
+  }
+
+  return toFeel(value);
 }
 
 
@@ -358,27 +380,23 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
         b = tmp;
       }
 
-      if (isTime(a) && isDuration(b)) {
-        return shiftTime(a, b, 1);
-      } else if (isTemporalInstant(a) && isTemporalInstant(b)) {
-        return null;
-      } else if ((isDate(a) || isDateTime(a)) && isDuration(b)) {
+      if (isTemporal(a) && isDuration(b)) {
         return addDuration(a, b, 1);
+      } else if (isTemporal(a) && isTemporal(b)) {
+        return null;
       } else if (isDuration(a) && isDuration(b)) {
-        return a.add(b);
+        return addDurations(a, b, 1);
       }
 
       return a + b;
     }, 'add', [ 'string', 'number', 'date', 'time', 'duration', 'date time' ]);
     case '-': return nullable((a, b) => {
-      if (isTime(a) && isDuration(b)) {
-        return shiftTime(a, b, -1);
-      } else if (isTemporalInstant(a) && isTemporalInstant(b)) {
-        return subtractTemporals(a, b);
-      } else if ((isDate(a) || isDateTime(a)) && isDuration(b)) {
+      if (isTemporal(a) && isDuration(b)) {
         return addDuration(a, b, -1);
+      } else if (isTemporal(a) && isTemporal(b)) {
+        return subtractTemporals(a, b);
       } else if (isDuration(a) && isDuration(b)) {
-        return a.subtract(b);
+        return addDurations(a, b, -1);
       }
 
       return a - b;
@@ -1412,70 +1430,6 @@ function createDateTimeRange(start, end, startIncluded, endIncluded) {
     map,
     includes
   });
-}
-
-
-/**
- * Whether a duration carries a sub-day (time) component.
- */
-function hasTimeComponent(dur) {
-  return dur.hours || dur.minutes || dur.seconds ||
-    dur.milliseconds || dur.microseconds || dur.nanoseconds;
-}
-
-/**
- * Add or subtract a duration from a date or date time.
- *
- * A plain <date> combined with a time-bearing duration is promoted to a
- * UTC <date and time> (bare dates are anchored in UTC).
- */
-function addDuration(temporal, dur, sign) {
-
-  if (isDate(temporal) && hasTimeComponent(dur)) {
-    const zoned = temporal.toZonedDateTime('UTC');
-
-    return sign < 0 ? zoned.subtract(dur) : zoned.add(dur);
-  }
-
-  return sign < 0 ? temporal.subtract(dur) : temporal.add(dur);
-}
-
-/**
- * Whether the value is a temporal instant: a date, time or date time
- * (i.e. anything but a duration).
- */
-function isTemporalInstant(a) {
-  return isDate(a) || isTime(a) || isDateTime(a);
-}
-
-/**
- * Add or subtract a duration from a time, preserving its time zone and
- * keeping the result a time (wrapping around midnight).
- */
-function shiftTime(time, dur, sign) {
-
-  if (isZonedTime(time)) {
-    const shifted = sign < 0 ? time.value.subtract(dur) : time.value.add(dur);
-
-    return zonedTime(shifted.toPlainTime(), time.value.timeZoneId);
-  }
-
-  return sign < 0 ? time.subtract(dur) : time.add(dur);
-}
-
-/**
- * Subtract two temporal instants, yielding a duration.
- */
-function subtractTemporals(a, b) {
-
-  const left = a instanceof ZonedTime ? a.value : a;
-  const right = b instanceof ZonedTime ? b.value : b;
-
-  if (isDate(left) || isDateTime(left)) {
-    return left.since(right, { largestUnit: 'day' });
-  }
-
-  return left.since(right);
 }
 
 

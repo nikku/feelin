@@ -1,54 +1,242 @@
 import { Temporal } from 'temporal-polyfill';
 
-import {
-  isDate,
-  isTime,
-  isDateTime,
-  isDuration,
-  isZonedTime,
-  isZonedDateTime
-} from './types.js';
-
-export {
-  isDate,
-  isTime,
-  isDateTime,
-  isDuration,
-  isZonedTime,
-  isZonedDateTime
-};
-
 import { notImplemented } from './utils.js';
 
+/**
+ * This module is the single place in the code base that talks to the
+ * underlying temporal implementation ({@link Temporal}, provided by
+ * `temporal-polyfill`).
+ *
+ * FEEL temporal values are represented by the wrapper classes
+ * {@link FeelDate}, {@link FeelTime}, {@link FeelDateTime} and
+ * {@link FeelDuration}. Consumers of the library interact with these
+ * wrappers (via `toString()`, component getters and `unwrap()`) rather
+ * than with raw `Temporal` objects. This keeps the temporal
+ * implementation a swappable internal detail.
+ */
 
 /**
  * A fixed reference date used to anchor zoned times and to compute
  * duration totals that require a `relativeTo` (years / months).
  */
-export const REFERENCE_DATE = Temporal.PlainDate.from('1970-01-01');
+const REFERENCE_DATE = Temporal.PlainDate.from('1970-01-01');
+
+
+// wrapper classes ///////////////////////////////////////////////////
 
 /**
- * A FEEL <time> that carries a time zone.
- *
- * Temporal has no native "time with zone" type, so we anchor the
- * time-of-day to {@link REFERENCE_DATE}. This keeps named zones (e.g.
- * `Europe/Paris`) resolvable to a concrete offset and allows instant
- * based comparison via `epochMilliseconds`.
+ * A FEEL <date> (e.g. `2020-04-06`).
  */
-export class ZonedTime {
-  readonly value: Temporal.ZonedDateTime;
+export class FeelDate {
 
-  constructor(value: Temporal.ZonedDateTime) {
+  /**
+   * @internal underlying temporal value
+   */
+  readonly value: Temporal.PlainDate;
+
+  constructor(value: Temporal.PlainDate) {
     this.value = value;
+  }
+
+  get year() { return this.value.year; }
+  get month() { return this.value.month; }
+  get day() { return this.value.day; }
+  get 'day of year'() { return this.value.dayOfYear; }
+  get 'day of week'() { return this.value.dayOfWeek; }
+  get 'week of year'() { return this.value.weekOfYear; }
+
+  /**
+   * Return the underlying `Temporal.PlainDate`.
+   *
+   * Escape hatch for consumers that need the raw temporal value. The
+   * returned type is implementation specific and may change.
+   */
+  unwrap() : Temporal.PlainDate {
+    return this.value;
+  }
+
+  toString() : string {
+    return this.value.toString();
   }
 }
 
-export type FeelDate = Temporal.PlainDate;
-export type FeelTime = Temporal.PlainTime | ZonedTime;
-export type FeelDateTime = Temporal.PlainDateTime | Temporal.ZonedDateTime;
-export type FeelDuration = Temporal.Duration;
+/**
+ * A FEEL <time>, either local (e.g. `10:30:00`) or zoned
+ * (e.g. `10:30:00Z`, `10:30:00+05:00`, `10:30:00@Europe/Paris`).
+ */
+export class FeelTime {
+
+  /**
+   * @internal wall-clock time
+   */
+  readonly value: Temporal.PlainTime;
+
+  /**
+   * @internal time zone identifier, `null` for a local time
+   */
+  readonly zone: string | null;
+
+  constructor(value: Temporal.PlainTime, zone: string | null = null) {
+    this.value = value;
+    this.zone = zone;
+  }
+
+  get hour() { return this.value.hour; }
+  get minute() { return this.value.minute; }
+  get second() { return this.value.second; }
+  get timezone() { return this.zone; }
+
+  /**
+   * The zone offset as a {@link FeelDuration}, or `null` for a local time.
+   */
+  get 'time offset'() {
+    return this.zone === null ? null : offsetDuration(zonedDateTime(this));
+  }
+
+  /**
+   * Return the underlying wall-clock `Temporal.PlainTime`.
+   *
+   * Escape hatch for consumers that need the raw temporal value. Zone
+   * information is available via {@link timezone} / {@link 'time offset'}.
+   */
+  unwrap() : Temporal.PlainTime {
+    return this.value;
+  }
+
+  toString() : string {
+    return this.value.toString() + (this.zone === null ? '' : zoneSuffix(this.zone));
+  }
+}
+
+/**
+ * A FEEL <date and time>, either local (e.g. `2020-04-06T10:30:00`) or
+ * zoned (e.g. `...Z`, `...+05:00`, `...@Europe/Paris`).
+ */
+export class FeelDateTime {
+
+  /**
+   * @internal wall-clock date and time
+   */
+  readonly value: Temporal.PlainDateTime;
+
+  /**
+   * @internal time zone identifier, `null` for a local date time
+   */
+  readonly zone: string | null;
+
+  constructor(value: Temporal.PlainDateTime, zone: string | null = null) {
+    this.value = value;
+    this.zone = zone;
+  }
+
+  get year() { return this.value.year; }
+  get month() { return this.value.month; }
+  get day() { return this.value.day; }
+  get hour() { return this.value.hour; }
+  get minute() { return this.value.minute; }
+  get second() { return this.value.second; }
+  get 'day of year'() { return this.value.dayOfYear; }
+  get 'day of week'() { return this.value.dayOfWeek; }
+  get 'week of year'() { return this.value.weekOfYear; }
+  get timezone() { return this.zone; }
+
+  get 'time offset'() {
+    return this.zone === null ? null : offsetDuration(zonedDateTime(this));
+  }
+
+  /**
+   * Return the underlying wall-clock `Temporal.PlainDateTime`.
+   *
+   * Escape hatch for consumers that need the raw temporal value. Zone
+   * information is available via {@link timezone} / {@link 'time offset'}.
+   */
+  unwrap() : Temporal.PlainDateTime {
+    return this.value;
+  }
+
+  toString() : string {
+    return this.value.toString() + (this.zone === null ? '' : zoneSuffix(this.zone));
+  }
+}
+
+/**
+ * A FEEL <duration>, both `years and months` and `days and time`
+ * durations (e.g. `P1Y2M`, `P2DT3H`).
+ */
+export class FeelDuration {
+
+  /**
+   * @internal normalized underlying duration
+   */
+  readonly value: Temporal.Duration;
+
+  constructor(value: Temporal.Duration) {
+    this.value = normalize(value);
+  }
+
+  get years() { return this.value.years; }
+  get months() { return this.value.months; }
+  get days() { return this.value.days; }
+  get hours() { return this.value.hours; }
+  get minutes() { return this.value.minutes; }
+  get seconds() { return this.value.seconds; }
+
+  /**
+   * Return the underlying `Temporal.Duration`.
+   *
+   * Escape hatch for consumers that need the raw temporal value. The
+   * returned type is implementation specific and may change.
+   */
+  unwrap() : Temporal.Duration {
+    return this.value;
+  }
+
+  toString() : string {
+    return this.value.toString();
+  }
+}
+
+/**
+ * Any FEEL temporal instant (date, time or date time).
+ */
 export type FeelTemporal = FeelDate | FeelTime | FeelDateTime;
 
+
+// type guards ///////////////////////////////////////////////////////
+
+export function isDate(obj) : obj is FeelDate {
+  return obj instanceof FeelDate;
+}
+
+export function isTime(obj) : obj is FeelTime {
+  return obj instanceof FeelTime;
+}
+
+export function isDateTime(obj) : obj is FeelDateTime {
+  return obj instanceof FeelDateTime;
+}
+
+export function isDuration(obj) : obj is FeelDuration {
+  return obj instanceof FeelDuration;
+}
+
+/**
+ * Whether the value is any temporal instant (date, time or date time),
+ * i.e. anything but a duration.
+ */
+export function isTemporal(obj) : obj is FeelTemporal {
+  return isDate(obj) || isTime(obj) || isDateTime(obj);
+}
+
+/**
+ * Whether the temporal value carries a time zone.
+ */
+export function isZoned(obj) : boolean {
+  return (isTime(obj) || isDateTime(obj)) && obj.zone !== null;
+}
+
+
+// zone helpers //////////////////////////////////////////////////////
 
 /**
  * Split a trailing time zone indicator off an ISO date / time string.
@@ -91,84 +279,276 @@ function splitZone(str: string) : { value: string, zone: string | null } {
 }
 
 /**
- * Return the time zone suffix for a zoned value, e.g.
+ * Return the FEEL time zone suffix for a time zone identifier, e.g.
  * `Z`, `+05:00` or `@Europe/Paris`.
  */
-export function zoneSuffix(value: Temporal.ZonedDateTime) : string {
+function zoneSuffix(zone: string) : string {
 
-  const id = value.timeZoneId;
-
-  if (id === 'UTC') {
+  if (zone === 'UTC') {
     return 'Z';
   }
 
-  if (/^[+-]\d{2}:\d{2}$/.test(id)) {
-    return id;
+  if (/^[+-]\d{2}:\d{2}$/.test(zone)) {
+    return zone;
   }
 
-  return '@' + id;
+  return '@' + zone;
 }
 
 /**
- * Convert any temporal value to a comparable number of milliseconds.
+ * Resolve a zoned temporal to a concrete `Temporal.ZonedDateTime`,
+ * anchoring zoned times to {@link REFERENCE_DATE}.
+ */
+function zonedDateTime(temporal: FeelTime | FeelDateTime) : Temporal.ZonedDateTime {
+
+  if (temporal instanceof FeelTime) {
+    return REFERENCE_DATE.toZonedDateTime({
+      plainTime: temporal.value,
+      timeZone: temporal.zone
+    });
+  }
+
+  return temporal.value.toZonedDateTime(temporal.zone);
+}
+
+/**
+ * Return the zone offset of a zoned date time as a {@link FeelDuration}.
+ */
+function offsetDuration(zdt: Temporal.ZonedDateTime) : FeelDuration {
+  return new FeelDuration(Temporal.Duration.from({ nanoseconds: zdt.offsetNanoseconds }));
+}
+
+
+// comparison ////////////////////////////////////////////////////////
+
+/**
+ * Convert a temporal value to a comparable number of milliseconds.
  *
  * Wall-clock (zone-less) values are anchored to UTC so they compare
  * consistently among themselves.
  */
 export function toComparable(value) : number | null {
 
-  if (value instanceof Temporal.ZonedDateTime) {
-    return value.epochMilliseconds;
+  if (isDate(value)) {
+    return value.value.toZonedDateTime('UTC').epochMilliseconds;
   }
 
-  if (value instanceof ZonedTime) {
-    return value.value.epochMilliseconds;
+  if (isTime(value) || isDateTime(value)) {
+    const zone = value.zone ?? 'UTC';
+
+    return (value instanceof FeelTime
+      ? REFERENCE_DATE.toZonedDateTime({ plainTime: value.value, timeZone: zone })
+      : value.value.toZonedDateTime(zone)
+    ).epochMilliseconds;
   }
 
-  if (value instanceof Temporal.PlainDate) {
-    return value.toZonedDateTime('UTC').epochMilliseconds;
-  }
-
-  if (value instanceof Temporal.PlainDateTime) {
-    return value.toZonedDateTime('UTC').epochMilliseconds;
-  }
-
-  if (value instanceof Temporal.PlainTime) {
-    return REFERENCE_DATE.toPlainDateTime(value).toZonedDateTime('UTC').epochMilliseconds;
-  }
-
-  if (value instanceof Temporal.Duration) {
-    return durationToMillis(value);
+  if (isDuration(value)) {
+    return value.value.total({ unit: 'millisecond', relativeTo: REFERENCE_DATE });
   }
 
   return null;
 }
 
-export function durationToMillis(d: Temporal.Duration) : number {
-  return d.total({ unit: 'millisecond', relativeTo: REFERENCE_DATE });
-}
+
+// duration //////////////////////////////////////////////////////////
 
 /**
- * Normalize a duration for output: years / months durations balance
- * into years and months, everything else balances into days and time.
+ * Normalize a duration: years / months durations balance into years and
+ * months, everything else balances into days and time.
  */
-export function normalizeDuration(d: Temporal.Duration) : Temporal.Duration {
+function normalize(d: Temporal.Duration) : Temporal.Duration {
 
   if (d.years !== 0 || d.months !== 0) {
     return d.round({ largestUnit: 'year', relativeTo: REFERENCE_DATE });
   }
 
-  return d.round({ largestUnit: 'day' });
+  return d.round({ largestUnit: 'day', relativeTo: REFERENCE_DATE });
+}
+
+/**
+ * Whether two durations are equal, comparing years / months durations by
+ * month and days / time durations by second (mirroring FEEL semantics).
+ */
+export function durationEquals(a: FeelDuration, b: FeelDuration) : boolean {
+
+  const total = (d: FeelDuration, unit) => d.value.total({ unit, relativeTo: REFERENCE_DATE });
+
+  // years and months duration -> compare in months
+  if (Math.abs(total(a, 'day')) > 180) {
+    return Math.trunc(total(a, 'month') - total(b, 'month')) === 0;
+  }
+
+  // days and time duration -> compare in seconds
+  return Math.trunc(total(a, 'second') - total(b, 'second')) === 0;
 }
 
 export function duration(opts: string | number) : FeelDuration {
 
   if (typeof opts === 'number') {
-    return Temporal.Duration.from({ milliseconds: opts });
+    return new FeelDuration(Temporal.Duration.from({ milliseconds: opts }));
   }
 
-  return Temporal.Duration.from(opts);
+  return new FeelDuration(Temporal.Duration.from(opts));
 }
+
+/**
+ * Whether a duration carries a sub-day (time) component.
+ */
+function hasTimeComponent(d: FeelDuration) : boolean {
+  const { hours, minutes, seconds, milliseconds } = d.value;
+
+  return !!(hours || minutes || seconds || milliseconds);
+}
+
+
+// arithmetic ////////////////////////////////////////////////////////
+
+/**
+ * Add (`sign > 0`) or subtract (`sign < 0`) a duration from a temporal
+ * instant, returning a new temporal instant.
+ *
+ * A local <date> combined with a time-bearing duration is promoted to a
+ * UTC <date and time> (bare dates are anchored in UTC).
+ */
+export function addDuration(temporal: FeelTemporal, dur: FeelDuration, sign: number) : FeelTemporal {
+
+  const d = sign < 0 ? dur.value.negated() : dur.value;
+
+  if (isDate(temporal)) {
+
+    if (hasTimeComponent(dur)) {
+      return new FeelDateTime(temporal.value.toPlainDateTime().add(d), 'UTC');
+    }
+
+    return new FeelDate(temporal.value.add(d));
+  }
+
+  if (isTime(temporal)) {
+
+    // times wrap around midnight and keep their zone
+    return new FeelTime(temporal.value.add(d), temporal.zone);
+  }
+
+  // date time
+  if (temporal.zone === null) {
+    return new FeelDateTime(temporal.value.add(d), null);
+  }
+
+  // honor the zone (e.g. DST) for zoned date times
+  const shifted = temporal.value.toZonedDateTime(temporal.zone).add(d);
+
+  return new FeelDateTime(shifted.toPlainDateTime(), temporal.zone);
+}
+
+/**
+ * Subtract two temporal instants, yielding a {@link FeelDuration}.
+ */
+export function subtractTemporals(a: FeelTemporal, b: FeelTemporal) : FeelDuration {
+
+  if (isTime(a) && isTime(b)) {
+    return new FeelDuration(a.value.since(b.value));
+  }
+
+  const left = toPlainDateTime(a);
+  const right = toPlainDateTime(b);
+
+  return new FeelDuration(left.since(right, { largestUnit: 'day' }));
+}
+
+/**
+ * Add or subtract two durations.
+ */
+export function addDurations(a: FeelDuration, b: FeelDuration, sign: number) : FeelDuration {
+
+  const other = sign < 0 ? b.value.negated() : b.value;
+
+  // anchor to a reference point so mixed years / months and days / time
+  // durations can be combined without a calendar-less RangeError
+  const anchor = REFERENCE_DATE.toPlainDateTime();
+
+  return new FeelDuration(
+    anchor.add(a.value).add(other).since(anchor, { largestUnit: 'year' })
+  );
+}
+
+/**
+ * The <years and months duration> between two dates.
+ */
+export function yearsAndMonthsDuration(from: FeelDate, to: FeelDate) : FeelDuration {
+  return new FeelDuration(from.value.until(to.value, { largestUnit: 'month' }));
+}
+
+
+// conversions ///////////////////////////////////////////////////////
+
+function toPlainDateTime(temporal: FeelTemporal) : Temporal.PlainDateTime {
+
+  if (isDate(temporal)) {
+    return temporal.value.toPlainDateTime();
+  }
+
+  if (isDateTime(temporal)) {
+    return temporal.value;
+  }
+
+  // time
+  return REFERENCE_DATE.toPlainDateTime(temporal.value);
+}
+
+/**
+ * Extract the calendar date of a date time.
+ */
+export function dateOf(dateTime: FeelDateTime) : FeelDate {
+  return new FeelDate(dateTime.value.toPlainDate());
+}
+
+/**
+ * Extract the time-of-day of a date time, preserving its time zone.
+ */
+export function timeOf(dateTime: FeelDateTime) : FeelTime {
+  return new FeelTime(dateTime.value.toPlainTime(), dateTime.zone);
+}
+
+/**
+ * Combine a date (or the date part of a date time) with a time into a
+ * date time, carrying over the time's zone.
+ */
+export function combine(date: FeelDate | FeelDateTime, time: FeelTime) : FeelDateTime {
+
+  const datePart = isDate(date) ? date.value : date.value.toPlainDate();
+
+  return new FeelDateTime(datePart.toPlainDateTime(time.value), time.zone);
+}
+
+
+// construction //////////////////////////////////////////////////////
+
+/**
+ * Construct a {@link FeelDate} from components, returning `null` for
+ * invalid input.
+ */
+export function dateFrom(year: number, month: number, day: number) : FeelDate | null {
+  try {
+    return new FeelDate(Temporal.PlainDate.from({ year, month, day }, { overflow: 'reject' }));
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Construct a {@link FeelTime} from components, returning `null` for
+ * invalid input.
+ */
+export function timeFrom(hour: number, minute: number, second: number) : FeelTime | null {
+  try {
+    return new FeelTime(Temporal.PlainTime.from({ hour, minute, second }, { overflow: 'reject' }));
+  } catch {
+    return null;
+  }
+}
+
+
+// parsing ///////////////////////////////////////////////////////////
 
 /**
  * Parse a FEEL <date> string (`2020-01-01`).
@@ -182,25 +562,10 @@ export function parseDate(str: string) : FeelDate | null {
   }
 
   try {
-    return Temporal.PlainDate.from(str);
+    return new FeelDate(Temporal.PlainDate.from(str));
   } catch {
     return null;
   }
-}
-
-/**
- * Parse a FEEL date-ish string into the most specific temporal value:
- * a plain <date> or, if the string carries a time / zone, a <date and time>.
- *
- * Primarily used to build expected values and as a public convenience export.
- */
-export function date(str: string) : FeelTemporal | null {
-
-  if (str.includes('T')) {
-    return parseDateTime(str);
-  }
-
-  return parseDate(str);
 }
 
 /**
@@ -212,13 +577,7 @@ export function parseTime(str: string) : FeelTime | null {
   const { value, zone } = splitZone(str);
 
   try {
-    const plainTime = Temporal.PlainTime.from(value);
-
-    if (zone === null) {
-      return plainTime;
-    }
-
-    return zonedTime(plainTime, zone);
+    return new FeelTime(Temporal.PlainTime.from(value), zone);
   } catch {
     return null;
   }
@@ -243,35 +602,107 @@ export function parseDateTime(str: string) : FeelDateTime | null {
   }
 
   try {
-    const plainDateTime = Temporal.PlainDateTime.from(value);
 
-    if (zone === null) {
-      return plainDateTime;
+    // validate the zone (throws for an unknown zone)
+    if (zone !== null) {
+      new Temporal.PlainDateTime(1970, 1, 1).toZonedDateTime(zone);
     }
 
-    return plainDateTime.toZonedDateTime(zone);
+    return new FeelDateTime(Temporal.PlainDateTime.from(value), zone);
   } catch {
     return null;
   }
 }
 
+
+// public factories //////////////////////////////////////////////////
+
 /**
- * Create a zoned time from a plain time and a time zone identifier.
+ * Parse a FEEL date-ish string into the most specific temporal value:
+ * a plain <date> or, if the string carries a time / zone, a
+ * <date and time>.
  */
-export function zonedTime(plainTime: Temporal.PlainTime, timeZone: string) : ZonedTime {
-  return new ZonedTime(REFERENCE_DATE.toZonedDateTime({ plainTime, timeZone }));
+export function date(str: string) : FeelTemporal | null {
+
+  if (str.includes('T')) {
+    return parseDateTime(str);
+  }
+
+  return parseDate(str);
+}
+
+/**
+ * Parse a FEEL <time> string into a {@link FeelTime}.
+ */
+export function time(str: string) : FeelTime | null {
+  return parseTime(str);
+}
+
+/**
+ * Parse a FEEL <date and time> string into a {@link FeelDateTime}.
+ */
+export function dateAndTime(str: string) : FeelDateTime | null {
+  return parseDateTime(str);
 }
 
 /**
  * The current system date and time as a zoned value.
  */
-export function now() : Temporal.ZonedDateTime {
-  return Temporal.Now.zonedDateTimeISO();
+export function now() : FeelDateTime {
+  const zdt = Temporal.Now.zonedDateTimeISO();
+
+  return new FeelDateTime(zdt.toPlainDateTime(), zdt.timeZoneId);
 }
 
 /**
  * The current system date.
  */
-export function today() : Temporal.PlainDate {
-  return Temporal.Now.plainDateISO();
+export function today() : FeelDate {
+  return new FeelDate(Temporal.Now.plainDateISO());
+}
+
+
+// coercion //////////////////////////////////////////////////////////
+
+/**
+ * Coerce a raw temporal value into its FEEL wrapper.
+ *
+ * Accepts the wrapper types (returned as-is), native `Temporal` values
+ * and native `Date` instances. Anything else is returned untouched.
+ */
+export function toFeel(value) {
+
+  if (isDate(value) || isTime(value) || isDateTime(value) || isDuration(value)) {
+    return value;
+  }
+
+  if (value instanceof Temporal.PlainDate) {
+    return new FeelDate(value);
+  }
+
+  if (value instanceof Temporal.PlainTime) {
+    return new FeelTime(value);
+  }
+
+  if (value instanceof Temporal.PlainDateTime) {
+    return new FeelDateTime(value);
+  }
+
+  if (value instanceof Temporal.ZonedDateTime) {
+    return new FeelDateTime(value.toPlainDateTime(), value.timeZoneId);
+  }
+
+  if (value instanceof Temporal.Duration) {
+    return new FeelDuration(value);
+  }
+
+  if (value instanceof Date) {
+    const zdt = Temporal.Instant
+      .fromEpochMilliseconds(value.getTime())
+      .toZonedDateTimeISO('UTC');
+
+    return new FeelDateTime(zdt.toPlainDateTime(), 'UTC');
+  }
+
+  return value;
 }

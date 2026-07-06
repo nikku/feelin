@@ -319,6 +319,7 @@ function describeBuiltins(name, evaluate) {
 
       expr('split("foo bar", "[a-z")', null);
 
+      expr('string join()', null);
       expr('string join(123, "X")', null);
 
       expr('string join(123, "X")', null);

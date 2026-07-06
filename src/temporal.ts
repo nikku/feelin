@@ -523,10 +523,17 @@ export function durationEquals(a: FeelDuration, b: FeelDuration) : boolean {
   return Math.trunc(total(a, 'second') - total(b, 'second')) === 0;
 }
 
-export function duration(opts: string | number) : FeelDuration {
+export function duration(opts: string | number) : FeelDuration | null {
 
   if (typeof opts === 'number') {
     return new FeelDuration(Temporal.Duration.from({ milliseconds: opts }), false);
+  }
+
+  // FEEL durations are years-and-months or days-and-time durations only;
+  // the ISO-8601 week designator (`W`) is not part of the FEEL grammar,
+  // even though the underlying temporal implementation would accept it
+  if (/\d+W/i.test(opts)) {
+    return null;
   }
 
   return new FeelDuration(Temporal.Duration.from(opts), isYearsMonthsString(opts));

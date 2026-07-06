@@ -684,6 +684,13 @@ function describeBuiltins(name, evaluate) {
       expr('duration("P7D") + date and time("2020-04-06T08:00:00") = date and time("2020-04-13T08:00:00")', true);
       expr('duration("P2D") + duration("P5D") = duration("P7D")', true);
 
+      // weeks are not part of the FEEL duration grammar, even though
+      // ISO-8601 allows them (see #105)
+      expr('duration("P1W")', null);
+      expr('duration("P2W")', null);
+      expr('duration("-P1W")', null);
+      expr('@"P1W"', null);
+
 
       describe('properties', function() {
 

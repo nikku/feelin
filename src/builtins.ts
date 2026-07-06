@@ -18,10 +18,13 @@ import {
 } from './range.js';
 
 import {
+  parseParameterNames
+} from './function.js';
+
+import {
   getFromContext,
   isNotImplemented,
-  notImplemented,
-  parseParameterNames
+  notImplemented
 } from './utils.js';
 
 import {

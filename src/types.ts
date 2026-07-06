@@ -15,6 +15,8 @@ import {
 
 import { FeelRange, isRange } from './range.js';
 
+import { isFunction } from './function.js';
+
 export {
   isDate,
   isTime,
@@ -236,83 +238,3 @@ export function equals(a, b, strict = false) {
   return aType === bType ? false : null;
 }
 
-export const FUNCTION_PARAMETER_MISSMATCH = {};
-
-
-export class FeelFunction {
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  fn: (...args) => any;
-  parameterNames: string[];
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(fn: (...args) => any, parameterNames: string[]) {
-
-    this.fn = fn;
-    this.parameterNames = parameterNames;
-
-    // the wrapped implementation is an internal detail; keep it
-    // non-enumerable so serialization and structural comparison rely on
-    // the public parameter names rather than the opaque closure
-    Object.defineProperty(this, 'fn', { enumerable: false });
-  }
-
-  invoke(contextOrArgs) {
-
-    let params;
-
-    if (isArray(contextOrArgs)) {
-      params = contextOrArgs;
-
-      // reject
-      if (params.length > this.parameterNames.length) {
-
-        const lastParam = this.parameterNames[this.parameterNames.length - 1];
-
-        // strictly check for parameter count provided
-        // for non var-args functions
-        if (!lastParam || !lastParam.startsWith('...')) {
-          return FUNCTION_PARAMETER_MISSMATCH;
-        }
-      }
-    } else {
-
-      // strictly check for required parameter names,
-      // and fail on wrong parameter name
-      if (Object.keys(contextOrArgs).some(
-        key => !this.parameterNames.includes(key) && !this.parameterNames.includes(`...${key}`)
-      )) {
-        return FUNCTION_PARAMETER_MISSMATCH;
-      }
-
-      params = this.parameterNames.reduce((params, name) => {
-
-        if (name.startsWith('...')) {
-          name = name.slice(3);
-
-          const value = contextOrArgs[name];
-
-          if (!value) {
-            return params;
-          } else {
-
-            // ensure that single arg provided for var args named
-            // parameter is wrapped in a list
-            return [ ...params, ...(isArray(value) ? value : [ value ]) ];
-          }
-        }
-
-        return [ ...params, contextOrArgs[name] ];
-      }, []);
-    }
-
-    return this.fn.call(null, ...params);
-  }
-}
-
-/**
- * Whether the value is a FEEL <function>.
- */
-export function isFunction(obj) : obj is FeelFunction {
-  return obj instanceof FeelFunction;
-}

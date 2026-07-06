@@ -5,7 +5,11 @@ import {
   isString,
   isNumber,
   getType,
-  typeCast
+  typeCast,
+  isDate,
+  isTime,
+  isDateTime,
+  isZonedTime
 } from './types.js';
 
 import {
@@ -16,12 +20,25 @@ import {
 } from './utils.js';
 
 import {
+  Temporal
+} from 'temporal-polyfill';
+
+import {
   duration,
-  date,
-  isDateTime
+  parseDate,
+  parseTime,
+  parseDateTime,
+  zonedTime,
+  now,
+  today,
+  normalizeDuration,
+  zoneSuffix,
+  ZonedTime
 } from './temporal.js';
 
-import { DateTime, Duration, SystemZone } from 'luxon';
+import type {
+  FeelDateTime
+} from './temporal.js';
 
 
 const names = [
@@ -180,11 +197,11 @@ const builtins = {
     let d;
 
     if (isString(from)) {
-      d = date(from);
-    }
-
-    if (isDateTime(from)) {
+      d = parseDate(from);
+    } else if (isDate(from)) {
       d = from;
+    } else if (isDateTime(from)) {
+      d = from.toPlainDate();
     }
 
     if (year) {
@@ -193,14 +210,10 @@ const builtins = {
         return null;
       }
 
-      d = date().setZone('utc').set({
-        year,
-        month,
-        day
-      });
+      d = plainDate(year, month, day);
     }
 
-    return d && ifValid(d.setZone('utc').startOf('day')) || null;
+    return d || null;
   }, [ 'any?', 'number?', 'number?', 'any?' ], [ 'year', 'month', 'day', 'from' ]),
 
   // date and time(from) => date time string
@@ -209,15 +222,18 @@ const builtins = {
 
     let dt;
 
-    if (isDateTime(d) && isDateTime(time)) {
+    if ((isDate(d) || isDateTime(d)) && isTime(time)) {
 
-      const dLocal = d.toLocal();
+      const datePart = isDate(d) ? d : d.toPlainDate();
 
-      dt = time.set({
-        year: dLocal.year,
-        month: dLocal.month,
-        day: dLocal.day
-      });
+      if (isZonedTime(time)) {
+        dt = datePart.toZonedDateTime({
+          plainTime: time.value.toPlainTime(),
+          timeZone: time.value.timeZoneId
+        });
+      } else {
+        dt = datePart.toPlainDateTime(time);
+      }
     }
 
     if (isString(d)) {
@@ -226,10 +242,10 @@ const builtins = {
     }
 
     if (isString(from)) {
-      dt = date(from, null, from.includes('@') ? null : SystemZone.instance);
+      dt = parseDateTime(from);
     }
 
-    return dt && ifValid(dt) || null;
+    return dt || null;
   }, [ 'any?', 'time?', 'string?' ], [ 'date', 'time', 'from' ]),
 
   // time(from) => time string
@@ -243,21 +259,21 @@ const builtins = {
       throw notImplemented('time(..., offset)');
     }
 
-    if (isString(hour) || isDateTime(hour)) {
+    if (isString(hour) || isDate(hour) || isDateTime(hour) || isTime(hour)) {
       from = hour;
       hour = null;
     }
 
     if (isString(from) && from) {
-      t = date(null, from);
+      t = parseTime(from);
+    }
+
+    if (isTime(from)) {
+      t = from;
     }
 
     if (isDateTime(from)) {
-      t = from.set({
-        year: 1900,
-        month: 1,
-        day: 1
-      });
+      t = timeOf(from);
     }
 
     if (isNumber(hour)) {
@@ -267,27 +283,18 @@ const builtins = {
       }
 
       // TODO: support offset = days and time duration
-      t = date().set({
-        hour,
-        minute,
-        second
-      }).set({
-        year: 1900,
-        month: 1,
-        day: 1,
-        millisecond: 0
-      });
+      t = plainTime(hour, minute, second);
     }
 
-    return t && ifValid(t) || null;
+    return t || null;
   }, [ 'any?', 'number?', 'number?', 'any?', 'any?' ], [ 'hour', 'minute', 'second', 'offset', 'from' ]),
 
   'duration': fn(function(from) {
-    return ifValid(duration(from));
+    return duration(from);
   }, [ 'string' ], [ 'from' ]),
 
   'years and months duration': fn(function(from, to) {
-    return ifValid(to.diff(from, [ 'years', 'months' ]));
+    return from.until(to, { largestUnit: 'month' });
   }, [ 'date', 'date' ], [ 'from', 'to' ]),
 
   '@': fn(function(string) {
@@ -299,22 +306,26 @@ const builtins = {
     }
 
     else if (/^[\d]{1,2}:[\d]{1,2}:[\d]{1,2}/.test(string)) {
-      t = date(null, string);
+      t = parseTime(string);
+    }
+
+    else if (string.includes('T')) {
+      t = parseDateTime(string);
     }
 
     else {
-      t = date(string);
+      t = parseDate(string);
     }
 
-    return t && ifValid(t) || null;
+    return t || null;
   }, [ 'string' ]),
 
   'now': fn(function() {
-    return date();
+    return now();
   }, [], []),
 
   'today': fn(function() {
-    return date().startOf('day');
+    return today();
   }, [], []),
 
   // 10.3.4.2 Boolean function
@@ -780,19 +791,19 @@ const builtins = {
   // 10.3.4.8 Temporal built-in functions
 
   'day of year': fn(function(date) {
-    return date.ordinal;
+    return date.dayOfYear;
   }, [ 'date time' ], [ 'date' ]),
 
   'day of week': fn(function(date) {
-    return date.weekdayLong;
+    return WEEKDAY_NAMES[date.dayOfWeek - 1];
   }, [ 'date time' ], [ 'date' ]),
 
   'month of year': fn(function(date) {
-    return date.monthLong;
+    return MONTH_NAMES[date.month - 1];
   }, [ 'date time' ], [ 'date' ]),
 
   'week of year': fn(function(date) {
-    return date.weekNumber;
+    return date.weekOfYear;
   }, [ 'date time' ], [ 'date' ]),
 
 
@@ -1188,23 +1199,20 @@ function toString(obj, wrap = false) {
   }
 
   if (type === 'duration') {
-    return obj.shiftTo('years', 'months', 'days', 'hours', 'minutes', 'seconds').normalize().toISO();
+    return normalizeDuration(obj).toString();
   }
 
   if (type === 'date time') {
-    if (obj.zone === SystemZone.instance) {
-      return obj.toISO({ suppressMilliseconds: true, includeOffset: false });
+
+    if (obj instanceof Temporal.ZonedDateTime) {
+      return obj.toPlainDateTime().toString() + zoneSuffix(obj);
     }
 
-    if (obj.zone?.zoneName) {
-      return obj.toISO({ suppressMilliseconds: true, includeOffset: false }) + '@' + obj.zone?.zoneName;
-    }
-
-    return obj.toISO({ suppressMilliseconds: true });
+    return obj.toString();
   }
 
   if (type === 'date') {
-    return obj.toISODate();
+    return obj.toString();
   }
 
   if (type === 'range') {
@@ -1212,15 +1220,12 @@ function toString(obj, wrap = false) {
   }
 
   if (type === 'time') {
-    if (obj.zone === SystemZone.instance) {
-      return obj.toISOTime({ suppressMilliseconds: true, includeOffset: false });
+
+    if (obj instanceof ZonedTime) {
+      return obj.value.toPlainTime().toString() + zoneSuffix(obj.value);
     }
 
-    if (obj.zone?.zoneName) {
-      return obj.toISOTime({ suppressMilliseconds: true, includeOffset: false }) + '@' + obj.zone?.zoneName;
-    }
-
-    return obj.toISOTime({ suppressMilliseconds: true });
+    return obj.toString();
   }
 
   if (type === 'function') {
@@ -1317,9 +1322,48 @@ function mode(array: number[]) {
   return sorted.filter(s => s[1] === sorted[0][1]).map(e => +e[0]);
 }
 
-function ifValid<T extends DateTime | Duration>(o: T) : T | null {
-  return o.isValid ? o : null;
+/**
+ * Construct a {@link Temporal.PlainDate}, returning null for invalid input.
+ */
+function plainDate(year, month, day) : Temporal.PlainDate | null {
+  try {
+    return Temporal.PlainDate.from({ year, month, day }, { overflow: 'reject' });
+  } catch {
+    return null;
+  }
 }
+
+/**
+ * Construct a {@link Temporal.PlainTime}, returning null for invalid input.
+ */
+function plainTime(hour, minute, second) : Temporal.PlainTime | null {
+  try {
+    return Temporal.PlainTime.from({ hour, minute, second }, { overflow: 'reject' });
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Extract the time-of-day of a date time, preserving its time zone.
+ */
+function timeOf(dateTime: FeelDateTime) : Temporal.PlainTime | ZonedTime {
+
+  if (dateTime instanceof Temporal.ZonedDateTime) {
+    return zonedTime(dateTime.toPlainTime(), dateTime.timeZoneId);
+  }
+
+  return dateTime.toPlainTime();
+}
+
+const WEEKDAY_NAMES = [
+  'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'
+];
+
+const MONTH_NAMES = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December'
+];
 
 /**
  * Concatenates flags for a regular expression.

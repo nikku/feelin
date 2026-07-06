@@ -9,7 +9,7 @@ const input = pkg.source;
 
 const external = [
   'lezer-feel',
-  'luxon',
+  'temporal-polyfill',
   'min-dash'
 ];
 

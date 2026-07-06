@@ -15,7 +15,6 @@
   "devDependencies": {
     "@rollup/plugin-terser": "^1.0.0",
     "@rollup/plugin-typescript": "^12.3.0",
-    "@types/luxon": "^3.7.1",
     "@types/mocha": "^10.0.10",
     "chai": "^6.2.2",
     "chokidar-cli": "^3.0.0",
@@ -35,8 +34,8 @@
   "dependencies": {
     "@lezer/common": "^1.5.2",
     "lezer-feel": "^3.0.1",
-    "luxon": "^3.7.2",
-    "min-dash": "^5.0.0"
+    "min-dash": "^5.0.0",
+    "temporal-polyfill": "^0.3.0"
   },
   "repository": {
     "type": "git",
@@ -49,7 +48,7 @@
   "scripts": {
     "all": "run-s lint build generate-typings test lint:types",
     "lint": "eslint .",
-    "lint:types": "tsc --noEmit --lib es2019 test/types.ts",
+    "lint:types": "tsc --noEmit --skipLibCheck --lib es2019 test/types.ts",
     "build": "rollup -c --bundleConfigAsCjs",
     "build:dev": "npm run build -- --watch",
     "dev": "run-p *:dev",

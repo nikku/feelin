@@ -92,6 +92,14 @@ function describeBuiltins(name, evaluate) {
 
       expr('string(time(10, 30, 0, duration("PT5H")))', '10:30:00+05:00');
 
+      // sub-minute offsets (Temporal only supports minute precision)
+      expr('string(time(10, 30, 15, duration("PT5H30M15S")))', '10:30:15+05:30:15');
+      expr('time(10, 30, 15, duration("PT5H30M15S")).time offset = duration("PT5H30M15S")', true);
+      expr(`
+        time("00:00:00+05:00:01") =
+        time("00:00:01+05:00:02")
+      `, true);
+
       expr(`
         number("1 000,0", " ", ",") =
         number("1,000.0", ",", ".")
@@ -115,12 +123,12 @@ function describeBuiltins(name, evaluate) {
       expr('string(date("2018-12-10"))', '2018-12-10');
       expr('string(date and time("2018-12-10"))', '2018-12-10T00:00:00');
       expr('string(date and time("2018-12-10T10:30:00.0001"))', '2018-12-10T10:30:00.0001');
-      exprSkip('string(date and time("2018-12-10T10:30:00.0001+05:00:01"))', '2018-12-10T10:30:00.0001+05:00:01');
+      expr('string(date and time("2018-12-10T10:30:00.0001+05:00:01"))', '2018-12-10T10:30:00.0001+05:00:01');
       expr('string(date and time("2018-12-10T10:30:00@Etc/UTC"))', '2018-12-10T10:30:00@Etc/UTC');
       expr('string(date and time("2018-12-10T10:30:00Z"))', '2018-12-10T10:30:00Z');
       expr('string(date and time(date and time("2017-09-05T10:20:00@Europe/Paris"),time("09:15:30.987@Europe/Paris")))', '2017-09-05T09:15:30.987@Europe/Paris');
       expr('string(time("10:30:00.0001"))', '10:30:00.0001');
-      exprSkip('string(time("10:30:00.0001+05:00:01"))', '10:30:00.0001+05:00:01');
+      expr('string(time("10:30:00.0001+05:00:01"))', '10:30:00.0001+05:00:01');
       expr('string(time("10:30:00"))', '10:30:00');
       expr('string(time("10:30:00@Etc/UTC"))', '10:30:00@Etc/UTC');
       expr('string(duration("P1D"))', 'P1D');

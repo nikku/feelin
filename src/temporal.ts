@@ -90,7 +90,7 @@ export class FeelTime {
    * The zone offset as a {@link FeelDuration}, or `null` for a local time.
    */
   get 'time offset'() {
-    return this.zone === null ? null : offsetDuration(zonedDateTime(this));
+    return this.zone === null ? null : zoneOffset(this);
   }
 
   /**
@@ -141,7 +141,7 @@ export class FeelDateTime {
   get timezone() { return this.zone; }
 
   get 'time offset'() {
-    return this.zone === null ? null : offsetDuration(zonedDateTime(this));
+    return this.zone === null ? null : zoneOffset(this);
   }
 
   /**
@@ -278,7 +278,7 @@ function splitZone(str: string) : { value: string, zone: string | null } {
     };
   }
 
-  const offsetMatch = /[+-]\d{2}:\d{2}$/.exec(str);
+  const offsetMatch = /[+-]\d{2}:\d{2}(:\d{2})?$/.exec(str);
 
   if (offsetMatch) {
     return {
@@ -303,11 +303,36 @@ function zoneSuffix(zone: string) : string {
     return 'Z';
   }
 
-  if (/^[+-]\d{2}:\d{2}$/.test(zone)) {
+  if (/^[+-]\d{2}:\d{2}(:\d{2})?$/.test(zone)) {
     return zone;
   }
 
   return '@' + zone;
+}
+
+/**
+ * The offset, in seconds, of a fixed numeric offset zone
+ * (`+HH:MM` or `+HH:MM:SS`). Returns `null` for named zones (including
+ * `UTC`), which are resolved through Temporal instead.
+ *
+ * Temporal itself only accepts offset zones to minute precision, so
+ * sub-minute offsets are handled through this manual path.
+ */
+function offsetZoneSeconds(zone: string | null) : number | null {
+
+  if (zone === null) {
+    return null;
+  }
+
+  const match = /^([+-])(\d{2}):(\d{2}):(\d{2})$/.exec(zone);
+
+  if (!match) {
+    return null;
+  }
+
+  const sign = match[1] === '-' ? -1 : 1;
+
+  return sign * (Number(match[2]) * 3600 + Number(match[3]) * 60 + Number(match[4]));
 }
 
 /**
@@ -333,6 +358,24 @@ function offsetDuration(zdt: Temporal.ZonedDateTime) : FeelDuration {
   return new FeelDuration(Temporal.Duration.from({ nanoseconds: zdt.offsetNanoseconds }));
 }
 
+/**
+ * Return the zone offset of a zoned temporal as a {@link FeelDuration}.
+ *
+ * Sub-minute numeric offsets are resolved directly (Temporal only
+ * supports offset zones to minute precision); everything else is
+ * resolved through {@link zonedDateTime}.
+ */
+function zoneOffset(temporal: FeelTime | FeelDateTime) : FeelDuration {
+
+  const seconds = offsetZoneSeconds(temporal.zone);
+
+  if (seconds !== null) {
+    return new FeelDuration(Temporal.Duration.from({ seconds }), false);
+  }
+
+  return offsetDuration(zonedDateTime(temporal));
+}
+
 
 // comparison ////////////////////////////////////////////////////////
 
@@ -349,6 +392,20 @@ export function toComparable(value) : number | null {
   }
 
   if (isTime(value) || isDateTime(value)) {
+
+    const offsetSeconds = offsetZoneSeconds(value.zone);
+
+    // sub-minute offset zone: interpret the wall clock at UTC, then
+    // shift by the fixed offset (Temporal rejects such offset zones)
+    if (offsetSeconds !== null) {
+      const utcEpoch = (value instanceof FeelTime
+        ? REFERENCE_DATE.toZonedDateTime({ plainTime: value.value, timeZone: 'UTC' })
+        : value.value.toZonedDateTime('UTC')
+      ).epochMilliseconds;
+
+      return utcEpoch - offsetSeconds * 1000;
+    }
+
     const zone = value.zone ?? 'UTC';
 
     return (value instanceof FeelTime
@@ -477,6 +534,12 @@ export function addDuration(temporal: FeelTemporal, dur: FeelDuration, sign: num
     return new FeelDateTime(temporal.value.add(d), null);
   }
 
+  // a fixed sub-minute offset has no DST, so shifting the wall clock is
+  // equivalent (and Temporal rejects such offset zones anyway)
+  if (offsetZoneSeconds(temporal.zone) !== null) {
+    return new FeelDateTime(temporal.value.add(d), temporal.zone);
+  }
+
   // honor the zone (e.g. DST) for zoned date times
   const shifted = temporal.value.toZonedDateTime(temporal.zone).add(d);
 
@@ -599,8 +662,20 @@ export function timeFrom(hour: number, minute: number, second: number, offset: F
 
     if (zone !== null) {
 
-      // validate the offset (throws for an out-of-range offset)
-      REFERENCE_DATE.toZonedDateTime({ plainTime: value, timeZone: zone });
+      const offsetSeconds = offsetZoneSeconds(zone);
+
+      if (offsetSeconds !== null) {
+
+        // sub-minute offset: validate the range manually, as Temporal
+        // rejects offset zones with second precision
+        if (Math.abs(offsetSeconds) >= 24 * 3600) {
+          return null;
+        }
+      } else {
+
+        // validate the offset (throws for an out-of-range offset)
+        REFERENCE_DATE.toZonedDateTime({ plainTime: value, timeZone: zone });
+      }
     }
 
     return new FeelTime(value, zone);
@@ -689,9 +764,19 @@ export function parseDateTime(str: string) : FeelDateTime | null {
 
   try {
 
-    // validate the zone (throws for an unknown zone)
+    // validate the zone (throws for an unknown zone); sub-minute offset
+    // zones are validated by range, as Temporal rejects them
     if (zone !== null) {
-      new Temporal.PlainDateTime(1970, 1, 1).toZonedDateTime(zone);
+
+      const offsetSeconds = offsetZoneSeconds(zone);
+
+      if (offsetSeconds !== null) {
+        if (Math.abs(offsetSeconds) >= 24 * 3600) {
+          return null;
+        }
+      } else {
+        new Temporal.PlainDateTime(1970, 1, 1).toZonedDateTime(zone);
+      }
     }
 
     return new FeelDateTime(Temporal.PlainDateTime.from(value), zone);

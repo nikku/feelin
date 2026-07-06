@@ -84,6 +84,13 @@ export class FeelRange {
   }
 }
 
+/**
+ * Whether the value is a FEEL <range>.
+ */
+export function isRange(obj) : obj is FeelRange {
+  return obj instanceof FeelRange;
+}
+
 
 // comparator ////////////////////////////////////////////////////////
 

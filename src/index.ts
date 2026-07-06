@@ -3,11 +3,13 @@ export * from './interpreter.js';
 export * from './parser.js';
 
 export {
-  FeelFunction
+  FeelFunction,
+  isFunction
 } from './types.js';
 
 export {
-  FeelRange
+  FeelRange,
+  isRange
 } from './range.js';
 
 export {

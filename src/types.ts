@@ -13,7 +13,7 @@ import {
   timeFrom
 } from './temporal.js';
 
-import { FeelRange } from './range.js';
+import { FeelRange, isRange } from './range.js';
 
 export {
   isDate,
@@ -83,11 +83,11 @@ export function getType(e) {
     return 'date time';
   }
 
-  if (e instanceof FeelRange) {
+  if (isRange(e)) {
     return 'range';
   }
 
-  if (e instanceof FeelFunction) {
+  if (isFunction(e)) {
     return 'function';
   }
 
@@ -308,4 +308,11 @@ export class FeelFunction {
 
     return this.fn.call(null, ...params);
   }
+}
+
+/**
+ * Whether the value is a FEEL <function>.
+ */
+export function isFunction(obj) : obj is FeelFunction {
+  return obj instanceof FeelFunction;
 }

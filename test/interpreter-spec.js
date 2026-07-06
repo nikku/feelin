@@ -8,7 +8,9 @@ import {
   date,
   duration,
   FeelRange,
-  FeelFunction
+  FeelFunction,
+  isRange,
+  isFunction
 } from 'feelin';
 
 
@@ -25,6 +27,26 @@ describe('interpreter', function() {
     it('should return wrapper values from evaluate', function() {
       expect(evaluate('[1..10]').value).to.be.an.instanceof(FeelRange);
       expect(evaluate('function(x) x + 1').value).to.be.an.instanceof(FeelFunction);
+    });
+
+
+    it('should expose <isRange> guard', function() {
+      expect(isRange).to.be.a('function');
+
+      expect(isRange(evaluate('[1..10]').value)).to.be.true;
+      expect(isRange(evaluate('function(x) x + 1').value)).to.be.false;
+      expect(isRange(5)).to.be.false;
+      expect(isRange(null)).to.be.false;
+    });
+
+
+    it('should expose <isFunction> guard', function() {
+      expect(isFunction).to.be.a('function');
+
+      expect(isFunction(evaluate('function(x) x + 1').value)).to.be.true;
+      expect(isFunction(evaluate('[1..10]').value)).to.be.false;
+      expect(isFunction(5)).to.be.false;
+      expect(isFunction(null)).to.be.false;
     });
 
   });

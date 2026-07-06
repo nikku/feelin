@@ -8,7 +8,8 @@ import {
   typeCast,
   isDate,
   isTime,
-  isDateTime
+  isDateTime,
+  isDuration
 } from './types.js';
 
 import {
@@ -238,10 +239,6 @@ const builtins = {
 
     let t;
 
-    if (offset) {
-      throw notImplemented('time(..., offset)');
-    }
-
     if (isString(hour) || isDate(hour) || isDateTime(hour) || isTime(hour)) {
       from = hour;
       hour = null;
@@ -265,8 +262,11 @@ const builtins = {
         return null;
       }
 
-      // TODO: support offset = days and time duration
-      t = timeFrom(hour, minute, second);
+      if (offset != null && !isDuration(offset)) {
+        return null;
+      }
+
+      t = timeFrom(hour, minute, second, offset);
     }
 
     return t || null;

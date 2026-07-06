@@ -538,13 +538,50 @@ export function dateFrom(year: number, month: number, day: number) : FeelDate | 
 /**
  * Construct a {@link FeelTime} from components, returning `null` for
  * invalid input.
+ *
+ * An optional `offset` (a days and time duration) sets the time's zone,
+ * e.g. `duration("PT5H")` yields a `+05:00` time.
  */
-export function timeFrom(hour: number, minute: number, second: number) : FeelTime | null {
+export function timeFrom(hour: number, minute: number, second: number, offset: FeelDuration | null = null) : FeelTime | null {
   try {
-    return new FeelTime(Temporal.PlainTime.from({ hour, minute, second }, { overflow: 'reject' }));
+    const value = Temporal.PlainTime.from({ hour, minute, second }, { overflow: 'reject' });
+
+    const zone = offset ? offsetZone(offset) : null;
+
+    if (zone !== null) {
+
+      // validate the offset (throws for an out-of-range offset)
+      REFERENCE_DATE.toZonedDateTime({ plainTime: value, timeZone: zone });
+    }
+
+    return new FeelTime(value, zone);
   } catch {
     return null;
   }
+}
+
+/**
+ * Convert a days and time duration into a fixed-offset time zone
+ * identifier, e.g. `+05:00`, `-01:00` or `+05:30:15`.
+ */
+function offsetZone(offset: FeelDuration) : string {
+
+  const totalSeconds = Math.trunc(
+    offset.value.total({ unit: 'second', relativeTo: REFERENCE_DATE })
+  );
+
+  const sign = totalSeconds < 0 ? '-' : '+';
+  const abs = Math.abs(totalSeconds);
+
+  const hours = Math.floor(abs / 3600);
+  const minutes = Math.floor((abs % 3600) / 60);
+  const seconds = abs % 60;
+
+  const pad = (n: number) => String(n).padStart(2, '0');
+
+  const base = `${sign}${pad(hours)}:${pad(minutes)}`;
+
+  return seconds ? `${base}:${pad(seconds)}` : base;
 }
 
 

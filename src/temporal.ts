@@ -170,16 +170,24 @@ export class FeelDuration {
    */
   readonly value: Temporal.Duration;
 
-  constructor(value: Temporal.Duration) {
+  /**
+   * @internal whether this is a years and months (rather than a
+   * days and time) duration; retained so the category survives even a
+   * zero-valued duration (e.g. `P0M` vs `PT0S`)
+   */
+  readonly yearsMonths: boolean;
+
+  constructor(value: Temporal.Duration, yearsMonths?: boolean) {
     this.value = normalize(value);
+    this.yearsMonths = yearsMonths ?? isYearsMonths(this.value);
   }
 
-  get years() { return isYearsMonths(this.value) ? this.value.years : null; }
-  get months() { return isYearsMonths(this.value) ? this.value.months : null; }
-  get days() { return isYearsMonths(this.value) ? null : this.value.days; }
-  get hours() { return isYearsMonths(this.value) ? null : this.value.hours; }
-  get minutes() { return isYearsMonths(this.value) ? null : this.value.minutes; }
-  get seconds() { return isYearsMonths(this.value) ? null : this.value.seconds; }
+  get years() { return this.yearsMonths ? this.value.years : null; }
+  get months() { return this.yearsMonths ? this.value.months : null; }
+  get days() { return this.yearsMonths ? null : this.value.days; }
+  get hours() { return this.yearsMonths ? null : this.value.hours; }
+  get minutes() { return this.yearsMonths ? null : this.value.minutes; }
+  get seconds() { return this.yearsMonths ? null : this.value.seconds; }
 
   /**
    * Return the underlying `Temporal.Duration`.
@@ -192,6 +200,13 @@ export class FeelDuration {
   }
 
   toString() : string {
+
+    // a zero years and months duration would otherwise stringify as
+    // `PT0S`, dropping its category
+    if (this.yearsMonths && this.value.sign === 0) {
+      return 'P0M';
+    }
+
     return this.value.toString();
   }
 }
@@ -376,6 +391,17 @@ function isYearsMonths(d: Temporal.Duration) : boolean {
 }
 
 /**
+ * Whether an ISO-8601 duration literal denotes a years and months
+ * duration, i.e. carries a year (`Y`) or month (`M`) component in its
+ * date part. Retains the category even when the value is zero
+ * (`P0Y` / `P0M` vs `P0D` / `PT0S`).
+ */
+function isYearsMonthsString(str: string) : boolean {
+  const datePart = str.split('T')[0];
+  return /[YM]/.test(datePart);
+}
+
+/**
  * Whether two durations are equal, comparing years / months durations by
  * month and days / time durations by second (mirroring FEEL semantics).
  */
@@ -395,17 +421,17 @@ export function durationEquals(a: FeelDuration, b: FeelDuration) : boolean {
 export function duration(opts: string | number) : FeelDuration {
 
   if (typeof opts === 'number') {
-    return new FeelDuration(Temporal.Duration.from({ milliseconds: opts }));
+    return new FeelDuration(Temporal.Duration.from({ milliseconds: opts }), false);
   }
 
-  return new FeelDuration(Temporal.Duration.from(opts));
+  return new FeelDuration(Temporal.Duration.from(opts), isYearsMonthsString(opts));
 }
 
 /**
  * Return the absolute (non-negative) value of a duration.
  */
 export function absDuration(d: FeelDuration) : FeelDuration {
-  return new FeelDuration(d.value.abs());
+  return new FeelDuration(d.value.abs(), d.yearsMonths);
 }
 
 /**
@@ -483,16 +509,22 @@ export function addDurations(a: FeelDuration, b: FeelDuration, sign: number) : F
   // durations can be combined without a calendar-less RangeError
   const anchor = REFERENCE_DATE.toPlainDateTime();
 
-  return new FeelDuration(
-    anchor.add(a.value).add(other).since(anchor, { largestUnit: 'year' })
-  );
+  const result = anchor.add(a.value).add(other).since(anchor, { largestUnit: 'year' });
+
+  // keep the category from the value; only fall back to the operands'
+  // category when the result is zero (and thus category-less)
+  const yearsMonths = result.sign === 0
+    ? a.yearsMonths || b.yearsMonths
+    : isYearsMonths(result);
+
+  return new FeelDuration(result, yearsMonths);
 }
 
 /**
  * The <years and months duration> between two dates.
  */
 export function yearsAndMonthsDuration(from: FeelDate, to: FeelDate) : FeelDuration {
-  return new FeelDuration(from.value.until(to.value, { largestUnit: 'month' }));
+  return new FeelDuration(from.value.until(to.value, { largestUnit: 'month' }), true);
 }
 
 

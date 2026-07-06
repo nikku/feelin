@@ -130,7 +130,8 @@ function describeBuiltins(name, evaluate) {
       expr('string(duration("PT49H"))', 'P2DT1H');
       expr('string(duration("P1Y"))', 'P1Y');
       expr('string(duration("-P1Y"))', '-P1Y');
-      exprSkip('string(duration("P0Y"))', 'P0M');
+      expr('string(duration("P0Y"))', 'P0M');
+      expr('string(duration("P0M"))', 'P0M');
       expr('string(duration("P1Y2M"))', 'P1Y2M');
       expr('string(duration("P25M"))', 'P2Y1M');
 

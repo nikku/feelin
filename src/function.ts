@@ -20,6 +20,39 @@ import { isRange } from './range.js';
  */
 export const FUNCTION_PARAMETER_MISMATCH = {};
 
+/**
+ * Returned by a builtin to signal that its arguments were structurally
+ * valid (right count and types) but semantically unusable.
+ *
+ * The value carries the warning template and interpolation values; the
+ * interpreter surfaces it as an INVALID_ARGUMENTS warning and evaluates
+ * the invocation to `null`.
+ */
+export class InvalidArguments {
+  constructor(
+    readonly template: string,
+    readonly values: Record<string, unknown> = {}
+  ) {}
+}
+
+/**
+ * Create an {@link InvalidArguments} signal for a builtin to return when it
+ * rejects otherwise well-typed input.
+ */
+export function invalidArguments(
+    template: string,
+    values: Record<string, unknown> = {}
+) {
+  return new InvalidArguments(template, values);
+}
+
+/**
+ * Whether the value is an {@link InvalidArguments} signal.
+ */
+export function isInvalidArguments(value: unknown): value is InvalidArguments {
+  return value instanceof InvalidArguments;
+}
+
 
 export class FeelFunction {
 

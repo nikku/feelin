@@ -1904,6 +1904,85 @@ describe('interpreter', function() {
         expect(warnings[0].details.values).to.have.keys('target', 'params');
       });
 
+
+      it('INVALID_ARGUMENTS on date(year, month, day, from)', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('date(2016, 1, 15, 100)');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.eql([
+          {
+            type: 'INVALID_ARGUMENTS',
+            message: 'date(year, month, day) does not accept a <from> argument',
+            position: { from: 0, to: 22 },
+            details: {
+              template: 'date(year, month, day) does not accept a <from> argument',
+              values: {}
+            }
+          }
+        ]);
+      });
+
+
+      it('INVALID_ARGUMENTS on non-number month or day', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('date(2017, null, 1)');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.eql([
+          {
+            type: 'INVALID_ARGUMENTS',
+            message: 'date(year, month, day) expects <month> and <day> to be numbers',
+            position: { from: 0, to: 19 },
+            details: {
+              template: 'date(year, month, day) expects <month> and <day> to be numbers',
+              values: {}
+            }
+          }
+        ]);
+      });
+
+
+      it('INVALID_ARGUMENTS on out-of-range date components', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('date(2017, 13, 31)');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.eql([
+          {
+            type: 'INVALID_ARGUMENTS',
+            message: "'2017'-'13'-'31' is not a valid date",
+            position: { from: 0, to: 18 },
+            details: {
+              template: '{year}-{month}-{day} is not a valid date',
+              values: {
+                year: 2017,
+                month: 13,
+                day: 31
+              }
+            }
+          }
+        ]);
+      });
+
     });
 
 
@@ -1951,6 +2030,20 @@ describe('interpreter', function() {
 
         // then
         expect(value).to.equal(3);
+        expect(warnings).to.be.empty;
+      });
+
+
+      it('for valid date(year, month, day)', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('date(2017, 12, 31)');
+
+        // then
+        expect(value).to.exist;
         expect(warnings).to.be.empty;
       });
 

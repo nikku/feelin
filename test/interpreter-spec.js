@@ -166,6 +166,25 @@ describe('interpreter', function() {
         expr('duration("P1D") + duration("P1D")', duration('P2D'));
         expr('duration("PT1M") + duration("PT1M")', duration('PT2M'));
 
+        // days / time durations add as 24h day units, without balancing
+        // into calendar months (P20D + P20D = P40D, not P1M9D)
+        expr('duration("P20D") + duration("P20D")', duration('P40D'));
+        expr('duration("P25D") + duration("P10D")', duration('P35D'));
+
+        // years / months durations add independently of any calendar
+        expr('duration("P1Y") + duration("P2M") = duration("P1Y2M")', true);
+        expr('duration("P1Y2M") - duration("P6M") = duration("P8M")', true);
+        expr('duration("P18M") + duration("P0M") = duration("P1Y6M")', true);
+        expr('string(duration("P1Y") + duration("P2M"))', 'P1Y2M');
+
+        // years / months and days / time durations are distinct FEEL types;
+        // combining the two kinds is undefined and yields null (mirrors
+        // camunda/feel-scala, which has no mixed-kind arithmetic case)
+        expr('duration("P1Y") + duration("P1D")', null);
+        expr('duration("P1D") + duration("P1Y")', null);
+        expr('duration("P1Y") - duration("P1D")', null);
+        expr('duration("P0Y") + duration("P0D")', null);
+
         expr('date("2023-10-06") + duration("PT1H")', date('2023-10-06T01:00Z'));
         expr('date("2023-10-06") + duration("P1D")', date('2023-10-07'));
         expr('date("2023-10-06") + duration("P1W")', date('2023-10-13'));
@@ -1723,6 +1742,34 @@ describe('interpreter', function() {
               values: {
                 right: 10,
                 left: date('2025-12-12')
+              }
+            }
+          }
+        ]);
+      });
+
+
+      it('INVALID_TYPE for mixed-kind duration arithmetic', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('duration("P1Y") + duration("P1D")');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.eql([
+          {
+            type: 'INVALID_TYPE',
+            message: "Can't add 'P1D' to 'P1Y'",
+            position: { from: 16, to: 17 },
+            details: {
+              template: "Can't add {right} to {left}",
+              values: {
+                left: duration('P1Y'),
+                right: duration('P1D')
               }
             }
           }

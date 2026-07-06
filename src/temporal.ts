@@ -610,25 +610,35 @@ export function subtractTemporals(a: FeelTemporal, b: FeelTemporal) : FeelDurati
 }
 
 /**
- * Add or subtract two durations.
+ * Add (`sign > 0`) or subtract (`sign < 0`) two durations of the same
+ * kind, returning `null` for a mixed-kind combination.
+ *
+ * Years / months and days / time durations are distinct FEEL types;
+ * combining the two kinds is undefined (mirroring camunda/feel-scala,
+ * which has no mixed-kind arithmetic case and yields `null`).
  */
-export function addDurations(a: FeelDuration, b: FeelDuration, sign: number) : FeelDuration {
+export function addDurations(a: FeelDuration, b: FeelDuration, sign: number) : FeelDuration | null {
+
+  if (a.yearsMonths !== b.yearsMonths) {
+    return null;
+  }
 
   const other = sign < 0 ? b.value.negated() : b.value;
 
-  // anchor to a reference point so mixed years / months and days / time
-  // durations can be combined without a calendar-less RangeError
-  const anchor = REFERENCE_DATE.toPlainDateTime();
+  if (a.yearsMonths) {
 
-  const result = anchor.add(a.value).add(other).since(anchor, { largestUnit: 'year' });
+    // years / months balance calendar-independently (12 months = 1 year),
+    // but Temporal requires an anchor to add year / month durations
+    const anchor = REFERENCE_DATE.toPlainDateTime();
 
-  // keep the category from the value; only fall back to the operands'
-  // category when the result is zero (and thus category-less)
-  const yearsMonths = result.sign === 0
-    ? a.yearsMonths || b.yearsMonths
-    : isYearsMonths(result);
+    const result = anchor.add(a.value).add(other).since(anchor, { largestUnit: 'year' });
 
-  return new FeelDuration(result, yearsMonths);
+    return new FeelDuration(result, true);
+  }
+
+  // days / time add directly; days stay 24h units (no calendar balancing,
+  // so P20D + P20D is P40D rather than P1M9D)
+  return new FeelDuration(a.value.add(other), false);
 }
 
 /**

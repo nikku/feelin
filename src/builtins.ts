@@ -18,6 +18,7 @@ import {
 } from './range.js';
 
 import {
+  invalidArguments,
   parseParameterNames
 } from './function.js';
 
@@ -211,14 +212,26 @@ const builtins = {
 
       // the (year, month, day) form does not accept a <from> argument
       if (from != null) {
-        return null;
+        return invalidArguments(
+          'date(year, month, day) does not accept a <from> argument'
+        );
       }
 
       if (!isNumber(month) || !isNumber(day)) {
-        return null;
+        return invalidArguments(
+          'date(year, month, day) expects <month> and <day> to be numbers'
+        );
       }
 
       d = dateFrom(year, month, day);
+
+      if (!d) {
+        return invalidArguments('{year}-{month}-{day} is not a valid date', {
+          year,
+          month,
+          day
+        });
+      }
     }
 
     return d || null;

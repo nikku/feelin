@@ -21,6 +21,7 @@ import {
 
 import {
   FUNCTION_PARAMETER_MISMATCH,
+  isInvalidArguments,
   wrapFunction
 } from './function.js';
 
@@ -49,6 +50,7 @@ export type WarningType =
   | 'NO_PROPERTY_FOUND'
   | 'NOT_COMPARABLE'
   | 'INVALID_TYPE'
+  | 'INVALID_ARGUMENTS'
   | 'NO_FUNCTION_FOUND'
   | 'FUNCTION_INVOCATION_FAILURE';
 
@@ -322,6 +324,35 @@ function coerceContext(value) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function evalNode(node: Node, args: any[], interpreterContext: InterpreterContext) {
+
+  // resolve a raw function invocation result: emit the appropriate
+  // warning for a sentinel value and normalise it to `null`, so the
+  // sentinel never leaks into an enclosing expression
+  const resolveInvocation = (result, wrappedFn, contextOrArgs) => {
+
+    if (result === FUNCTION_PARAMETER_MISMATCH) {
+      interpreterContext.addWarning(node, 'FUNCTION_INVOCATION_FAILURE', {
+        template: 'Cannot invoke {target} with parameters {params}',
+        values: {
+          target: wrappedFn,
+          params: contextOrArgs
+        }
+      });
+
+      return null;
+    }
+
+    if (isInvalidArguments(result)) {
+      interpreterContext.addWarning(node, 'INVALID_ARGUMENTS', {
+        template: result.template,
+        values: result.values
+      });
+
+      return null;
+    }
+
+    return result;
+  };
 
   switch (node.name) {
   case 'ArithOp': return (context) => {
@@ -785,19 +816,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
 
       const result = wrappedFn.invoke(contextOrArgs);
 
-      if (result === FUNCTION_PARAMETER_MISMATCH) {
-        interpreterContext.addWarning(node, 'FUNCTION_INVOCATION_FAILURE', {
-          template: 'Cannot invoke {target} with parameters {params}',
-          values: {
-            target: wrappedFn,
-            params: contextOrArgs
-          }
-        });
-
-        return null;
-      }
-
-      return result;
+      return resolveInvocation(result, wrappedFn, contextOrArgs);
     }
 
   }, 'date');
@@ -839,19 +858,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
 
     const result = wrappedFn.invoke(contextOrArgs);
 
-    if (result === FUNCTION_PARAMETER_MISMATCH) {
-      interpreterContext.addWarning(node, 'FUNCTION_INVOCATION_FAILURE', {
-        template: 'Cannot invoke {target} with parameters {params}',
-        values: {
-          target: wrappedFn,
-          params: contextOrArgs
-        }
-      });
-
-      return null;
-    }
-
-    return result;
+    return resolveInvocation(result, wrappedFn, contextOrArgs);
   }, 'any');
 
   case 'IfExpression': return (function() {

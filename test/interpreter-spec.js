@@ -566,7 +566,11 @@ describe('interpreter', function() {
       expr('1 between null and 3', null);
       expr('1 between 1 and null', null);
 
-      exprSkip('1 between "b" and "d"', null);
+      expr('1 between "b" and "d"', null);
+
+      // incompatible types are not comparable (return `null`, not `false`)
+      expr('date("2026-06-10") between 1 and 10', null);
+      expr('1 between date("2026-01-01") and date("2026-12-31")', null);
 
       expr('"d" in ["b".."d"]', true);
       expr('"d" in ["b".."d")', false);
@@ -1537,6 +1541,28 @@ describe('interpreter', function() {
     expr('null > 2', null);
     expr('2 > null', null);
 
+    // incompatible types are not comparable and yield `null`, not `false`
+    // (cf. #154, #49)
+    expr('date("2026-06-10") > "2026-01-01"', null);
+    expr('"2026-01-01" > date("2026-06-10")', null);
+    expr('date("2026-06-10") >= "2026-01-01"', null);
+    expr('date("2026-06-10") < "2026-01-01"', null);
+    expr('date("2026-06-10") <= "2026-01-01"', null);
+    expr('1 > "a"', null);
+    expr('"a" < 1', null);
+    expr('true > false', null);
+    expr('true < 1', null);
+
+    // relational comparisons of compatible types keep working
+    expr('5 > 3', true);
+    expr('date("2026-06-10") > date("2026-01-01")', true);
+    expr('duration("P2D") > duration("P1D")', true);
+
+    // membership of an incomparable value is `null`, not `false`
+    expr('date("2026-06-10") in [1..10]', null);
+    expr('1 in ["a".."z"]', null);
+    expr('date("2026-06-10") in (1, 2)', null);
+
   });
 
 
@@ -1859,13 +1885,89 @@ describe('interpreter', function() {
       });
 
 
-      it.skip('NOT_COMPARABLE for basic comparison');
+      it('NOT_COMPARABLE for basic comparison', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('date("2020-01-01") > "x"');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.eql([
+          {
+            type: 'NOT_COMPARABLE',
+            message: "Can't compare '2020-01-01' with '\"x\"'",
+            position: { from: 0, to: 24 },
+            details: {
+              template: "Can't compare {left} with {right}",
+              values: {
+                left: date('2020-01-01'),
+                right: 'x'
+              }
+            }
+          }
+        ]);
+      });
 
 
-      it.skip('NOT_COMPARABLE for <between> comparison');
+      it('NOT_COMPARABLE for <between> comparison', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('1 between "a" and "z"');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.eql([
+          {
+            type: 'NOT_COMPARABLE',
+            message: "Can't compare '1' with '\"a\"' and '\"z\"'",
+            position: { from: 0, to: 21 },
+            details: {
+              template: "Can't compare {value} with {start} and {end}",
+              values: {
+                value: 1,
+                start: 'a',
+                end: 'z'
+              }
+            }
+          }
+        ]);
+      });
 
 
-      it.skip('NOT_COMPARABLE for <in> comparison');
+      it('NOT_COMPARABLE for <in> comparison', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('date("2020-01-01") in (1, 2)');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.eql([
+          {
+            type: 'NOT_COMPARABLE',
+            message: "Can't compare '2020-01-01' with '[2 items]'",
+            position: { from: 0, to: 28 },
+            details: {
+              template: "Can't compare {value} with {tests}",
+              values: {
+                value: date('2020-01-01'),
+                tests: [ 1, 2 ]
+              }
+            }
+          }
+        ]);
+      });
 
 
       it('NOT_CALLABLE for non-function', function() {

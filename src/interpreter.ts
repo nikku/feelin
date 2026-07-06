@@ -11,7 +11,8 @@ import {
   isDuration,
   isNumber,
   isContext,
-  isBoolean
+  isBoolean,
+  isComparable
 } from './types.js';
 
 import {
@@ -434,21 +435,28 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     }
   };
 
-  case 'CompareOp': return tag(() => {
+  case 'CompareOp': {
 
-    switch (node.input) {
-    case '>': return (b) => createRange(b, null, false, false);
-    case '>=': return (b) => createRange(b, null, true, false);
-    case '<': return (b) => createRange(null, b, false, false);
-    case '<=': return (b) => createRange(null, b, false, true);
-    case '=': return (b) => (a) => equals(a, b);
-    case '!=': return (b) => (a) => {
-      const result = equals(a, b);
-      return result === null ? null : !result;
-    };
-    }
+    // `<`, `>`, `<=`, `>=` order their operands (and so require them to be
+    // comparable); `=` / `!=` are equality (defined across all types)
+    const ordering = [ '<', '>', '<=', '>=' ].includes(node.input);
 
-  }, 'test');
+    return Object.assign(tag(() => {
+
+      switch (node.input) {
+      case '>': return (b) => createRange(b, null, false, false);
+      case '>=': return (b) => createRange(b, null, true, false);
+      case '<': return (b) => createRange(null, b, false, false);
+      case '<=': return (b) => createRange(null, b, false, true);
+      case '=': return (b) => (a) => equals(a, b);
+      case '!=': return (b) => (a) => {
+        const result = equals(a, b);
+        return result === null ? null : !result;
+      };
+      }
+
+    }, 'test'), { ordering });
+  }
 
   case 'BacktickIdentifier': return node.input.replace(/`/g, '');
 
@@ -912,26 +920,65 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     // expression !compare kw<"in"> PositiveUnaryTest |
     // expression !compare kw<"in"> !unaryTest "(" PositiveUnaryTests ")"
     if (operator === 'in') {
-      return compareIn(args[0](context), (args[3] || args[2])(context));
+
+      const value = args[0](context);
+      const tests = (args[3] || args[2])(context);
+
+      const result = compareIn(value, tests);
+
+      if (result === null && value !== null && notComparableTo(value, tests)) {
+        interpreterContext.addWarning(node, 'NOT_COMPARABLE', {
+          template: "Can't compare {value} with {tests}",
+          values: { value, tests }
+        });
+      }
+
+      return result;
     }
 
     // expression !compare kw<"between"> expression kw<"and"> expression
     if (operator === 'between') {
 
+      const value = args[0](context);
       const start = args[2](context);
       const end = args[4](context);
 
-      if (start === null || end === null) {
+      if (value === null || start === null || end === null) {
         return null;
       }
 
-      return createRange(start, end).includes(args[0](context));
+      if (!isComparable(value, start) || !isComparable(start, end)) {
+        interpreterContext.addWarning(node, 'NOT_COMPARABLE', {
+          template: "Can't compare {value} with {start} and {end}",
+          values: { value, start, end }
+        });
+
+        return null;
+      }
+
+      return createRange(start, end).includes(value);
     }
 
     // expression !compare CompareOp<"=" | "!="> expression |
     // expression !compare CompareOp<Gt | Gte | Lt | Lte> expression |
     const left = args[0](context);
     const right = args[2](context);
+
+    // ordering operators (`<`, `>`, `<=`, `>=`) require comparable
+    // operands; a non-comparable pair is a semantic error and yields
+    // `null` (equality handles a type mismatch itself, via `equals`)
+    if (
+      operator.ordering &&
+      left !== null && right !== null &&
+      !isComparable(left, right)
+    ) {
+      interpreterContext.addWarning(node, 'NOT_COMPARABLE', {
+        template: "Can't compare {left} with {right}",
+        values: { left, right }
+      });
+
+      return null;
+    }
 
     const test = operator()(right);
 
@@ -1236,6 +1283,32 @@ function compareValue(test, value) {
   }
 
   return equals(test, value);
+}
+
+/**
+ * Whether `value` is matched against a direct value or range test of an
+ * incomparable type (used to emit a `NOT_COMPARABLE` warning). Unary-test
+ * predicates (functions) and `null` tests are not direct comparisons and
+ * never qualify.
+ */
+function notComparableTo(value, tests) {
+
+  if (!isArray(tests)) {
+    tests = [ tests ];
+  }
+
+  return tests.some(test => {
+
+    if (typeof test === 'function' || test === null) {
+      return false;
+    }
+
+    if (isRange(test)) {
+      return test.valueType !== null && getType(value) !== test.valueType;
+    }
+
+    return !isComparable(value, test);
+  });
 }
 
 

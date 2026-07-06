@@ -1,14 +1,6 @@
 import { toComparable } from './temporal.js';
 
-import { getType } from './types.js';
-
-/**
- * The FEEL types whose values are temporal instants (`date`, `time` and
- * `date and time`). They are mutually incomparable: a value of one type is
- * not comparable to a value of another.
- */
-const TEMPORAL_INSTANT_TYPES = [ 'date', 'time', 'date time' ];
-
+import { getType, isArray } from './types.js';
 
 /**
  * This module is the single place in the code base that deals with FEEL
@@ -174,17 +166,20 @@ function rangeIncludes(range: FeelRange, value: RangeValue | null) : boolean | n
     return rangeIncludesRange(range, value);
   }
 
-  // `date`, `time` and `date and time` are distinct FEEL types; a probe
-  // of one temporal type is not comparable to a range of another (hence
-  // `null` rather than `false`)
-  const valueType = getType(value);
+  // a singleton list is a member iff its element is (mirroring `equals`)
+  if (isArray(value) && value.length < 2) {
+    value = value[0];
 
-  if (
-    range.valueType !== null &&
-    TEMPORAL_INSTANT_TYPES.includes(valueType) &&
-    TEMPORAL_INSTANT_TYPES.includes(range.valueType) &&
-    valueType !== range.valueType
-  ) {
+    if (value === null || value === undefined) {
+      return null;
+    }
+  }
+
+  // a probe whose type differs from the range's element type is not
+  // comparable to the range; ordering the two is a semantic error, hence
+  // `null` rather than `false` (e.g. `date` in a `number` range, or a
+  // `date` probe on a `date and time` range)
+  if (range.valueType !== null && getType(value) !== range.valueType) {
     return null;
   }
 

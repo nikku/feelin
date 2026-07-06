@@ -1,17 +1,26 @@
-import { Temporal } from 'temporal-polyfill';
-
 import {
-  ZonedTime,
-  REFERENCE_DATE,
-  toComparable
+  isDate,
+  isTime,
+  isDateTime,
+  isDuration,
+  isTemporal,
+  isZoned,
+  toComparable,
+  durationEquals,
+  dateOf,
+  timeOf,
+  combine,
+  timeFrom
 } from './temporal.js';
 
-import type {
-  FeelDate,
-  FeelTime,
-  FeelDateTime,
-  FeelDuration
-} from './temporal.js';
+export {
+  isDate,
+  isTime,
+  isDateTime,
+  isDuration,
+  isTemporal,
+  isZoned
+};
 
 export function isNil(e) {
   return e === null || e === undefined;
@@ -19,42 +28,6 @@ export function isNil(e) {
 
 export function isContext(e) {
   return !isNil(e) && Object.getPrototypeOf(e) === Object.prototype;
-}
-
-export function isDate(obj): obj is FeelDate {
-  return obj instanceof Temporal.PlainDate;
-}
-
-export function isZonedTime(obj): obj is ZonedTime {
-  return obj instanceof ZonedTime;
-}
-
-export function isTime(obj): obj is FeelTime {
-  return obj instanceof Temporal.PlainTime || obj instanceof ZonedTime;
-}
-
-export function isZonedDateTime(obj): obj is Temporal.ZonedDateTime {
-  return obj instanceof Temporal.ZonedDateTime;
-}
-
-/**
- * Whether the value is a FEEL <date and time>
- * (local {@link Temporal.PlainDateTime} or zoned {@link Temporal.ZonedDateTime}).
- */
-export function isDateTime(obj): obj is FeelDateTime {
-  return obj instanceof Temporal.PlainDateTime || obj instanceof Temporal.ZonedDateTime;
-}
-
-/**
- * Whether the value is any temporal instant (date, time or date time),
- * i.e. anything but a duration.
- */
-export function isTemporal(obj): boolean {
-  return isDate(obj) || isTime(obj) || isDateTime(obj);
-}
-
-export function isDuration(obj): obj is FeelDuration {
-  return obj instanceof Temporal.Duration;
 }
 
 export function isArray(e) {
@@ -122,32 +95,13 @@ export function isType(el: string, type: string): boolean {
   return getType(el) === type;
 }
 
-/**
- * Extract the wall-clock time-of-day of a temporal value.
- */
-function toPlainTime(obj): Temporal.PlainTime {
-
-  if (obj instanceof ZonedTime) {
-    return obj.value.toPlainTime();
-  }
-
-  return obj.toPlainTime();
-}
-
-/**
- * Extract the calendar date of a temporal value.
- */
-function toPlainDate(obj): Temporal.PlainDate {
-  return obj.toPlainDate();
-}
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function typeCast(obj: any, type: string) {
 
   if (isDate(obj)) {
 
     if (type === 'date time') {
-      return obj.toPlainDateTime(Temporal.PlainTime.from('00:00:00'));
+      return combine(obj, timeFrom(0, 0, 0));
     }
 
     return null;
@@ -160,11 +114,11 @@ export function typeCast(obj: any, type: string) {
   if (isDateTime(obj)) {
 
     if (type === 'time') {
-      return toPlainTime(obj);
+      return timeOf(obj);
     }
 
     if (type === 'date') {
-      return toPlainDate(obj);
+      return dateOf(obj);
     }
 
     if (type === 'date time') {
@@ -251,13 +205,8 @@ export function equals(a, b, strict = false) {
     }
 
     // a zoned and a zone-less temporal of the same type are never equal
-    if (aType === bType) {
-      const aZoned = isZonedTime(a) || isZonedDateTime(a);
-      const bZoned = isZonedTime(b) || isZonedDateTime(b);
-
-      if (aZoned !== bZoned) {
-        return false;
-      }
+    if (aType === bType && isZoned(a) !== isZoned(b)) {
+      return false;
     }
 
     return toComparable(a) === toComparable(b);
@@ -282,21 +231,7 @@ export function equals(a, b, strict = false) {
   }
 
   if (aType === 'duration') {
-
-    const relativeTo = REFERENCE_DATE;
-
-    const total = (d, unit) => d.total({ unit, relativeTo });
-
-    // years and months duration -> compare in months
-    if (Math.abs(total(a, 'day')) > 180) {
-      return Math.trunc(total(a, 'month') - total(b, 'month')) === 0;
-    }
-
-    // days and time duration -> compare in seconds
-    else {
-      return Math.trunc(total(a, 'second') - total(b, 'second')) === 0;
-    }
-
+    return durationEquals(a, b);
   }
 
   if (aType === 'context') {

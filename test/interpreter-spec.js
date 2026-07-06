@@ -636,6 +636,45 @@ describe('interpreter', function() {
     });
 
 
+    // https://github.com/nikku/feelin/issues/49
+    describe('Comparison > incompatible temporal types', function() {
+
+      // `date`, `time` and `date and time` are distinct FEEL types; a value
+      // of one type is never comparable to a value of another, so any such
+      // comparison is `null` (equality/relational) rather than true/false
+
+      // date <-> date and time
+      expr('date("2024-01-01") = date and time("2024-01-01T00:00:00")', null);
+      expr('date("2024-01-01") != date and time("2024-01-01T00:00:00")', null);
+      expr('date("2024-01-01") < date and time("2024-01-02T00:00:00")', null);
+      expr('date("2024-01-01") <= date and time("2024-01-01T00:00:00")', null);
+      expr('date("2024-01-01") > date and time("2024-01-01T00:00:00")', null);
+      expr('date("2024-01-01") >= date and time("2024-01-01T00:00:00")', null);
+      expr('date and time("2024-01-01T10:00:00") > date("2024-01-01")', null);
+
+      // date <-> time
+      expr('time("10:00:00") = date("2024-01-01")', null);
+      expr('time("10:00:00") > date("2024-01-01")', null);
+
+      // date and time <-> time
+      expr('date and time("2024-01-01T10:00:00") = time("10:00:00")', null);
+      expr('date and time("2024-01-01T10:00:00") < time("11:00:00")', null);
+
+      // between / in over incompatible temporal types
+      expr('date("2024-01-01") between date and time("2024-01-01T00:00:00") and date and time("2024-01-05T00:00:00")', null);
+      expr('date("2024-01-03") in [date and time("2024-01-01T00:00:00")..date and time("2024-01-05T00:00:00")]', null);
+
+      // a comparable member still matches within an <in> list
+      expr('date("2024-01-01") in (date and time("2024-01-01T00:00:00"), date("2024-01-01"))', true);
+
+      // comparisons within the same temporal type keep working
+      expr('date("2024-01-01") < date("2024-01-02")', true);
+      expr('date("2024-01-01") = date("2024-01-01")', true);
+      expr('date and time("2024-01-01T10:00:00") > date and time("2024-01-01T09:00:00")', true);
+      expr('time("10:00:00") < time("11:00:00")', true);
+    });
+
+
     describe('ForExpression > SimplePositiveUnaryTest', function() {
 
       expr(`

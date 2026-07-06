@@ -169,17 +169,16 @@ export function equals(a, b, strict = false) {
       return null;
     }
 
-    if ((aType === 'time') !== (bType === 'time')) {
-      return null;
-    }
-
-    // strict equality (`is`) does not coerce across temporal types
-    if (strict && aType !== bType) {
-      return false;
+    // `date`, `time` and `date and time` are distinct FEEL types; a value
+    // of one type is never comparable to a value of another. Strict
+    // equality (`is`) yields `false` for such a mismatch, a regular
+    // comparison yields `null`.
+    if (aType !== bType) {
+      return strict ? false : null;
     }
 
     // a zoned and a zone-less temporal of the same type are never equal
-    if (aType === bType && isZoned(a) !== isZoned(b)) {
+    if (isZoned(a) !== isZoned(b)) {
       return false;
     }
 

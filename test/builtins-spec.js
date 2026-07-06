@@ -591,7 +591,7 @@ function describeBuiltins(name, evaluate) {
 
       expr('@"2014-12-31T23:59:59" = date and time("2014-12-31T23:59:59")', true);
 
-      expr('is(date("2012-12-25"), time("23:00:50"))', null);
+      expr('is(date("2012-12-25"), time("23:00:50"))', false);
       expr('is(date("2012-12-25"), @"2012-12-25")', true);
       expr('is(date("2011-12-25"), @"2012-12-25")', false);
 
@@ -632,9 +632,11 @@ function describeBuiltins(name, evaluate) {
         date("2016-01-15") = date(2016, 1, 15)
       `, true);
 
+      // `date`, `time` and `date and time` are distinct FEEL types, so a
+      // `date` is not comparable to a `date and time` (see #49)
       expr(`
         date(2016, 1, 15) = date and time("2016-01-15T00:00:00z")
-      `, true);
+      `, null);
 
       expr('date(1)', null);
       expr('date(2017,8,-2)', null);
@@ -652,9 +654,11 @@ function describeBuiltins(name, evaluate) {
       expr('time(12,null,null,null)', null);
       expr('time(12,11,null,null)', null);
 
+      // `today()` is a `date` and `date and time(...)` a `date and time`;
+      // the two types are not comparable (see #49)
       expr(`
         today() = date and time(now(), @"00:00:00")
-      `, true);
+      `, null);
 
       expr('day of year(@"2016-01-15")', 15);
       expr('day of year(@"2016-11-15")', 320);

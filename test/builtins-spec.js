@@ -75,10 +75,22 @@ function describeBuiltins(name, evaluate) {
         time(from: "12:45:00") = time("12:45:00")
       `, true);
 
-      exprSkip(`
+      expr(`
         time("23:59:00z") =
         time(23, 59, 0, duration("PT0H"))
       `, true);
+
+      expr(`
+        time(10, 30, 0, duration("PT5H")) =
+        time("10:30:00+05:00")
+      `, true);
+
+      expr(`
+        time(23, 59, 0, duration("-PT1H")) =
+        time("23:59:00-01:00")
+      `, true);
+
+      expr('string(time(10, 30, 0, duration("PT5H")))', '10:30:00+05:00');
 
       expr(`
         number("1 000,0", " ", ",") =

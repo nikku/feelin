@@ -1240,7 +1240,7 @@ describe('interpreter', function() {
     });
 
 
-    describe.skip('DateAndTime', function() {
+    describe('DateAndTime', function() {
 
       expr('time("10:30:00+05:00").time offset = @"PT5H"', true);
 
@@ -1321,8 +1321,7 @@ describe('interpreter', function() {
 
     expr('time("00:01") = time("00:01:00")', true);
 
-    // TODO(nikku): investigate me
-    exprSkip('time("10:30:00+01:00") = time("10:30:00@Europe/Paris")', true);
+    expr('time("10:30:00+01:00") = time("10:30:00@Europe/Paris")', true);
 
     expr('@"2002-04-02T12:00:00-01:00" = @"2002-04-02T17:00:00+04:00"', true);
 

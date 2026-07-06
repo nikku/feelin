@@ -114,22 +114,22 @@ function describeBuiltins(name, evaluate) {
       expr('string(date("2012-12-25"))', '2012-12-25');
       expr('string(date("2018-12-10"))', '2018-12-10');
       expr('string(date and time("2018-12-10"))', '2018-12-10T00:00:00');
-      exprSkip('string(date and time("2018-12-10T10:30:00.0001"))', '2018-12-10T10:30:00.0001');
+      expr('string(date and time("2018-12-10T10:30:00.0001"))', '2018-12-10T10:30:00.0001');
       exprSkip('string(date and time("2018-12-10T10:30:00.0001+05:00:01"))', '2018-12-10T10:30:00.0001+05:00:01');
       expr('string(date and time("2018-12-10T10:30:00@Etc/UTC"))', '2018-12-10T10:30:00@Etc/UTC');
       expr('string(date and time("2018-12-10T10:30:00Z"))', '2018-12-10T10:30:00Z');
       expr('string(date and time(date and time("2017-09-05T10:20:00@Europe/Paris"),time("09:15:30.987@Europe/Paris")))', '2017-09-05T09:15:30.987@Europe/Paris');
-      exprSkip('string(time("10:30:00.0001"))', '10:30:00.0001');
+      expr('string(time("10:30:00.0001"))', '10:30:00.0001');
       exprSkip('string(time("10:30:00.0001+05:00:01"))', '10:30:00.0001+05:00:01');
       expr('string(time("10:30:00"))', '10:30:00');
       expr('string(time("10:30:00@Etc/UTC"))', '10:30:00@Etc/UTC');
       expr('string(duration("P1D"))', 'P1D');
-      exprSkip('string(duration("-P1D"))', '-P1D');
+      expr('string(duration("-P1D"))', '-P1D');
       expr('string(duration("P0D"))', 'PT0S');
       expr('string(duration("P1DT2H3M4.123S"))', 'P1DT2H3M4.123S');
       expr('string(duration("PT49H"))', 'P2DT1H');
       expr('string(duration("P1Y"))', 'P1Y');
-      exprSkip('string(duration("-P1Y"))', '-P1Y');
+      expr('string(duration("-P1Y"))', '-P1Y');
       exprSkip('string(duration("P0Y"))', 'P0M');
       expr('string(duration("P1Y2M"))', 'P1Y2M');
       expr('string(duration("P25M"))', 'P2Y1M');
@@ -626,10 +626,10 @@ function describeBuiltins(name, evaluate) {
       `, true);
 
       expr('date(1)', null);
-      exprSkip('date(2017,8,-2)', null);
-      exprSkip('date(2017,-8,2)', null);
-      exprSkip('date(2017,12,32)', null);
-      exprSkip('date(2017,13,31)', null);
+      expr('date(2017,8,-2)', null);
+      expr('date(2017,-8,2)', null);
+      expr('date(2017,12,32)', null);
+      expr('date(2017,13,31)', null);
       exprSkip('date(2016, 1, 15, 100)', null);
 
       expr('date("")', null);
@@ -681,8 +681,8 @@ function describeBuiltins(name, evaluate) {
         exprSkip('duration("P1Y").minutes', null);
         exprSkip('duration("P1Y").hours', null);
 
-        exprSkip('time("10:30:00+05:00").time offset', 'duration("PT5H")');
-        exprSkip('date and time("2018-12-10T10:30:00+05:00").time offset', 'duration("PT5H")');
+        expr('time("10:30:00+05:00").time offset = duration("PT5H")', true);
+        expr('date and time("2018-12-10T10:30:00+05:00").time offset = duration("PT5H")', true);
 
       });
 

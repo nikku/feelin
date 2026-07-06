@@ -1655,7 +1655,7 @@ describe('interpreter', function() {
         expect(warnings).to.eql([
           {
             type: 'INVALID_TYPE',
-            message: "Can't exponentiate '10' to '2025-12-12T00:00:00.000Z'",
+            message: "Can't exponentiate '10' to '2025-12-12'",
             position: { from: 14, to: 16 },
             details: {
               template: "Can't exponentiate {right} to {left}",

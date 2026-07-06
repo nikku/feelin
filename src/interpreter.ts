@@ -12,8 +12,10 @@ import {
   isArray,
   getType,
   isDuration,
+  isDate,
+  isTime,
+  isZonedTime,
   isDateTime,
-  isType,
   isNumber,
   isContext,
   isBoolean
@@ -30,7 +32,11 @@ import {
   parseUnaryTests
 } from './parser.js';
 
-import { Duration } from 'luxon';
+import {
+  toComparable,
+  zonedTime,
+  ZonedTime
+} from './temporal.js';
 
 
 export type WarningType =
@@ -345,42 +351,34 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     switch (node.input) {
     case '+': return nullable((a, b) => {
 
-      // flip these as luxon operations with durations aren't commutative
+      // flip these as temporal + duration operations aren't commutative
       if (isDuration(a) && !isDuration(b)) {
         const tmp = a;
         a = b;
         b = tmp;
       }
 
-      if (isType(a, 'time') && isDuration(b)) {
-        return a.plus(b).set({
-          year: 1900,
-          month: 1,
-          day: 1
-        });
-      } else if (isDateTime(a) && isDateTime(b)) {
+      if (isTime(a) && isDuration(b)) {
+        return shiftTime(a, b, 1);
+      } else if (isTemporalInstant(a) && isTemporalInstant(b)) {
         return null;
-      } else if (isDateTime(a) && isDuration(b)) {
-        return a.plus(b);
+      } else if ((isDate(a) || isDateTime(a)) && isDuration(b)) {
+        return addDuration(a, b, 1);
       } else if (isDuration(a) && isDuration(b)) {
-        return a.plus(b);
+        return a.add(b);
       }
 
       return a + b;
     }, 'add', [ 'string', 'number', 'date', 'time', 'duration', 'date time' ]);
     case '-': return nullable((a, b) => {
-      if (isType(a, 'time') && isDuration(b)) {
-        return a.minus(b).set({
-          year: 1900,
-          month: 1,
-          day: 1
-        });
-      } else if (isDateTime(a) && isDateTime(b)) {
-        return a.diff(b);
-      } else if (isDateTime(a) && isDuration(b)) {
-        return a.minus(b);
+      if (isTime(a) && isDuration(b)) {
+        return shiftTime(a, b, -1);
+      } else if (isTemporalInstant(a) && isTemporalInstant(b)) {
+        return subtractTemporals(a, b);
+      } else if ((isDate(a) || isDateTime(a)) && isDuration(b)) {
+        return addDuration(a, b, -1);
       } else if (isDuration(a) && isDuration(b)) {
-        return a.minus(b);
+        return a.subtract(b);
       }
 
       return a - b;
@@ -1375,14 +1373,14 @@ function createNumberRange(start, end, startIncluded, endIncluded) {
 }
 
 /**
- * @param {Duration} start
- * @param {Duration} end
+ * @param {FeelDuration} start
+ * @param {FeelDuration} end
  * @param {boolean} startIncluded
  * @param {boolean} endIncluded
  */
 function createDurationRange(start, end, startIncluded, endIncluded) {
 
-  const toMillis = (d) => d ? Duration.fromDurationLike(d).toMillis() : null;
+  const toMillis = (d) => d ? toComparable(d) : null;
 
   const map = noopMap();
   const includes = anyIncludes(toMillis(start), toMillis(end), startIncluded, endIncluded, toMillis);
@@ -1400,8 +1398,11 @@ function createDurationRange(start, end, startIncluded, endIncluded) {
 
 
 function createDateTimeRange(start, end, startIncluded, endIncluded) {
+
+  const toMillis = (d) => d ? toComparable(d) : null;
+
   const map = noopMap();
-  const includes = anyIncludes(start, end, startIncluded, endIncluded);
+  const includes = anyIncludes(toMillis(start), toMillis(end), startIncluded, endIncluded, toMillis);
 
   return new Range({
     start,
@@ -1411,6 +1412,70 @@ function createDateTimeRange(start, end, startIncluded, endIncluded) {
     map,
     includes
   });
+}
+
+
+/**
+ * Whether a duration carries a sub-day (time) component.
+ */
+function hasTimeComponent(dur) {
+  return dur.hours || dur.minutes || dur.seconds ||
+    dur.milliseconds || dur.microseconds || dur.nanoseconds;
+}
+
+/**
+ * Add or subtract a duration from a date or date time.
+ *
+ * A plain <date> combined with a time-bearing duration is promoted to a
+ * UTC <date and time> (bare dates are anchored in UTC).
+ */
+function addDuration(temporal, dur, sign) {
+
+  if (isDate(temporal) && hasTimeComponent(dur)) {
+    const zoned = temporal.toZonedDateTime('UTC');
+
+    return sign < 0 ? zoned.subtract(dur) : zoned.add(dur);
+  }
+
+  return sign < 0 ? temporal.subtract(dur) : temporal.add(dur);
+}
+
+/**
+ * Whether the value is a temporal instant: a date, time or date time
+ * (i.e. anything but a duration).
+ */
+function isTemporalInstant(a) {
+  return isDate(a) || isTime(a) || isDateTime(a);
+}
+
+/**
+ * Add or subtract a duration from a time, preserving its time zone and
+ * keeping the result a time (wrapping around midnight).
+ */
+function shiftTime(time, dur, sign) {
+
+  if (isZonedTime(time)) {
+    const shifted = sign < 0 ? time.value.subtract(dur) : time.value.add(dur);
+
+    return zonedTime(shifted.toPlainTime(), time.value.timeZoneId);
+  }
+
+  return sign < 0 ? time.subtract(dur) : time.add(dur);
+}
+
+/**
+ * Subtract two temporal instants, yielding a duration.
+ */
+function subtractTemporals(a, b) {
+
+  const left = a instanceof ZonedTime ? a.value : a;
+  const right = b instanceof ZonedTime ? b.value : b;
+
+  if (isDate(left) || isDateTime(left)) {
+    return left.since(right, { largestUnit: 'day' });
+  }
+
+  return left.since(right);
 }
 
 

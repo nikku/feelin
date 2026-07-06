@@ -234,12 +234,18 @@ const builtins = {
       }
     }
 
-    return d || null;
+    if (d) {
+      return d;
+    }
+
+    return invalidArguments('date({from}) is not a valid date', { from });
   }, [ 'any?', 'number?', 'number?', 'any?' ], [ 'year', 'month', 'day', 'from' ]),
 
   // date and time(from) => date time string
   // date and time(date, time)
   'date and time': fn(function(d, time, from) {
+
+    const dateArg = d;
 
     let dt;
 
@@ -256,7 +262,13 @@ const builtins = {
       dt = parseDateTime(from);
     }
 
-    return dt || null;
+    if (dt) {
+      return dt;
+    }
+
+    return invalidArguments('date and time({from}) is not a valid date time', {
+      from: isString(from) ? from : dateArg
+    });
   }, [ 'any?', 'time?', 'string?' ], [ 'date', 'time', 'from' ]),
 
   // time(from) => time string
@@ -304,7 +316,11 @@ const builtins = {
       }
     }
 
-    return t || null;
+    if (t) {
+      return t;
+    }
+
+    return invalidArguments('time({from}) is not a valid time', { from: from ?? hour });
   }, [ 'any?', 'number?', 'number?', 'any?', 'any?' ], [ 'hour', 'minute', 'second', 'offset', 'from' ]),
 
   'duration': fn(function(from) {

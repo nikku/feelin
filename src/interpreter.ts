@@ -442,7 +442,10 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     case '<': return (b) => createRange(null, b, false, false);
     case '<=': return (b) => createRange(null, b, false, true);
     case '=': return (b) => (a) => equals(a, b);
-    case '!=': return (b) => (a) => !equals(a, b);
+    case '!=': return (b) => (a) => {
+      const result = equals(a, b);
+      return result === null ? null : !result;
+    };
     }
 
   }, 'test');
@@ -1203,9 +1206,23 @@ function compareIn(value, tests) {
     tests = [ tests ];
   }
 
-  return tests.some(
-    test => compareValue(test, value)
-  );
+  // three-valued membership: a matching test wins, otherwise any
+  // incomparable (null) test makes the whole result unknown (null)
+  let unknown = false;
+
+  for (const test of tests) {
+    const result = compareValue(test, value);
+
+    if (result === true) {
+      return true;
+    }
+
+    if (result === null) {
+      unknown = true;
+    }
+  }
+
+  return unknown ? null : false;
 }
 
 function compareValue(test, value) {

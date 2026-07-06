@@ -3,6 +3,14 @@ import { toComparable } from './temporal.js';
 import { getType } from './types.js';
 
 /**
+ * The FEEL types whose values are temporal instants (`date`, `time` and
+ * `date and time`). They are mutually incomparable: a value of one type is
+ * not comparable to a value of another.
+ */
+const TEMPORAL_INSTANT_TYPES = [ 'date', 'time', 'date time' ];
+
+
+/**
  * This module is the single place in the code base that deals with FEEL
  * <range> values.
  *
@@ -164,6 +172,20 @@ function rangeIncludes(range: FeelRange, value: RangeValue | null) : boolean | n
 
   if (value instanceof FeelRange) {
     return rangeIncludesRange(range, value);
+  }
+
+  // `date`, `time` and `date and time` are distinct FEEL types; a probe
+  // of one temporal type is not comparable to a range of another (hence
+  // `null` rather than `false`)
+  const valueType = getType(value);
+
+  if (
+    range.valueType !== null &&
+    TEMPORAL_INSTANT_TYPES.includes(valueType) &&
+    TEMPORAL_INSTANT_TYPES.includes(range.valueType) &&
+    valueType !== range.valueType
+  ) {
+    return null;
   }
 
   // normalize a descending range (e.g. `[10..1]`) so bounds are ordered

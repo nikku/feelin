@@ -19,6 +19,7 @@ import {
 
 import {
   invalidArguments,
+  isInvalidArguments,
   parseParameterNames
 } from './function.js';
 
@@ -163,6 +164,8 @@ const builtins = {
       return null;
     }
 
+    const original = from;
+
     if (groupingSeparator) {
       from = from.split(groupingSeparator).join('');
     }
@@ -174,7 +177,9 @@ const builtins = {
     const number = +from;
 
     if (isNaN(number)) {
-      return null;
+      return invalidArguments('number(from) expects a numeric string, got {from}', {
+        from: original
+      });
     }
 
     return number;
@@ -397,7 +402,13 @@ const builtins = {
   'replace': fn(function(input, pattern, replacement, flags) {
     const regexp = createRegexp(pattern, flags || '', 'g');
 
-    return regexp && input.replace(regexp, replacement.replace(/\$0/g, '$$&'));
+    if (!regexp) {
+      return invalidArguments('replace(input, pattern, replacement) expects a valid pattern, got {pattern}', {
+        pattern
+      });
+    }
+
+    return input.replace(regexp, replacement.replace(/\$0/g, '$$&'));
   }, [ 'string', 'string', 'string', 'string?' ], [ 'input', 'pattern', 'replacement', 'flags' ]),
 
   'contains': fn(function(string, match) {
@@ -407,7 +418,13 @@ const builtins = {
   'matches': fn(function(input, pattern, flags) {
     const regexp = createRegexp(pattern, flags || '', '');
 
-    return regexp && regexp.test(input);
+    if (!regexp) {
+      return invalidArguments('matches(input, pattern) expects a valid pattern, got {pattern}', {
+        pattern
+      });
+    }
+
+    return regexp.test(input);
   }, [ 'string', 'string', 'string?' ], [ 'input', 'pattern', 'flags' ]),
 
   'starts with': fn(function(string, match) {
@@ -421,12 +438,23 @@ const builtins = {
   'split': fn(function(string, delimiter) {
     const regexp = createRegexp(delimiter, '', '');
 
-    return regexp && string.split(regexp);
+    if (!regexp) {
+      return invalidArguments('split(string, delimiter) expects a valid pattern, got {delimiter}', {
+        delimiter
+      });
+    }
+
+    return string.split(regexp);
   }, [ 'string', 'string' ], [ 'string', 'delimiter' ]),
 
   'string join': fn(function(list, delimiter) {
-    if (list.some(e => !isString(e) && e !== null)) {
-      return null;
+
+    const invalidItem = list.find(e => !isString(e) && e !== null);
+
+    if (invalidItem !== undefined) {
+      return invalidArguments('string join(list) expects a list of strings, got {item}', {
+        item: invalidItem
+      });
     }
 
     return list.filter(l => l !== null).join(delimiter || '');
@@ -445,7 +473,9 @@ const builtins = {
     const matcher = position || match;
 
     if (![ 'number', 'function' ].includes(getType(matcher))) {
-      return null;
+      return invalidArguments('list replace expects a numeric position or a match function, got {matcher}', {
+        matcher
+      });
     }
 
     return listReplace(list, position || match, newItem);
@@ -659,7 +689,13 @@ const builtins = {
       return absDuration(n);
     }
 
-    return null;
+    if (n === null) {
+      return null;
+    }
+
+    return invalidArguments('abs(n) expects a number or duration, got {n}', {
+      n
+    });
   }, [ 'any' ], [ 'n' ]),
 
   'round up': fn(function(n, scale) {
@@ -693,7 +729,9 @@ const builtins = {
   'modulo': fn(function(dividend, divisor) {
 
     if (!divisor) {
-      return null;
+      return invalidArguments('modulo(dividend, divisor) does not accept {divisor} as a divisor', {
+        divisor
+      });
     }
 
     const adjust = 1000000000;
@@ -708,7 +746,9 @@ const builtins = {
   'sqrt': fn(function(number) {
 
     if (number < 0) {
-      return null;
+      return invalidArguments('sqrt(number) expects a non-negative number, got {number}', {
+        number
+      });
     }
 
     return Math.sqrt(number);
@@ -716,7 +756,9 @@ const builtins = {
 
   'log': fn(function(number) {
     if (number <= 0) {
-      return null;
+      return invalidArguments('log(number) expects a positive number, got {number}', {
+        number
+      });
     }
 
     return Math.log(number);
@@ -852,30 +894,30 @@ const builtins = {
   }, [ 'context' ], [ 'm' ]),
 
   'context': listFn(function(...entries) {
-    const context = entries.reduce((context, entry) => {
 
-      if (context === FALSE || ![ 'key', 'value' ].every(e => e in entry)) {
-        return FALSE;
+    const context = {};
+
+    for (const entry of entries) {
+
+      if (![ 'key', 'value' ].every(e => e in entry)) {
+        return invalidArguments('context(entries) expects each entry to have a key and value, got {entry}', {
+          entry
+        });
       }
 
       const key = entry.key;
 
       if (key === null) {
-        return FALSE;
+        return invalidArguments('context(entries) does not accept a null key');
       }
 
       if (key in context) {
-        return FALSE;
+        return invalidArguments('context(entries) expects unique keys, got {key}', {
+          key
+        });
       }
 
-      return {
-        ...context,
-        [entry.key]: entry.value
-      };
-    }, {});
-
-    if (context === FALSE) {
-      return null;
+      context[key] = entry.value;
     }
 
     return context;
@@ -888,7 +930,7 @@ const builtins = {
   'context put': fn(function(context, keys, value, key) {
 
     if (typeof keys === 'undefined' && typeof key === 'undefined') {
-      return null;
+      return invalidArguments('context put(context, value) expects a key or keys');
     }
 
     return contextPut(context, keys || [ key ], value);
@@ -910,18 +952,22 @@ function contextPut(context, keys, value) {
   const [ key, ...remainingKeys ] = keys;
 
   if (getType(key) !== 'string') {
-    return null;
+    return invalidArguments('context put expects a string key, got {key}', {
+      key
+    });
   }
 
   if (getType(context) === 'nil') {
-    return null;
+    return invalidArguments('context put expects an existing context, got {context}', {
+      context
+    });
   }
 
   if (remainingKeys.length) {
     value = contextPut(context[key], remainingKeys, value);
 
-    if (value === null) {
-      return null;
+    if (isInvalidArguments(value)) {
+      return value;
     }
   }
 

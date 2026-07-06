@@ -2062,6 +2062,46 @@ describe('interpreter', function() {
         ]);
       });
 
+
+      [
+        [ 'sqrt(-3)', "sqrt(number) expects a non-negative number, got '-3'", { number: -3 } ],
+        [ 'log(0)', "log(number) expects a positive number, got '0'", { number: 0 } ],
+        [ 'modulo(10, 0)', "modulo(dividend, divisor) does not accept '0' as a divisor", { divisor: 0 } ],
+        [ 'replace("a", "[", "x")', 'replace(input, pattern, replacement) expects a valid pattern, got \'"["\'', { pattern: '[' } ],
+        [ 'matches("a", "[")', 'matches(input, pattern) expects a valid pattern, got \'"["\'', { pattern: '[' } ],
+        [ 'split("a", "[")', 'split(string, delimiter) expects a valid pattern, got \'"["\'', { delimiter: '[' } ],
+        [ 'number("abc")', 'number(from) expects a numeric string, got \'"abc"\'', { from: 'abc' } ],
+        [ 'string join([1, 2])', "string join(list) expects a list of strings, got '1'", { item: 1 } ],
+        [ 'list replace([1, 2], "x", 9)', 'list replace expects a numeric position or a match function, got \'"x"\'', { matcher: 'x' } ],
+        [ 'abs("x")', 'abs(n) expects a number or duration, got \'"x"\'', { n: 'x' } ],
+        [ 'context([ { key: null, value: 1 } ])', 'context(entries) does not accept a null key', {} ],
+        [ 'context([ { key: "a", value: 1 }, { key: "a", value: 2 } ])', 'context(entries) expects unique keys, got \'"a"\'', { key: 'a' } ],
+        [ 'context put({}, 1, 1)', "context put expects a string key, got '1'", { key: 1 } ]
+      ].forEach(([ expression, message, values ]) => {
+
+        it(`INVALID_ARGUMENTS for <${ expression }>`, function() {
+
+          // when
+          const {
+            value,
+            warnings
+          } = evaluate(expression);
+
+          // then
+          expect(value).to.be.null;
+
+          expect(warnings).to.have.length(1);
+
+          expect(warnings[0]).to.include({
+            type: 'INVALID_ARGUMENTS',
+            message
+          });
+
+          expect(warnings[0].details.values).to.eql(values);
+        });
+
+      });
+
     });
 
 
@@ -2138,6 +2178,44 @@ describe('interpreter', function() {
         // then
         expect(value).to.exist;
         expect(warnings).to.be.empty;
+      });
+
+
+      it('for abs(null) null propagation', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('abs(null)');
+
+        // then
+        expect(value).to.be.null;
+        expect(warnings).to.be.empty;
+      });
+
+
+      [
+        'sqrt(9)',
+        'log(10)',
+        'modulo(10, 3)',
+        'replace("abc", "b", "x")',
+        'number("1000")',
+        'string join(["a", "b"], "-")',
+        'context put({}, "a", 1)'
+      ].forEach((expression) => {
+
+        it(`for valid <${ expression }>`, function() {
+
+          // when
+          const {
+            warnings
+          } = evaluate(expression);
+
+          // then
+          expect(warnings).to.be.empty;
+        });
+
       });
 
     });

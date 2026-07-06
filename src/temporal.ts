@@ -34,8 +34,20 @@ export class FeelDate {
    */
   readonly value: Temporal.PlainDate;
 
+  /**
+   * @internal canonical ISO-8601 form; drives both display and
+   * structural comparison
+   */
+  readonly iso: string;
+
   constructor(value: Temporal.PlainDate) {
     this.value = value;
+    this.iso = this.value.toString();
+
+    // the raw Temporal value is an implementation detail; keep it
+    // non-enumerable so structural equality and serialization rely on
+    // the canonical `iso` string rather than the underlying value
+    Object.defineProperty(this, 'value', { enumerable: false });
   }
 
   get year() { return this.value.year; }
@@ -56,7 +68,7 @@ export class FeelDate {
   }
 
   toString() : string {
-    return this.value.toString();
+    return this.iso;
   }
 }
 
@@ -76,9 +88,21 @@ export class FeelTime {
    */
   readonly zone: string | null;
 
+  /**
+   * @internal canonical form (wall-clock plus zone); drives both
+   * display and structural comparison
+   */
+  readonly iso: string;
+
   constructor(value: Temporal.PlainTime, zone: string | null = null) {
     this.value = value;
     this.zone = zone;
+    this.iso = this.value.toString() + (this.zone === null ? '' : zoneSuffix(this.zone));
+
+    // the raw Temporal value is an implementation detail; keep it
+    // non-enumerable so structural equality and serialization rely on
+    // the canonical `iso` string rather than the underlying value
+    Object.defineProperty(this, 'value', { enumerable: false });
   }
 
   get hour() { return this.value.hour; }
@@ -104,7 +128,7 @@ export class FeelTime {
   }
 
   toString() : string {
-    return this.value.toString() + (this.zone === null ? '' : zoneSuffix(this.zone));
+    return this.iso;
   }
 }
 
@@ -124,9 +148,21 @@ export class FeelDateTime {
    */
   readonly zone: string | null;
 
+  /**
+   * @internal canonical form (wall-clock plus zone); drives both
+   * display and structural comparison
+   */
+  readonly iso: string;
+
   constructor(value: Temporal.PlainDateTime, zone: string | null = null) {
     this.value = value;
     this.zone = zone;
+    this.iso = this.value.toString() + (this.zone === null ? '' : zoneSuffix(this.zone));
+
+    // the raw Temporal value is an implementation detail; keep it
+    // non-enumerable so structural equality and serialization rely on
+    // the canonical `iso` string rather than the underlying value
+    Object.defineProperty(this, 'value', { enumerable: false });
   }
 
   get year() { return this.value.year; }
@@ -155,7 +191,7 @@ export class FeelDateTime {
   }
 
   toString() : string {
-    return this.value.toString() + (this.zone === null ? '' : zoneSuffix(this.zone));
+    return this.iso;
   }
 }
 
@@ -177,9 +213,28 @@ export class FeelDuration {
    */
   readonly yearsMonths: boolean;
 
+  /**
+   * @internal category-aware canonical ISO-8601 form; drives both
+   * display and structural comparison
+   */
+  readonly iso: string;
+
   constructor(value: Temporal.Duration, yearsMonths?: boolean) {
     this.value = normalize(value);
     this.yearsMonths = yearsMonths ?? isYearsMonths(this.value);
+
+    // a zero years and months duration would otherwise stringify as
+    // `PT0S`, dropping its category
+    this.iso = this.yearsMonths && this.value.sign === 0
+      ? 'P0M'
+      : this.value.toString();
+
+    // the raw Temporal value is an implementation detail; keep it
+    // non-enumerable so structural equality and serialization rely on
+    // the category-aware `iso` string rather than the underlying
+    // duration, whose years / months totals require a `relativeTo`
+    // anchor and are not deep-comparable
+    Object.defineProperty(this, 'value', { enumerable: false });
   }
 
   get years() { return this.yearsMonths ? this.value.years : null; }
@@ -200,14 +255,7 @@ export class FeelDuration {
   }
 
   toString() : string {
-
-    // a zero years and months duration would otherwise stringify as
-    // `PT0S`, dropping its category
-    if (this.yearsMonths && this.value.sign === 0) {
-      return 'P0M';
-    }
-
-    return this.value.toString();
+    return this.iso;
   }
 }
 

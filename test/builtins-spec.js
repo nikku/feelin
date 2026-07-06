@@ -598,8 +598,10 @@ function describeBuiltins(name, evaluate) {
       expr('is(time("23:00:50z"), time("23:00:50+01:30"))', false);
       expr('is(time("23:00:50z"), time("23:00:50+01:00"))', false);
 
-      exprSkip('is(@"2012-12-25", @"2012-12-25T00:00:00Z")', null);
-      exprSkip('is(@"2012-12-25", @"2012-12-25T00:00:00")', true);
+      // `is` requires the same type, so a date and a date time are never
+      // the same value (per DMN TCK 0103-feel-is-function, decision date_005)
+      expr('is(@"2012-12-25", @"2012-12-25T00:00:00Z")', false);
+      expr('is(@"2012-12-25", @"2012-12-25T00:00:00")', false);
 
       expr(`
         years and months duration(

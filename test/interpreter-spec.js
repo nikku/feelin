@@ -187,12 +187,12 @@ describe('interpreter', function() {
 
         expr('date("2023-10-06") + duration("PT1H")', date('2023-10-06T01:00Z'));
         expr('date("2023-10-06") + duration("P1D")', date('2023-10-07'));
-        expr('date("2023-10-06") + duration("P1W")', date('2023-10-13'));
+        expr('date("2023-10-06") + duration("P7D")', date('2023-10-13'));
         expr('date("2023-10-06") + duration("P1M")', date('2023-11-06'));
         expr('date("2023-10-06") + duration("P1Y")', date('2024-10-06'));
         expr('date("2023-10-06") - duration("PT1H")', date('2023-10-05T23:00Z'));
         expr('date("2023-10-06") - duration("P1D")', date('2023-10-05'));
-        expr('date("2023-10-06") - duration("P1W")', date('2023-09-29'));
+        expr('date("2023-10-06") - duration("P7D")', date('2023-09-29'));
         expr('date("2023-10-06") - duration("P1M")', date('2023-09-06'));
         expr('date("2023-10-06") - duration("P1Y")', date('2022-10-06'));
         expr('date("2023-10-06") + duration("P1M") = date("2023-11-06")', true);

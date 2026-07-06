@@ -640,7 +640,7 @@ function describeBuiltins(name, evaluate) {
       expr('date(2017,-8,2)', null);
       expr('date(2017,12,32)', null);
       expr('date(2017,13,31)', null);
-      exprSkip('date(2016, 1, 15, 100)', null);
+      expr('date(2016, 1, 15, 100)', null);
 
       expr('date("")', null);
       expr('date(2017,null,1)', null);

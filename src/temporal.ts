@@ -392,6 +392,13 @@ export function duration(opts: string | number) : FeelDuration {
 }
 
 /**
+ * Return the absolute (non-negative) value of a duration.
+ */
+export function absDuration(d: FeelDuration) : FeelDuration {
+  return new FeelDuration(d.value.abs());
+}
+
+/**
  * Whether a duration carries a sub-day (time) component.
  */
 function hasTimeComponent(d: FeelDuration) : boolean {

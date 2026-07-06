@@ -31,7 +31,8 @@ import {
   dateOf,
   timeOf,
   combine,
-  yearsAndMonthsDuration
+  yearsAndMonthsDuration,
+  absDuration
 } from './temporal.js';
 
 
@@ -621,12 +622,16 @@ const builtins = {
 
   'abs': fn(function(n) {
 
-    if (typeof n !== 'number') {
-      return null;
+    if (isNumber(n)) {
+      return Math.abs(n);
     }
 
-    return Math.abs(n);
-  }, [ 'number' ], [ 'n' ]),
+    if (isDuration(n)) {
+      return absDuration(n);
+    }
+
+    return null;
+  }, [ 'any' ], [ 'n' ]),
 
   'round up': fn(function(n, scale) {
     if (n === null || scale === null) return null;

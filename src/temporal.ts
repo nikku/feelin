@@ -174,12 +174,12 @@ export class FeelDuration {
     this.value = normalize(value);
   }
 
-  get years() { return this.value.years; }
-  get months() { return this.value.months; }
-  get days() { return this.value.days; }
-  get hours() { return this.value.hours; }
-  get minutes() { return this.value.minutes; }
-  get seconds() { return this.value.seconds; }
+  get years() { return isYearsMonths(this.value) ? this.value.years : null; }
+  get months() { return isYearsMonths(this.value) ? this.value.months : null; }
+  get days() { return isYearsMonths(this.value) ? null : this.value.days; }
+  get hours() { return isYearsMonths(this.value) ? null : this.value.hours; }
+  get minutes() { return isYearsMonths(this.value) ? null : this.value.minutes; }
+  get seconds() { return isYearsMonths(this.value) ? null : this.value.seconds; }
 
   /**
    * Return the underlying `Temporal.Duration`.
@@ -363,6 +363,16 @@ function normalize(d: Temporal.Duration) : Temporal.Duration {
   }
 
   return d.round({ largestUnit: 'day', relativeTo: REFERENCE_DATE });
+}
+
+/**
+ * Whether a duration is a years and months duration (rather than a
+ * days and time duration). Years and months durations only expose
+ * `years` / `months` components; days and time durations only expose
+ * `days` / `hours` / `minutes` / `seconds`.
+ */
+function isYearsMonths(d: Temporal.Duration) : boolean {
+  return d.years !== 0 || d.months !== 0;
 }
 
 /**

@@ -5,8 +5,8 @@ import { builtins } from './builtins.js';
 import { has } from 'min-dash';
 
 import {
-  Range,
-  FunctionWrapper,
+  FeelRange,
+  FeelFunction,
   FUNCTION_PARAMETER_MISSMATCH,
   equals,
   isArray,
@@ -1058,7 +1058,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
           result = result(el);
         }
 
-        if (result instanceof Range) {
+        if (result instanceof FeelRange) {
           result = result.includes(el);
         }
 
@@ -1179,7 +1179,7 @@ function compareValue(test, value) {
     return test(value);
   }
 
-  if (test instanceof Range) {
+  if (test instanceof FeelRange) {
     return test.includes(value);
   }
 
@@ -1198,7 +1198,7 @@ function isTyped(type, values) {
   );
 }
 
-const nullRange = new Range({
+const nullRange = new FeelRange({
   start: null,
   end: null,
   'start included': false,
@@ -1211,7 +1211,7 @@ const nullRange = new Range({
   }
 });
 
-function createRange(start, end, startIncluded = true, endIncluded = true) : Range {
+function createRange(start, end, startIncluded = true, endIncluded = true) : FeelRange {
 
   if (isTyped('string', [ start, end ])) {
     return createStringRange(start, end, startIncluded, endIncluded);
@@ -1366,7 +1366,7 @@ function createStringRange(start, end, startIncluded = true, endIncluded = true)
   const map = values ? valuesMap(values) : noopMap();
   const includes = values ? valuesIncludes(values) : anyIncludes(start, end, startIncluded, endIncluded);
 
-  return new Range({
+  return new FeelRange({
     start,
     end,
     'start included': startIncluded,
@@ -1380,7 +1380,7 @@ function createNumberRange(start, end, startIncluded, endIncluded) {
   const map = start !== null && end !== null ? numberMap(start, end, startIncluded, endIncluded) : noopMap();
   const includes = anyIncludes(start, end, startIncluded, endIncluded);
 
-  return new Range({
+  return new FeelRange({
     start,
     end,
     'start included': startIncluded,
@@ -1403,7 +1403,7 @@ function createDurationRange(start, end, startIncluded, endIncluded) {
   const map = noopMap();
   const includes = anyIncludes(toMillis(start), toMillis(end), startIncluded, endIncluded, toMillis);
 
-  return new Range({
+  return new FeelRange({
     start,
     end,
     'start included': startIncluded,
@@ -1422,7 +1422,7 @@ function createDateTimeRange(start, end, startIncluded, endIncluded) {
   const map = noopMap();
   const includes = anyIncludes(toMillis(start), toMillis(end), startIncluded, endIncluded, toMillis);
 
-  return new Range({
+  return new FeelRange({
     start,
     end,
     'start included': startIncluded,
@@ -1469,7 +1469,7 @@ function isTruthy(obj) {
  * @param {Function} fn
  * @param {string[]} [parameterNames]
  *
- * @return {FunctionWrapper}
+ * @return {FeelFunction}
  */
 function wrapFunction(fn, parameterNames = null) {
 
@@ -1477,19 +1477,19 @@ function wrapFunction(fn, parameterNames = null) {
     return null;
   }
 
-  if (fn instanceof FunctionWrapper) {
+  if (fn instanceof FeelFunction) {
     return fn;
   }
 
-  if (fn instanceof Range) {
-    return new FunctionWrapper((value) => fn.includes(value), [ 'value' ]);
+  if (fn instanceof FeelRange) {
+    return new FeelFunction((value) => fn.includes(value), [ 'value' ]);
   }
 
   if (typeof fn !== 'function') {
     return null;
   }
 
-  return new FunctionWrapper(fn, parameterNames || parseParameterNames(fn));
+  return new FeelFunction(fn, parameterNames || parseParameterNames(fn));
 }
 
 function parseString(str: string) {

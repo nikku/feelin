@@ -80,11 +80,11 @@ export function getType(e) {
     return 'date time';
   }
 
-  if (e instanceof Range) {
+  if (e instanceof FeelRange) {
     return 'range';
   }
 
-  if (e instanceof FunctionWrapper) {
+  if (e instanceof FeelFunction) {
     return 'function';
   }
 
@@ -129,7 +129,7 @@ export function typeCast(obj: any, type: string) {
   return null;
 }
 
-export type RangeProps = {
+export type FeelRangeProps = {
   'start included': boolean;
   'end included': boolean;
   start: string|number|null;
@@ -142,7 +142,7 @@ export type RangeProps = {
   includes: (val: any) => boolean;
 };
 
-export class Range {
+export class FeelRange {
 
   'start included': boolean;
   'end included': boolean;
@@ -155,7 +155,7 @@ export class Range {
 
   includes: (val) => boolean;
 
-  constructor(props: RangeProps) {
+  constructor(props: FeelRangeProps) {
     Object.assign(this, props);
   }
 }
@@ -267,7 +267,7 @@ export function equals(a, b, strict = false) {
 export const FUNCTION_PARAMETER_MISSMATCH = {};
 
 
-export class FunctionWrapper {
+export class FeelFunction {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fn: (...args) => any;

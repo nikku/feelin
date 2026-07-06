@@ -1,7 +1,7 @@
 import {
   isType,
   equals,
-  Range,
+  FeelRange,
   isString,
   isNumber,
   getType,
@@ -1043,8 +1043,8 @@ function fn(fnDefinition, argDefinitions, parameterNames = null) {
 }
 
 /**
- * @param {Range} a
- * @param {Range} b
+ * @param {FeelRange} a
+ * @param {FeelRange} b
  */
 function meetsRange(a, b) {
   return [
@@ -1055,11 +1055,11 @@ function meetsRange(a, b) {
 }
 
 /**
- * @param {Range|number} a
- * @param {Range|number} b
+ * @param {FeelRange|number} a
+ * @param {FeelRange|number} b
  */
 function before(a, b) {
-  if (a instanceof Range && b instanceof Range) {
+  if (a instanceof FeelRange && b instanceof FeelRange) {
     return (
       a.end < b.start || (
         !a['end included'] || !b['start included']
@@ -1067,7 +1067,7 @@ function before(a, b) {
     );
   }
 
-  if (a instanceof Range) {
+  if (a instanceof FeelRange) {
     return (
       a.end < b || (
         !a['end included'] && a.end === b
@@ -1075,7 +1075,7 @@ function before(a, b) {
     );
   }
 
-  if (b instanceof Range) {
+  if (b instanceof FeelRange) {
     return (
       b.start > a || (
         !b['start included'] && b.start === a
@@ -1087,16 +1087,16 @@ function before(a, b) {
 }
 
 /**
- * @param {Range} container - The range that should contain the other value
- * @param {Range|number} value - The range or point to check if contained
+ * @param {FeelRange} container - The range that should contain the other value
+ * @param {FeelRange|number} value - The range or point to check if contained
  */
 function includesRange(container, value) {
-  if (!(container instanceof Range)) {
+  if (!(container instanceof FeelRange)) {
     return false;
   }
 
   // Range includes another range
-  if (value instanceof Range) {
+  if (value instanceof FeelRange) {
     const startOk = (
       container.start < value.start ||
       (

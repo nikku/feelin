@@ -88,8 +88,12 @@ describe('interpreter', function() {
         expr('time("23:59:00") + duration("PT2M") + duration("P1D") = time("00:01")', true);
         expr('time("23:59:00") + duration("PT2M") + duration("P1M") = time("00:01")', true);
 
-        // TODO(nikku): figure out semantics in accordance with DMN spec
-        exprSkip('time("00:01:00@Etc/UTC") - time("23:59:00z") = duration("PT2M")', true);
+        // time subtraction yields a signed days-and-time duration (mirroring
+        // camunda/feel-scala); zoned times subtract as instants
+        expr('string(time("10:30:00") - time("09:00:00"))', 'PT1H30M');
+        expr('string(time("09:00:00") - time("10:00:00"))', '-PT1H');
+        expr('string(time("12:00:00+01:00") - time("10:00:00+01:00"))', 'PT2H');
+        expr('time("00:01:00@Etc/UTC") - time("23:59:00z") = duration("-PT23H58M")', true);
 
         expr(`
           time("23:59:00z") + duration("PT2M") =

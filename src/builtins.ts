@@ -210,23 +210,18 @@ const builtins = {
 
     if (isNumber(year)) {
 
-      // the (year, month, day) form does not accept a <from> argument
-      if (from != null) {
-        return invalidArguments(
-          'date(year, month, day) does not accept a <from> argument'
-        );
-      }
+      const error =
+        guard(from == null, 'date(year, month, day) does not accept a <from> argument') ||
+        guard(isNumber(month) && isNumber(day), 'date(year, month, day) expects <month> and <day> to be numbers');
 
-      if (!isNumber(month) || !isNumber(day)) {
-        return invalidArguments(
-          'date(year, month, day) expects <month> and <day> to be numbers'
-        );
+      if (error) {
+        return error;
       }
 
       d = dateFrom(year, month, day);
 
       if (!d) {
-        return invalidArguments('{year}-{month}-{day} is not a valid date', {
+        return invalidArguments('{year}, {month}, {day} is not a valid date', {
           year,
           month,
           day
@@ -285,15 +280,23 @@ const builtins = {
 
     if (isNumber(hour)) {
 
-      if (!isNumber(minute) || !isNumber(second)) {
-        return null;
-      }
+      const error =
+        guard(isNumber(minute) && isNumber(second), 'time(hour, minute, second) expects <minute> and <second> to be numbers') ||
+        guard(offset == null || isDuration(offset), 'time(hour, minute, second, offset) expects <offset> to be a duration');
 
-      if (offset != null && !isDuration(offset)) {
-        return null;
+      if (error) {
+        return error;
       }
 
       t = timeFrom(hour, minute, second, offset);
+
+      if (!t) {
+        return invalidArguments('{hour}, {minute}, {second} is not a valid time', {
+          hour,
+          minute,
+          second
+        });
+      }
     }
 
     return t || null;
@@ -1040,6 +1043,21 @@ function listFn(fnDefinition, type, parameterNames = null) {
 }
 
 /**
+ * Return an {@link InvalidArguments} signal unless the condition holds,
+ * so builtins can express argument validation as a flat guard chain
+ * (`guard(...) || guard(...)`), short-circuiting on the first failure.
+ *
+ * @param {boolean} condition
+ * @param {string} template
+ * @param {Record<string, unknown>} [values]
+ *
+ * @return {import('./function.js').InvalidArguments | null}
+ */
+function guard(condition, template, values = {}) {
+  return condition ? null : invalidArguments(template, values);
+}
+
+/**
  * @param {Function} fnDefinition
  * @param {string[]} argDefinitions
  * @param {string[]} [parameterNames]
@@ -1047,7 +1065,6 @@ function listFn(fnDefinition, type, parameterNames = null) {
  * @return {Function}
  */
 function fn(fnDefinition, argDefinitions, parameterNames = null) {
-
   const checkArgs = createArgsValidator(argDefinitions);
 
   parameterNames = parameterNames || parseParameterNames(fnDefinition);

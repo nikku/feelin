@@ -1969,14 +1969,93 @@ describe('interpreter', function() {
         expect(warnings).to.eql([
           {
             type: 'INVALID_ARGUMENTS',
-            message: "'2017'-'13'-'31' is not a valid date",
+            message: "'2017', '13', '31' is not a valid date",
             position: { from: 0, to: 18 },
             details: {
-              template: '{year}-{month}-{day} is not a valid date',
+              template: '{year}, {month}, {day} is not a valid date',
               values: {
                 year: 2017,
                 month: 13,
                 day: 31
+              }
+            }
+          }
+        ]);
+      });
+
+
+      it('INVALID_ARGUMENTS on non-number time minute or second', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('time(12, null, 0)');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.eql([
+          {
+            type: 'INVALID_ARGUMENTS',
+            message: 'time(hour, minute, second) expects <minute> and <second> to be numbers',
+            position: { from: 0, to: 17 },
+            details: {
+              template: 'time(hour, minute, second) expects <minute> and <second> to be numbers',
+              values: {}
+            }
+          }
+        ]);
+      });
+
+
+      it('INVALID_ARGUMENTS on non-duration time offset', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('time(12, 0, 0, 5)');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.eql([
+          {
+            type: 'INVALID_ARGUMENTS',
+            message: 'time(hour, minute, second, offset) expects <offset> to be a duration',
+            position: { from: 0, to: 17 },
+            details: {
+              template: 'time(hour, minute, second, offset) expects <offset> to be a duration',
+              values: {}
+            }
+          }
+        ]);
+      });
+
+
+      it('INVALID_ARGUMENTS on out-of-range time components', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('time(25, 0, 0)');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.eql([
+          {
+            type: 'INVALID_ARGUMENTS',
+            message: "'25', '0', '0' is not a valid time",
+            position: { from: 0, to: 14 },
+            details: {
+              template: '{hour}, {minute}, {second} is not a valid time',
+              values: {
+                hour: 25,
+                minute: 0,
+                second: 0
               }
             }
           }
@@ -2041,6 +2120,20 @@ describe('interpreter', function() {
           value,
           warnings
         } = evaluate('date(2017, 12, 31)');
+
+        // then
+        expect(value).to.exist;
+        expect(warnings).to.be.empty;
+      });
+
+
+      it('for valid time(hour, minute, second)', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('time(12, 0, 0)');
 
         // then
         expect(value).to.exist;

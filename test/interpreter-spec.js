@@ -301,6 +301,24 @@ describe('interpreter', function() {
         }
       });
 
+      expr('foo(varArgs: 0)', [ [ 0 ] ], {
+        foo: function(...varArgs) {
+          return [ varArgs ];
+        }
+      });
+
+      expr('foo(varArgs: false)', [ [ false ] ], {
+        foo: function(...varArgs) {
+          return [ varArgs ];
+        }
+      });
+
+      expr('foo(varArgs: "")', [ [ '' ] ], {
+        foo: function(...varArgs) {
+          return [ varArgs ];
+        }
+      });
+
     });
 
 

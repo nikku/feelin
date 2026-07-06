@@ -1,4 +1,4 @@
-import { isArray } from './types.js';
+import { isArray, isNil } from './types.js';
 
 import { isRange } from './range.js';
 
@@ -74,7 +74,7 @@ export class FeelFunction {
 
           const value = contextOrArgs[name];
 
-          if (!value) {
+          if (isNil(value)) {
             return params;
           } else {
 

@@ -17,7 +17,7 @@ import {
 } from './types.js';
 
 import {
-  FeelRange,
+  isRange,
   createRange
 } from './range.js';
 
@@ -1061,7 +1061,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
           result = result(el);
         }
 
-        if (result instanceof FeelRange) {
+        if (isRange(result)) {
           result = result.includes(el);
         }
 
@@ -1182,7 +1182,7 @@ function compareValue(test, value) {
     return test(value);
   }
 
-  if (test instanceof FeelRange) {
+  if (isRange(test)) {
     return test.includes(value);
   }
 
@@ -1238,7 +1238,7 @@ function wrapFunction(fn, parameterNames = null) {
     return fn;
   }
 
-  if (fn instanceof FeelRange) {
+  if (isRange(fn)) {
     return new FeelFunction((value) => fn.includes(value), [ 'value' ]);
   }
 

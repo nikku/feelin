@@ -326,19 +326,23 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
   switch (node.name) {
   case 'ArithOp': return (context) => {
 
+    const invalidType = (opName, left, right) => {
+      interpreterContext.addWarning(node, 'INVALID_TYPE', {
+        template: `Can't ${opName} {right} to {left}`,
+        values: {
+          left,
+          right
+        }
+      });
+    };
+
     const nullable = (op, opName, types = [ 'number' ]) => (a, b) => {
 
       const left = a(context);
       const right = b(context);
 
       if (isArray(left) || isArray(right)) {
-        interpreterContext.addWarning(node, 'INVALID_TYPE', {
-          template: `Can't ${opName} {right} to {left}`,
-          values: {
-            left,
-            right
-          }
-        });
+        invalidType(opName, left, right);
 
         return null;
       }
@@ -350,24 +354,12 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
 
       if (temporal.includes(leftType)) {
         if (!temporal.includes(rightType)) {
-          interpreterContext.addWarning(node, 'INVALID_TYPE', {
-            template: `Can't ${opName} {right} to {left}`,
-            values: {
-              left,
-              right
-            }
-          });
+          invalidType(opName, left, right);
 
           return null;
         }
       } else if (leftType !== rightType || !types.includes(leftType)) {
-        interpreterContext.addWarning(node, 'INVALID_TYPE', {
-          template: `Can't ${opName} {right} to {left}`,
-          values: {
-            left,
-            right
-          }
-        });
+        invalidType(opName, left, right);
 
         return null;
       }
@@ -390,7 +382,13 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
       } else if (isTemporal(a) && isTemporal(b)) {
         return null;
       } else if (isDuration(a) && isDuration(b)) {
-        return addDurations(a, b, 1);
+        const result = addDurations(a, b, 1);
+
+        if (result === null) {
+          invalidType('add', a, b);
+        }
+
+        return result;
       }
 
       return a + b;
@@ -401,7 +399,13 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
       } else if (isTemporal(a) && isTemporal(b)) {
         return subtractTemporals(a, b);
       } else if (isDuration(a) && isDuration(b)) {
-        return addDurations(a, b, -1);
+        const result = addDurations(a, b, -1);
+
+        if (result === null) {
+          invalidType('subtract', a, b);
+        }
+
+        return result;
       }
 
       return a - b;

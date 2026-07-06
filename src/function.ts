@@ -15,42 +15,54 @@ import { isRange } from './range.js';
  */
 
 /**
- * Sentinel returned by {@link FeelFunction#invoke} when the provided
- * arguments do not match the function's parameters.
- */
-export const FUNCTION_PARAMETER_MISMATCH = {};
-
-/**
- * Returned by a builtin to signal that its arguments were structurally
- * valid (right count and types) but semantically unusable.
+ * Signal returned in place of a result when a function invocation fails.
  *
- * The value carries the warning template and interpolation values; the
- * interpreter surfaces it as an INVALID_ARGUMENTS warning and evaluates
- * the invocation to `null`.
+ * It carries the {@link InvocationFailure#warning} type to emit plus the
+ * message template and interpolation values; the interpreter surfaces it
+ * as the corresponding warning and evaluates the invocation to `null`, so
+ * the signal never leaks into an enclosing expression.
+ *
+ * Two flavors exist: a structural {@link parameterMismatch} (wrong
+ * parameter count or names, raised by {@link FeelFunction#invoke}) and a
+ * semantic {@link invalidArguments} (well-typed but unusable input, raised
+ * by a builtin body).
  */
-export class InvalidArguments {
+export class InvocationFailure {
   constructor(
+    readonly warning: string,
     readonly template: string,
     readonly values: Record<string, unknown> = {}
   ) {}
 }
 
 /**
- * Create an {@link InvalidArguments} signal for a builtin to return when it
+ * Create an {@link InvocationFailure} for a builtin to return when it
  * rejects otherwise well-typed input.
  */
 export function invalidArguments(
     template: string,
     values: Record<string, unknown> = {}
 ) {
-  return new InvalidArguments(template, values);
+  return new InvocationFailure('INVALID_ARGUMENTS', template, values);
 }
 
 /**
- * Whether the value is an {@link InvalidArguments} signal.
+ * Create an {@link InvocationFailure} for an invocation whose arguments do
+ * not match the target's parameters (wrong count or unknown names).
  */
-export function isInvalidArguments(value: unknown): value is InvalidArguments {
-  return value instanceof InvalidArguments;
+export function parameterMismatch(target: unknown, params: unknown) {
+  return new InvocationFailure(
+    'FUNCTION_INVOCATION_FAILURE',
+    'Cannot invoke {target} with parameters {params}',
+    { target, params }
+  );
+}
+
+/**
+ * Whether the value is an {@link InvocationFailure} signal.
+ */
+export function isInvocationFailure(value: unknown): value is InvocationFailure {
+  return value instanceof InvocationFailure;
 }
 
 
@@ -87,7 +99,7 @@ export class FeelFunction {
         // strictly check for parameter count provided
         // for non var-args functions
         if (!lastParam || !lastParam.startsWith('...')) {
-          return FUNCTION_PARAMETER_MISMATCH;
+          return parameterMismatch(this, contextOrArgs);
         }
       }
     } else {
@@ -97,7 +109,7 @@ export class FeelFunction {
       if (Object.keys(contextOrArgs).some(
         key => !this.parameterNames.includes(key) && !this.parameterNames.includes(`...${key}`)
       )) {
-        return FUNCTION_PARAMETER_MISMATCH;
+        return parameterMismatch(this, contextOrArgs);
       }
 
       params = this.parameterNames.reduce((params, name) => {

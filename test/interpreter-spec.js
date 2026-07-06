@@ -6,11 +6,29 @@ import {
   unaryTest,
   evaluate,
   date,
-  duration
+  duration,
+  FeelRange,
+  FeelFunction
 } from 'feelin';
 
 
 describe('interpreter', function() {
+
+  describe('public API', function() {
+
+    it('should expose wrapper classes', function() {
+      expect(FeelRange).to.be.a('function');
+      expect(FeelFunction).to.be.a('function');
+    });
+
+
+    it('should return wrapper values from evaluate', function() {
+      expect(evaluate('[1..10]').value).to.be.an.instanceof(FeelRange);
+      expect(evaluate('function(x) x + 1').value).to.be.an.instanceof(FeelFunction);
+    });
+
+  });
+
 
   describe('evaluate', function() {
 

@@ -207,7 +207,12 @@ const builtins = {
       d = dateOf(from);
     }
 
-    if (year) {
+    if (isNumber(year)) {
+
+      // the (year, month, day) form does not accept a <from> argument
+      if (from != null) {
+        return null;
+      }
 
       if (!isNumber(month) || !isNumber(day)) {
         return null;

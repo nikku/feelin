@@ -821,6 +821,19 @@ function describeBuiltins(name, evaluate) {
       expr('includes( [1..10], 11 )', false);
       expr('includes( [1..a], 11 )', true, { a: 11 });
       expr('includes( [1..a], 11 )', false, { a: 10 });
+
+      // temporal ranges (compared via a category-aware comparator)
+      expr('before( [date("2020-01-01")..date("2020-06-01")], [date("2020-07-01")..date("2020-12-01")] )', true);
+      expr('before( [date("2020-01-01")..date("2020-08-01")], [date("2020-07-01")..date("2020-12-01")] )', false);
+      expr('after( [date("2020-07-01")..date("2020-12-01")], [date("2020-01-01")..date("2020-06-01")] )', true);
+      expr('meets( [date("2020-01-01")..date("2020-06-01")], [date("2020-06-01")..date("2020-12-01")] )', true);
+      expr('meets( [date("2020-01-01")..date("2020-06-01")), [date("2020-06-01")..date("2020-12-01")] )', false);
+      expr('includes( [date("2020-01-01")..date("2020-12-01")], date("2020-06-15") )', true);
+      expr('includes( [date("2020-01-01")..date("2020-12-01")], date("2021-06-15") )', false);
+      expr('includes( [date("2020-01-01")..date("2020-12-01")], [date("2020-03-01")..date("2020-09-01")] )', true);
+      expr('before( [duration("P1D")..duration("P5D")], [duration("P7D")..duration("P9D")] )', true);
+      expr('includes( [duration("P1D")..duration("P10D")], duration("P5D") )', true);
+      expr('includes( [duration("P1D")..duration("P10D")], duration("P20D") )', false);
     });
 
 

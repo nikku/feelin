@@ -3,9 +3,12 @@ export * from './interpreter.js';
 export * from './parser.js';
 
 export {
-  FeelRange,
   FeelFunction
 } from './types.js';
+
+export {
+  FeelRange
+} from './range.js';
 
 export {
   FeelDate,

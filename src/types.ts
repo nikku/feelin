@@ -13,13 +13,16 @@ import {
   timeFrom
 } from './temporal.js';
 
+import { FeelRange } from './range.js';
+
 export {
   isDate,
   isTime,
   isDateTime,
   isDuration,
   isTemporal,
-  isZoned
+  isZoned,
+  FeelRange
 };
 
 export function isNil(e) {
@@ -129,43 +132,6 @@ export function typeCast(obj: any, type: string) {
   return null;
 }
 
-export type FeelRangeProps = {
-  'start included': boolean;
-  'end included': boolean;
-  start: string|number|null;
-  end: string|number|null;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  map: <T> (fn: (val: any) => T) => T[];
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  includes: (val: any) => boolean;
-};
-
-export class FeelRange {
-
-  'start included': boolean;
-  'end included': boolean;
-  start: string|number|null;
-  end: string|number|null;
-
-
-  map: <T> (fn: (val) => T) => T[];
-
-
-  includes: (val) => boolean;
-
-  constructor(props: FeelRangeProps) {
-    Object.assign(this, props);
-
-    // `map` / `includes` are behavior, not identity; keep them
-    // non-enumerable so structural equality and serialization rely on
-    // the range bounds (start / end and their inclusion)
-    Object.defineProperty(this, 'map', { enumerable: false });
-    Object.defineProperty(this, 'includes', { enumerable: false });
-  }
-}
-
 export function isNumber(obj) : obj is number {
   return typeof obj === 'number';
 }
@@ -255,12 +221,12 @@ export function equals(a, b, strict = false) {
   }
 
   if (aType === 'range') {
-    return [
-      [ a.start, b.start ],
-      [ a.end, b.end ],
-      [ a['start included'], b['start included'] ],
-      [ a['end included'], b['end included'] ]
-    ].every(([ a, b ]) => a === b);
+    return (
+      a['start included'] === b['start included'] &&
+      a['end included'] === b['end included'] &&
+      equals(a.start, b.start) === true &&
+      equals(a.end, b.end) === true
+    );
   }
 
   if (a == b) {

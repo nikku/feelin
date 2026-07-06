@@ -675,10 +675,17 @@ function describeBuiltins(name, evaluate) {
 
       describe('properties', function() {
 
-        exprSkip('duration("P1D").months', null);
-        exprSkip('duration("P1D").years', null);
-        exprSkip('duration("P1Y").minutes', null);
-        exprSkip('duration("P1Y").hours', null);
+        expr('duration("P1D").months', null);
+        expr('duration("P1D").years', null);
+        expr('duration("P1Y").minutes', null);
+        expr('duration("P1Y").hours', null);
+
+        expr('duration("P1Y2M").years', 1);
+        expr('duration("P1Y2M").months', 2);
+        expr('duration("P1DT2H3M4S").days', 1);
+        expr('duration("P1DT2H3M4S").hours', 2);
+        expr('duration("P1DT2H3M4S").minutes', 3);
+        expr('duration("P1DT2H3M4S").seconds', 4);
 
         expr('time("10:30:00+05:00").time offset = duration("PT5H")', true);
         expr('date and time("2018-12-10T10:30:00+05:00").time offset = duration("PT5H")', true);

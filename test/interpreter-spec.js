@@ -2076,7 +2076,13 @@ describe('interpreter', function() {
         [ 'abs("x")', 'abs(n) expects a number or duration, got \'"x"\'', { n: 'x' } ],
         [ 'context([ { key: null, value: 1 } ])', 'context(entries) does not accept a null key', {} ],
         [ 'context([ { key: "a", value: 1 }, { key: "a", value: 2 } ])', 'context(entries) expects unique keys, got \'"a"\'', { key: 'a' } ],
-        [ 'context put({}, 1, 1)', "context put expects a string key, got '1'", { key: 1 } ]
+        [ 'context put({}, 1, 1)', "context put expects a string key, got '1'", { key: 1 } ],
+        [ 'date("nope")', "date('\"nope\"') is not a valid date", { from: 'nope' } ],
+        [ 'date(null)', "date('null') is not a valid date", { from: null } ],
+        [ 'time("nope")', "time('\"nope\"') is not a valid time", { from: 'nope' } ],
+        [ 'time(null)', "time('null') is not a valid time", { from: null } ],
+        [ 'date and time("2017-13-10T11:22:33")', "date and time('\"2017-13-10T11:22:33\"') is not a valid date time", { from: '2017-13-10T11:22:33' } ],
+        [ 'date and time(null)', "date and time('null') is not a valid date time", { from: null } ]
       ].forEach(([ expression, message, values ]) => {
 
         it(`INVALID_ARGUMENTS for <${ expression }>`, function() {

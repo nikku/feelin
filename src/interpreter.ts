@@ -20,7 +20,7 @@ import {
 } from './range.js';
 
 import {
-  FUNCTION_PARAMETER_MISSMATCH,
+  FUNCTION_PARAMETER_MISMATCH,
   wrapFunction
 } from './function.js';
 
@@ -781,7 +781,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
 
       const result = wrappedFn.invoke(contextOrArgs);
 
-      if (result === FUNCTION_PARAMETER_MISSMATCH) {
+      if (result === FUNCTION_PARAMETER_MISMATCH) {
         interpreterContext.addWarning(node, 'FUNCTION_INVOCATION_FAILURE', {
           template: 'Cannot invoke {target} with parameters {params}',
           values: {
@@ -835,7 +835,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
 
     const result = wrappedFn.invoke(contextOrArgs);
 
-    if (result === FUNCTION_PARAMETER_MISSMATCH) {
+    if (result === FUNCTION_PARAMETER_MISMATCH) {
       interpreterContext.addWarning(node, 'FUNCTION_INVOCATION_FAILURE', {
         template: 'Cannot invoke {target} with parameters {params}',
         values: {

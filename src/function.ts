@@ -18,7 +18,7 @@ import { isRange } from './range.js';
  * Sentinel returned by {@link FeelFunction#invoke} when the provided
  * arguments do not match the function's parameters.
  */
-export const FUNCTION_PARAMETER_MISSMATCH = {};
+export const FUNCTION_PARAMETER_MISMATCH = {};
 
 
 export class FeelFunction {
@@ -54,7 +54,7 @@ export class FeelFunction {
         // strictly check for parameter count provided
         // for non var-args functions
         if (!lastParam || !lastParam.startsWith('...')) {
-          return FUNCTION_PARAMETER_MISSMATCH;
+          return FUNCTION_PARAMETER_MISMATCH;
         }
       }
     } else {
@@ -64,7 +64,7 @@ export class FeelFunction {
       if (Object.keys(contextOrArgs).some(
         key => !this.parameterNames.includes(key) && !this.parameterNames.includes(`...${key}`)
       )) {
-        return FUNCTION_PARAMETER_MISSMATCH;
+        return FUNCTION_PARAMETER_MISMATCH;
       }
 
       params = this.parameterNames.reduce((params, name) => {

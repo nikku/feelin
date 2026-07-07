@@ -35,7 +35,7 @@
     "@lezer/common": "^1.5.2",
     "lezer-feel": "^3.0.1",
     "min-dash": "^5.0.0",
-    "temporal-polyfill": "^0.3.0"
+    "temporal-polyfill": "^1.0.0"
   },
   "repository": {
     "type": "git",

@@ -100,6 +100,35 @@ export function isType(el: string, type: string): boolean {
   return getType(el) === type;
 }
 
+/**
+ * FEEL types that are orderable, i.e. may be compared through `<`, `>`,
+ * `<=`, `>=`, `between` and range membership.
+ */
+const ORDERABLE_TYPES = [ 'number', 'string', 'date', 'date time', 'time', 'duration' ];
+
+/**
+ * Whether `a` and `b` may be *ordered* (via `<`, `>`, `<=`, `>=`,
+ * `between` or range membership). Two values are comparable only when
+ * they share the same orderable FEEL type; ordering values of different
+ * (or non-orderable) types is a semantic error that yields `null`.
+ *
+ * A singleton list is compared as its element (mirroring {@link equals}).
+ */
+export function isComparable(a, b): boolean {
+
+  if (isArray(a) && a.length < 2) {
+    a = a[0];
+  }
+
+  if (isArray(b) && b.length < 2) {
+    b = b[0];
+  }
+
+  const type = getType(a);
+
+  return type === getType(b) && ORDERABLE_TYPES.includes(type);
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function typeCast(obj: any, type: string) {
 

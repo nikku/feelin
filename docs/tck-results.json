@@ -12,7 +12,7 @@
     "tck - 0068-feel-equality-test-01.xml - range_010 - (=10) = [10..10] === false",
     "tck - 0068-feel-equality-test-01.xml - range_011 - (=10) = (=10) === true",
     "tck - 0068-feel-equality-test-01.xml - range_012 - (!=10) = (!=10) === true",
-    "tck - 0072-feel-in-test-01.xml - null_001 - null in [1..10] === null",
+    "tck - 0072-feel-in-test-01.xml - boolean_001_a - true in [false, 2, 3] === false",
     "tck - 0072-feel-in-test-01.xml - null_001_a - 5 in (null..10] === null",
     "tck - 0072-feel-in-test-01.xml - null_001_b - 5 in [1..null) === null",
     "tck - 0072-feel-in-test-01.xml - null_001_c - 5 in [1..null] === null",

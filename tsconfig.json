@@ -4,7 +4,6 @@
       "es2019"
     ],
     "strict": false,
-    "skipLibCheck": true,
     "target": "ES2015",
     "moduleResolution": "node"
   },

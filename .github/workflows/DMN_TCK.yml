@@ -16,7 +16,7 @@ jobs:
         repository: dmn-tck/tck
         path: tmp/dmn-tck
     - name: Use Node.js
-      uses: actions/setup-node@v6
+      uses: actions/setup-node@v7
       with:
         node-version: 24
         cache: 'npm'

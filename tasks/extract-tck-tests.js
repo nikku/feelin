@@ -1,7 +1,7 @@
 /* eslint @typescript-eslint/no-var-requires: off */
 
-import path from 'path';
-import fs from 'fs';
+import path from 'node:path';
+import fs from 'node:fs';
 
 import glob from 'fast-glob';
 
@@ -49,13 +49,13 @@ for (const testGlob of tests) {
 
   fs.mkdirSync(resultDir, { recursive: true });
 
-  fs.writeFileSync(path.join(resultDir, test.testName + '.json'), JSON.stringify(result, 0, 2), 'utf8');
+  fs.writeFileSync(path.join(resultDir, `${test.testName}.json`), JSON.stringify(result, 0, 2), 'utf8');
 
 }
 
 function createParser(handlers) {
 
-  var parser = new SAXParser({ proxy: true });
+  const parser = new SAXParser({ proxy: true });
 
   // enable namespace parsing: element prefixes will
   // automatically adjusted to the ones configured here
@@ -340,7 +340,7 @@ function parseTestFile(file) {
         testCase.inputNodes.push(node);
       }
 
-      if (el.name === 'test:expected' || el.name == 'test:inputNode') {
+      if (el.name === 'test:expected' || el.name === 'test:inputNode') {
         record = [];
         context = [];
         stackDepth = 0;
@@ -463,7 +463,7 @@ function parseTestFile(file) {
         closeElement(stackDepth);
       }
 
-      if (el.name === 'test:expected' || el.name == 'test:inputNode') {
+      if (el.name === 'test:expected' || el.name === 'test:inputNode') {
         closeElement(stackDepth);
 
         node.value = record.join('').trim();

@@ -1,6 +1,5 @@
 /* eslint @typescript-eslint/no-require-imports: off */
 
-const { inherits } = require('node:util');
 const { readFileSync, writeFileSync } = require('node:fs');
 
 const Mocha = require('mocha');
@@ -39,116 +38,116 @@ function testDiff(tests, oldTests = []) {
 
 function testTitle(test, suffix = '') {
 
-  suffix = test.title + (suffix ? ' - ' + suffix : '');
+  const prefixed = test.title + (suffix ? ` - ${suffix}` : '');
 
-  if (test.parent && test.parent.title) {
-    return testTitle(test.parent, suffix);
+  if (test.parent?.title) {
+    return testTitle(test.parent, prefixed);
   }
 
-  return suffix;
+  return prefixed;
 }
 
-/**
- * @param {Mocha.Runner} runner
- * @param {Mocha.MochaOptions} options
- */
-function TckReporter(runner, options) {
-  SpecReporter.call(this, runner, options);
+class TckReporter extends SpecReporter {
 
-  const failedTests = [];
+  /**
+   * @param {Mocha.Runner} runner
+   * @param {Mocha.MochaOptions} options
+   */
+  constructor(runner, options) {
+    super(runner, options);
 
-  const pendingTests = [];
+    const failedTests = [];
 
-  runner.on(EVENT_TEST_FAIL, function(test) {
-    failedTests.push(testTitle(test));
-  });
+    const pendingTests = [];
 
-  runner.on(EVENT_TEST_PENDING, function(test) {
-    pendingTests.push(testTitle(test));
-  });
+    runner.on(EVENT_TEST_FAIL, test => {
+      failedTests.push(testTitle(test));
+    });
 
-  runner.on(EVENT_RUN_END, function() {
-    const {
-      passes,
-      pending,
-      failures,
-      tests
-    } = runner.stats;
+    runner.on(EVENT_TEST_PENDING, test => {
+      pendingTests.push(testTitle(test));
+    });
 
-    const passesPercentage = passes / tests * 100;
-    const pendingPercentage = pending / tests * 100;
-    const failuresPercentage = failures / tests * 100;
+    runner.on(EVENT_RUN_END, () => {
+      const {
+        passes,
+        pending,
+        failures,
+        tests
+      } = runner.stats;
 
-    const resultsSvg = `<svg
-  version="1.1"
-  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 5" width="200">
-  <defs>
-    <clipPath id="round-corners">
-      <rect x="0" y="0" width="100" height="5" rx="1" />
-    </clipPath>
-  </defs>
+      const passesPercentage = passes / tests * 100;
+      const pendingPercentage = pending / tests * 100;
+      const failuresPercentage = failures / tests * 100;
 
-  <g clip-path="url(#round-corners)">
-    <rect width="${ passesPercentage }" height="5" fill="rgb(26, 127, 55)" x="0" y="0">
-      <title>${passes} tests passing</title>
-    </rect>
-    <rect width="${ pendingPercentage }" height="5" fill="rgb(200, 200, 200)" x="${ passesPercentage }" y="0">
-      <title>${pending} tests pending</title>
-    </rect>
-    <rect width="${ failuresPercentage }" height="5" fill="rgb(209, 36, 47)" x="${ passesPercentage + pendingPercentage }" y="0">
-      <title>${failures} tests failing</title>
-    </rect>
-  </g>
+      const resultsSvg = `<svg
+    version="1.1"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 5" width="200">
+    <defs>
+      <clipPath id="round-corners">
+        <rect x="0" y="0" width="100" height="5" rx="1" />
+      </clipPath>
+    </defs>
 
-</svg>`;
+    <g clip-path="url(#round-corners)">
+      <rect width="${ passesPercentage }" height="5" fill="rgb(26, 127, 55)" x="0" y="0">
+        <title>${passes} tests passing</title>
+      </rect>
+      <rect width="${ pendingPercentage }" height="5" fill="rgb(200, 200, 200)" x="${ passesPercentage }" y="0">
+        <title>${pending} tests pending</title>
+      </rect>
+      <rect width="${ failuresPercentage }" height="5" fill="rgb(209, 36, 47)" x="${ passesPercentage + pendingPercentage }" y="0">
+        <title>${failures} tests failing</title>
+      </rect>
+    </g>
 
-    const results = {
-      passes,
-      pending,
-      failures,
-      tests,
-      failedTests,
-      pendingTests
-    };
+  </svg>`;
 
-    const oldResults = (function() {
-      try {
-        return JSON.parse(readFileSync(resultsJSONPath, 'utf8'));
-      } catch (e) {
-        console.warn('could not read tck-results.json', e);
+      const results = {
+        passes,
+        pending,
+        failures,
+        tests,
+        failedTests,
+        pendingTests
+      };
 
-        return results;
+      const oldResults = (() => {
+        try {
+          return JSON.parse(readFileSync(resultsJSONPath, 'utf8'));
+        } catch (e) {
+          console.warn('could not read tck-results.json', e);
+
+          return results;
+        }
+      })();
+
+      console.error(`INFO: Executed ${tests} tests (${passes} passing, ${pending} pending, ${failures} failures)`);
+      if (oldResults.failures !== results.failures) {
+        const diff = testDiff(failedTests, oldResults.failedTests);
+
+        console.log(`WARN: Diff (${oldResults.failures > results.failures ? '-' : '+'}${Math.abs(results.failures - oldResults.failures)}) from expected failures: ${diff}`);
       }
-    })();
 
-    console.error(`INFO: Executed ${tests} tests (${passes} passing, ${pending} pending, ${failures} failures)`);
-    if (oldResults.failures !== results.failures) {
-      const diff = testDiff(failedTests, oldResults.failedTests);
+      if (process.env.DRY_RUN === 'false') {
+        console.log('INFO: Writing test results.');
 
-      console.log(`WARN: Diff (${oldResults.failures > results.failures ? '-' : '+'}${Math.abs(results.failures - oldResults.failures)}) from expected failures: ${diff}`);
-    }
+        writeFileSync(resultsImgPath, resultsSvg, 'utf8');
+        writeFileSync(resultsJSONPath, JSON.stringify(results, null, 2), 'utf8');
+      } else {
 
-    if (process.env.DRY_RUN === 'false') {
-      console.log('INFO: Writing test results.');
+        // indicate failure if test failures != expected failures
+        if (oldResults.failures !== results.failures || oldResults.pending !== results.pending || oldResults.passes !== results.passes) {
+          console.log();
+          console.log('INFO: Test results differ from snapshots. Execute with DRY_RUN=false to update snapshots');
 
-      writeFileSync(resultsImgPath, resultsSvg, 'utf8');
-      writeFileSync(resultsJSONPath, JSON.stringify(results, null, 2), 'utf8');
-    } else {
-
-      // indicate failure if test failures != expected failures
-      if (oldResults.failures !== results.failures || oldResults.pending !== results.pending || oldResults.passes !== results.passes) {
-        console.log();
-        console.log('INFO: Test results differ from snapshots. Execute with DRY_RUN=false to update snapshots');
-
-        process.exit(101);
+          process.exit(101);
+        }
       }
-    }
 
-    process.exit(0);
-  });
-
+      process.exit(0);
+    });
+  }
 }
-
-inherits(TckReporter, SpecReporter);
 
 module.exports = TckReporter;

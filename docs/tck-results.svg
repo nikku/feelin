@@ -1,22 +1,22 @@
 <svg
-  version="1.1"
-  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 5" width="200">
-  <defs>
-    <clipPath id="round-corners">
-      <rect x="0" y="0" width="100" height="5" rx="1" />
-    </clipPath>
-  </defs>
+    version="1.1"
+    xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 5" width="200">
+    <defs>
+      <clipPath id="round-corners">
+        <rect x="0" y="0" width="100" height="5" rx="1" />
+      </clipPath>
+    </defs>
 
-  <g clip-path="url(#round-corners)">
-    <rect width="83.87725280077935" height="5" fill="rgb(26, 127, 55)" x="0" y="0">
-      <title>1722 tests passing</title>
-    </rect>
-    <rect width="12.323429128105213" height="5" fill="rgb(200, 200, 200)" x="83.87725280077935" y="0">
-      <title>253 tests pending</title>
-    </rect>
-    <rect width="3.7993180711154406" height="5" fill="rgb(209, 36, 47)" x="96.20068192888456" y="0">
-      <title>78 tests failing</title>
-    </rect>
-  </g>
+    <g clip-path="url(#round-corners)">
+      <rect width="83.87725280077935" height="5" fill="rgb(26, 127, 55)" x="0" y="0">
+        <title>1722 tests passing</title>
+      </rect>
+      <rect width="12.323429128105213" height="5" fill="rgb(200, 200, 200)" x="83.87725280077935" y="0">
+        <title>253 tests pending</title>
+      </rect>
+      <rect width="3.7993180711154406" height="5" fill="rgb(209, 36, 47)" x="96.20068192888456" y="0">
+        <title>78 tests failing</title>
+      </rect>
+    </g>
 
-</svg>
+  </svg>

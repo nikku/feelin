@@ -1,7 +1,7 @@
 {
-  "passes": 1736,
+  "passes": 1737,
   "pending": 253,
-  "failures": 64,
+  "failures": 63,
   "tests": 2053,
   "failedTests": [
     "tck - 0068-feel-equality-test-01.xml - ym_duration_006 - duration(\"P1Y\") = duration(\"P365D\") === null",
@@ -36,7 +36,6 @@
     "tck - 1115-feel-date-function-test-01.xml - 015_1dd66594cf - string(date(\"999999999-12-31\")) === \"999999999-12-31\"",
     "tck - 1115-feel-date-function-test-01.xml - 029_88f5c7c90f - string(date(999999999,12,31)) === \"999999999-12-31\"",
     "tck - 1115-feel-date-function-test-01.xml - 030_9184a7bfc3 - string(date(-999999999,12,31)) === \"-999999999-12-31\"",
-    "tck - 1116-feel-time-function-test-01.xml - 057_d039115cce - time(\"23:59:60\") === null",
     "tck - 1116-feel-time-function-test-01.xml - 066_5116e12fd3 - time(\"13:20:00@xyz/abc\") === null",
     "tck - 1116-feel-time-function-test-01.xml - 067_8285edad7b - time(\"13:20:00+19:00\") === null",
     "tck - 1116-feel-time-function-test-01.xml - 068_ad528abb23 - time(\"13:20:00-19:00\") === null",

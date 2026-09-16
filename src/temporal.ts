@@ -869,6 +869,11 @@ export function parseTime(str: string) : FeelTime | null {
 
   const { value, zone } = splitZone(str);
 
+  // FEEL does not recognize leap seconds
+  if (/^\d{2}:\d{2}:60/.test(value)) {
+    return null;
+  }
+
   try {
     return new FeelTime(Temporal.PlainTime.from(value), zone);
   } catch {

@@ -712,6 +712,10 @@ function describeBuiltins(name, evaluate) {
       // (per DMN TCK 1116-feel-time-function, 053)
       expr('time(date("2017-08-10")) = time("00:00:00Z")', true);
 
+      // leap seconds are rejected
+      // (per DMN TCK 1116-feel-time-function, 057)
+      expr('time("23:59:60")', null);
+
 
       describe('properties', function() {
 

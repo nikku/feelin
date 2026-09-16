@@ -1,7 +1,7 @@
 {
-  "passes": 1722,
+  "passes": 1723,
   "pending": 253,
-  "failures": 78,
+  "failures": 77,
   "tests": 2053,
   "failedTests": [
     "tck - 0068-feel-equality-test-01.xml - ym_duration_006 - duration(\"P1Y\") = duration(\"P365D\") === null",
@@ -12,7 +12,6 @@
     "tck - 0068-feel-equality-test-01.xml - range_010 - (=10) = [10..10] === false",
     "tck - 0068-feel-equality-test-01.xml - range_011 - (=10) = (=10) === true",
     "tck - 0068-feel-equality-test-01.xml - range_012 - (!=10) = (!=10) === true",
-    "tck - 0072-feel-in-test-01.xml - boolean_001_a - true in [false, 2, 3] === false",
     "tck - 0072-feel-in-test-01.xml - null_001_a - 5 in (null..10] === null",
     "tck - 0072-feel-in-test-01.xml - null_001_b - 5 in [1..null) === null",
     "tck - 0072-feel-in-test-01.xml - null_001_c - 5 in [1..null] === null",

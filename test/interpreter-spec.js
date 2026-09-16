@@ -600,6 +600,10 @@ describe('interpreter', function() {
 
       expr('true in (true, false)', true);
 
+      // incomparable scalar list members are simply not equal
+      // (per DMN TCK 0072-feel-in-test, boolean_001_a)
+      expr('true in [false, 2, 3]', false);
+
       expr('5 in 6', false);
 
       expr('5 in 5', true);

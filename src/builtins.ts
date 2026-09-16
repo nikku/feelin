@@ -25,6 +25,7 @@ import {
 
 import {
   getFromContext,
+  has,
   isNotImplemented,
   notImplemented
 } from './utils.js';
@@ -927,7 +928,7 @@ const builtins = {
         return invalidArguments('context(entries) does not accept a null key');
       }
 
-      if (key in context) {
+      if (has(context, key)) {
         return invalidArguments('context(entries) expects unique keys, got {key}', {
           key
         });

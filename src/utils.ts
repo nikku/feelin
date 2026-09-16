@@ -12,6 +12,34 @@ export function isNotImplemented(err) {
 }
 
 /**
+ * Whether `context` exposes `name` to FEEL: an own property, or a
+ * prototype getter (read-only view).
+ *
+ * @param {Record<string, any>} context
+ * @param {string} name
+ *
+ * @return {boolean}
+ */
+export function has(context, name) {
+
+  if (Object.prototype.hasOwnProperty.call(context, name)) {
+    return true;
+  }
+
+  // walk the prototype chain, stopping before `Object.prototype`
+  // (its `__proto__` accessor must not become visible)
+  for (let proto = Object.getPrototypeOf(context); proto && proto !== Object.prototype; proto = Object.getPrototypeOf(proto)) {
+    const descriptor = Object.getOwnPropertyDescriptor(proto, name);
+
+    if (descriptor) {
+      return typeof descriptor.get === 'function';
+    }
+  }
+
+  return false;
+}
+
+/**
  * Returns a name from context or undefined if it does not exist.
  *
  * @param {string} name
@@ -25,13 +53,14 @@ export function getFromContext(name, context) {
     return undefined;
   }
 
-  if (name in context) {
+  // fast path: exact own entry, no normalization needed
+  if (has(context, name)) {
     return context[name];
   }
 
   const normalizedName = normalizeContextKey(name);
 
-  if (normalizedName in context) {
+  if (has(context, normalizedName)) {
     return context[normalizedName];
   }
 

@@ -583,20 +583,26 @@ export function durationEquals(a: FeelDuration, b: FeelDuration) : boolean {
   return Math.trunc(total(a, 'second') - total(b, 'second')) === 0;
 }
 
+// the FEEL duration grammar: `P[nY][nM][nD][T[nH][nM][nS]]` with at least
+// one component; notably the ISO-8601 week designator (`W`) is not part
+// of it (see #105)
+const DURATION_PATTERN = /^-?P(?=\d|T\d)(?:\d+Y)?(?:\d+M)?(?:\d+D)?(?:T(?=\d)(?:\d+H)?(?:\d+M)?(?:\d+(?:\.\d+)?S)?)?$/;
+
 export function duration(opts: string | number) : FeelDuration | null {
 
   if (typeof opts === 'number') {
     return new FeelDuration(Temporal.Duration.from({ milliseconds: opts }), false);
   }
 
-  // FEEL durations are years-and-months or days-and-time durations only;
-  // the ISO-8601 week designator (`W`) is not part of the FEEL grammar,
-  // even though the underlying temporal implementation would accept it
-  if (/\d+W/i.test(opts)) {
+  if (!DURATION_PATTERN.test(opts)) {
     return null;
   }
 
-  return new FeelDuration(Temporal.Duration.from(opts), isYearsMonthsString(opts));
+  try {
+    return new FeelDuration(Temporal.Duration.from(opts), isYearsMonthsString(opts));
+  } catch {
+    return null;
+  }
 }
 
 /**

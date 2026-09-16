@@ -708,6 +708,16 @@ function describeBuiltins(name, evaluate) {
       expr('duration("-P1W")', null);
       expr('@"P1W"', null);
 
+      // malformed duration literals are rejected
+      // (per DMN TCK 1120-feel-duration-function)
+      expr('duration("")', null);
+      expr('duration("2012T-12-2511:00:00Z")', null);
+      expr('duration("P0")', null);
+      expr('duration("1Y")', null);
+      expr('duration("1D")', null);
+      expr('duration("P1H")', null);
+      expr('duration("P1S")', null);
+
       // time(date) is midnight UTC
       // (per DMN TCK 1116-feel-time-function, 053)
       expr('time(date("2017-08-10")) = time("00:00:00Z")', true);

@@ -17,6 +17,8 @@ import { FeelRange, isRange } from './range.js';
 
 import { isFunction } from './function.js';
 
+import { has } from './utils.js';
+
 export {
   isDate,
   isTime,
@@ -217,7 +219,7 @@ export function equals(a, b, strict = false) {
     }
 
     return aEntries.every(
-      ([ key, value ]) => key in b && equals(value, b[key])
+      ([ key, value ]) => has(b, key) && equals(value, b[key])
     );
   }
 

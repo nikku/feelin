@@ -875,6 +875,22 @@ export function parseTime(str: string) : FeelTime | null {
   }
 
   try {
+
+    // validate the zone (throws for an unknown zone); sub-minute offset
+    // zones are validated by range, as Temporal rejects them
+    if (zone !== null) {
+
+      const offsetSeconds = offsetZoneSeconds(zone);
+
+      if (offsetSeconds !== null) {
+        if (Math.abs(offsetSeconds) >= 24 * 3600) {
+          return null;
+        }
+      } else {
+        new Temporal.PlainDateTime(1970, 1, 1).toZonedDateTime(zone);
+      }
+    }
+
     return new FeelTime(Temporal.PlainTime.from(value), zone);
   } catch {
     return null;

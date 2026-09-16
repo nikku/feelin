@@ -824,6 +824,10 @@ function describeBuiltins(name, evaluate) {
       expr('context(entries: [{key:"a", value:1}])', { 'a':1 });
       expr('context(entries: {key:"a", value:1})', { 'a':1 });
 
+      // keys named like javascript special properties are accepted
+      expr('context(entries: [{key:"constructor", value:1}])', { 'constructor':1 });
+      expr('context(entries: [{key:"toString", value:1}])', { 'toString':1 });
+
       expr('context merge([{x:1}, {y:2}])', { x:1, y:2 });
       expr('context merge([{x:1, y:0}, {y:2}])', { x:1, y:2 });
 

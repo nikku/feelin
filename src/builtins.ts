@@ -10,6 +10,7 @@ import {
 
 import {
   getFromContext,
+  has,
   isNotImplemented,
   notImplemented,
   parseParameterNames
@@ -836,7 +837,7 @@ const builtins = {
         return FALSE;
       }
 
-      if (key in context) {
+      if (has(context, key)) {
         return FALSE;
       }
 

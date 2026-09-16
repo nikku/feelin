@@ -699,6 +699,25 @@ describe('interpreter', function() {
       expr('string(a.number)', null);
       expr('a.number', null);
 
+      // inherited names must not leak into FEEL name resolution
+      expr('a.constructor', null, { a: {} });
+      expr('a.toString', null, { a: {} });
+      expr('a.hasOwnProperty', null, { a: {} });
+      expr('a.__proto__', null, { a: {} });
+      expr('a.b.constructor', null, { a: { b: {} } });
+      expr('a.b.toString', null, { a: { b: {} } });
+
+      // Function constructor must not be reachable
+      expr('a.constructor.name', null, { a: {} });
+      expr('a.constructor.constructor.name', null, { a: {} });
+      expr('a.constructor.constructor("return 1")', null, { a: {} });
+      expr('a.constructor.constructor()', null, { a: {} });
+
+      // own entries named like javascript special properties resolve as declared
+      expr('a.constructor', 1, { a: { constructor: 1 } });
+      expr('a.toString', 'stringified', { a: { toString: 'stringified' } });
+      expr('a.__proto__', 2, { a: JSON.parse('{ "__proto__": 2 }') });
+
     });
 
 
@@ -1017,6 +1036,36 @@ describe('interpreter', function() {
           { 'foo' : { 'bar' : 'result' } },
           'camunda'
         );
+      });
+
+
+      describe('special javascript names', function() {
+
+        // inherited names must not leak into FEEL name resolution
+        expr('constructor', null, {});
+        expr('toString', null, {});
+        expr('__proto__', null, {});
+
+        // own entries named after javascript internals resolve as declared
+        expr('constructor', 'acme', { constructor: 'acme' });
+
+        class Service {
+
+          get status() {
+            return 'up';
+          }
+
+          restart() {
+            return 'restarted';
+          }
+        }
+
+        // getters are resolved
+        expr('svc.status', 'up', { svc: new Service() });
+
+        // methods are not
+        expr('svc.restart', null, { svc: new Service() });
+
       });
 
     });

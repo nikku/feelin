@@ -713,6 +713,10 @@ function describeBuiltins(name, evaluate) {
         expr('time("10:30:00+05:00").time offset = duration("PT5H")', true);
         expr('date and time("2018-12-10T10:30:00+05:00").time offset = duration("PT5H")', true);
 
+        // per DMN TCK 0074-feel-properties
+        expr('date("2018-12-10").weekday', 1);
+        expr('date and time("2018-12-10T10:30:01").weekday', 1);
+
       });
 
 

@@ -1,7 +1,7 @@
 {
-  "passes": 1723,
+  "passes": 1725,
   "pending": 253,
-  "failures": 77,
+  "failures": 75,
   "tests": 2053,
   "failedTests": [
     "tck - 0068-feel-equality-test-01.xml - ym_duration_006 - duration(\"P1Y\") = duration(\"P365D\") === null",
@@ -16,8 +16,6 @@
     "tck - 0072-feel-in-test-01.xml - null_001_b - 5 in [1..null) === null",
     "tck - 0072-feel-in-test-01.xml - null_001_c - 5 in [1..null] === null",
     "tck - 0072-feel-in-test-01.xml - null_001_d - 5 in [null..10] === null",
-    "tck - 0074-feel-properties-test-01.xml - date_004 - date(\"2018-12-10\").weekday === 1",
-    "tck - 0074-feel-properties-test-01.xml - dateTime_004 - date and time(\"2018-12-10T10:30:01\").weekday === 1",
     "tck - 0074-feel-properties-test-01.xml - range_011 - { start included: (=10).start included, start: (=10).start, end: (=10).end, end included: (=10).end included } === {\"start included\":true, \"start\":10, \"end\":10, \"end included\":true}",
     "tck - 0084-feel-for-loops-test-01.xml - decision_017 - for i in @\"1980-01-01\"..@\"1980-01-03\" return i === [date(\"1980-01-01\"),date(\"1980-01-02\"),date(\"1980-01-03\")]",
     "tck - 0084-feel-for-loops-test-01.xml - decision_018 - for i in @\"1980-01-03\"..@\"1980-01-01\" return i === [date(\"1980-01-03\"),date(\"1980-01-02\"),date(\"1980-01-01\")]",

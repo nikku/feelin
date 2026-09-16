@@ -747,6 +747,13 @@ export function timeOf(dateTime: FeelDateTime) : FeelTime {
 }
 
 /**
+ * The midnight (UTC) time of a date.
+ */
+export function timeOfDate(_date: FeelDate) : FeelTime {
+  return new FeelTime(new Temporal.PlainTime(0, 0, 0), 'UTC');
+}
+
+/**
  * Combine a date (or the date part of a date time) with a time into a
  * date time, carrying over the time's zone.
  */

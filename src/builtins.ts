@@ -41,6 +41,7 @@ import {
   timeFrom,
   dateOf,
   timeOf,
+  timeOfDate,
   combine,
   yearsAndMonthsDuration,
   absDuration
@@ -294,6 +295,11 @@ const builtins = {
 
     if (isDateTime(from)) {
       t = timeOf(from);
+    }
+
+    // a date converts to its midnight (UTC) time
+    if (isDate(from)) {
+      t = timeOfDate(from);
     }
 
     if (isNumber(hour)) {

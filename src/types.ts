@@ -5,6 +5,8 @@ import {
   SystemZone
 } from 'luxon';
 
+import { has } from './utils.js';
+
 export function isNil(e) {
   return e === null || e === undefined;
 }
@@ -244,7 +246,7 @@ export function equals(a, b, strict = false) {
     }
 
     return aEntries.every(
-      ([ key, value ]) => key in b && equals(value, b[key])
+      ([ key, value ]) => has(b, key) && equals(value, b[key])
     );
   }
 

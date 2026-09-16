@@ -119,9 +119,7 @@ function skipSuite(suiteName) {
   }
 
   return [
-    '0070-feel-instance-of-test-01.xml',
     '0076-feel-external-java-test-01.xml',
-    '0082-feel-coercion-test-01.xml',
     '0092-feel-lambda-test-01.xml'
   ].includes(suiteName);
 }
@@ -142,7 +140,37 @@ function skipTest(suiteName, testId) {
     '1111-feel-matches-function-test-01.xml#caselessmatch10',
     '1111-feel-matches-function-test-01.xml#caselessmatch11',
 
-    '0079-feel-string-function-test-01.xml#dt_duration_004',
+    // instance of based on XML types
+    '0070-feel-instance-of-test-01.xml#number_013',
+    '0070-feel-instance-of-test-01.xml#string_013',
+    '0070-feel-instance-of-test-01.xml#list_013',
+    '0070-feel-instance-of-test-01.xml#list_014',
+    '0070-feel-instance-of-test-01.xml#list_014_a',
+    '0070-feel-instance-of-test-01.xml#list_018',
+    '0070-feel-instance-of-test-01.xml#context_013',
+    '0070-feel-instance-of-test-01.xml#context_014',
+    '0070-feel-instance-of-test-01.xml#context_019',
+
+    // misc cohersion
+    '0082-feel-coercion-test-01.xml#decision_001',
+    '0082-feel-coercion-test-01.xml#decision_003',
+    '0082-feel-coercion-test-01.xml#decision_005',
+    '0082-feel-coercion-test-01.xml#decision_006_a',
+    '0082-feel-coercion-test-01.xml#decision_007_a',
+    '0082-feel-coercion-test-01.xml#decision_bkm_001',
+    '0082-feel-coercion-test-01.xml#decision_bkm_005',
+    '0082-feel-coercion-test-01.xml#invoke_001',
+    '0082-feel-coercion-test-01.xml#invoke_002',
+    '0082-feel-coercion-test-01.xml#invoke_004',
+    '0082-feel-coercion-test-01.xml#fd_001',
+    '0082-feel-coercion-test-01.xml#fd_002',
+    '0082-feel-coercion-test-01.xml#literal_002',
+    '0082-feel-coercion-test-01.xml#literal_004',
+    '0082-feel-coercion-test-01.xml#literal_006',
+    '0082-feel-coercion-test-01.xml#decisionService_001',
+    '0082-feel-coercion-test-01.xml#decisionService_002',
+    '0082-feel-coercion-test-01.xml#decisionService_002_c',
+    '0082-feel-coercion-test-01.xml#decision_context_03',
 
     // we're not Java
     '1141-feel-round-up-function-test-01.xml#016_b',

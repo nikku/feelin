@@ -54,9 +54,6 @@ export class FeelDate {
   get month() { return this.value.month; }
   get day() { return this.value.day; }
   get weekday() { return this.value.dayOfWeek; }
-  get 'day of year'() { return this.value.dayOfYear; }
-  get 'day of week'() { return this.value.dayOfWeek; }
-  get 'week of year'() { return this.value.weekOfYear; }
 
   /**
    * Return the underlying `Temporal.PlainDate`.
@@ -181,9 +178,6 @@ export class FeelDateTime {
   get minute() { return this.value.minute; }
   get second() { return this.value.second; }
   get weekday() { return this.value.dayOfWeek; }
-  get 'day of year'() { return this.value.dayOfYear; }
-  get 'day of week'() { return this.value.dayOfWeek; }
-  get 'week of year'() { return this.value.weekOfYear; }
   get timezone() { return this.zone; }
 
   get 'time offset'() {

@@ -757,6 +757,11 @@ function describeBuiltins(name, evaluate) {
         expr('date("2018-12-10").weekday', 1);
         expr('date and time("2018-12-10T10:30:01").weekday', 1);
 
+        // `day of week` is a built-in function (returning the weekday
+        // name), not a date property (per DMN 10.3.4.1)
+        expr('date("2018-12-10").day of week', null);
+        expr('date and time("2018-12-10T10:30:01").day of week', null);
+
       });
 
 

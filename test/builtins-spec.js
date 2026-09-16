@@ -708,6 +708,10 @@ function describeBuiltins(name, evaluate) {
       expr('duration("-P1W")', null);
       expr('@"P1W"', null);
 
+      // time(date) is midnight UTC
+      // (per DMN TCK 1116-feel-time-function, 053)
+      expr('time(date("2017-08-10")) = time("00:00:00Z")', true);
+
 
       describe('properties', function() {
 

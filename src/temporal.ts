@@ -402,6 +402,48 @@ function offsetZoneSeconds(zone: string | null) : number | null {
 }
 
 /**
+ * The offset, in seconds, of a fixed offset zone (`Z` / `UTC`,
+ * `+HH:MM` or `+HH:MM:SS`). Returns `null` for named (IANA) zones.
+ */
+function fixedOffsetSeconds(zone: string) : number | null {
+
+  if (zone === 'UTC') {
+    return 0;
+  }
+
+  const match = /^([+-])(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(zone);
+
+  if (!match) {
+    return null;
+  }
+
+  const sign = match[1] === '-' ? -1 : 1;
+
+  return sign * (Number(match[2]) * 3600 + Number(match[3]) * 60 + Number(match[4] ?? 0));
+}
+
+/**
+ * Whether two zone identifiers denote the same zone, for the purpose of
+ * strict (`is`) equality: fixed offsets compare by offset (`Z` equals
+ * `+00:00`), named zones only by identifier.
+ */
+export function zoneEquals(a: string | null, b: string | null) : boolean {
+
+  if (a === null || b === null) {
+    return a === b;
+  }
+
+  const aOffset = fixedOffsetSeconds(a);
+  const bOffset = fixedOffsetSeconds(b);
+
+  if (aOffset !== null && bOffset !== null) {
+    return aOffset === bOffset;
+  }
+
+  return a === b;
+}
+
+/**
  * Resolve a zoned temporal to a concrete `Temporal.ZonedDateTime`,
  * anchoring zoned times to {@link REFERENCE_DATE}.
  */

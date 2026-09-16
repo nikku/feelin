@@ -604,6 +604,19 @@ function describeBuiltins(name, evaluate) {
       expr('is(@"2012-12-25", @"2012-12-25T00:00:00Z")', false);
       expr('is(@"2012-12-25", @"2012-12-25T00:00:00")', false);
 
+      // `is` requires zone identity: same instants expressed via different
+      // zones are not the same value (per DMN TCK 0103-feel-is-function)
+      expr('is(@"2002-04-02T12:00:00-01:00", @"2002-04-02T17:00:00+04:00")', false);
+      expr('is(@"2002-04-02T12:00:00-05:00", @"2002-04-02T23:00:00+06:00")', false);
+      expr('is(@"2002-04-02T23:00:00-04:00", @"2002-04-03T02:00:00-01:00")', false);
+      expr('is(@"2002-04-02T23:00:00@Australia/Melbourne", @"2002-04-02T23:00:00@Australia/Sydney")', false);
+      expr('is(@"2021-04-02T23:00:00@Australia/Melbourne", @"2021-04-02T23:00:00+11:00")', false);
+      expr('is(@"2021-10-02T23:00:00@Australia/Melbourne", @"2021-10-02T23:00:00+10:00")', false);
+      expr('is(@"23:00:50@Australia/Melbourne", @"23:00:50+10:00")', false);
+      expr('is(@"23:00:50@Etc/GMT", @"23:00:50Z")', false);
+      expr('is(@"23:00:50@Australia/Melbourne", @"23:00:50@Australia/Sydney")', false);
+      expr('is(@"20:00:50+00:00", @"21:00:50+01:00")', false);
+
       expr(`
         years and months duration(
           from:date("2016-01-21"),

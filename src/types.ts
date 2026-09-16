@@ -7,6 +7,7 @@ import {
   isZoned,
   toComparable,
   durationEquals,
+  zoneEquals,
   dateOf,
   timeOf,
   combine,
@@ -181,6 +182,12 @@ export function equals(a, b, strict = false) {
 
     // a zoned and a zone-less temporal of the same type are never equal
     if (isZoned(a) !== isZoned(b)) {
+      return false;
+    }
+
+    // strict equality (`is`) requires identical zones: the same instant
+    // expressed via different zones is not the same value
+    if (strict && !zoneEquals(a.zone ?? null, b.zone ?? null)) {
       return false;
     }
 

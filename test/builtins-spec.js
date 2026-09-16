@@ -716,6 +716,15 @@ function describeBuiltins(name, evaluate) {
       // (per DMN TCK 1116-feel-time-function, 057)
       expr('time("23:59:60")', null);
 
+      // unknown zones are rejected
+      // (per DMN TCK 1116-feel-time-function, 066)
+      expr('time("13:20:00@xyz/abc")', null);
+
+      // out-of-range fixed offsets are rejected
+      expr('time("13:20:00+25:00")', null);
+      expr('time("13:20:00-25:00")', null);
+      expr('time("13:20:00+24:00:01")', null);
+
 
       describe('properties', function() {
 

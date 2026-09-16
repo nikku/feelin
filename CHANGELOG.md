@@ -32,6 +32,10 @@ ___Note:__ Yet to be released changes appear here._
 * `Range` renamed to `FeelRange`, `FunctionWrapper` renamed to `FeelFunction`; both are now exported publicly ([#157](https://github.com/nikku/feelin/pull/157))
 * Week durations (`P1W`) and mixed-kind duration arithmetic (e.g. `months + days`) are now rejected instead of silently producing incorrect results ([#105](https://github.com/nikku/feelin/issues/105), [#106](https://github.com/nikku/feelin/issues/106), [#159](https://github.com/nikku/feelin/pull/159), [#163](https://github.com/nikku/feelin/pull/163))
 
+## 7.0.2
+
+* `FIX`: prevent prototype access from FEEL expressions ([#174](https://github.com/nikku/feelin/pull/174))
+
 ## 7.0.1
 
 * `FIX`: adjust for dots in parse tree

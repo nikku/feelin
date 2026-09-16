@@ -6,6 +6,10 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 7.0.2
+
+* `FIX`: prevent prototype access from FEEL expressions ([#174](https://github.com/nikku/feelin/pull/174))
+
 ## 7.0.1
 
 * `FIX`: adjust for dots in parse tree

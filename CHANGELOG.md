@@ -6,6 +6,16 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 8.0.1
+
+* `FIX`: expose `weekday` property on `date` and `date and time` ([#175](https://github.com/nikku/feelin/pull/175))
+* `FIX`: require zone identity for strict temporal equality (`is`) ([#175](https://github.com/nikku/feelin/pull/175))
+* `FIX`: convert `time(date)` to the midnight (UTC) time ([#175](https://github.com/nikku/feelin/pull/175))
+* `FIX`: reject leap seconds in `time` literals ([#175](https://github.com/nikku/feelin/pull/175))
+* `FIX`: reject invalid zones and out-of-range offsets in `time` literals ([#175](https://github.com/nikku/feelin/pull/175))
+* `FIX`: reject malformed `duration` literals, warn on invalid input ([#175](https://github.com/nikku/feelin/pull/175))
+* `FIX`: treat incomparable scalars in membership tests as not equal ([#175](https://github.com/nikku/feelin/pull/175))
+
 ## 8.0.0
 
 * `FEAT`: migrate temporal handling from `luxon` to `Temporal` ([#146](https://github.com/nikku/feelin/issues/146), [#156](https://github.com/nikku/feelin/pull/156))

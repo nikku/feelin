@@ -417,6 +417,34 @@ function fixedOffsetSeconds(zone: string) : number | null {
 }
 
 /**
+ * Whether a zone identifier is usable: a known (IANA) zone or a fixed
+ * offset within ±24h. Sub-minute offset zones are validated by range,
+ * as Temporal rejects them.
+ */
+function isValidZone(zone: string | null) : boolean {
+
+  if (zone === null) {
+    return true;
+  }
+
+  const offsetSeconds = offsetZoneSeconds(zone);
+
+  if (offsetSeconds !== null) {
+    return Math.abs(offsetSeconds) < 24 * 3600;
+  }
+
+  try {
+
+    // throws for an unknown zone
+    new Temporal.PlainDateTime(1970, 1, 1).toZonedDateTime(zone);
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Whether two zone identifiers denote the same zone, for the purpose of
  * strict (`is`) equality: fixed offsets compare by offset (`Z` equals
  * `+00:00`), named zones only by identifier.
@@ -876,19 +904,8 @@ export function parseTime(str: string) : FeelTime | null {
 
   try {
 
-    // validate the zone (throws for an unknown zone); sub-minute offset
-    // zones are validated by range, as Temporal rejects them
-    if (zone !== null) {
-
-      const offsetSeconds = offsetZoneSeconds(zone);
-
-      if (offsetSeconds !== null) {
-        if (Math.abs(offsetSeconds) >= 24 * 3600) {
-          return null;
-        }
-      } else {
-        new Temporal.PlainDateTime(1970, 1, 1).toZonedDateTime(zone);
-      }
+    if (!isValidZone(zone)) {
+      return null;
     }
 
     return new FeelTime(Temporal.PlainTime.from(value), zone);
@@ -917,19 +934,8 @@ export function parseDateTime(str: string) : FeelDateTime | null {
 
   try {
 
-    // validate the zone (throws for an unknown zone); sub-minute offset
-    // zones are validated by range, as Temporal rejects them
-    if (zone !== null) {
-
-      const offsetSeconds = offsetZoneSeconds(zone);
-
-      if (offsetSeconds !== null) {
-        if (Math.abs(offsetSeconds) >= 24 * 3600) {
-          return null;
-        }
-      } else {
-        new Temporal.PlainDateTime(1970, 1, 1).toZonedDateTime(zone);
-      }
+    if (!isValidZone(zone)) {
+      return null;
     }
 
     return new FeelDateTime(Temporal.PlainDateTime.from(value), zone);

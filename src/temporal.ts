@@ -70,6 +70,10 @@ export class FeelDate {
   toString() : string {
     return this.iso;
   }
+
+  toJSON() : string {
+    return this.iso;
+  }
 }
 
 /**
@@ -128,6 +132,10 @@ export class FeelTime {
   }
 
   toString() : string {
+    return this.iso;
+  }
+
+  toJSON() : string {
     return this.iso;
   }
 }
@@ -193,6 +201,10 @@ export class FeelDateTime {
   toString() : string {
     return this.iso;
   }
+
+  toJSON() : string {
+    return this.iso;
+  }
 }
 
 /**
@@ -255,6 +267,10 @@ export class FeelDuration {
   }
 
   toString() : string {
+    return this.iso;
+  }
+
+  toJSON() : string {
     return this.iso;
   }
 }

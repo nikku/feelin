@@ -86,6 +86,29 @@ describe('temporal', function() {
   });
 
 
+  describe('serialization', function() {
+
+    it('should serialize to the canonical ISO form', function() {
+      expect(JSON.stringify(date('2020-04-06'))).to.eql('"2020-04-06"');
+      expect(JSON.stringify(time('10:30:00'))).to.eql('"10:30:00"');
+      expect(JSON.stringify(dateAndTime('2020-04-06T10:30:00'))).to.eql('"2020-04-06T10:30:00"');
+      expect(JSON.stringify(duration('P1Y2M'))).to.eql('"P1Y2M"');
+    });
+
+
+    it('should serialize zoned values with their zone', function() {
+      expect(JSON.stringify(time('10:30:00+05:00'))).to.eql('"10:30:00+05:00"');
+      expect(JSON.stringify(dateAndTime('2020-04-06T10:30:00Z'))).to.eql('"2020-04-06T10:30:00Z"');
+    });
+
+
+    it('should serialize a zero years and months duration category-aware', function() {
+      expect(JSON.stringify(duration('P0M'))).to.eql('"P0M"');
+    });
+
+  });
+
+
   describe('toFeel()', function() {
 
     it('should wrap a JS Date as a UTC date and time', function() {

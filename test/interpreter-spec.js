@@ -362,6 +362,12 @@ describe('interpreter', function() {
         (function(x,y) x < y)(1, 3)
       `, true);
 
+      // external functions are not supported
+      expr(`
+        {
+          a: function() external { anything: "goes" }
+        }
+      `, { a: null });
     });
 
 
@@ -2192,6 +2198,31 @@ describe('interpreter', function() {
                 minute: 0,
                 second: 0
               }
+            }
+          }
+        ]);
+      });
+
+
+      it('UNSUPPORTED', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('function() external {}');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.eql([
+          {
+            message: 'External functions are not supported',
+            type: 'UNSUPPORTED',
+            position: { from: 0, to: 22 },
+            details: {
+              template: 'External functions are not supported',
+              values: {}
             }
           }
         ]);

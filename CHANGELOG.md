@@ -6,6 +6,8 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+* `FEAT`: mark external function definitions as unsupported ([#176](https://github.com/nikku/feelin/pull/176))
+
 ## 8.0.1
 
 * `FIX`: expose `weekday` property on `date` and `date and time` ([#175](https://github.com/nikku/feelin/pull/175))

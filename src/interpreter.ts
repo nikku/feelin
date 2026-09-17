@@ -50,7 +50,8 @@ export type WarningType =
   | 'INVALID_TYPE'
   | 'INVALID_ARGUMENTS'
   | 'NO_FUNCTION_FOUND'
-  | 'FUNCTION_INVOCATION_FAILURE';
+  | 'FUNCTION_INVOCATION_FAILURE'
+  | 'UNSUPPORTED';
 
 export type SourceLocation = {
   from: number,
@@ -529,7 +530,18 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
   case 'FunctionDefinition': return (context) => {
     const parameterNames = args[2];
 
-    const fnBody = args[4];
+    const external = args[4] === 'external';
+
+    if (external) {
+      interpreterContext.addWarning(node, 'UNSUPPORTED', {
+        template: 'External functions are not supported',
+        values: {}
+      });
+
+      return null;
+    }
+
+    const fnBody = args[external ? 5 : 4];
 
     return wrapFunction((...args) => {
 

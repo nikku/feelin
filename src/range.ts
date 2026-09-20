@@ -284,10 +284,11 @@ export function includes(range: FeelRange, value: RangeValue) : boolean | null {
 
 // iteration /////////////////////////////////////////////////////////
 
-const chars = Array.from(
+const CHARS = Array.from(
   'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 );
 
+const CHAR_TO_INDEX = new Map(CHARS.map((c, i) => [ c, i ]));
 
 function rangeMap<T>(range: FeelRange, fn: (val: RangeValue) => T) : T[] {
 
@@ -341,12 +342,12 @@ function numberRangeMap<T>(start, end, startIncluded, endIncluded, fn: (val) => 
 
 function charRangeValues(start, end, startIncluded, endIncluded) : string[] | null {
 
-  if (!chars.includes(start) || !chars.includes(end)) {
+  let startIdx = CHAR_TO_INDEX.get(start);
+  let endIdx = CHAR_TO_INDEX.get(end);
+
+  if (startIdx === undefined || endIdx === undefined) {
     return null;
   }
-
-  let startIdx = chars.indexOf(start);
-  let endIdx = chars.indexOf(end);
 
   const direction = startIdx > endIdx ? -1 : 1;
 
@@ -358,7 +359,7 @@ function charRangeValues(start, end, startIncluded, endIncluded) : string[] | nu
     endIdx -= direction;
   }
 
-  return chars.slice(
+  return CHARS.slice(
     Math.min(startIdx, endIdx),
     Math.max(startIdx, endIdx) + 1
   );

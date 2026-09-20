@@ -46,7 +46,7 @@
   },
   "sideEffects": false,
   "scripts": {
-    "all": "run-s lint build generate-typings test lint:types",
+    "all": "run-s lint test generate-typings lint:types",
     "lint": "eslint .",
     "lint:types": "tsc --noEmit --skipLibCheck --lib es2019 test/types.ts",
     "build": "rollup -c --bundleConfigAsCjs",
@@ -54,8 +54,10 @@
     "dev": "run-p *:dev",
     "generate-typings": "tsc --emitDeclarationOnly --declaration --outDir dist",
     "prepare": "run-s build generate-typings",
-    "test": "mocha -r source-map-support/register test/*-spec.js test/*-spec.cjs",
-    "test:dev": "chokidar '{dist,test}/**/*.js' -c 'npm test'",
+    "pretest": "npm run build",
+    "test": "npm run test:exec",
+    "test:exec": "mocha -r source-map-support/register test/*-spec.js test/*-spec.cjs",
+    "test:dev": "chokidar '{dist,test}/**/*.js' -c 'npm run test:exec'",
     "tck": "run-s tck:extract tck:test",
     "tck:extract": "node tasks/extract-tck-tests.js",
     "tck:test": "mocha --reporter=test/reporters/tck.cjs -r source-map-support/register test/tck/*.js"

@@ -250,6 +250,14 @@ class Interpreter {
 
 const interpreter = new Interpreter();
 
+const TEMPORAL_TYPES = new Set([ 'date', 'time', 'date time', 'duration' ]);
+
+const NUMBER_ONLY = [ 'number' ];
+
+const FILTER_INDEX_TYPES = new Set([ 'number', 'boolean', 'any' ]);
+
+const LIST_OR_RANGE = new Set([ 'list', 'range' ]);
+
 export function unaryTest(
     expression: string,
     evalContext: EvalContext = {},
@@ -354,7 +362,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
       });
     };
 
-    const nullable = (op, opName, types = [ 'number' ]) => (a, b) => {
+    const nullable = (op, opName, types = NUMBER_ONLY) => (a, b) => {
 
       const left = a(context);
       const right = b(context);
@@ -368,10 +376,8 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
       const leftType = getType(left);
       const rightType = getType(right);
 
-      const temporal = [ 'date', 'time', 'date time', 'duration' ];
-
-      if (temporal.includes(leftType)) {
-        if (!temporal.includes(rightType)) {
+      if (TEMPORAL_TYPES.has(leftType)) {
+        if (!TEMPORAL_TYPES.has(rightType)) {
           invalidType(opName, left, right);
 
           return null;
@@ -464,44 +470,38 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     const left = args[0](context);
     const right = args[2](context);
 
-    const matrix = [
-      [ true, true, true ],
-      [ true, false, true ],
-      [ true, null, true ],
-      [ false, true, true ],
-      [ false, false, false ],
-      [ false, null, null ],
-      [ null, true, true ],
-      [ null, false, null ],
-      [ null, null, null ],
-    ];
-
     const a = typeof left === 'boolean' ? left : null;
     const b = typeof right === 'boolean' ? right : null;
 
-    return matrix.find(el => el[0] === a && el[1] === b)[2];
+    // FEEL three-valued or
+    if (a === true || b === true) {
+      return true;
+    }
+
+    if (a === false && b === false) {
+      return false;
+    }
+
+    return null;
   }, 'test');
 
   case 'Conjunction': return tag((context) => {
     const left = args[0](context);
     const right = args[2](context);
 
-    const matrix = [
-      [ true, true, true ],
-      [ true, false, false ],
-      [ true, null, null ],
-      [ false, true, false ],
-      [ false, false, false ],
-      [ false, null, false ],
-      [ null, true, null ],
-      [ null, false, false ],
-      [ null, null, null ],
-    ];
-
     const a = typeof left === 'boolean' ? left : null;
     const b = typeof right === 'boolean' ? right : null;
 
-    return matrix.find(el => el[0] === a && el[1] === b)[2];
+    // FEEL three-valued and
+    if (a === false || b === false) {
+      return false;
+    }
+
+    if (a === true && b === true) {
+      return true;
+    }
+
+    return null;
   }, 'test');
 
   case 'Context': return (context) => {
@@ -1056,7 +1056,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     // a[b]
     // a[b()]
     // a[1 + 3]
-    if ([ 'number', 'boolean', 'any' ].includes(type)) {
+    if (FILTER_INDEX_TYPES.has(type)) {
       const idx = filterFn(context);
 
       if (isBoolean(idx)) {
@@ -1198,7 +1198,7 @@ function extractValue(context, prop, _target) {
 
   const target = _target(context);
 
-  if ([ 'list', 'range' ].includes(getType(target))) {
+  if (LIST_OR_RANGE.has(getType(target))) {
     return target.map(t => (
       { [prop]: t }
     ));

@@ -47,9 +47,11 @@ export function has(context, name) {
  *
  * @return {any|undefined}
  */
+const NON_CONTEXT_TYPES = new Set([ 'nil', 'boolean', 'number', 'string' ]);
+
 export function getFromContext(name, context) {
 
-  if ([ 'nil', 'boolean', 'number', 'string' ].includes(getType(context))) {
+  if (NON_CONTEXT_TYPES.has(getType(context))) {
     return undefined;
   }
 

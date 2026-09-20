@@ -435,6 +435,8 @@ function fixedOffsetSeconds(zone: string) : number | null {
  * offset within ±24h. Sub-minute offset zones are validated by range,
  * as Temporal rejects them.
  */
+const zoneValidity = new Set<string>();
+
 function isValidZone(zone: string | null) : boolean {
 
   if (zone === null) {
@@ -447,15 +449,23 @@ function isValidZone(zone: string | null) : boolean {
     return Math.abs(offsetSeconds) < 24 * 3600;
   }
 
+  // cache positive results only: the set of valid zones is bounded in
+  // practice, while arbitrary invalid strings must not grow the cache
+  if (zoneValidity.has(zone)) {
+    return true;
+  }
+
   try {
 
     // throws for an unknown zone
     new Temporal.PlainDateTime(1970, 1, 1).toZonedDateTime(zone);
-
-    return true;
   } catch {
     return false;
   }
+
+  zoneValidity.add(zone);
+
+  return true;
 }
 
 /**

@@ -795,13 +795,38 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     };
   }, 'test');
 
-  case 'NumericLiteral': return tag((_context) => node.input.includes('.') ? parseFloat(node.input) : parseInt(node.input), 'number');
+  case 'NumericLiteral': {
 
-  case 'BooleanLiteral': return tag((_context) => node.input === 'true' ? true : false, 'boolean');
+    // parse once at build time, not per evaluation
+    const value = node.input.includes('.') ? parseFloat(node.input) : parseInt(node.input);
 
-  case 'StringLiteral': return tag((_context) => parseString(node.input), 'string');
+    return constant(value, 'number');
+  }
 
-  case 'PositionalParameters': return (context) => args.map(arg => arg(context));
+  case 'BooleanLiteral': {
+
+    const value = node.input === 'true';
+
+    return constant(value, 'boolean');
+  }
+
+  case 'StringLiteral': {
+
+    const value = parseString(node.input);
+
+    return constant(value, 'string');
+  }
+
+  case 'PositionalParameters': {
+
+    // constant parameters: enable constant folding of the enclosing
+    // invocation (e.g. date("2026-12-12"))
+    if (args.every(isConstant)) {
+      return constant(args.map(arg => arg.constantValue), 'parameters');
+    }
+
+    return (context) => args.map(arg => arg(context));
+  }
 
   case 'NamedParameter': return (context) => {
 
@@ -819,57 +844,88 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     return args;
   }, {});
 
-  case 'DateTimeConstructor': return (context) => {
-    return getBuiltin(node.input, context);
-  };
+  case 'DateTimeConstructor':
 
-  case 'DateTimeLiteral': return tag((context) => {
+    // date / time / date and time / duration are pure builtins, resolved
+    // independent of the evaluation context
+    return constant(getBuiltin(node.input, null), 'function');
 
-    // AtLiteral
-    if (args.length === 1) {
-      return args[0](context);
+  case 'DateTimeLiteral': {
+
+    // fold constant constructor invocations, e.g. date("2026-12-12")
+    if (args.length !== 1 && isConstant(args[0]) && isConstant(args[2])) {
+      const wrappedFn = wrapFunction(args[0].constantValue);
+
+      if (wrappedFn) {
+        const result = wrappedFn.invoke(args[2].constantValue);
+
+        // keep the runtime path (and its warning) on invocation failure
+        if (!isInvocationFailure(result)) {
+          return constant(result, 'date');
+        }
+      }
     }
 
-    // FunctionInvocation
-    else {
-      const target = args[0](context);
-      const wrappedFn = wrapFunction(target);
+    return tag((context) => {
+
+      // AtLiteral
+      if (args.length === 1) {
+        return args[0](context);
+      }
+
+      // FunctionInvocation
+      else {
+        const target = args[0](context);
+        const wrappedFn = wrapFunction(target);
+
+        if (!wrappedFn) {
+          interpreterContext.addWarning(node, 'NO_FUNCTION_FOUND', {
+            template: 'Cannot invoke {target}',
+            values: {
+              target
+            }
+          });
+
+          return null;
+        }
+
+        const contextOrArgs = args[2](context);
+
+        const result = wrappedFn.invoke(contextOrArgs);
+
+        return resolveInvocation(result);
+      }
+
+    }, 'date');
+  }
+
+  case 'AtLiteral': {
+
+    const arg = args[0];
+
+    // fold constant @"..." literals: parse once at build time
+    if (isConstant(arg)) {
+      const value = wrapFunction(getBuiltin('@', null)).invoke([ arg.constantValue ]);
+
+      return tag(() => isInvocationFailure(value) ? null : value, 'date');
+    }
+
+    return tag((context) => {
+
+      const wrappedFn = wrapFunction(getBuiltin('@', context));
 
       if (!wrappedFn) {
         interpreterContext.addWarning(node, 'NO_FUNCTION_FOUND', {
-          template: 'Cannot invoke {target}',
-          values: {
-            target
-          }
+          template: "Cannot invoke '@'",
+          values: {}
         });
 
         return null;
       }
 
-      const contextOrArgs = args[2](context);
-
-      const result = wrappedFn.invoke(contextOrArgs);
-
-      return resolveInvocation(result);
-    }
-
-  }, 'date');
-
-  case 'AtLiteral': return tag((context) => {
-
-    const wrappedFn = wrapFunction(getBuiltin('@', context));
-
-    if (!wrappedFn) {
-      interpreterContext.addWarning(node, 'NO_FUNCTION_FOUND', {
-        template: "Cannot invoke '@'",
-        values: {}
-      });
-
-      return null;
-    }
-
-    return wrappedFn.invoke([ args[0](context) ]);
-  }, 'date');
+      return wrappedFn.invoke([ arg(context) ]);
+    }, 'date');
+  }
 
   case 'FunctionInvocation': return tag((context) => {
 
@@ -1272,7 +1328,8 @@ function coalecenseTypes(a, b) {
 
 type ContextFn<T> = (context: InterpreterContext) => T;
 type TaggedFn = {
-  type: string
+  type: string,
+  constantValue?: unknown
 };
 
 function tag<Z, T extends ContextFn<Z>>(fn: T, type: string) : T & TaggedFn {
@@ -1283,6 +1340,25 @@ function tag<Z, T extends ContextFn<Z>>(fn: T, type: string) : T & TaggedFn {
       return `TaggedFunction[${type}] ${Function.prototype.toString.call(fn)}`;
     }
   });
+}
+
+/**
+ * A tagged evaluation function for a value known at build time; the
+ * `constantValue` marker lets enclosing nodes (e.g. AtLiteral) fold
+ * themselves at build time, too.
+ */
+function constant<Z>(value: Z, type: string) : ContextFn<Z> & TaggedFn {
+
+  return Object.assign(tag(() => value, type), {
+    constantValue: value
+  });
+}
+
+/**
+ * Whether an evaluation function carries a build-time constant value.
+ */
+function isConstant(fn: ContextFn<unknown> & TaggedFn) : boolean {
+  return 'constantValue' in fn;
 }
 
 function isTruthy(obj) {

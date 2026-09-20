@@ -6,6 +6,9 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+* `PERF`: improve expression evaluation and built-in performance ([#177](https://github.com/nikku/feelin/pull/177))
+* `FIX`: warn `INVALID_ARGUMENTS` on invalid `@"..."` temporal literals ([#177](https://github.com/nikku/feelin/pull/177))
+
 ## 8.1.0
 
 * `FEAT`: mark external function definitions as unsupported ([#176](https://github.com/nikku/feelin/pull/176))

@@ -1,5 +1,6 @@
 import {
   isType,
+  isArray,
   equals,
   isString,
   isNumber,
@@ -899,7 +900,15 @@ const builtins = {
   // 10.3.4.9 Sort
 
   'sort': fn(function(list, precedes) {
-    return Array.from(list).sort((a, b) => precedes.invoke([ a, b ]) ? -1 : 1);
+
+    // fast path: positional two-parameter functions can be invoked
+    // directly, skipping FeelFunction#invoke argument binding overhead
+    // on every comparison
+    const compare = precedes.parameterNames.length === 2
+      ? (a, b) => precedes.fn(a, b) ? -1 : 1
+      : (a, b) => precedes.invoke([ a, b ]) ? -1 : 1;
+
+    return Array.from(list).sort(compare);
   }, [ 'list', 'function' ], [ 'list', 'precedes' ]),
 
 

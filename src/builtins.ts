@@ -589,9 +589,19 @@ const builtins = {
 
   'concatenate': fn(function(...list) {
 
-    return list.reduce((result, arg) => {
-      return result.concat(arg);
-    }, []);
+    const result = [];
+
+    for (const arg of list) {
+      if (isArray(arg)) {
+        for (const item of arg) {
+          result.push(item);
+        }
+      } else {
+        result.push(arg);
+      }
+    }
+
+    return result;
 
   }, [ 'any' ], [ '...list' ]),
 

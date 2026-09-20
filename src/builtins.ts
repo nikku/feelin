@@ -1128,28 +1128,26 @@ function createArgsValidator(argDefinitions) {
 
   return function(args) {
 
-    while (args.length < argDefinitions.length) {
-      args.push(undefined);
-    }
+    const result = [];
 
-    return args.reduce((result, arg, index) => {
+    // validate provided args; pad and validate missing trailing args
+    // (without mutating the caller's array)
+    const length = Math.max(args.length, argDefinitions.length);
 
-      if (result === false) {
-        return result;
-      }
+    for (let index = 0; index < length; index++) {
 
       const test = tests[index];
 
-      const conversion = test ? test(arg) : arg;
+      const conversion = test ? test(args[index]) : args[index];
 
       if (conversion === FALSE) {
         return false;
       }
 
       result.push(conversion);
+    }
 
-      return result;
-    }, []);
+    return result;
 
   };
 }

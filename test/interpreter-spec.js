@@ -1072,6 +1072,32 @@ describe('interpreter', function() {
     });
 
 
+    describe('constant folding', function() {
+
+      // folded literals evaluate like their parsed values
+      expr('1 + 2', 3);
+      expr('"foo" + "bar"', 'foobar');
+      expr('true or false', true);
+
+      // folded @"..." literals
+      expr('@"10:30:00" instance of time', true);
+      expr('@"2026-12-12T10:00:00" instance of date and time', true);
+      expr('@"2026-12-12" instance of date', true);
+      expr('@"P1D" instance of days and time duration', true);
+
+      // invalid constant literals evaluate to null
+      expr('@"nonsense"', null);
+      expr('@"10:30:60"', null);
+
+      // invalid constant constructor invocations evaluate to null
+      expr('date("garbage")', null);
+      expr('time("25:99:99")', null);
+      expr('duration("P")', null);
+      expr('date and time("garbage")', null);
+
+    });
+
+
     describe('List', function() {
 
       expr('[]', []);
@@ -1699,6 +1725,36 @@ describe('interpreter', function() {
   describe('warnings', function() {
 
     describe('should indicate warning', function() {
+
+      it('INVALID_ARGUMENTS on constant constructor without parameters', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('date and time()');
+
+        // then
+        expect(value).to.be.null;
+        expect(warnings).to.have.length(1);
+        expect(warnings[0].type).to.eql('INVALID_ARGUMENTS');
+      });
+
+
+      it('INVALID_ARGUMENTS on constant constructor with invalid literal', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('date and time("garbage")');
+
+        // then
+        expect(value).to.be.null;
+        expect(warnings).to.have.length(1);
+        expect(warnings[0].type).to.eql('INVALID_ARGUMENTS');
+      });
+
 
       it('NO_VARIABLE_FOUND', function() {
 

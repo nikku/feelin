@@ -381,7 +381,7 @@ function zoneSuffix(zone: string) : string {
     return zone;
   }
 
-  return '@' + zone;
+  return `@${zone}`;
 }
 
 /**
@@ -943,7 +943,7 @@ export function parseDateTime(str: string) : FeelDateTime | null {
   let value = parsedValue;
 
   if (!value.includes('T')) {
-    value = value + 'T00:00:00';
+    value = `${value}T00:00:00`;
   }
 
   try {

@@ -352,11 +352,11 @@ const builtins = {
 
     let t;
 
-    if (/^-?P/.test(string)) {
+    if (DURATION_START_PATTERN.test(string)) {
       t = duration(string);
     }
 
-    else if (/^[\d]{1,2}:[\d]{1,2}:[\d]{1,2}/.test(string)) {
+    else if (TIME_START_PATTERN.test(string)) {
       t = parseTime(string);
     }
 
@@ -1019,6 +1019,16 @@ function matches(a, b) {
 
 const FALSE = {};
 
+const DURATION_START_PATTERN = /^-?P/;
+
+const TIME_START_PATTERN = /^\d{1,2}:\d{1,2}:\d{1,2}/;
+
+const NON_WORD_PATTERN = /\W/;
+
+const SUPPORTED_FLAGS_PATTERN = /[smix]/g;
+
+const EXTENDED_FLAG_PATTERN = /x/;
+
 function createArgTester(arg) {
   const optional = arg.endsWith('?');
 
@@ -1262,7 +1272,7 @@ function flatten<T>([ x,...xs ]: (T|T[])[]):T[] {
 }
 
 function toKeyString(key) {
-  if (typeof key === 'string' && /\W/.test(key)) {
+  if (typeof key === 'string' && NON_WORD_PATTERN.test(key)) {
     return toString(key, true);
   }
 
@@ -1434,14 +1444,14 @@ const MONTH_NAMES = [
  */
 export function buildFlags(flags: string, defaultFlags: string) {
 
-  const unsupportedFlags = flags.replace(/[smix]/g, '');
+  const unsupportedFlags = flags.replace(SUPPORTED_FLAGS_PATTERN, '');
 
   if (unsupportedFlags) {
     throw new Error('illegal flags: ' + unsupportedFlags);
   }
 
   // we don't implement the <x> flag
-  if (/x/.test(flags)) {
+  if (EXTENDED_FLAG_PATTERN.test(flags)) {
     throw notImplemented('matches <x> flag');
   }
 

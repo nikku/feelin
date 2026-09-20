@@ -313,6 +313,20 @@ export function isZoned(obj) : boolean {
 
 // zone helpers //////////////////////////////////////////////////////
 
+const Z_SUFFIX_PATTERN = /z$/i;
+
+const OFFSET_SUFFIX_PATTERN = /[+-]\d{2}:\d{2}(:\d{2})?$/;
+
+const OFFSET_ZONE_PATTERN = /^[+-]\d{2}:\d{2}(:\d{2})?$/;
+
+const OFFSET_SECONDS_PATTERN = /^([+-])(\d{2}):(\d{2}):(\d{2})$/;
+
+const FIXED_OFFSET_PATTERN = /^([+-])(\d{2}):(\d{2})(?::(\d{2}))?$/;
+
+const YEARS_MONTHS_PATTERN = /[YM]/;
+
+const LEAP_SECOND_PATTERN = /^\d{2}:\d{2}:60/;
+
 /**
  * Split a trailing time zone indicator off an ISO date / time string.
  *
@@ -331,14 +345,14 @@ function splitZone(str: string) : { value: string, zone: string | null } {
     };
   }
 
-  if (/z$/i.test(str)) {
+  if (Z_SUFFIX_PATTERN.test(str)) {
     return {
       value: str.substring(0, str.length - 1),
       zone: 'UTC'
     };
   }
 
-  const offsetMatch = /[+-]\d{2}:\d{2}(:\d{2})?$/.exec(str);
+  const offsetMatch = OFFSET_SUFFIX_PATTERN.exec(str);
 
   if (offsetMatch) {
     return {
@@ -363,7 +377,7 @@ function zoneSuffix(zone: string) : string {
     return 'Z';
   }
 
-  if (/^[+-]\d{2}:\d{2}(:\d{2})?$/.test(zone)) {
+  if (OFFSET_ZONE_PATTERN.test(zone)) {
     return zone;
   }
 
@@ -384,7 +398,7 @@ function offsetZoneSeconds(zone: string | null) : number | null {
     return null;
   }
 
-  const match = /^([+-])(\d{2}):(\d{2}):(\d{2})$/.exec(zone);
+  const match = OFFSET_SECONDS_PATTERN.exec(zone);
 
   if (!match) {
     return null;
@@ -405,7 +419,7 @@ function fixedOffsetSeconds(zone: string) : number | null {
     return 0;
   }
 
-  const match = /^([+-])(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(zone);
+  const match = FIXED_OFFSET_PATTERN.exec(zone);
 
   if (!match) {
     return null;
@@ -585,7 +599,7 @@ function isYearsMonths(d: Temporal.Duration) : boolean {
  */
 function isYearsMonthsString(str: string) : boolean {
   const datePart = str.split('T')[0];
-  return /[YM]/.test(datePart);
+  return YEARS_MONTHS_PATTERN.test(datePart);
 }
 
 /**
@@ -898,7 +912,7 @@ export function parseTime(str: string) : FeelTime | null {
   const { value, zone } = splitZone(str);
 
   // FEEL does not recognize leap seconds
-  if (/^\d{2}:\d{2}:60/.test(value)) {
+  if (LEAP_SECOND_PATTERN.test(value)) {
     return null;
   }
 

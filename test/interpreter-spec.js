@@ -5,6 +5,8 @@ import { expect } from './helpers.js';
 import {
   unaryTest,
   evaluate,
+  compileExpression,
+  compileUnaryTests,
   date,
   duration,
   FeelRange,
@@ -47,6 +49,52 @@ describe('interpreter', function() {
       expect(isFunction(evaluate('[1..10]').value)).to.be.false;
       expect(isFunction(5)).to.be.false;
       expect(isFunction(null)).to.be.false;
+    });
+
+  });
+
+
+  describe('compileExpression', function() {
+
+    it('should evaluate compiled expression against varying contexts', function() {
+
+      const compiled = compileExpression('if age >= 18 then "adult" else "minor"');
+
+      expect(compiled.evaluate({ age: 20 }).value).to.eql('adult');
+      expect(compiled.evaluate({ age: 5 }).value).to.eql('minor');
+    });
+
+
+    it('should fold literals at compile time', function() {
+
+      const compiled = compileExpression('date("2026-12-12") + duration("P1D")');
+
+      expect(String(compiled.evaluate().value)).to.eql('2026-12-13');
+    });
+
+
+    it('should provide fresh warnings per evaluation', function() {
+
+      const compiled = compileExpression('x');
+
+      const first = compiled.evaluate({});
+      const second = compiled.evaluate({ x: 1 });
+
+      expect(first.warnings).to.have.length(1);
+      expect(first.warnings[0].type).to.eql('NO_VARIABLE_FOUND');
+
+      expect(second.value).to.eql(1);
+      expect(second.warnings).to.have.length(0);
+    });
+
+
+    it('should evaluate compiled unary tests', function() {
+
+      const compiled = compileUnaryTests('[1..10], > 100');
+
+      expect(compiled.unaryTest({ '?': 5 }).value).to.be.true;
+      expect(compiled.unaryTest({ '?': 50 }).value).to.be.false;
+      expect(compiled.unaryTest({ '?': 500 }).value).to.be.true;
     });
 
   });

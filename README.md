@@ -44,6 +44,31 @@ console.log(warnings);
 // ]
 ```
 
+### Compiling expressions
+
+Because of the context-sensitive nature of FEEL, one-shot evaluation
+re-creates a parse tree every time. To evaluate the same expression
+repeatedly (e.g. over many rows of a decision table), compile it once including
+an example of the evaluation context:
+
+```javascript
+import { compileExpression } from 'feelin';
+
+const evalContext = {
+  'Mike\'s daughter.name': 'Lisa'
+};
+
+const expression = compileExpression("Mike's daughter.name", evalContext);
+
+expression.evaluate({ 'Mike\'s daughter.name': 'Lisa' }); // { value: 'Lisa', warnings: [] }
+expression.evaluate({ 'Mike\'s daughter.name': 'Ann' }); // { value: 'Ann', warnings: [] }
+```
+
+The artifact is locked to the context *shape* seen at compile time:
+which (nested) keys exist and which values are functions. Values may
+differ per evaluation, the shape may not — re-compile instead.
+`compileUnaryTests` does the same for unary tests.
+
 ## Features
 
 * [x] Recognizes full FEEL grammar

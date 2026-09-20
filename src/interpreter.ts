@@ -263,31 +263,102 @@ const FILTER_INDEX_TYPES = new Set([ 'number', 'boolean', 'any' ]);
 
 const LIST_OR_RANGE = new Set([ 'list', 'range' ]);
 
+/**
+ * A pre-compiled FEEL artifact, evaluable many times.
+ *
+ * Locked to the context shape seen at compile time (which nested keys
+ * exist, which values are functions): values may differ per evaluation,
+ * the shape may not — re-compile instead.
+ */
+export type CompiledExpression = {
+  expression: string;
+  evaluate(evalContext?: EvalContext): EvaluationResult<unknown>;
+};
+
+/**
+ * Pre-compiled FEEL unary tests; see {@link CompiledExpression} for the
+ * shape contract.
+ */
+export type CompiledUnaryTests = {
+  expression: string;
+  unaryTest(evalContext?: EvalContext): EvaluationResult<boolean | null>;
+};
+
+/**
+ * Compile a FEEL expression for repeated evaluation.
+ */
+export function compileExpression(
+    expression: string,
+    evalContext: EvalContext = {},
+    dialect?: string
+): CompiledExpression {
+
+  const interpreterContext = new InterpreterContext();
+
+  const {
+    root
+  } = interpreter.evaluate(expression, coerceContext(evalContext), dialect, interpreterContext);
+
+  return {
+    expression,
+    evaluate(evalContext: EvalContext = {}) {
+
+      // evaluation is synchronous; reset warnings per call
+      interpreterContext.warnings = [];
+
+      return {
+        value: root(coerceContext(evalContext)),
+        warnings: interpreterContext.getWarnings()
+      };
+    }
+  };
+}
+
+/**
+ * Compile FEEL unary tests for repeated evaluation.
+ */
+export function compileUnaryTests(
+    expression: string,
+    evalContext: EvalContext = {},
+    dialect?: string
+): CompiledUnaryTests {
+
+  const interpreterContext = new InterpreterContext();
+
+  const {
+    root
+  } = interpreter.unaryTest(expression, coerceContext(evalContext), dialect, interpreterContext);
+
+  return {
+    expression,
+    unaryTest(evalContext: EvalContext = {}) {
+
+      interpreterContext.warnings = [];
+
+      const coerced = coerceContext(evalContext);
+
+      const value = coerced['?'] !== undefined ? coerced['?'] : null;
+
+      // root = fn(ctx) => test(val)
+      const test = root(coerced);
+
+      return {
+        value: test(value),
+        warnings: interpreterContext.getWarnings()
+      };
+    }
+  };
+}
+
 export function unaryTest(
     expression: string,
     evalContext: EvalContext = {},
     dialect?: string
 ) : EvaluationResult<boolean | null> {
 
-  const interpreterContext = new InterpreterContext();
+  const compiled = compileUnaryTests(expression, evalContext, dialect);
 
-  evalContext = coerceContext(evalContext);
-
-  const value = evalContext['?'] !== undefined ? evalContext['?'] : null;
-
-  const {
-    root
-  } = interpreter.unaryTest(expression, evalContext, dialect, interpreterContext);
-
-  // root = fn(ctx) => test(val)
-  const test = root(evalContext);
-
-  const testResult = test(value);
-
-  return {
-    value: testResult,
-    warnings: interpreterContext.getWarnings()
-  };
+  return compiled.unaryTest(evalContext);
 }
 
 export function evaluate(
@@ -296,22 +367,9 @@ export function evaluate(
     dialect?: string
 ): EvaluationResult<unknown> {
 
-  const interpreterContext = new InterpreterContext();
+  const compiled = compileExpression(expression, evalContext, dialect);
 
-  evalContext = coerceContext(evalContext);
-
-  const {
-    root
-  } = interpreter.evaluate(expression, evalContext, dialect, interpreterContext);
-
-  // root = Expression :: fn(ctx)
-
-  const result = root(evalContext);
-
-  return {
-    value: result,
-    warnings: interpreterContext.getWarnings()
-  };
+  return compiled.evaluate(evalContext);
 }
 
 /**

@@ -584,9 +584,10 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
 
   case 'SpecialFunctionName': {
 
-    const name = node.input;
+    // builtins are fixed; resolve once at build time
+    const fn = getBuiltin(node.input, null);
 
-    return (context) => getBuiltin(name, context);
+    return () => fn;
   }
 
   // preserve spaces in name, but compact multiple
@@ -621,28 +622,32 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     return null;
   }, 'any');
 
-  case 'VariableName': return tag((context) => {
+  case 'VariableName': {
+
     const name = args.join(' ');
 
-    const contextValue = getFromContext(name, context);
+    // builtins are fixed; resolve the fallback once at build time
+    const builtin = getBuiltin(name, null);
 
-    if (typeof contextValue !== 'undefined') {
-      return contextValue;
-    }
+    return tag((context) => {
+      const contextValue = getFromContext(name, context);
 
-    const builtin = getBuiltin(name, context);
+      if (typeof contextValue !== 'undefined') {
+        return contextValue;
+      }
 
-    if (builtin) {
-      return builtin;
-    }
+      if (builtin) {
+        return builtin;
+      }
 
-    interpreterContext.addWarning(node, 'NO_VARIABLE_FOUND', {
-      template: `Variable '${name}' not found`,
-      values: {}
-    });
+      interpreterContext.addWarning(node, 'NO_VARIABLE_FOUND', {
+        template: `Variable '${name}' not found`,
+        values: {}
+      });
 
-    return null;
-  }, 'any');
+      return null;
+    }, 'any');
+  }
 
   case 'QualifiedName': return {
     kind: 'name',
@@ -938,9 +943,10 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
       }
     }
 
-    return tag((context) => {
+    // builtins are fixed; resolve and wrap '@' once at build time
+    const wrappedFn = wrapFunction(getBuiltin('@', null));
 
-      const wrappedFn = wrapFunction(getBuiltin('@', context));
+    return tag((context) => {
 
       if (!wrappedFn) {
         interpreterContext.addWarning(node, 'NO_FUNCTION_FOUND', {
@@ -1222,21 +1228,32 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     return args[0](context)(args[1](context));
   }, 'test');
 
-  case 'List': return (context) => {
-    return args.slice(1, -1).map(arg => arg(context));
-  };
+  case 'List': {
+
+    const elements = args.slice(1, -1);
+
+    return (context) => {
+      return elements.map(arg => arg(context));
+    };
+  }
 
   // "[" endpoint ".." endpoint "]"
-  case 'Interval': return tag((context) => {
+  case 'Interval': {
 
-    const left = args[1](context);
-    const right = args[3](context);
+    const startBracket = args[0] === '[';
+    const endBracket = args[4] === ']';
 
-    const startIncluded = left !== null && args[0] === '[';
-    const endIncluded = right !== null && args[4] === ']';
+    return tag((context) => {
 
-    return createRange(left, right, startIncluded, endIncluded);
-  }, 'test');
+      const left = args[1](context);
+      const right = args[3](context);
+
+      const startIncluded = left !== null && startBracket;
+      const endIncluded = right !== null && endBracket;
+
+      return createRange(left, right, startIncluded, endIncluded);
+    }, 'test');
+  }
 
   case 'PositiveUnaryTests':
   case 'Expressions': return (context) => {
@@ -1247,30 +1264,33 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     return args[0](context);
   };
 
-  case 'UnaryTests': return (context) => {
+  case 'UnaryTests': {
 
-    return (value = null) => {
+    const negate = args[0] === 'not';
 
-      const negate = args[0] === 'not';
+    const tests = negate ? args.slice(2, -1) : args;
 
-      const tests = negate ? args.slice(2, -1) : args;
+    return (context) => {
 
-      const matches = tests.map(test => test(context)).flat(1).map(test => {
+      return (value = null) => {
 
-        if (isArray(test)) {
-          return test.includes(value);
-        }
+        const matches = tests.map(test => test(context)).flat(1).map(test => {
 
-        if (typeof test === 'boolean') {
-          return test;
-        }
+          if (isArray(test)) {
+            return test.includes(value);
+          }
 
-        return compareValue(test, value);
-      }).some(v => v === true);
+          if (typeof test === 'boolean') {
+            return test;
+          }
 
-      return matches === null ? null : (negate ? !matches : matches);
+          return compareValue(test, value);
+        }).some(v => v === true);
+
+        return matches === null ? null : (negate ? !matches : matches);
+      };
     };
-  };
+  }
 
   default: return node.name;
   }

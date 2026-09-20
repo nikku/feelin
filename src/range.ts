@@ -288,6 +288,7 @@ const chars = Array.from(
   'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
 );
 
+
 function rangeMap<T>(range: FeelRange, fn: (val: RangeValue) => T) : T[] {
 
   const { start, end, valueType } = range;
@@ -366,14 +367,7 @@ function charRangeValues(start, end, startIncluded, endIncluded) : string[] | nu
 
 // construction //////////////////////////////////////////////////////
 
-const RANGE_TYPES = [ 'string', 'number', 'duration', 'time', 'date time', 'date' ];
-
-function isTyped(type: string, values: RangeValue[]) : boolean {
-  return (
-    values.some(e => getType(e) === type) &&
-    values.every(e => e === null || getType(e) === type)
-  );
-}
+const RANGE_TYPES = new Set([ 'string', 'number', 'duration', 'time', 'date time', 'date' ]);
 
 /**
  * Create a {@link FeelRange} from its bounds, inferring the element type.
@@ -385,7 +379,18 @@ export function createRange(
     endIncluded = true
 ) : FeelRange {
 
-  const valueType = RANGE_TYPES.find(type => isTyped(type, [ start, end ])) ?? null;
+  // infer the element type: the shared FEEL type of the non-null bounds
+  const startType = start === null ? null : getType(start);
+  const endType = end === null ? null : getType(end);
+
+  const type = startType ?? endType;
+
+  const valueType = (
+    type !== null &&
+    RANGE_TYPES.has(type) &&
+    (startType === null || startType === type) &&
+    (endType === null || endType === type)
+  ) ? type : null;
 
   if (valueType === null && !(start === null && end === null)) {
     throw new Error(`unsupported range: ${start}..${end}`);

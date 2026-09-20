@@ -6,6 +6,8 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 8.2.0
+
 * `PERF`: improve expression evaluation and built-in performance ([#177](https://github.com/nikku/feelin/pull/177))
 * `FIX`: warn `INVALID_ARGUMENTS` on invalid `@"..."` temporal literals ([#177](https://github.com/nikku/feelin/pull/177))
 

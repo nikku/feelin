@@ -504,20 +504,27 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     return null;
   }, 'test');
 
-  case 'Context': return (context) => {
+  case 'Context': {
 
-    return args.slice(1, -1).reduce((obj, arg) => {
-      const [ key, value ] = arg({
-        ...context,
-        ...obj
-      });
+    const entries = args.slice(1, -1);
 
-      return {
-        ...obj,
-        [key]: value
-      };
-    }, {});
-  };
+    return (context) => {
+
+      // entries may reference earlier keys, so evaluate each against
+      // the outer context plus the keys collected so far
+      const merged = { ...context };
+      const result = {};
+
+      for (const arg of entries) {
+        const [ key, value ] = arg(merged);
+
+        merged[key] = value;
+        result[key] = value;
+      }
+
+      return result;
+    };
+  }
 
   case 'FunctionBody': return args[0];
 

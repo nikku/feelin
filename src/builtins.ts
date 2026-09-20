@@ -612,11 +612,57 @@ const builtins = {
   }, [ 'any' ], [ '...list' ]),
 
   'insert before': fn(function(list, position, newItem) {
-    return list.slice(0, position - 1).concat([ newItem ], list.slice(position - 1));
+
+    // single-copy equivalent of
+    // list.slice(0, position - 1).concat([ newItem ], list.slice(position - 1))
+    const len = list.length;
+
+    let p = position - 1;
+
+    if (p < 0) {
+      p = Math.max(0, len + p);
+    } else if (p > len) {
+      p = len;
+    }
+
+    const result = new Array(len + 1);
+
+    for (let i = 0; i < p; i++) {
+      result[i] = list[i];
+    }
+
+    result[p] = newItem;
+
+    for (let i = p; i < len; i++) {
+      result[i + 1] = list[i];
+    }
+
+    return result;
   }, [ 'list', 'number', 'any?' ], [ 'list', 'position', 'newItem' ]),
 
   'remove': fn(function(list, position) {
-    return list.slice(0, position - 1).concat(list.slice(position));
+
+    // single-copy equivalent of
+    // list.slice(0, position - 1).concat(list.slice(position))
+    const len = list.length;
+
+    const head = Math.min(Math.max(position - 1, -len), len);
+    const tail = Math.min(Math.max(position, -len), len);
+
+    const a = head < 0 ? len + head : head;
+    const b = tail < 0 ? len + tail : tail;
+
+    const result = new Array(a + (len - b));
+
+    for (let i = 0; i < a; i++) {
+      result[i] = list[i];
+    }
+
+    for (let i = b; i < len; i++) {
+      result[a + (i - b)] = list[i];
+    }
+
+    return result;
   }, [ 'list', 'number' ], [ 'list', 'position' ]),
 
   'reverse': fn(function(list) {
@@ -1267,12 +1313,34 @@ function distinctLists(lists) {
   return result;
 }
 
-function flatten<T>([ x,...xs ]: (T|T[])[]):T[] {
-  return (
-    x !== undefined
-      ? [ ...Array.isArray(x) ? flatten(x) : [ x ],...flatten(xs) ]
-      : []
-  );
+function flatten<T>(list: (T | T[])[]): T[] {
+
+  const result: T[] = [];
+
+  // explicit stack of [array, index] frames, deepest list on top
+  const stack: [ (T | T[])[], number ][] = [ [ list, 0 ] ];
+
+  while (stack.length) {
+    const frame = stack[stack.length - 1];
+    const [ items, index ] = frame;
+
+    if (index >= items.length) {
+      stack.pop();
+      continue;
+    }
+
+    frame[1]++;
+
+    const item = items[index];
+
+    if (Array.isArray(item)) {
+      stack.push([ item, 0 ]);
+    } else if (item !== undefined) {
+      result.push(item);
+    }
+  }
+
+  return result;
 }
 
 function toKeyString(key) {

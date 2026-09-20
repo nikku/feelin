@@ -45,7 +45,9 @@ import {
   timeOfDate,
   combine,
   yearsAndMonthsDuration,
-  absDuration
+  absDuration,
+  isZoned,
+  toComparable
 } from './temporal.js';
 
 
@@ -631,27 +633,12 @@ const builtins = {
 
   'union': listFn(function(...lists) {
 
-    return lists.reduce((result, list) => {
-
-      return list.reduce((result, e) => {
-        if (!result.some(r => equals(e, r))) {
-          result.push(e);
-        }
-
-        return result;
-      }, result);
-    }, []);
+    return distinctLists(lists);
 
   }, 'list', [ '...list' ]),
 
   'distinct values': fn(function(list) {
-    return list.reduce((result, e) => {
-      if (!result.some(r => equals(e, r))) {
-        result.push(e);
-      }
-
-      return result;
-    }, []);
+    return distinctLists([ list ]);
   }, [ 'list' ], [ 'list' ]),
 
   'flatten': fn(function(list) {
@@ -1186,6 +1173,84 @@ function fn(fnDefinition, argDefinitions, parameterNames = null) {
 
 function sum(list) {
   return list.reduce((sum, el) => sum === null ? el : sum + el, null);
+}
+
+/**
+ * Deduplicate the concatenation of `lists`, preserving FEEL `equals`
+ * semantics and first-occurrence order.
+ *
+ * @param {any[][]} lists
+ *
+ * @return {any[]}
+ */
+function distinctLists(lists) {
+
+  // hash-bucket scalars and temporals for O(1) probes; complex values
+  // (lists, contexts, ranges, durations) fall back to linear equals() scans
+  const result = [];
+  const seenScalars = new Set();
+  const seenTemporals = new Set();
+  const complex = [];
+
+  const temporalKey = (e) => {
+    const type = getType(e);
+
+    if (type === 'date' || type === 'time' || type === 'date time') {
+      return `${type}|${isZoned(e) ? 1 : 0}|${toComparable(e)}`;
+    }
+
+    return null;
+  };
+
+  for (const list of lists) {
+    for (const e of list) {
+
+      // NaN excluded: it is never equal to itself per equals() and
+      // thus never deduplicated
+      const scalar = (
+        typeof e === 'number' && !Number.isNaN(e) ||
+        typeof e === 'string' ||
+        typeof e === 'boolean' ||
+        e === null ||
+        e === undefined
+      );
+
+      // complex values are probed against scalars, too: equals() unwraps
+      // single-element lists, so [ 1 ] equals 1
+      if (scalar) {
+        if (seenScalars.has(e) || complex.some(c => equals(e, c))) {
+          continue;
+        }
+
+        seenScalars.add(e);
+        result.push(e);
+
+        continue;
+      }
+
+      const key = temporalKey(e);
+
+      if (key !== null) {
+        if (seenTemporals.has(key) || complex.some(c => equals(e, c))) {
+          continue;
+        }
+
+        seenTemporals.add(key);
+        result.push(e);
+
+        continue;
+      }
+
+      if (result.some(r => equals(e, r))) {
+        continue;
+      }
+
+      complex.push(e);
+      result.push(e);
+    }
+  }
+
+  return result;
 }
 
 function flatten<T>([ x,...xs ]: (T|T[])[]):T[] {

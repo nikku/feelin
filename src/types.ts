@@ -30,6 +30,8 @@ export {
   FeelRange
 };
 
+const TEMPORAL_TYPES = new Set([ 'date time', 'time', 'date' ]);
+
 export function isNil(e) {
   return e === null || e === undefined;
 }
@@ -64,16 +66,12 @@ export function getType(e) {
     return 'string';
   }
 
-  if (isContext(e)) {
-    return 'context';
-  }
-
   if (isArray(e)) {
     return 'list';
   }
 
-  if (isDuration(e)) {
-    return 'duration';
+  if (isContext(e)) {
+    return 'context';
   }
 
   if (isDate(e)) {
@@ -86,6 +84,10 @@ export function getType(e) {
 
   if (isDateTime(e)) {
     return 'date time';
+  }
+
+  if (isDuration(e)) {
+    return 'duration';
   }
 
   if (isRange(e)) {
@@ -164,11 +166,9 @@ export function equals(a, b, strict = false) {
   const aType = getType(a);
   const bType = getType(b);
 
-  const temporalTypes = [ 'date time', 'time', 'date' ];
+  if (TEMPORAL_TYPES.has(aType)) {
 
-  if (temporalTypes.includes(aType)) {
-
-    if (!temporalTypes.includes(bType)) {
+    if (!TEMPORAL_TYPES.has(bType)) {
       return null;
     }
 

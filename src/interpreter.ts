@@ -690,7 +690,9 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
         bContextProducer: ContextsProducer
     ) => {
 
-      return [].concat(...aContexts.map(aContext => {
+      const result = [];
+
+      for (const aContext of aContexts) {
 
         const bContexts = bContextProducer({ ...context, ...aContext });
 
@@ -698,10 +700,12 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
           return null;
         }
 
-        return bContexts.map(bContext => {
-          return { ...aContext, ...bContext };
-        });
-      }));
+        for (const bContext of bContexts) {
+          result.push({ ...aContext, ...bContext });
+        }
+      }
+
+      return result;
     };
 
     const cartesian = (
@@ -1046,10 +1050,12 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
 
     for (const ctx of iterationContexts) {
 
-      partial.push(extractor({
-        ...ctx,
-        partial
-      }));
+      // iteration contexts are fresh objects (created by InExpressions),
+      // so expose the partial results by mutation instead of copying
+      // the context per iteration
+      ctx.partial = partial;
+
+      partial.push(extractor(ctx));
     }
 
     return partial;

@@ -135,6 +135,16 @@ scenario('eval: date/time parsing', () => {
   evaluate('date and time("2024-03-15T10:30:00@Europe/Paris") + duration("P1Y2M")', {});
 }, { iterations: 3000, warmup: 300 });
 
+// --- for expression over wide context ---
+
+const forCtx = Object.fromEntries(Array.from({ length: 50 }, (_, i) => [ `v${i}`, i ]));
+
+forCtx.list = bigList(1000);
+
+scenario('eval: for x in 1k list, 50-wide context', () => {
+  evaluate('for x in list return x * 2', forCtx);
+}, { iterations: 500, warmup: 50 });
+
 // --- unary tests ---
 
 scenario('unaryTest: range + list of tests', (i) => {

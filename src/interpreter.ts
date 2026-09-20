@@ -179,7 +179,12 @@ class Interpreter {
           args: [],
           node: {
             name,
-            input: input.slice(from, to),
+
+            // materialize the node text only when actually inspected
+            // (operator dispatch, literals, error messages)
+            get input() {
+              return input.slice(from, to);
+            },
             position: {
               from,
               to
@@ -577,7 +582,12 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
 
   case 'Identifier': return node.input;
 
-  case 'SpecialFunctionName': return (context) => getBuiltin(node.input, context);
+  case 'SpecialFunctionName': {
+
+    const name = node.input;
+
+    return (context) => getBuiltin(name, context);
+  }
 
   // preserve spaces in name, but compact multiple
   // spaces into one (token)

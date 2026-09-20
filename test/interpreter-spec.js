@@ -1756,6 +1756,21 @@ describe('interpreter', function() {
       });
 
 
+      it('INVALID_ARGUMENTS on invalid @ literal', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('@"nonsense"');
+
+        // then
+        expect(value).to.be.null;
+        expect(warnings).to.have.length(1);
+        expect(warnings[0].type).to.eql('INVALID_ARGUMENTS');
+      });
+
+
       it('NO_VARIABLE_FOUND', function() {
 
         // when

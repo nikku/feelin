@@ -368,7 +368,11 @@ const builtins = {
       t = parseDate(string);
     }
 
-    return t || null;
+    if (!t) {
+      return invalidArguments('@"{string}" is not a valid temporal literal', { string });
+    }
+
+    return t;
   }, [ 'string' ]),
 
   'now': fn(function() {

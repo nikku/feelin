@@ -905,9 +905,16 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
 
     // fold constant @"..." literals: parse once at build time
     if (isConstant(arg)) {
-      const value = wrapFunction(getBuiltin('@', null)).invoke([ arg.constantValue ]);
+      const wrappedFn = wrapFunction(getBuiltin('@', null));
 
-      return tag(() => isInvocationFailure(value) ? null : value, 'date');
+      if (wrappedFn) {
+        const value = wrappedFn.invoke([ arg.constantValue ]);
+
+        // keep the runtime path (and its warning) on invocation failure
+        if (!isInvocationFailure(value)) {
+          return constant(value, 'date');
+        }
+      }
     }
 
     return tag((context) => {
@@ -923,7 +930,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
         return null;
       }
 
-      return wrappedFn.invoke([ arg(context) ]);
+      return resolveInvocation(wrappedFn.invoke([ arg(context) ]));
     }, 'date');
   }
 

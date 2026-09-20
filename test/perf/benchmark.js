@@ -11,7 +11,7 @@
  */
 import { performance } from 'node:perf_hooks';
 
-import { evaluate, unaryTest } from '../../dist/index.js';
+import { evaluate, unaryTest, compileExpression } from '../../dist/index.js';
 
 const JSON_OUTPUT = process.argv.includes('--json');
 
@@ -85,6 +85,26 @@ scenario('eval: same expression, varying context', (i) => {
 scenario('eval: arithmetic expression', (i) => {
   evaluate('a + b * 2 - c / 4', { a: i, b: i * 2, c: i * 3 });
 }, { iterations: 5000, warmup: 500 });
+
+// --- compiled artifact: parse + build once, evaluate many ---
+
+const compiledArithmetic = compileExpression('a + b * 2 - c / 4');
+
+scenario('eval: compiled arithmetic expression', (i) => {
+  compiledArithmetic.evaluate({ a: i, b: i * 2, c: i * 3 });
+}, { iterations: 5000, warmup: 500 });
+
+const compiledConditional = compileExpression('if age >= 18 then "adult" else "minor"');
+
+scenario('eval: compiled conditional, varying context', (i) => {
+  compiledConditional.evaluate({ age: i % 100 });
+}, { iterations: 5000, warmup: 500 });
+
+const compiledTemporal = compileExpression('date and time("2024-03-15T10:30:00@Europe/Paris") + duration("P1Y2M")');
+
+scenario('eval: compiled date/time literal', () => {
+  compiledTemporal.evaluate({});
+}, { iterations: 3000, warmup: 300 });
 
 // --- context lookup ---
 

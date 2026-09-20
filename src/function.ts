@@ -106,13 +106,15 @@ export class FeelFunction {
 
       // strictly check for required parameter names,
       // and fail on wrong parameter name
-      if (Object.keys(contextOrArgs).some(
-        key => !this.parameterNames.includes(key) && !this.parameterNames.includes(`...${key}`)
-      )) {
-        return parameterMismatch(this, contextOrArgs);
+      for (const key of Object.keys(contextOrArgs)) {
+        if (!this.parameterNames.includes(key) && !this.parameterNames.includes(`...${key}`)) {
+          return parameterMismatch(this, contextOrArgs);
+        }
       }
 
-      params = this.parameterNames.reduce((params, name) => {
+      params = [];
+
+      for (let name of this.parameterNames) {
 
         if (name.startsWith('...')) {
           name = name.slice(3);
@@ -120,17 +122,24 @@ export class FeelFunction {
           const value = contextOrArgs[name];
 
           if (isNil(value)) {
-            return params;
-          } else {
-
-            // ensure that single arg provided for var args named
-            // parameter is wrapped in a list
-            return [ ...params, ...(isArray(value) ? value : [ value ]) ];
+            continue;
           }
+
+          // ensure that single arg provided for var args named
+          // parameter is wrapped in a list
+          if (isArray(value)) {
+            for (const v of value) {
+              params.push(v);
+            }
+          } else {
+            params.push(value);
+          }
+
+          continue;
         }
 
-        return [ ...params, contextOrArgs[name] ];
-      }, []);
+        params.push(contextOrArgs[name]);
+      }
     }
 
     return this.fn.call(null, ...params);

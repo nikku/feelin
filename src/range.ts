@@ -7,7 +7,7 @@ import { getType } from './types.js';
  * `date and time`). They are mutually incomparable: a value of one type is
  * not comparable to a value of another.
  */
-const TEMPORAL_INSTANT_TYPES = [ 'date', 'time', 'date time' ];
+const TEMPORAL_INSTANT_TYPES = new Set([ 'date', 'time', 'date time' ]);
 
 
 /**
@@ -181,8 +181,8 @@ function rangeIncludes(range: FeelRange, value: RangeValue | null) : boolean | n
 
   if (
     range.valueType !== null &&
-    TEMPORAL_INSTANT_TYPES.includes(valueType) &&
-    TEMPORAL_INSTANT_TYPES.includes(range.valueType) &&
+    TEMPORAL_INSTANT_TYPES.has(valueType) &&
+    TEMPORAL_INSTANT_TYPES.has(range.valueType) &&
     valueType !== range.valueType
   ) {
     return null;

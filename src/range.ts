@@ -1,4 +1,4 @@
-import { toComparable } from './temporal.js';
+import { toComparable, compareTemporals } from './temporal.js';
 
 import { getType } from './types.js';
 
@@ -118,6 +118,14 @@ function comparable(value: RangeValue) : RangeValue {
  * `1`.
  */
 function cmp(a: RangeValue, b: RangeValue) : number {
+
+  // order temporal instants at full (nanosecond) precision
+  const temporal = compareTemporals(a, b);
+
+  if (temporal !== null) {
+    return temporal;
+  }
+
   const ca = comparable(a);
   const cb = comparable(b);
 
@@ -318,23 +326,16 @@ function numberRangeMap<T>(start, end, startIncluded, endIncluded, fn: (val) => 
 
   const direction = start > end ? -1 : 1;
 
+  const first = startIncluded ? start : start + direction;
+
+  const pastEnd = endIncluded
+    ? (i) => (i - end) * direction > 0
+    : (i) => (i - end) * direction >= 0;
+
   const result: T[] = [];
 
-  for (let i = start;; i += direction) {
-
-    if (i === start && !startIncluded) {
-      continue;
-    }
-
-    if (i === end && !endIncluded) {
-      break;
-    }
-
+  for (let i = first; !pastEnd(i); i += direction) {
     result.push(fn(i));
-
-    if (i === end) {
-      break;
-    }
   }
 
   return result;
@@ -359,10 +360,14 @@ function charRangeValues(start, end, startIncluded, endIncluded) : string[] | nu
     endIdx -= direction;
   }
 
-  return CHARS.slice(
-    Math.min(startIdx, endIdx),
-    Math.max(startIdx, endIdx) + 1
-  );
+  const values: string[] = [];
+
+  // preserve direction; an empty (adjusted) interval yields no values
+  for (let i = startIdx; (endIdx - i) * direction >= 0; i += direction) {
+    values.push(CHARS[i]);
+  }
+
+  return values;
 }
 
 

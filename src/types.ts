@@ -187,11 +187,21 @@ export function equals(a, b, strict = false) {
 
     // strict equality (`is`) requires identical zones: the same instant
     // expressed via different zones is not the same value
+    // (DMN TCK 0103-feel-is-function, e.g. time_013)
     if (strict && !zoneEquals(a.zone ?? null, b.zone ?? null)) {
       return false;
     }
 
-    return toComparable(a) === toComparable(b);
+    const ca = toComparable(a);
+    const cb = toComparable(b);
+
+    // expanded-year dates are beyond the range Temporal can represent;
+    // compare them structurally
+    if (ca === null || cb === null) {
+      return a.iso === b.iso;
+    }
+
+    return ca === cb;
   }
 
   if (aType !== bType) {
@@ -213,6 +223,21 @@ export function equals(a, b, strict = false) {
   }
 
   if (aType === 'duration') {
+
+    // years and months and days and time durations are distinct FEEL
+    // types: a regular comparison across kinds yields `null`
+    // (DMN TCK 0068-feel-equality ym_duration_006), except two zero
+    // durations, which are equal (dt_duration_008); strict `is`
+    // equality across kinds is always `false`
+    // (DMN TCK 0103-feel-is-function zero_duration_001)
+    if (a.yearsMonths !== b.yearsMonths) {
+      if (strict) {
+        return false;
+      }
+
+      return a.value.sign === 0 && b.value.sign === 0 ? true : null;
+    }
+
     return durationEquals(a, b);
   }
 

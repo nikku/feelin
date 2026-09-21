@@ -1003,14 +1003,25 @@ const builtins = {
         });
       }
 
-      context[key] = entry.value;
+      // keys may be `__proto__`; assign as an own property
+      Object.defineProperty(context, key, { value: entry.value, writable: true, enumerable: true, configurable: true });
     }
 
     return context;
   }, 'context', [ '...entries' ]),
 
   'context merge': listFn(function(...contexts) {
-    return Object.assign({}, ...contexts);
+    const merged = {};
+
+    for (const context of contexts) {
+      for (const key of Object.keys(context)) {
+
+        // keys may be `__proto__`; assign as an own property
+        Object.defineProperty(merged, key, { value: context[key], writable: true, enumerable: true, configurable: true });
+      }
+    }
+
+    return merged;
   }, 'context', [ '...contexts' ]),
 
   'context put': fn(function(context, keys, value, key) {

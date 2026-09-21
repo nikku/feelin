@@ -325,9 +325,21 @@ function coerceContext(value) {
   }
 
   if (isContext(value)) {
-    return Object.fromEntries(
-      Object.entries(value).map(([ key, entry ]) => [ key, coerceContext(entry) ])
-    );
+
+    // preserve own properties with their visibility: non-enumerable
+    // entries are visible to FEEL lookups (cf. utils `has`)
+    const result = {};
+
+    for (const key of Object.getOwnPropertyNames(value)) {
+      const descriptor = Object.getOwnPropertyDescriptor(value, key)!;
+
+      Object.defineProperty(result, key, 'get' in descriptor ? descriptor : {
+        ...descriptor,
+        value: coerceContext(descriptor.value)
+      });
+    }
+
+    return result;
   }
 
   return toFeel(value);
@@ -523,8 +535,9 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
       for (const arg of entries) {
         const [ key, value ] = arg(merged);
 
-        merged[key] = value;
-        result[key] = value;
+        // keys may be `__proto__`; assign as an own property
+        Object.defineProperty(merged, key, { value, writable: true, enumerable: true, configurable: true });
+        Object.defineProperty(result, key, { value, writable: true, enumerable: true, configurable: true });
       }
 
       return result;

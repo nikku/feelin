@@ -631,7 +631,15 @@ function describeBuiltins(name, evaluate) {
         ) = duration("-P1Y")
       `, true);
 
-      expr('duration("-P1Y") = duration("-P365D")', true);
+      // years and months and days and time durations are distinct FEEL
+      // types; comparing across kinds yields null, except two zero
+      // durations (DMN TCK 0068-feel-equality)
+      expr('duration("-P1Y") = duration("-P365D")', null);
+      expr('duration("P1Y") = duration("P365D")', null);
+      expr('duration("P0Y") = duration("P0D")', true);
+      expr('duration("P0D") = duration("PT0S")', true);
+      expr('is(duration("P0Y"), duration("P0D"))', false);
+      expr('is(duration("P1Y"), duration("P12M"))', true);
 
       expr('date and time("2012-12-24") = date and time("2012-12-24T00:00:00")', true);
 
@@ -934,6 +942,21 @@ function describeBuiltins(name, evaluate) {
       // keys named like javascript special properties are accepted
       expr('context(entries: [{key:"constructor", value:1}])', { 'constructor':1 });
       expr('context(entries: [{key:"toString", value:1}])', { 'toString':1 });
+
+      it('should keep a <__proto__> key as an own property', function() {
+        const { value } = evaluate('context(entries: [{key:"__proto__", value:1}])');
+
+        expect(Object.prototype.hasOwnProperty.call(value, '__proto__')).to.be.true;
+        expect(value['__proto__']).to.eql(1);
+      });
+
+      it('should keep a <__proto__> key on context merge', function() {
+        const { value } = evaluate('context merge([{ "__proto__": 1 }, { y: 2 }])');
+
+        expect(Object.prototype.hasOwnProperty.call(value, '__proto__')).to.be.true;
+        expect(value['__proto__']).to.eql(1);
+        expect(value.y).to.eql(2);
+      });
 
       expr('context merge([{x:1}, {y:2}])', { x:1, y:2 });
       expr('context merge([{x:1, y:0}, {y:2}])', { x:1, y:2 });

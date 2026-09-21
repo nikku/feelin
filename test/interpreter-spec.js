@@ -133,7 +133,19 @@ describe('interpreter', function() {
         expr('string(time("10:30:00") - time("09:00:00"))', 'PT1H30M');
         expr('string(time("09:00:00") - time("10:00:00"))', '-PT1H');
         expr('string(time("12:00:00+01:00") - time("10:00:00+01:00"))', 'PT2H');
-        expr('time("00:01:00@Etc/UTC") - time("23:59:00z") = duration("-PT23H58M")', true);
+
+        // zoned times subtract as the absolute instant difference
+        // (mirroring camunda/feel-scala ZonedTime#between)
+        expr('time("00:01:00@Etc/UTC") - time("23:59:00z") = duration("PT23H58M")', true);
+
+        // zoned subtraction honors offsets (same wall clock, different
+        // instants)
+        expr('string(time("10:00:00+01:00") - time("10:00:00Z"))', 'PT1H');
+        expr('string(time("10:00:00Z") - time("10:00:00+01:00"))', 'PT1H');
+
+        // zoned date times subtract as signed instant difference
+        expr('string(date and time("2020-01-01T10:00:00Z") - date and time("2020-01-01T10:00:00+01:00"))', 'PT1H');
+        expr('string(date and time("2020-01-01T10:00:00+01:00") - date and time("2020-01-01T10:00:00Z"))', '-PT1H');
 
         expr(`
           time("23:59:00z") + duration("PT2M") =
@@ -186,6 +198,9 @@ describe('interpreter', function() {
         expr('duration("P0Y") + duration("P0D")', null);
 
         expr('date("2023-10-06") + duration("PT1H")', date('2023-10-06T01:00Z'));
+
+        // a subsecond time component promotes a date to a date time
+        expr('date("2020-01-01") + duration("PT0.000000001S")', date('2020-01-01T00:00:00.000000001Z'));
         expr('date("2023-10-06") + duration("P1D")', date('2023-10-07'));
         expr('date("2023-10-06") + duration("P7D")', date('2023-10-13'));
         expr('date("2023-10-06") + duration("P1M")', date('2023-11-06'));
@@ -401,6 +416,28 @@ describe('interpreter', function() {
 
       expr('for a in 1 .. 3 return a', [ 1, 2, 3 ]);
 
+      expr('for a in (1 .. 3] return a', [ 2, 3 ]);
+
+      expr('for a in [1 .. 3) return a', [ 1, 2 ]);
+
+      // empty exclusive ranges terminate
+      expr('for a in (1 .. 1] return a', []);
+
+      expr('for a in [1 .. 1) return a', []);
+
+      expr('for a in (1 .. 1) return a', []);
+
+      expr('for a in (3 .. 1] return a', [ 2, 1 ]);
+
+      // char ranges preserve direction
+      expr('for c in "a".."c" return c', [ 'a', 'b', 'c' ]);
+
+      expr('for c in "c".."a" return c', [ 'c', 'b', 'a' ]);
+
+      expr('for c in ("c".."a") return c', [ 'b' ]);
+
+      expr('for c in ("a".."a"] return c', []);
+
       expr('for a in 1 .. 2, b in 1 .. 2 return a * 10 + b', [ 11, 12, 21, 22 ]);
 
       expr('for i in 0..4 return if i = 0 then 1 else i * partial[-1]', [ 1, 1, 2, 6, 24 ]);
@@ -558,6 +595,15 @@ describe('interpreter', function() {
       expr('"1020ZZ" >= "1015CJ" and "1020ZZ" <= "1020ZZ"', true);
       expr('"1014AA" >= "1015CJ" and "1014AA" <= "1020ZZ"', false);
       expr('"1021AA" >= "1015CJ" and "1021AA" <= "1020ZZ"', false);
+
+      // ordering retains nanosecond precision, while equality is
+      // defined at millisecond precision (DMN TCK 0068-feel-equality
+      // time_005, datetime_003_a)
+      expr('time("10:00:00.000000001") < time("10:00:00.000000002")', true);
+      expr('time("10:00:00.000000002") > time("10:00:00.000000001")', true);
+      expr('date and time("2020-01-01T10:00:00.000000001") < date and time("2020-01-01T10:00:00.000000002")', true);
+      expr('time("10:00:00.000000001") in [time("10:00:00.000000001")..time("10:00:00.000000002")]', true);
+      expr('time("10:30:00.0001") = time("10:30:00.0002")', true);
 
       expr('1 between -1 and 5', true);
 
@@ -1147,6 +1193,14 @@ describe('interpreter', function() {
         }
       `, { a: 1, b: 2 });
 
+      it('should keep a <__proto__> entry as an own property', function() {
+        const { value } = evaluate('{ "__proto__": 1 }');
+
+        expect(Object.prototype.hasOwnProperty.call(value, '__proto__')).to.be.true;
+        expect(value['__proto__']).to.eql(1);
+        expect(evaluate('get value({ "__proto__": 1 }, "__proto__")').value).to.eql(1);
+      });
+
     });
 
 
@@ -1491,6 +1545,27 @@ describe('interpreter', function() {
     describe('DateAndTime', function() {
 
       expr('time("10:30:00+05:00").time offset = @"PT5H"', true);
+
+      // the FEEL offset is bounded to ±18:00 (DMN TCK
+      // 1116-feel-time-function 067/068,
+      // 1117-feel-date-and-time-function 078/079)
+      expr('time("13:20:00+18:00") != null', true);
+      expr('time("13:20:00+19:00")', null);
+      expr('time("13:20:00-19:00")', null);
+      expr('date and time("2017-12-31T13:20:00+19:00")', null);
+      expr('date and time("2017-12-31T13:20:00-19:00")', null);
+      expr('time(13, 20, 0, duration("PT18H")) != null', true);
+      expr('time(13, 20, 0, duration("PT19H"))', null);
+      expr('time(13, 20, 0, duration("-PT19H"))', null);
+
+      // expanded years serialize in FEEL form (DMN TCK
+      // 1115-feel-date-function 015/029/030,
+      // 1117-feel-date-and-time-function 011/027)
+      expr('string(date("999999999-12-31"))', '999999999-12-31');
+      expr('string(date(999999999, 12, 31))', '999999999-12-31');
+      expr('string(date(-999999999, 12, 31))', '-999999999-12-31');
+      expr('string(date and time("99999-12-31T11:22:33"))', '99999-12-31T11:22:33');
+      expr('string(date and time("999999999-12-31T23:59:59.999999999@Europe/Paris"))', '999999999-12-31T23:59:59.999999999@Europe/Paris');
 
     });
 

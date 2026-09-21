@@ -8,14 +8,14 @@
     </defs>
 
     <g clip-path="url(#round-corners)">
-      <rect width="92.59620068192889" height="5" fill="rgb(26, 127, 55)" x="0" y="0">
-        <title>1901 tests passing</title>
+      <rect width="93.76522162688748" height="5" fill="rgb(26, 127, 55)" x="0" y="0">
+        <title>1925 tests passing</title>
       </rect>
-      <rect width="4.968339016074038" height="5" fill="rgb(200, 200, 200)" x="92.59620068192889" y="0">
-        <title>102 tests pending</title>
+      <rect width="4.335119337554798" height="5" fill="rgb(200, 200, 200)" x="93.76522162688748" y="0">
+        <title>89 tests pending</title>
       </rect>
-      <rect width="2.4354603019970775" height="5" fill="rgb(209, 36, 47)" x="97.56453969800293" y="0">
-        <title>50 tests failing</title>
+      <rect width="1.8996590355577203" height="5" fill="rgb(209, 36, 47)" x="98.10034096444228" y="0">
+        <title>39 tests failing</title>
       </rect>
     </g>
 

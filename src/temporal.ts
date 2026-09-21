@@ -1,7 +1,5 @@
 import { Temporal } from 'temporal-polyfill';
 
-import { notImplemented } from './utils.js';
-
 /**
  * This module is the single place in the code base that talks to the
  * underlying temporal implementation ({@link Temporal}, provided by
@@ -25,14 +23,46 @@ const REFERENCE_DATE = Temporal.PlainDate.from('1970-01-01');
 // wrapper classes ///////////////////////////////////////////////////
 
 /**
+ * Date components of an expanded-year date, i.e. a date whose year is
+ * outside the range `Temporal` can represent (beyond ±275760).
+ */
+type ExpandedDate = {
+  year: number;
+  month: number;
+  day: number;
+};
+
+/**
+ * Render a year in FEEL form: at least four digits, no `+` sign and no
+ * extra padding for expanded years (e.g. `99999`, `-999999999`).
+ */
+function isoYear(year: number) : string {
+  const sign = year < 0 ? '-' : '';
+
+  return sign + String(Math.abs(year)).padStart(4, '0');
+}
+
+function isoDate(year: number, month: number, day: number) : string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+
+  return `${isoYear(year)}-${pad(month)}-${pad(day)}`;
+}
+
+/**
  * A FEEL <date> (e.g. `2020-04-06`).
  */
 export class FeelDate {
 
   /**
-   * @internal underlying temporal value
+   * @internal underlying temporal value; `null` for an expanded-year
+   * date beyond the range `Temporal` can represent
    */
-  readonly value: Temporal.PlainDate;
+  readonly value: Temporal.PlainDate | null;
+
+  /**
+   * @internal date components of an expanded-year date
+   */
+  private readonly expanded: ExpandedDate | null;
 
   /**
    * @internal canonical ISO-8601 form; drives both display and
@@ -40,20 +70,27 @@ export class FeelDate {
    */
   readonly iso: string;
 
-  constructor(value: Temporal.PlainDate) {
+  constructor(value: Temporal.PlainDate | null, expanded: ExpandedDate | null = null) {
     this.value = value;
-    this.iso = this.value.toString();
+    this.expanded = expanded;
+
+    const { year, month, day } = expanded ?? value!;
+
+    // FEEL renders expanded years unpadded and unsigned, unlike the
+    // ISO-8601 extended form (`+099999`) emitted by Temporal
+    this.iso = isoDate(year, month, day);
 
     // the raw Temporal value is an implementation detail; keep it
     // non-enumerable so structural equality and serialization rely on
     // the canonical `iso` string rather than the underlying value
     Object.defineProperty(this, 'value', { enumerable: false });
+    Object.defineProperty(this, 'expanded', { enumerable: false });
   }
 
-  get year() { return this.value.year; }
-  get month() { return this.value.month; }
-  get day() { return this.value.day; }
-  get weekday() { return this.value.dayOfWeek; }
+  get year() { return this.value ? this.value.year : this.expanded!.year; }
+  get month() { return this.value ? this.value.month : this.expanded!.month; }
+  get day() { return this.value ? this.value.day : this.expanded!.day; }
+  get weekday() { return this.value ? this.value.dayOfWeek : null; }
 
   /**
    * Return the underlying `Temporal.PlainDate`.
@@ -61,7 +98,7 @@ export class FeelDate {
    * Escape hatch for consumers that need the raw temporal value. The
    * returned type is implementation specific and may change.
    */
-  unwrap() : Temporal.PlainDate {
+  unwrap() : Temporal.PlainDate | null {
     return this.value;
   }
 
@@ -145,9 +182,15 @@ export class FeelTime {
 export class FeelDateTime {
 
   /**
-   * @internal wall-clock date and time
+   * @internal wall-clock date and time; `null` for an expanded-year
+   * date time beyond the range `Temporal` can represent
    */
-  readonly value: Temporal.PlainDateTime;
+  readonly value: Temporal.PlainDateTime | null;
+
+  /**
+   * @internal date and time components of an expanded-year date time
+   */
+  private readonly expanded: (ExpandedDate & { time: Temporal.PlainTime }) | null;
 
   /**
    * @internal time zone identifier, `null` for a local date time
@@ -160,28 +203,50 @@ export class FeelDateTime {
    */
   readonly iso: string;
 
-  constructor(value: Temporal.PlainDateTime, zone: string | null = null) {
+  constructor(
+      value: Temporal.PlainDateTime | null,
+      zone: string | null = null,
+      expanded: (ExpandedDate & { time: Temporal.PlainTime }) | null = null
+  ) {
     this.value = value;
     this.zone = zone;
-    this.iso = this.value.toString() + (this.zone === null ? '' : zoneSuffix(this.zone));
+    this.expanded = expanded;
+
+    // FEEL renders expanded years unpadded and unsigned, unlike the
+    // ISO-8601 extended form (`+099999`) emitted by Temporal
+    const datePart = expanded
+      ? isoDate(expanded.year, expanded.month, expanded.day)
+      : isoDate(value!.year, value!.month, value!.day);
+
+    const timePart = expanded ? expanded.time : value!.toPlainTime();
+
+    this.iso = `${datePart}T${timePart}` + (this.zone === null ? '' : zoneSuffix(this.zone));
 
     // the raw Temporal value is an implementation detail; keep it
     // non-enumerable so structural equality and serialization rely on
     // the canonical `iso` string rather than the underlying value
     Object.defineProperty(this, 'value', { enumerable: false });
+    Object.defineProperty(this, 'expanded', { enumerable: false });
   }
 
-  get year() { return this.value.year; }
-  get month() { return this.value.month; }
-  get day() { return this.value.day; }
-  get hour() { return this.value.hour; }
-  get minute() { return this.value.minute; }
-  get second() { return this.value.second; }
-  get weekday() { return this.value.dayOfWeek; }
+  get year() { return this.value ? this.value.year : this.expanded!.year; }
+  get month() { return this.value ? this.value.month : this.expanded!.month; }
+  get day() { return this.value ? this.value.day : this.expanded!.day; }
+  get hour() { return this.value ? this.value.hour : this.expanded!.time.hour; }
+  get minute() { return this.value ? this.value.minute : this.expanded!.time.minute; }
+  get second() { return this.value ? this.value.second : this.expanded!.time.second; }
+  get weekday() { return this.value ? this.value.dayOfWeek : null; }
   get timezone() { return this.zone; }
 
   get 'time offset'() {
-    return this.zone === null ? null : zoneOffset(this);
+
+    // the offset of an expanded-year date time cannot be resolved
+    // against a calendar
+    if (this.zone === null || this.value === null) {
+      return null;
+    }
+
+    return zoneOffset(this);
   }
 
   /**
@@ -189,8 +254,10 @@ export class FeelDateTime {
    *
    * Escape hatch for consumers that need the raw temporal value. Zone
    * information is available via {@link timezone} / {@link 'time offset'}.
+   * Returns `null` for an expanded-year date time beyond the range
+   * `Temporal` can represent.
    */
-  unwrap() : Temporal.PlainDateTime {
+  unwrap() : Temporal.PlainDateTime | null {
     return this.value;
   }
 
@@ -544,7 +611,12 @@ function zoneOffset(temporal: FeelTime | FeelDateTime) : FeelDuration {
  * and zone-less values to UTC. Sub-minute fixed offsets are applied
  * manually, as Temporal rejects such offset zones.
  */
-function toInstant(temporal: FeelTemporal) : Temporal.ZonedDateTime {
+function toInstant(temporal: FeelTemporal) : Temporal.ZonedDateTime | null {
+
+  // expanded-year dates are beyond the range Temporal can represent
+  if (temporal.value === null) {
+    return null;
+  }
 
   if (isDate(temporal)) {
     return temporal.value.toZonedDateTime('UTC');
@@ -584,7 +656,12 @@ export function toComparable(value) : number | null {
 
   if (isDate(value) || isTime(value) || isDateTime(value)) {
 
-    return toInstant(value).epochMilliseconds;
+    // expanded-year dates are beyond the range Temporal can represent
+    if (value.value === null) {
+      return null;
+    }
+
+    return toInstant(value)!.epochMilliseconds;
   }
 
   if (isDuration(value)) {
@@ -756,7 +833,7 @@ export function addDuration(temporal: FeelTemporal, dur: FeelDuration, sign: num
 /**
  * Subtract two temporal instants, yielding a {@link FeelDuration}.
  */
-export function subtractTemporals(a: FeelTemporal, b: FeelTemporal) : FeelDuration {
+export function subtractTemporals(a: FeelTemporal, b: FeelTemporal) : FeelDuration | null {
 
   const zoned = isZoned(a) || isZoned(b);
 
@@ -767,16 +844,29 @@ export function subtractTemporals(a: FeelTemporal, b: FeelTemporal) : FeelDurati
       return new FeelDuration(a.value.since(b.value));
     }
 
+    // expanded-year dates do not support arithmetic
+    if (a.value === null || b.value === null) {
+      return null;
+    }
+
     const left = toPlainDateTime(a);
     const right = toPlainDateTime(b);
 
     return new FeelDuration(left.since(right, { largestUnit: 'day' }));
   }
 
+  const leftInstant = toInstant(a);
+  const rightInstant = toInstant(b);
+
+  // expanded-year dates do not support arithmetic
+  if (leftInstant === null || rightInstant === null) {
+    return null;
+  }
+
   // zoned values subtract as instants; ZonedDateTime requires a common
   // zone, so difference in UTC
-  const left = toInstant(a).withTimeZone('UTC');
-  const right = toInstant(b).withTimeZone('UTC');
+  const left = leftInstant.withTimeZone('UTC');
+  const right = rightInstant.withTimeZone('UTC');
 
   // times have no date component: subtract as the absolute instant
   // difference (mirroring camunda/feel-scala ZonedTime#between)
@@ -879,14 +969,42 @@ export function combine(date: FeelDate | FeelDateTime, time: FeelTime) : FeelDat
 // construction //////////////////////////////////////////////////////
 
 /**
+ * Whether date components denote a valid (proleptic Gregorian) date.
+ */
+function isValidDateParts(year: number, month: number, day: number) : boolean {
+
+  if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) {
+    return false;
+  }
+
+  if (month < 1 || month > 12 || day < 1) {
+    return false;
+  }
+
+  const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+
+  const daysInMonth = [ 31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 ][month - 1];
+
+  return day <= daysInMonth;
+}
+
+/**
  * Construct a {@link FeelDate} from components, returning `null` for
- * invalid input.
+ * invalid input. Years beyond the range `Temporal` can represent yield
+ * an expanded-year date.
  */
 export function dateFrom(year: number, month: number, day: number) : FeelDate | null {
-  try {
-    return new FeelDate(Temporal.PlainDate.from({ year, month, day }, { overflow: 'reject' }));
-  } catch {
+
+  if (!isValidDateParts(year, month, day)) {
     return null;
+  }
+
+  try {
+    return new FeelDate(new Temporal.PlainDate(year, month, day));
+  } catch {
+
+    // out of the Temporal range: retain as an expanded-year date
+    return new FeelDate(null, { year, month, day });
   }
 }
 
@@ -953,14 +1071,30 @@ function offsetZone(offset: FeelDuration) : string {
 // parsing ///////////////////////////////////////////////////////////
 
 /**
+ * A FEEL date part with an expanded (or negative) year, e.g.
+ * `999999999-12-31`; ISO-8601 only covers four-digit (or signed
+ * six-digit) years.
+ */
+const EXPANDED_DATE_PATTERN = /^(-?\d+)-(\d{2})-(\d{2})$/;
+
+/**
  * Parse a FEEL <date> string (`2020-01-01`).
  *
  * Returns `null` if the input is not a valid date.
  */
 export function parseDate(str: string) : FeelDate | null {
 
-  if (str.startsWith('-')) {
-    throw notImplemented('negative date');
+  const expandedMatch = EXPANDED_DATE_PATTERN.exec(str);
+
+  if (expandedMatch) {
+
+    // covers expanded and negative years, which ISO-8601 strings
+    // (and thus `Temporal.PlainDate.from`) cannot express
+    return dateFrom(
+      Number(expandedMatch[1]),
+      Number(expandedMatch[2]),
+      Number(expandedMatch[3])
+    );
   }
 
   try {
@@ -1001,10 +1135,6 @@ export function parseTime(str: string) : FeelTime | null {
  */
 export function parseDateTime(str: string) : FeelDateTime | null {
 
-  if (str.startsWith('-')) {
-    throw notImplemented('negative date');
-  }
-
   const { value: parsedValue, zone } = splitZone(str);
 
   let value = parsedValue;
@@ -1017,6 +1147,33 @@ export function parseDateTime(str: string) : FeelDateTime | null {
 
     if (!isValidZone(zone)) {
       return null;
+    }
+
+    const expandedMatch = EXPANDED_DATE_PATTERN.exec(value.split('T')[0]);
+
+    if (expandedMatch) {
+
+      // expanded or negative year: beyond what ISO-8601 strings (and
+      // possibly `Temporal`) can express
+      const year = Number(expandedMatch[1]);
+      const month = Number(expandedMatch[2]);
+      const day = Number(expandedMatch[3]);
+
+      if (!isValidDateParts(year, month, day)) {
+        return null;
+      }
+
+      const timePart = Temporal.PlainTime.from(value.substring(value.indexOf('T') + 1));
+
+      try {
+        const datePart = new Temporal.PlainDate(year, month, day);
+
+        return new FeelDateTime(datePart.toPlainDateTime(timePart), zone);
+      } catch {
+
+        // out of the Temporal range: retain as an expanded-year date time
+        return new FeelDateTime(null, zone, { year, month, day, time: timePart });
+      }
     }
 
     return new FeelDateTime(Temporal.PlainDateTime.from(value), zone);

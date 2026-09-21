@@ -192,7 +192,16 @@ export function equals(a, b, strict = false) {
       return false;
     }
 
-    return toComparable(a) === toComparable(b);
+    const ca = toComparable(a);
+    const cb = toComparable(b);
+
+    // expanded-year dates are beyond the range Temporal can represent;
+    // compare them structurally
+    if (ca === null || cb === null) {
+      return a.iso === b.iso;
+    }
+
+    return ca === cb;
   }
 
   if (aType !== bType) {

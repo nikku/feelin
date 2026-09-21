@@ -1548,6 +1548,15 @@ describe('interpreter', function() {
       expr('time(13, 20, 0, duration("PT19H"))', null);
       expr('time(13, 20, 0, duration("-PT19H"))', null);
 
+      // expanded years serialize in FEEL form (DMN TCK
+      // 1115-feel-date-function 015/029/030,
+      // 1117-feel-date-and-time-function 011/027)
+      expr('string(date("999999999-12-31"))', '999999999-12-31');
+      expr('string(date(999999999, 12, 31))', '999999999-12-31');
+      expr('string(date(-999999999, 12, 31))', '-999999999-12-31');
+      expr('string(date and time("99999-12-31T11:22:33"))', '99999-12-31T11:22:33');
+      expr('string(date and time("999999999-12-31T23:59:59.999999999@Europe/Paris"))', '999999999-12-31T23:59:59.999999999@Europe/Paris');
+
     });
 
   });

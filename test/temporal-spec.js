@@ -106,6 +106,34 @@ describe('temporal', function() {
       expect(JSON.stringify(duration('P0M'))).to.eql('"P0M"');
     });
 
+
+    it('should serialize expanded years in FEEL form', function() {
+
+      // FEEL renders expanded years unpadded and unsigned, unlike the
+      // ISO-8601 extended form (`+099999`) emitted by Temporal
+      expect(String(date('99999-12-31'))).to.eql('99999-12-31');
+      expect(String(dateAndTime('99999-12-31T11:22:33'))).to.eql('99999-12-31T11:22:33');
+
+      // beyond the Temporal range entirely
+      expect(String(date('999999999-12-31'))).to.eql('999999999-12-31');
+      expect(String(date('-999999999-12-31'))).to.eql('-999999999-12-31');
+      expect(String(dateAndTime('999999999-12-31T23:59:59.999999999@Europe/Paris')))
+        .to.eql('999999999-12-31T23:59:59.999999999@Europe/Paris');
+    });
+
+
+    it('should compare expanded-year dates structurally', function() {
+      expect(evaluate('date("999999999-12-31") = date("999999999-12-31")').value).to.be.true;
+      expect(evaluate('date("999999999-12-31") = date("999999999-12-30")').value).to.be.false;
+      expect(evaluate('date(999999999, 12, 31) = date("999999999-12-31")').value).to.be.true;
+    });
+
+
+    it('should reject invalid expanded-year dates', function() {
+      expect(date('999999999-13-01')).to.be.null;
+      expect(date('999999999-02-30')).to.be.null;
+    });
+
   });
 
 

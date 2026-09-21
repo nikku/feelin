@@ -133,6 +133,7 @@ describe('interpreter', function() {
         expr('string(time("10:30:00") - time("09:00:00"))', 'PT1H30M');
         expr('string(time("09:00:00") - time("10:00:00"))', '-PT1H');
         expr('string(time("12:00:00+01:00") - time("10:00:00+01:00"))', 'PT2H');
+
         // zoned times subtract as the absolute instant difference
         // (mirroring camunda/feel-scala ZonedTime#between)
         expr('time("00:01:00@Etc/UTC") - time("23:59:00z") = duration("PT23H58M")', true);
@@ -141,6 +142,7 @@ describe('interpreter', function() {
         // instants)
         expr('string(time("10:00:00+01:00") - time("10:00:00Z"))', 'PT1H');
         expr('string(time("10:00:00Z") - time("10:00:00+01:00"))', 'PT1H');
+
         // zoned date times subtract as signed instant difference
         expr('string(date and time("2020-01-01T10:00:00Z") - date and time("2020-01-01T10:00:00+01:00"))', 'PT1H');
         expr('string(date and time("2020-01-01T10:00:00+01:00") - date and time("2020-01-01T10:00:00Z"))', '-PT1H');
@@ -1190,6 +1192,14 @@ describe('interpreter', function() {
           b: a + 1
         }
       `, { a: 1, b: 2 });
+
+      it('should keep a <__proto__> entry as an own property', function() {
+        const { value } = evaluate('{ "__proto__": 1 }');
+
+        expect(Object.prototype.hasOwnProperty.call(value, '__proto__')).to.be.true;
+        expect(value['__proto__']).to.eql(1);
+        expect(evaluate('get value({ "__proto__": 1 }, "__proto__")').value).to.eql(1);
+      });
 
     });
 

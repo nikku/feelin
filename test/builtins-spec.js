@@ -943,6 +943,21 @@ function describeBuiltins(name, evaluate) {
       expr('context(entries: [{key:"constructor", value:1}])', { 'constructor':1 });
       expr('context(entries: [{key:"toString", value:1}])', { 'toString':1 });
 
+      it('should keep a <__proto__> key as an own property', function() {
+        const { value } = evaluate('context(entries: [{key:"__proto__", value:1}])');
+
+        expect(Object.prototype.hasOwnProperty.call(value, '__proto__')).to.be.true;
+        expect(value['__proto__']).to.eql(1);
+      });
+
+      it('should keep a <__proto__> key on context merge', function() {
+        const { value } = evaluate('context merge([{ "__proto__": 1 }, { y: 2 }])');
+
+        expect(Object.prototype.hasOwnProperty.call(value, '__proto__')).to.be.true;
+        expect(value['__proto__']).to.eql(1);
+        expect(value.y).to.eql(2);
+      });
+
       expr('context merge([{x:1}, {y:2}])', { x:1, y:2 });
       expr('context merge([{x:1, y:0}, {y:2}])', { x:1, y:2 });
 

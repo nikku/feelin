@@ -209,6 +209,20 @@ describe('temporal', function() {
     });
 
 
+    it('should preserve non-enumerable own context entries', function() {
+
+      // non-enumerable own properties are visible to FEEL lookups
+      const context = Object.defineProperty({}, 'a', {
+        value: Temporal.PlainDate.from('2020-04-06'),
+        enumerable: false
+      });
+
+      const output = evaluate('a = date("2020-04-06")', context);
+
+      expect(output.value).to.be.true;
+    });
+
+
     it('should coerce nested context entries', function() {
       const output = evaluate('a.b = date("2020-04-06")', {
         a: { b: Temporal.PlainDate.from('2020-04-06') }

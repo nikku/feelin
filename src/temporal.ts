@@ -328,6 +328,13 @@ const YEARS_MONTHS_PATTERN = /[YM]/;
 const LEAP_SECOND_PATTERN = /^\d{2}:\d{2}:60/;
 
 /**
+ * The FEEL <time> offset is bounded to ±18:00 (DMN TCK
+ * 1116-feel-time-function 067/068, 1117-feel-date-and-time-function
+ * 078/079).
+ */
+const MAX_OFFSET_SECONDS = 18 * 3600;
+
+/**
  * Split a trailing time zone indicator off an ISO date / time string.
  *
  * Recognizes `Z`, numeric offsets (`+HH:MM`) and named zones (`@Zone`).
@@ -432,8 +439,8 @@ function fixedOffsetSeconds(zone: string) : number | null {
 
 /**
  * Whether a zone identifier is usable: a known (IANA) zone or a fixed
- * offset within ±24h. Sub-minute offset zones are validated by range,
- * as Temporal rejects them.
+ * offset within the FEEL bound of ±18:00. Sub-minute offset zones are
+ * validated by range, as Temporal rejects them.
  */
 const zoneValidity = new Set<string>();
 
@@ -443,10 +450,10 @@ function isValidZone(zone: string | null) : boolean {
     return true;
   }
 
-  const offsetSeconds = offsetZoneSeconds(zone);
+  const offsetSeconds = fixedOffsetSeconds(zone);
 
   if (offsetSeconds !== null) {
-    return Math.abs(offsetSeconds) < 24 * 3600;
+    return Math.abs(offsetSeconds) <= MAX_OFFSET_SECONDS;
   }
 
   // cache positive results only: the set of valid zones is bounded in
@@ -898,16 +905,14 @@ export function timeFrom(hour: number, minute: number, second: number, offset: F
 
     if (zone !== null) {
 
+      // the FEEL offset is bounded to ±18:00
+      if (!isValidZone(zone)) {
+        return null;
+      }
+
       const offsetSeconds = offsetZoneSeconds(zone);
 
-      if (offsetSeconds !== null) {
-
-        // sub-minute offset: validate the range manually, as Temporal
-        // rejects offset zones with second precision
-        if (Math.abs(offsetSeconds) >= 24 * 3600) {
-          return null;
-        }
-      } else {
+      if (offsetSeconds === null) {
 
         // validate the offset (throws for an out-of-range offset)
         REFERENCE_DATE.toZonedDateTime({ plainTime: value, timeZone: zone });

@@ -1536,6 +1536,18 @@ describe('interpreter', function() {
 
       expr('time("10:30:00+05:00").time offset = @"PT5H"', true);
 
+      // the FEEL offset is bounded to ±18:00 (DMN TCK
+      // 1116-feel-time-function 067/068,
+      // 1117-feel-date-and-time-function 078/079)
+      expr('time("13:20:00+18:00") != null', true);
+      expr('time("13:20:00+19:00")', null);
+      expr('time("13:20:00-19:00")', null);
+      expr('date and time("2017-12-31T13:20:00+19:00")', null);
+      expr('date and time("2017-12-31T13:20:00-19:00")', null);
+      expr('time(13, 20, 0, duration("PT18H")) != null', true);
+      expr('time(13, 20, 0, duration("PT19H"))', null);
+      expr('time(13, 20, 0, duration("-PT19H"))', null);
+
     });
 
   });

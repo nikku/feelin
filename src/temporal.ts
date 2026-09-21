@@ -695,9 +695,9 @@ export function absDuration(d: FeelDuration) : FeelDuration {
  * Whether a duration carries a sub-day (time) component.
  */
 function hasTimeComponent(d: FeelDuration) : boolean {
-  const { hours, minutes, seconds, milliseconds } = d.value;
+  const { hours, minutes, seconds, milliseconds, microseconds, nanoseconds } = d.value;
 
-  return !!(hours || minutes || seconds || milliseconds);
+  return !!(hours || minutes || seconds || milliseconds || microseconds || nanoseconds);
 }
 
 

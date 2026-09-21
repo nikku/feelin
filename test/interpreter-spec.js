@@ -196,6 +196,9 @@ describe('interpreter', function() {
         expr('duration("P0Y") + duration("P0D")', null);
 
         expr('date("2023-10-06") + duration("PT1H")', date('2023-10-06T01:00Z'));
+
+        // a subsecond time component promotes a date to a date time
+        expr('date("2020-01-01") + duration("PT0.000000001S")', date('2020-01-01T00:00:00.000000001Z'));
         expr('date("2023-10-06") + duration("P1D")', date('2023-10-07'));
         expr('date("2023-10-06") + duration("P7D")', date('2023-10-13'));
         expr('date("2023-10-06") + duration("P1M")', date('2023-11-06'));

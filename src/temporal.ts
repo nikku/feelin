@@ -531,6 +531,36 @@ function zoneOffset(temporal: FeelTime | FeelDateTime) : FeelDuration {
 }
 
 
+/**
+ * Resolve a temporal instant to a concrete `Temporal.ZonedDateTime`,
+ * anchoring dates and times to {@link REFERENCE_DATE} (UTC midnight)
+ * and zone-less values to UTC. Sub-minute fixed offsets are applied
+ * manually, as Temporal rejects such offset zones.
+ */
+function toInstant(temporal: FeelTemporal) : Temporal.ZonedDateTime {
+
+  if (isDate(temporal)) {
+    return temporal.value.toZonedDateTime('UTC');
+  }
+
+  const offsetSeconds = offsetZoneSeconds(temporal.zone);
+
+  if (offsetSeconds !== null) {
+    const utc = temporal instanceof FeelTime
+      ? REFERENCE_DATE.toZonedDateTime({ plainTime: temporal.value, timeZone: 'UTC' })
+      : temporal.value.toZonedDateTime('UTC');
+
+    return utc.subtract(Temporal.Duration.from({ seconds: offsetSeconds }));
+  }
+
+  const zone = temporal.zone ?? 'UTC';
+
+  return temporal instanceof FeelTime
+    ? REFERENCE_DATE.toZonedDateTime({ plainTime: temporal.value, timeZone: zone })
+    : temporal.value.toZonedDateTime(zone);
+}
+
+
 // comparison ////////////////////////////////////////////////////////
 
 /**
@@ -718,12 +748,31 @@ export function addDuration(temporal: FeelTemporal, dur: FeelDuration, sign: num
  */
 export function subtractTemporals(a: FeelTemporal, b: FeelTemporal) : FeelDuration {
 
-  if (isTime(a) && isTime(b)) {
-    return new FeelDuration(a.value.since(b.value));
+  const zoned = isZoned(a) || isZoned(b);
+
+  // zone-less values subtract by wall clock
+  if (!zoned) {
+
+    if (isTime(a) && isTime(b)) {
+      return new FeelDuration(a.value.since(b.value));
+    }
+
+    const left = toPlainDateTime(a);
+    const right = toPlainDateTime(b);
+
+    return new FeelDuration(left.since(right, { largestUnit: 'day' }));
   }
 
-  const left = toPlainDateTime(a);
-  const right = toPlainDateTime(b);
+  // zoned values subtract as instants; ZonedDateTime requires a common
+  // zone, so difference in UTC
+  const left = toInstant(a).withTimeZone('UTC');
+  const right = toInstant(b).withTimeZone('UTC');
+
+  // times have no date component: subtract as the absolute instant
+  // difference (mirroring camunda/feel-scala ZonedTime#between)
+  if (isTime(a) && isTime(b)) {
+    return new FeelDuration(left.since(right).abs());
+  }
 
   return new FeelDuration(left.since(right, { largestUnit: 'day' }));
 }

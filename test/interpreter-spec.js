@@ -133,7 +133,17 @@ describe('interpreter', function() {
         expr('string(time("10:30:00") - time("09:00:00"))', 'PT1H30M');
         expr('string(time("09:00:00") - time("10:00:00"))', '-PT1H');
         expr('string(time("12:00:00+01:00") - time("10:00:00+01:00"))', 'PT2H');
-        expr('time("00:01:00@Etc/UTC") - time("23:59:00z") = duration("-PT23H58M")', true);
+        // zoned times subtract as the absolute instant difference
+        // (mirroring camunda/feel-scala ZonedTime#between)
+        expr('time("00:01:00@Etc/UTC") - time("23:59:00z") = duration("PT23H58M")', true);
+
+        // zoned subtraction honors offsets (same wall clock, different
+        // instants)
+        expr('string(time("10:00:00+01:00") - time("10:00:00Z"))', 'PT1H');
+        expr('string(time("10:00:00Z") - time("10:00:00+01:00"))', 'PT1H');
+        // zoned date times subtract as signed instant difference
+        expr('string(date and time("2020-01-01T10:00:00Z") - date and time("2020-01-01T10:00:00+01:00"))', 'PT1H');
+        expr('string(date and time("2020-01-01T10:00:00+01:00") - date and time("2020-01-01T10:00:00Z"))', '-PT1H');
 
         expr(`
           time("23:59:00z") + duration("PT2M") =

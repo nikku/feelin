@@ -401,6 +401,28 @@ describe('interpreter', function() {
 
       expr('for a in 1 .. 3 return a', [ 1, 2, 3 ]);
 
+      expr('for a in (1 .. 3] return a', [ 2, 3 ]);
+
+      expr('for a in [1 .. 3) return a', [ 1, 2 ]);
+
+      // empty exclusive ranges terminate
+      expr('for a in (1 .. 1] return a', []);
+
+      expr('for a in [1 .. 1) return a', []);
+
+      expr('for a in (1 .. 1) return a', []);
+
+      expr('for a in (3 .. 1] return a', [ 2, 1 ]);
+
+      // char ranges preserve direction
+      expr('for c in "a".."c" return c', [ 'a', 'b', 'c' ]);
+
+      expr('for c in "c".."a" return c', [ 'c', 'b', 'a' ]);
+
+      expr('for c in ("c".."a") return c', [ 'b' ]);
+
+      expr('for c in ("a".."a"] return c', []);
+
       expr('for a in 1 .. 2, b in 1 .. 2 return a * 10 + b', [ 11, 12, 21, 22 ]);
 
       expr('for i in 0..4 return if i = 0 then 1 else i * partial[-1]', [ 1, 1, 2, 6, 24 ]);

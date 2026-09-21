@@ -318,23 +318,16 @@ function numberRangeMap<T>(start, end, startIncluded, endIncluded, fn: (val) => 
 
   const direction = start > end ? -1 : 1;
 
+  const first = startIncluded ? start : start + direction;
+
+  const pastEnd = endIncluded
+    ? (i) => (i - end) * direction > 0
+    : (i) => (i - end) * direction >= 0;
+
   const result: T[] = [];
 
-  for (let i = start;; i += direction) {
-
-    if (i === start && !startIncluded) {
-      continue;
-    }
-
-    if (i === end && !endIncluded) {
-      break;
-    }
-
+  for (let i = first; !pastEnd(i); i += direction) {
     result.push(fn(i));
-
-    if (i === end) {
-      break;
-    }
   }
 
   return result;
@@ -359,10 +352,14 @@ function charRangeValues(start, end, startIncluded, endIncluded) : string[] | nu
     endIdx -= direction;
   }
 
-  return CHARS.slice(
-    Math.min(startIdx, endIdx),
-    Math.max(startIdx, endIdx) + 1
-  );
+  const values: string[] = [];
+
+  // preserve direction; an empty (adjusted) interval yields no values
+  for (let i = startIdx; (endIdx - i) * direction >= 0; i += direction) {
+    values.push(CHARS[i]);
+  }
+
+  return values;
 }
 
 

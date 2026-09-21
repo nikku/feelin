@@ -973,7 +973,11 @@ export function combine(date: FeelDate | FeelDateTime, time: FeelTime) : FeelDat
  */
 function isValidDateParts(year: number, month: number, day: number) : boolean {
 
-  if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) {
+  // the FEEL year is bounded to nine digits
+  if (
+    !Number.isInteger(year) || Math.abs(year) > 999999999 ||
+    !Number.isInteger(month) || !Number.isInteger(day)
+  ) {
     return false;
   }
 
@@ -1075,7 +1079,7 @@ function offsetZone(offset: FeelDuration) : string {
  * `999999999-12-31`; ISO-8601 only covers four-digit (or signed
  * six-digit) years.
  */
-const EXPANDED_DATE_PATTERN = /^(-?\d+)-(\d{2})-(\d{2})$/;
+const EXPANDED_DATE_PATTERN = /^(-?(?:\d{4}|[1-9]\d{4,8}))-(\d{2})-(\d{2})$/;
 
 /**
  * Parse a FEEL <date> string (`2020-01-01`).

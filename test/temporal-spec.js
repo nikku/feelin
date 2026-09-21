@@ -132,6 +132,14 @@ describe('temporal', function() {
     it('should reject invalid expanded-year dates', function() {
       expect(date('999999999-13-01')).to.be.null;
       expect(date('999999999-02-30')).to.be.null;
+
+      // the FEEL year is exactly four digits, or five to nine digits
+      // without a leading zero (DMN TCK 1115-feel-date-function)
+      expect(date('9999999999-12-25')).to.be.null;
+      expect(date('998-12-31')).to.be.null;
+      expect(date('01211-12-31')).to.be.null;
+      expect(date('+2012-12-02')).to.be.null;
+      expect(dateAndTime('9999999999-12-27T11:22:33')).to.be.null;
     });
 
   });

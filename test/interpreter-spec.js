@@ -591,6 +591,15 @@ describe('interpreter', function() {
       expr('"1014AA" >= "1015CJ" and "1014AA" <= "1020ZZ"', false);
       expr('"1021AA" >= "1015CJ" and "1021AA" <= "1020ZZ"', false);
 
+      // ordering retains nanosecond precision, while equality is
+      // defined at millisecond precision (DMN TCK 0068-feel-equality
+      // time_005, datetime_003_a)
+      expr('time("10:00:00.000000001") < time("10:00:00.000000002")', true);
+      expr('time("10:00:00.000000002") > time("10:00:00.000000001")', true);
+      expr('date and time("2020-01-01T10:00:00.000000001") < date and time("2020-01-01T10:00:00.000000002")', true);
+      expr('time("10:00:00.000000001") in [time("10:00:00.000000001")..time("10:00:00.000000002")]', true);
+      expr('time("10:30:00.0001") = time("10:30:00.0002")', true);
+
       expr('1 between -1 and 5', true);
 
       expr('1 between 5 and -1', true);

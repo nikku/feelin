@@ -1,4 +1,4 @@
-import { toComparable } from './temporal.js';
+import { toComparable, compareTemporals } from './temporal.js';
 
 import { getType } from './types.js';
 
@@ -118,6 +118,14 @@ function comparable(value: RangeValue) : RangeValue {
  * `1`.
  */
 function cmp(a: RangeValue, b: RangeValue) : number {
+
+  // order temporal instants at full (nanosecond) precision
+  const temporal = compareTemporals(a, b);
+
+  if (temporal !== null) {
+    return temporal;
+  }
+
   const ca = comparable(a);
   const cb = comparable(b);
 

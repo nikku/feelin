@@ -566,36 +566,18 @@ function toInstant(temporal: FeelTemporal) : Temporal.ZonedDateTime {
 /**
  * Convert a temporal value to a comparable number of milliseconds.
  *
+ * FEEL equality is defined at millisecond precision (DMN TCK
+ * 0068-feel-equality time_005, datetime_003_a); use
+ * {@link compareTemporals} for full-precision ordering.
+ *
  * Wall-clock (zone-less) values are anchored to UTC so they compare
  * consistently among themselves.
  */
 export function toComparable(value) : number | null {
 
-  if (isDate(value)) {
-    return value.value.toZonedDateTime('UTC').epochMilliseconds;
-  }
+  if (isDate(value) || isTime(value) || isDateTime(value)) {
 
-  if (isTime(value) || isDateTime(value)) {
-
-    const offsetSeconds = offsetZoneSeconds(value.zone);
-
-    // sub-minute offset zone: interpret the wall clock at UTC, then
-    // shift by the fixed offset (Temporal rejects such offset zones)
-    if (offsetSeconds !== null) {
-      const utcEpoch = (value instanceof FeelTime
-        ? REFERENCE_DATE.toZonedDateTime({ plainTime: value.value, timeZone: 'UTC' })
-        : value.value.toZonedDateTime('UTC')
-      ).epochMilliseconds;
-
-      return utcEpoch - offsetSeconds * 1000;
-    }
-
-    const zone = value.zone ?? 'UTC';
-
-    return (value instanceof FeelTime
-      ? REFERENCE_DATE.toZonedDateTime({ plainTime: value.value, timeZone: zone })
-      : value.value.toZonedDateTime(zone)
-    ).epochMilliseconds;
+    return toInstant(value).epochMilliseconds;
   }
 
   if (isDuration(value)) {
@@ -603,6 +585,27 @@ export function toComparable(value) : number | null {
   }
 
   return null;
+}
+
+/**
+ * Compare two temporal instants at full (nanosecond) precision,
+ * returning `-1`, `0` or `1`. Returns `null` if either value is not a
+ * temporal instant or cannot be ordered (expanded-year dates).
+ */
+export function compareTemporals(a, b) : number | null {
+
+  if (!isTemporal(a) || !isTemporal(b)) {
+    return null;
+  }
+
+  const left = toInstant(a);
+  const right = toInstant(b);
+
+  if (left === null || right === null) {
+    return null;
+  }
+
+  return Temporal.ZonedDateTime.compare(left, right);
 }
 
 

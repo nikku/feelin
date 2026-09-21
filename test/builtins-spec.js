@@ -631,7 +631,15 @@ function describeBuiltins(name, evaluate) {
         ) = duration("-P1Y")
       `, true);
 
-      expr('duration("-P1Y") = duration("-P365D")', true);
+      // years and months and days and time durations are distinct FEEL
+      // types; comparing across kinds yields null, except two zero
+      // durations (DMN TCK 0068-feel-equality)
+      expr('duration("-P1Y") = duration("-P365D")', null);
+      expr('duration("P1Y") = duration("P365D")', null);
+      expr('duration("P0Y") = duration("P0D")', true);
+      expr('duration("P0D") = duration("PT0S")', true);
+      expr('is(duration("P0Y"), duration("P0D"))', false);
+      expr('is(duration("P1Y"), duration("P12M"))', true);
 
       expr('date and time("2012-12-24") = date and time("2012-12-24T00:00:00")', true);
 

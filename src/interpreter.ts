@@ -29,6 +29,10 @@ import {
 } from './utils.js';
 
 import {
+  formatDetails
+} from './inspect.js';
+
+import {
   parseExpression,
   parseUnaryTests
 } from './parser.js';
@@ -95,14 +99,6 @@ export class SyntaxError extends Error {
 
     Object.assign(this, details);
   }
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function formatDetails(template: string, values: Record<string, any>) {
-
-  return Object.keys(values).reduce((message, key) => {
-    return message.replace(`{${key}}`, `'${ formatValue(values[key]) }'`);
-  }, template);
 }
 
 class InterpreterContext {
@@ -1654,37 +1650,3 @@ function findNext(nodeRef: SyntaxNodeRef) : SyntaxNode | null {
 
   return null;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function formatValue(value: any) {
-  const type = getType(value);
-
-  if (type === 'string') {
-    return `"${ String(value) }"`;
-  }
-
-  if (type === 'list') {
-    return `[${value.length} items]`;
-  }
-
-  if (type === 'context') {
-    return '{...}';
-  }
-
-  if (type === 'function') {
-
-    const parameterNames = value.parameterNames;
-
-    if (parameterNames) {
-      return `function(${ parameterNames.join(', ') })`;
-    }
-
-    return 'function';
-  }
-
-  if (type === 'nil') {
-    return 'null';
-  }
-
-  return String(value);
-};

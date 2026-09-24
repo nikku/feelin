@@ -2,6 +2,12 @@ export * from './interpreter.js';
 
 export * from './parser.js';
 
+// internal helpers, exposed for testing; not public API
+export {
+  formatDetails as __formatDetails,
+  formatValue as __formatValue
+} from './inspect.js';
+
 export {
   FeelFunction,
   isFunction

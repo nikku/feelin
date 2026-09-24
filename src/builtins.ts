@@ -9,7 +9,8 @@ import {
   isDate,
   isTime,
   isDateTime,
-  isDuration
+  isDuration,
+  isNil
 } from './types.js';
 
 import {
@@ -231,7 +232,7 @@ const builtins = {
       d = dateFrom(year, month, day);
 
       if (!d) {
-        return invalidArguments('{year}, {month}, {day} is not a valid date', {
+        return invalidArguments('\'date({{year}}, {{month}}, {{day}})\' is not a valid date', {
           year,
           month,
           day
@@ -243,7 +244,7 @@ const builtins = {
       return d;
     }
 
-    return invalidArguments('date({from}) is not a valid date', { from });
+    return invalidArguments('\'date({{from}})\' is not a valid date', { from });
   }, [ 'any?', 'number?', 'number?', 'any?' ], [ 'year', 'month', 'day', 'from' ]),
 
   // date and time(from) => date time string
@@ -271,7 +272,7 @@ const builtins = {
       return dt;
     }
 
-    return invalidArguments('date and time({from}) is not a valid date time', {
+    return invalidArguments('\'date and time({{from}})\' is not a valid date time', {
       from: isString(from) ? from : dateArg
     });
   }, [ 'any?', 'time?', 'string?' ], [ 'date', 'time', 'from' ]),
@@ -318,7 +319,7 @@ const builtins = {
       t = timeFrom(hour, minute, second, offset);
 
       if (!t) {
-        return invalidArguments('{hour}, {minute}, {second} is not a valid time', {
+        return invalidArguments('\'time({{hour}}, {{minute}}, {{second}})\' is not a valid time', {
           hour,
           minute,
           second
@@ -330,7 +331,7 @@ const builtins = {
       return t;
     }
 
-    return invalidArguments('time({from}) is not a valid time', { from: from ?? hour });
+    return invalidArguments('\'time({{from}})\' is not a valid time', { from: from ?? hour });
   }, [ 'any?', 'number?', 'number?', 'any?', 'any?' ], [ 'hour', 'minute', 'second', 'offset', 'from' ]),
 
   'duration': fn(function(from) {
@@ -338,7 +339,7 @@ const builtins = {
     const d = duration(from);
 
     if (!d) {
-      return invalidArguments('duration({from}) is not a valid duration', { from });
+      return invalidArguments('\'duration({{from}})\' is not a valid duration', { from });
     }
 
     return d;
@@ -369,7 +370,7 @@ const builtins = {
     }
 
     if (!t) {
-      return invalidArguments('@"{string}" is not a valid temporal literal', { string });
+      return invalidArguments('\'@"{{{string}}}"\' is not a valid temporal literal', { string });
     }
 
     return t;
@@ -485,17 +486,8 @@ const builtins = {
   }, [ 'string', 'string' ], [ 'string', 'delimiter' ]),
 
   'string join': fn(function(list, delimiter) {
-
-    const invalidItem = list.find(e => !isString(e) && e !== null);
-
-    if (invalidItem !== undefined) {
-      return invalidArguments('string join(list) expects a list of strings, got {item}', {
-        item: invalidItem
-      });
-    }
-
     return list.filter(l => l !== null).join(delimiter || '');
-  }, [ 'list', 'string?' ], [ 'list', 'delimiter' ]),
+  }, [ 'list<string>', 'string?' ], [ 'list', 'delimiter' ]),
 
   // 10.3.4.4 List functions
 
@@ -1079,10 +1071,54 @@ const SUPPORTED_FLAGS_PATTERN = /[smix]/g;
 
 const EXTENDED_FLAG_PATTERN = /x/;
 
+/**
+ * Create a tester for a single argument definition.
+ *
+ * Definitions:
+ *
+ * - `<type>` — a required argument of the type
+ * - `<type>?` — an optional argument (may be nil/undefined)
+ * - `list` — a list, with implicit conversion `obj => [ obj ]`
+ * - `list<<type>>` — a list whose members must all be of the type
+ *   (nil members pass)
+ *
+ * The tester returns the (converted) argument, or {@link FALSE} if
+ * the argument does not match.
+ *
+ * @param {string} arg
+ *
+ * @return {Function}
+ */
 function createArgTester(arg) {
   const optional = arg.endsWith('?');
 
   const type = optional ? arg.substring(0, arg.length - 1) : arg;
+
+  // list<memberType>: validate members, too
+  const memberMatch = /^list<(\w+)>$/.exec(type);
+
+  if (memberMatch) {
+    const memberType = memberMatch[1];
+
+    return function(obj) {
+
+      const arr = Array.isArray(obj);
+
+      if (!arr) {
+
+        // implicit conversion obj => [ obj ]
+        if (typeof obj === 'undefined' || obj === null) {
+          return optional ? obj : FALSE;
+        }
+
+        obj = [ obj ];
+      }
+
+      const invalid = obj.find(member => !isNil(member) && getType(member) !== memberType);
+
+      return invalid === undefined ? obj : FALSE;
+    };
+  }
 
   return function(obj) {
 
@@ -1122,6 +1158,16 @@ function createArgTester(arg) {
   };
 }
 
+/**
+ * Create a validator for the given argument definitions.
+ *
+ * Returns a function mapping raw arguments to converted arguments,
+ * or the index of the first argument that failed validation.
+ *
+ * @param {string[]} argDefinitions
+ *
+ * @return {Function}
+ */
 function createArgsValidator(argDefinitions) {
 
   const tests = argDefinitions.map(createArgTester);
@@ -1141,7 +1187,7 @@ function createArgsValidator(argDefinitions) {
       const conversion = test ? test(args[index]) : args[index];
 
       if (conversion === FALSE) {
-        return false;
+        return index;
       }
 
       result.push(conversion);
@@ -1152,6 +1198,13 @@ function createArgsValidator(argDefinitions) {
   };
 }
 
+/**
+ * @param {Function} fnDefinition
+ * @param {string} type
+ * @param {string[]} [parameterNames]
+ *
+ * @return {Function}
+ */
 /**
  * @param {Function} fnDefinition
  * @param {string} type
@@ -1174,8 +1227,19 @@ function listFn(fnDefinition, type, parameterNames = null) {
       args = args[0];
     }
 
-    if (!args.every(arg => tester(arg) !== FALSE)) {
-      return null;
+    const invalidIndex = args.findIndex(arg => tester(arg) === FALSE);
+
+    // member validation failed: surface the offending member
+    // instead of silently evaluating to null
+    if (invalidIndex !== -1) {
+
+      const expectedType = type.replace(/\?$/, '');
+
+      return invalidArguments('parameter \'{{{name}}}\' expects members of type \'{{{expectedType}}}\', got {value}', {
+        name: (wrappedFn.$args[0] || 'list').replace(/^\.\.\./, ''),
+        expectedType,
+        value: args[invalidIndex]
+      });
     }
 
     return fnDefinition(...args);
@@ -1217,8 +1281,36 @@ function fn(fnDefinition, argDefinitions, parameterNames = null) {
 
     const convertedArgs = checkArgs(args);
 
-    if (!convertedArgs) {
-      return null;
+    // argument validation failed: surface the offending argument
+    // instead of silently evaluating to null
+    if (typeof convertedArgs === 'number') {
+
+      const index = convertedArgs;
+      const name = parameterNames[index] || String(index);
+      const argDefinition = argDefinitions[index];
+      const expectedType = argDefinition.replace(/\?$/, '');
+
+      // list<memberType>: surface the offending member, not the whole list
+      const memberMatch = /^list<(\w+)>$/.exec(expectedType);
+
+      if (memberMatch) {
+        const memberType = memberMatch[1];
+        const list = Array.isArray(args[index]) ? args[index] : [ args[index] ];
+        const invalidMember = list.find(member => !isNil(member) && getType(member) !== memberType);
+
+        return invalidArguments('parameter \'{{{name}}}\' expects a list of \'{{{expectedType}}}\' members, but member {value} is of type \'{{{valueType}}}\'', {
+          name,
+          expectedType: memberType,
+          value: invalidMember,
+          valueType: getType(invalidMember)
+        });
+      }
+
+      return invalidArguments('parameter \'{{{name}}}\' expects a value of type \'{{{expectedType}}}\', got {value}', {
+        name,
+        expectedType,
+        value: args[index]
+      });
     }
 
     return fnDefinition(...convertedArgs);

@@ -1809,7 +1809,7 @@ describe('interpreter', function() {
 
         expect(warnings).to.eql([
           {
-            message: "Key 'x' not found in '{...}'",
+            message: "Key 'x' not found in '{a: 10}'",
             type: 'NO_CONTEXT_ENTRY_FOUND',
             position: { from: 10, to: 11 },
             details: {
@@ -1919,7 +1919,7 @@ describe('interpreter', function() {
         expect(warnings).to.eql([
           {
             type: 'INVALID_TYPE',
-            message: "Can't multiply '3' to '[2 items]'",
+            message: "Can't multiply '3' to '[1, 2]'",
             position: { from: 7, to: 8 },
             details: {
               template: "Can't multiply {right} to {left}",
@@ -1947,7 +1947,7 @@ describe('interpreter', function() {
         expect(warnings).to.eql([
           {
             type: 'INVALID_TYPE',
-            message: "Can't exponentiate '10' to '2025-12-12'",
+            message: "Can't exponentiate '10' to 'date(\"2025-12-12\")'",
             position: { from: 14, to: 16 },
             details: {
               template: "Can't exponentiate {right} to {left}",
@@ -1975,7 +1975,7 @@ describe('interpreter', function() {
         expect(warnings).to.eql([
           {
             type: 'INVALID_TYPE',
-            message: "Can't add 'P1D' to 'P1Y'",
+            message: "Can't add 'duration(\"P1D\")' to 'duration(\"P1Y\")'",
             position: { from: 16, to: 17 },
             details: {
               template: "Can't add {right} to {left}",
@@ -2040,7 +2040,7 @@ describe('interpreter', function() {
 
         expect(warnings[0]).to.deep.include({
           type: 'FUNCTION_INVOCATION_FAILURE',
-          message: "Cannot invoke 'function(negand)' with parameters '[2 items]'",
+          message: "Cannot invoke 'function(negand)' with parameters '[1, 2]'",
           position: { from: 0, to: 9 }
         });
 
@@ -2063,7 +2063,7 @@ describe('interpreter', function() {
 
         expect(warnings[0]).to.deep.include({
           type: 'FUNCTION_INVOCATION_FAILURE',
-          message: "Cannot invoke 'function(negand)' with parameters '{...}'",
+          message: "Cannot invoke 'function(negand)' with parameters '{foo: 1}'",
           position: { from: 0, to: 11 }
         });
 
@@ -2086,7 +2086,7 @@ describe('interpreter', function() {
 
         expect(warnings[0]).to.deep.include({
           type: 'FUNCTION_INVOCATION_FAILURE',
-          message: "Cannot invoke 'function(year, month, day, from)' with parameters '[6 items]'",
+          message: "Cannot invoke 'function(year, month, day, from)' with parameters '[1, 2, … 4 more]'",
           position: { from: 0, to: 22 }
         });
 
@@ -2109,7 +2109,7 @@ describe('interpreter', function() {
 
         expect(warnings[0]).to.deep.include({
           type: 'FUNCTION_INVOCATION_FAILURE',
-          message: "Cannot invoke 'function(year, month, day, from)' with parameters '{...}'",
+          message: "Cannot invoke 'function(year, month, day, from)' with parameters '{foo: 1}'",
           position: { from: 0, to: 12 }
         });
 
@@ -2167,6 +2167,40 @@ describe('interpreter', function() {
       });
 
 
+      it('INVALID_ARGUMENTS on negative or over-long date year', function() {
+
+        // extended (signed) ISO years cannot be parsed back
+        // by the FEEL grammar
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('date(-10, 10, 10)');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.have.length(1);
+
+        expect(warnings[0]).to.deep.include({
+          type: 'INVALID_ARGUMENTS',
+          message: "'date(-10, 10, 10)' is not a valid date"
+        });
+
+        // when
+        const overflow = evaluate('date(10000, 1, 1)');
+
+        // then
+        expect(overflow.value).to.be.null;
+
+        expect(overflow.warnings[0]).to.deep.include({
+          type: 'INVALID_ARGUMENTS',
+          message: "'date(10000, 1, 1)' is not a valid date"
+        });
+      });
+
+
       it('INVALID_ARGUMENTS on out-of-range date components', function() {
 
         // when
@@ -2181,10 +2215,10 @@ describe('interpreter', function() {
         expect(warnings).to.eql([
           {
             type: 'INVALID_ARGUMENTS',
-            message: "'2017', '13', '31' is not a valid date",
+            message: "'date(2017, 13, 31)' is not a valid date",
             position: { from: 0, to: 18 },
             details: {
-              template: '{year}, {month}, {day} is not a valid date',
+              template: "'date({{year}}, {{month}}, {{day}})' is not a valid date",
               values: {
                 year: 2017,
                 month: 13,
@@ -2260,10 +2294,10 @@ describe('interpreter', function() {
         expect(warnings).to.eql([
           {
             type: 'INVALID_ARGUMENTS',
-            message: "'25', '0', '0' is not a valid time",
+            message: "'time(25, 0, 0)' is not a valid time",
             position: { from: 0, to: 14 },
             details: {
-              template: '{hour}, {minute}, {second} is not a valid time',
+              template: "'time({{hour}}, {{minute}}, {{second}})' is not a valid time",
               values: {
                 hour: 25,
                 minute: 0,
@@ -2304,24 +2338,24 @@ describe('interpreter', function() {
         [ 'sqrt(-3)', "sqrt(number) expects a non-negative number, got '-3'", { number: -3 } ],
         [ 'log(0)', "log(number) expects a positive number, got '0'", { number: 0 } ],
         [ 'modulo(10, 0)', "modulo(dividend, divisor) does not accept '0' as a divisor", { divisor: 0 } ],
-        [ 'replace("a", "[", "x")', 'replace(input, pattern, replacement) expects a valid pattern, got \'"["\'', { pattern: '[' } ],
-        [ 'matches("a", "[")', 'matches(input, pattern) expects a valid pattern, got \'"["\'', { pattern: '[' } ],
-        [ 'split("a", "[")', 'split(string, delimiter) expects a valid pattern, got \'"["\'', { delimiter: '[' } ],
+        [ 'replace("a", "[", "x")', "replace(input, pattern, replacement) expects a valid pattern, got '\"[\"'", { pattern: '[' } ],
+        [ 'matches("a", "[")', "matches(input, pattern) expects a valid pattern, got '\"[\"'", { pattern: '[' } ],
+        [ 'split("a", "[")', "split(string, delimiter) expects a valid pattern, got '\"[\"'", { delimiter: '[' } ],
         [ 'number("abc")', 'number(from) expects a numeric string, got \'"abc"\'', { from: 'abc' } ],
-        [ 'string join([1, 2])', "string join(list) expects a list of strings, got '1'", { item: 1 } ],
-        [ 'list replace([1, 2], "x", 9)', 'list replace expects a numeric position or a match function, got \'"x"\'', { matcher: 'x' } ],
-        [ 'abs("x")', 'abs(n) expects a number or duration, got \'"x"\'', { n: 'x' } ],
+        [ 'string join([1, 2])', "parameter 'list' expects a list of 'string' members, but member '1' is of type 'number'", { name: 'list', expectedType: 'string', value: 1, valueType: 'number' } ],
+        [ 'list replace([1, 2], "x", 9)', "list replace expects a numeric position or a match function, got '\"x\"'", { matcher: 'x' } ],
+        [ 'abs("x")', "abs(n) expects a number or duration, got '\"x\"'", { n: 'x' } ],
         [ 'context([ { key: null, value: 1 } ])', 'context(entries) does not accept a null key', {} ],
-        [ 'context([ { key: "a", value: 1 }, { key: "a", value: 2 } ])', 'context(entries) expects unique keys, got \'"a"\'', { key: 'a' } ],
+        [ 'context([ { key: "a", value: 1 }, { key: "a", value: 2 } ])', "context(entries) expects unique keys, got '\"a\"'", { key: 'a' } ],
         [ 'context put({}, 1, 1)', "context put expects a string key, got '1'", { key: 1 } ],
-        [ 'date("nope")', "date('\"nope\"') is not a valid date", { from: 'nope' } ],
-        [ 'date(null)', "date('null') is not a valid date", { from: null } ],
-        [ 'time("nope")', "time('\"nope\"') is not a valid time", { from: 'nope' } ],
-        [ 'time(null)', "time('null') is not a valid time", { from: null } ],
-        [ 'duration("1Y")', "duration('\"1Y\"') is not a valid duration", { from: '1Y' } ],
-        [ 'duration("P999999999M")', "duration('\"P999999999M\"') is not a valid duration", { from: 'P999999999M' } ],
-        [ 'date and time("2017-13-10T11:22:33")', "date and time('\"2017-13-10T11:22:33\"') is not a valid date time", { from: '2017-13-10T11:22:33' } ],
-        [ 'date and time(null)', "date and time('null') is not a valid date time", { from: null } ]
+        [ 'date("nope")', "'date(\"nope\")' is not a valid date", { from: 'nope' } ],
+        [ 'date(null)', "'date(null)' is not a valid date", { from: null } ],
+        [ 'time("nope")', "'time(\"nope\")' is not a valid time", { from: 'nope' } ],
+        [ 'time(null)', "'time(null)' is not a valid time", { from: null } ],
+        [ 'duration("1Y")', "'duration(\"1Y\")' is not a valid duration", { from: '1Y' } ],
+        [ 'duration("P999999999M")', "'duration(\"P999999999M\")' is not a valid duration", { from: 'P999999999M' } ],
+        [ 'date and time("2017-13-10T11:22:33")', "'date and time(\"2017-13-10T11:22:33\")' is not a valid date time", { from: '2017-13-10T11:22:33' } ],
+        [ 'date and time(null)', "'date and time(null)' is not a valid date time", { from: null } ]
       ].forEach(([ expression, message, values ]) => {
 
         it(`INVALID_ARGUMENTS for <${ expression }>`, function() {
@@ -2343,6 +2377,354 @@ describe('interpreter', function() {
           });
 
           expect(warnings[0].details.values).to.eql(values);
+        });
+
+      });
+
+
+      it('INVALID_ARGUMENTS for <sum> with non-numeric member', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('sum([1, "x"])');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.have.length(1);
+
+        expect(warnings[0]).to.deep.include({
+          type: 'INVALID_ARGUMENTS',
+          message: 'parameter \'list\' expects members of type \'number\', got \'"x"\'',
+          details: {
+            template: 'parameter \'{{{name}}}\' expects members of type \'{{{expectedType}}}\', got {value}',
+            values: {
+              name: 'list',
+              expectedType: 'number',
+              value: 'x'
+            }
+          }
+        });
+      });
+
+
+      it('INVALID_ARGUMENTS for <min> with null member', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('min([3, null])');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.have.length(1);
+
+        expect(warnings[0]).to.deep.include({
+          type: 'INVALID_ARGUMENTS',
+          message: 'parameter \'list\' expects members of type \'number\', got \'null\''
+        });
+      });
+
+
+      it('INVALID_ARGUMENTS for <string join> with non-string delimiter', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('string join(["garlic", "tomato"], 35)');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.have.length(1);
+
+        expect(warnings[0]).to.deep.include({
+          type: 'INVALID_ARGUMENTS',
+          message: 'parameter \'delimiter\' expects a value of type \'string\', got \'35\'',
+          details: {
+            template: 'parameter \'{{{name}}}\' expects a value of type \'{{{expectedType}}}\', got {value}',
+            values: {
+              name: 'delimiter',
+              expectedType: 'string',
+              value: 35
+            }
+          }
+        });
+      });
+
+
+      it('INVALID_ARGUMENTS for <string join> with list member', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('string join(["garlic", [35]])');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.have.length(1);
+
+        expect(warnings[0]).to.deep.include({
+          type: 'INVALID_ARGUMENTS',
+          message: "parameter 'list' expects a list of 'string' members, but member '[35]' is of type 'list'",
+          details: {
+            template: 'parameter \'{{{name}}}\' expects a list of \'{{{expectedType}}}\' members, but member {value} is of type \'{{{valueType}}}\'',
+            values: {
+              name: 'list',
+              expectedType: 'string',
+              value: [ 35 ],
+              valueType: 'list'
+            }
+          }
+        });
+      });
+
+
+      it('INVALID_ARGUMENTS for <string join> inside for loop, once per iteration', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('for a in b, c in d return string join([a, c])', {
+          b: [ 'garlic', 'tomato' ],
+          d: [ 35 ]
+        });
+
+        // then
+        expect(value).to.eql([ null, null ]);
+
+        expect(warnings).to.have.length(2);
+
+        for (const warning of warnings) {
+          expect(warning).to.deep.include({
+            type: 'INVALID_ARGUMENTS',
+            message: "parameter 'list' expects a list of 'string' members, but member '35' is of type 'number'"
+          });
+        }
+      });
+
+
+      it('INVALID_TYPE renders list sample, truncating long lists', function() {
+
+        // when
+        const {
+          warnings
+        } = evaluate('[1, 2, 3, 4, 5] + 1');
+
+        // then
+        expect(warnings).to.have.length(1);
+
+        expect(warnings[0]).to.deep.include({
+          type: 'INVALID_TYPE',
+          message: "Can't add '1' to '[1, 2, … 3 more]'"
+        });
+      });
+
+
+      it('INVALID_TYPE renders nested values up to a depth cap', function() {
+
+        // when
+        const {
+          warnings
+        } = evaluate('[[[1, 2], [3]]] + 1');
+
+        // then
+        expect(warnings).to.have.length(1);
+
+        expect(warnings[0]).to.deep.include({
+          type: 'INVALID_TYPE',
+          message: "Can't add '1' to '[[[2 items], [1 items]]]'"
+        });
+      });
+
+
+      it('INVALID_ARGUMENTS truncates long strings', function() {
+
+        // given
+        const longString = 'a'.repeat(100);
+
+        // when
+        const {
+          warnings
+        } = evaluate(`date("${longString}")`);
+
+        // then
+        expect(warnings).to.have.length(1);
+
+        expect(warnings[0]).to.deep.include({
+          type: 'INVALID_ARGUMENTS',
+          message: `'date("${'a'.repeat(20)}…")' is not a valid date`
+        });
+      });
+
+
+      it('NO_CONTEXT_ENTRY_FOUND renders context sample, truncating many entries', function() {
+
+        // when
+        const {
+          warnings
+        } = evaluate('{ a: 1, b: 2, c: 3, d: 4 }.x');
+
+        // then
+        expect(warnings).to.have.length(1);
+
+        expect(warnings[0]).to.deep.include({
+          type: 'NO_CONTEXT_ENTRY_FOUND',
+          message: "Key 'x' not found in '{a: 1, b: 2, … 2 more}'"
+        });
+      });
+
+
+      [
+        [ 'date', '@"2020-01-01"', 'date("2020-01-01")', 'date' ],
+        [ 'time', '@"12:00:00"', 'time("12:00:00")', 'time' ],
+        [ 'date time', '@"2020-01-01T12:00:00"', 'date and time("2020-01-01T12:00:00")', 'date time' ],
+        [ 'years and months duration', 'duration("P1Y2M")', 'duration("P1Y2M")', 'duration' ],
+        [ 'days and time duration', 'duration("PT1H")', 'duration("PT1H")', 'duration' ],
+        [ 'range', '[1..5]', '[1..5]', 'range' ],
+        [ 'boolean', 'true', 'true', 'boolean' ],
+        [ 'context', '{ a: 1 }', '{a: 1}', 'context' ],
+        [ 'function', 'not', 'function', 'literal' ]
+      ].forEach(([ label, member, rendered, type ]) => {
+
+        it(`INVALID_ARGUMENTS for <string join> with ${ label } member`, function() {
+
+          // when
+          const {
+            value,
+            warnings
+          } = evaluate(`string join(["garlic", ${ member }])`);
+
+          // then
+          expect(value).to.be.null;
+
+          expect(warnings).to.have.length(1);
+
+          expect(warnings[0].type).to.eql('INVALID_ARGUMENTS');
+          expect(warnings[0].message).to.eql(
+            `parameter 'list' expects a list of 'string' members, but member '${ rendered }' is of type '${ type }'`
+          );
+        });
+
+      });
+
+
+      it('NO_CONTEXT_ENTRY_FOUND renders temporal and range values in context sample', function() {
+
+        // when
+        const {
+          warnings
+        } = evaluate('{ d: @"2020-01-01", r: [1..5], l: [1, 2] }.x');
+
+        // then
+        expect(warnings).to.have.length(1);
+
+        expect(warnings[0]).to.deep.include({
+          type: 'NO_CONTEXT_ENTRY_FOUND',
+          message: "Key 'x' not found in '{d: date(\"2020-01-01\"), r: [1..5], l: [1, 2]}'"
+        });
+      });
+
+
+      it('NO_FUNCTION_FOUND degrades gracefully for custom class instances', function() {
+
+        // given
+        class Foo {
+          constructor() {
+            this.a = 1;
+          }
+        }
+
+        // when
+        const {
+          warnings
+        } = evaluate('x()', { x: new Foo() });
+
+        // then
+        expect(warnings).to.have.length(1);
+
+        expect(warnings[0]).to.deep.include({
+          type: 'NO_FUNCTION_FOUND',
+          message: "Cannot invoke '{a: 1}'"
+        });
+      });
+
+
+      describe('renders every value type', function() {
+
+        [
+          [ 'nil', 'null + 1', {}, "Can't add '1' to 'null'" ],
+          [ 'boolean', 'true + 1', {}, "Can't add '1' to 'true'" ],
+          [ 'number', '1 + true', {}, "Can't add 'true' to '1'" ],
+          [ 'string', '"foo" + 1', {}, "Can't add '1' to '\"foo\"'" ],
+          [ 'list', '[1, 2] + 1', {}, "Can't add '1' to '[1, 2]'" ],
+          [ 'context', '{ a: 1 } + 1', {}, "Can't add '1' to '{a: 1}'" ],
+          [ 'date', '@"2020-01-01" + 1', {}, "Can't add '1' to 'date(\"2020-01-01\")'" ],
+          [ 'time', '@"12:00:00" + 1', {}, "Can't add '1' to 'time(\"12:00:00\")'" ],
+          [ 'date time', '@"2020-01-01T12:00:00" + 1', {}, "Can't add '1' to 'date and time(\"2020-01-01T12:00:00\")'" ],
+          [ 'duration', 'duration("P1D") + 1', {}, "Can't add '1' to 'duration(\"P1D\")'" ],
+          [ 'range', '[1..5] + 1', {}, "Can't add '1' to '[1..5]'" ],
+          [ 'function', 'not + 1', {}, "Can't add '1' to 'function'" ]
+        ].forEach(([ label, expression, context, message ]) => {
+
+          it(`standalone ${ label }`, function() {
+
+            // when
+            const {
+              warnings
+            } = evaluate(expression, context);
+
+            // then
+            expect(warnings).to.have.length(1);
+
+            expect(warnings[0]).to.deep.include({
+              type: 'INVALID_TYPE',
+              message
+            });
+          });
+
+        });
+
+
+        it('nested in list sample', function() {
+
+          // when
+          const {
+            warnings
+          } = evaluate('[true, null, @"2020-01-01", duration("P1D"), [1..5], not, { a: 1 }] + 1');
+
+          // then
+          expect(warnings).to.have.length(1);
+
+          expect(warnings[0]).to.deep.include({
+            type: 'INVALID_TYPE',
+            message: 'Can\'t add \'1\' to \'[true, null, … 5 more]\''
+          });
+        });
+
+
+        it('nested in context sample', function() {
+
+          // when
+          const {
+            warnings
+          } = evaluate('{ s: "x", f: not, dur: duration("P1D"), dt: @"2020-01-01T12:00:00" }.x');
+
+          // then
+          expect(warnings).to.have.length(1);
+
+          expect(warnings[0]).to.deep.include({
+            type: 'NO_CONTEXT_ENTRY_FOUND',
+            message: 'Key \'x\' not found in \'{s: "x", f: function, … 2 more}\''
+          });
         });
 
       });

@@ -1,6 +1,5 @@
 import { Temporal } from 'temporal-polyfill';
 
-import { notImplemented } from './utils.js';
 
 /**
  * This module is the single place in the code base that talks to the
@@ -824,6 +823,13 @@ export function combine(date: FeelDate | FeelDateTime, time: FeelTime) : FeelDat
  * invalid input.
  */
 export function dateFrom(year: number, month: number, day: number) : FeelDate | null {
+
+  // reject years outside the plain 4-digit ISO representation;
+  // the FEEL grammar cannot parse extended (signed) years back
+  if (year < 0 || year > 9999) {
+    return null;
+  }
+
   try {
     return new FeelDate(Temporal.PlainDate.from({ year, month, day }, { overflow: 'reject' }));
   } catch {
@@ -902,8 +908,9 @@ function offsetZone(offset: FeelDuration) : string {
  */
 export function parseDate(str: string) : FeelDate | null {
 
+  // negative (extended) ISO years are not supported by the FEEL grammar
   if (str.startsWith('-')) {
-    throw notImplemented('negative date');
+    return null;
   }
 
   try {
@@ -944,8 +951,9 @@ export function parseTime(str: string) : FeelTime | null {
  */
 export function parseDateTime(str: string) : FeelDateTime | null {
 
+  // negative (extended) ISO years are not supported by the FEEL grammar
   if (str.startsWith('-')) {
-    throw notImplemented('negative date');
+    return null;
   }
 
   const { value: parsedValue, zone } = splitZone(str);

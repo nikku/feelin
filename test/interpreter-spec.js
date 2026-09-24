@@ -2086,7 +2086,7 @@ describe('interpreter', function() {
 
         expect(warnings[0]).to.deep.include({
           type: 'FUNCTION_INVOCATION_FAILURE',
-          message: "Cannot invoke 'function(year, month, day)' with parameters '[1, 2, … 4 more]'",
+          message: "Cannot invoke 'function(year, month, day, from)' with parameters '[1, 2, … 4 more]'",
           position: { from: 0, to: 22 }
         });
 
@@ -2109,7 +2109,7 @@ describe('interpreter', function() {
 
         expect(warnings[0]).to.deep.include({
           type: 'FUNCTION_INVOCATION_FAILURE',
-          message: "Cannot invoke 'function(year, month, day)' with parameters '{foo: 1}'",
+          message: "Cannot invoke 'function(year, month, day, from)' with parameters '{foo: 1}'",
           position: { from: 0, to: 12 }
         });
 
@@ -2132,7 +2132,7 @@ describe('interpreter', function() {
 
         expect(warnings[0]).to.deep.include({
           type: 'FUNCTION_INVOCATION_FAILURE',
-          message: "Cannot invoke 'function(year, month, day)' with parameters '[2016, 1, … 2 more]'",
+          message: "Cannot invoke 'function(year, month, day, from)' with parameters '[2016, 1, … 2 more]'",
           position: { from: 0, to: 22 }
         });
 

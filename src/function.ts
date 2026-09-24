@@ -72,6 +72,9 @@ export function isInvocationFailure(value: unknown): value is InvocationFailure 
  * matching signature; the signatures only describe how provided
  * arguments bind and validate.
  *
+ * The first matching signature wins; declare narrower (more
+ * restrictive) signatures first.
+ *
  * - `args` — arg-definition DSL entries, one per parameter (see
  *   {@link createArgTester}): `<type>`, `<type>?`, `list`, `list<<type>>`,
  *   union types `<type>|<type>|…`
@@ -95,9 +98,6 @@ interface CompiledSignature extends FunctionSignature {
 
   /** maps raw positional args to converted args, or a failing index */
   validate: (args: unknown[]) => number | unknown[];
-
-  /** specificity used to break dispatch ties (non-`any` arg count) */
-  specificity: number;
 }
 
 export class FeelFunction {
@@ -159,11 +159,12 @@ export class FeelFunction {
 
       const candidates = satisfiable.length ? satisfiable : fitting;
 
-      if (!candidates.length) {
-        return parameterMismatch(this._signatureView(arityClosest(signatures, count)), contextOrArgs);
-      }
+      // first match wins; declare narrower signatures first
+      signature = candidates[0];
 
-      signature = mostSpecific(candidates);
+      if (!signature) {
+        return parameterMismatch(this, contextOrArgs);
+      }
 
       params = contextOrArgs;
 
@@ -171,22 +172,15 @@ export class FeelFunction {
 
       const keys = Object.keys(contextOrArgs);
 
-      const covering = signatures.filter(
+      // first covering signature wins; declare narrower signatures
+      // first
+      signature = signatures.find(
         sig => keys.every(key => sig.params.includes(key) || sig.params.includes(`...${key}`))
       );
 
-      if (!covering.length) {
-        return parameterMismatch(this._signatureView(bestCoverage(signatures, keys)), contextOrArgs);
+      if (!signature) {
+        return parameterMismatch(this, contextOrArgs);
       }
-
-      // prefer the tightest signature, break ties by specificity
-      signature = covering.reduce((best, sig) => {
-        if (sig.params.length !== best.params.length) {
-          return sig.params.length < best.params.length ? sig : best;
-        }
-
-        return sig.specificity > best.specificity ? sig : best;
-      });
 
       params = [];
 
@@ -225,14 +219,6 @@ export class FeelFunction {
     }
 
     return this.fn.call(null, ...converted);
-  }
-
-  /**
-   * A lightweight view of this function exposing only the given
-   * signature's parameters, for mismatch messages.
-   */
-  private _signatureView(signature: CompiledSignature) {
-    return new FeelFunction(this.fn, signature.params);
   }
 }
 
@@ -429,63 +415,8 @@ function compileSignature(signature: FunctionSignature): CompiledSignature {
     // a varargs parameter is never required
     required: args.filter((arg, index) => !arg.endsWith('?') && !(varargs && index === args.length - 1)).length,
     varargs,
-    validate: createArgsValidator(args, varargs),
-    specificity: args.filter(arg => !arg.startsWith('any')).length
+    validate: createArgsValidator(args, varargs)
   };
-}
-
-/**
- * The signature with the most typed (non-`any`) arguments.
- */
-function mostSpecific(signatures: CompiledSignature[]): CompiledSignature {
-  return signatures.reduce((best, sig) => sig.specificity > best.specificity ? sig : best);
-}
-
-/**
- * The signature whose arity is closest to the given argument count,
- * breaking ties towards the more specific signature.
- */
-function arityClosest(signatures: CompiledSignature[], count: number): CompiledSignature {
-
-  const distance = (sig: CompiledSignature) => {
-    if (count < sig.required) {
-      return sig.required - count;
-    }
-
-    return sig.varargs ? 0 : Math.max(0, count - sig.params.length);
-  };
-
-  return signatures.reduce((best, sig) => {
-    const dBest = distance(best);
-    const dSig = distance(sig);
-
-    if (dSig !== dBest) {
-      return dSig < dBest ? sig : best;
-    }
-
-    return sig.specificity > best.specificity ? sig : best;
-  });
-}
-
-/**
- * The signature covering most of the given named parameters, breaking
- * ties towards the more specific signature.
- */
-function bestCoverage(signatures: CompiledSignature[], keys: string[]): CompiledSignature {
-
-  const coverage = (sig: CompiledSignature) =>
-    keys.filter(key => sig.params.includes(key) || sig.params.includes(`...${key}`)).length;
-
-  return signatures.reduce((best, sig) => {
-    const cBest = coverage(best);
-    const cSig = coverage(sig);
-
-    if (cSig !== cBest) {
-      return cSig > cBest ? sig : best;
-    }
-
-    return sig.specificity > best.specificity ? sig : best;
-  });
 }
 
 /**

@@ -18,7 +18,7 @@ import {
 } from './range.js';
 
 import {
-  FALSE,
+  ARG_MISMATCH,
   FeelFunction,
   createArgTester,
   invalidArguments,
@@ -1056,7 +1056,7 @@ function listFn(fnDefinition, type, parameterNames = null) {
       args = args[0];
     }
 
-    const invalidIndex = args.findIndex(arg => tester(arg) === FALSE);
+    const invalidIndex = args.findIndex(arg => tester(arg) === ARG_MISMATCH);
 
     // member validation failed: surface the offending member
     // instead of silently evaluating to null

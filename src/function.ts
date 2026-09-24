@@ -232,7 +232,7 @@ export function isFunction(obj) : obj is FeelFunction {
 /**
  * Marker returned by argument testers for a non-matching argument.
  */
-export const FALSE = {};
+export const ARG_MISMATCH = {};
 
 /**
  * Create a tester for a single argument definition.
@@ -246,7 +246,7 @@ export const FALSE = {};
  * - `list<<type>>` — a list whose members must all be of the type
  *   (nil members pass)
  *
- * The tester returns the (converted) argument, or {@link FALSE} if
+ * The tester returns the (converted) argument, or {@link ARG_MISMATCH} if
  * the argument does not match.
  *
  * @param {string} arg
@@ -265,18 +265,18 @@ export function createArgTester(arg) {
     return function(obj) {
 
       if (typeof obj === 'undefined' || obj === null) {
-        return optional ? obj : FALSE;
+        return optional ? obj : ARG_MISMATCH;
       }
 
       for (const test of testers) {
         const result = test(obj);
 
-        if (result !== FALSE) {
+        if (result !== ARG_MISMATCH) {
           return result;
         }
       }
 
-      return FALSE;
+      return ARG_MISMATCH;
     };
   }
 
@@ -294,7 +294,7 @@ export function createArgTester(arg) {
 
         // implicit conversion obj => [ obj ]
         if (typeof obj === 'undefined' || obj === null) {
-          return optional ? obj : FALSE;
+          return optional ? obj : ARG_MISMATCH;
         }
 
         obj = [ obj ];
@@ -302,7 +302,7 @@ export function createArgTester(arg) {
 
       const invalid = obj.find(member => !isNil(member) && getType(member) !== memberType);
 
-      return invalid === undefined ? obj : FALSE;
+      return invalid === undefined ? obj : ARG_MISMATCH;
     };
   }
 
@@ -316,11 +316,11 @@ export function createArgTester(arg) {
       } else if (typeof obj === 'undefined') {
 
         // reject a missing required list argument
-        return FALSE;
+        return ARG_MISMATCH;
       } else {
 
         // implicit conversion obj => [ obj ]
-        return obj === null ? FALSE : [ obj ];
+        return obj === null ? ARG_MISMATCH : [ obj ];
       }
     }
 
@@ -333,14 +333,14 @@ export function createArgTester(arg) {
     const objType = getType(obj);
 
     if (type === 'any' || type === objType) {
-      return optional ? obj : typeof obj !== 'undefined' ? obj : FALSE;
+      return optional ? obj : typeof obj !== 'undefined' ? obj : ARG_MISMATCH;
     }
 
     if (objType === 'nil') {
-      return (optional ? obj : FALSE);
+      return (optional ? obj : ARG_MISMATCH);
     }
 
-    return typeCast(obj, type) || FALSE;
+    return typeCast(obj, type) || ARG_MISMATCH;
   };
 }
 
@@ -376,7 +376,7 @@ export function createArgsValidator(argDefinitions, varargs = false) {
 
       const conversion = test ? test(args[index]) : args[index];
 
-      if (conversion === FALSE) {
+      if (conversion === ARG_MISMATCH) {
         return index;
       }
 

@@ -2086,7 +2086,7 @@ describe('interpreter', function() {
 
         expect(warnings[0]).to.deep.include({
           type: 'FUNCTION_INVOCATION_FAILURE',
-          message: "Cannot invoke 'function(year, month, day, from)' with parameters '[1, 2, … 4 more]'",
+          message: "Cannot invoke 'function(year, month, day)' with parameters '[1, 2, … 4 more]'",
           position: { from: 0, to: 22 }
         });
 
@@ -2109,7 +2109,7 @@ describe('interpreter', function() {
 
         expect(warnings[0]).to.deep.include({
           type: 'FUNCTION_INVOCATION_FAILURE',
-          message: "Cannot invoke 'function(year, month, day, from)' with parameters '{foo: 1}'",
+          message: "Cannot invoke 'function(year, month, day)' with parameters '{foo: 1}'",
           position: { from: 0, to: 12 }
         });
 
@@ -2117,7 +2117,7 @@ describe('interpreter', function() {
       });
 
 
-      it('INVALID_ARGUMENTS on date(year, month, day, from)', function() {
+      it('FUNCTION_INVOCATION_FAILURE on date(year, month, day, from) surplus', function() {
 
         // when
         const {
@@ -2128,17 +2128,15 @@ describe('interpreter', function() {
         // then
         expect(value).to.be.null;
 
-        expect(warnings).to.eql([
-          {
-            type: 'INVALID_ARGUMENTS',
-            message: 'date(year, month, day) does not accept a <from> argument',
-            position: { from: 0, to: 22 },
-            details: {
-              template: 'date(year, month, day) does not accept a <from> argument',
-              values: {}
-            }
-          }
-        ]);
+        expect(warnings).to.have.length(1);
+
+        expect(warnings[0]).to.deep.include({
+          type: 'FUNCTION_INVOCATION_FAILURE',
+          message: "Cannot invoke 'function(year, month, day)' with parameters '[2016, 1, … 2 more]'",
+          position: { from: 0, to: 22 }
+        });
+
+        expect(warnings[0].details.values).to.have.keys('target', 'params');
       });
 
 
@@ -2156,11 +2154,73 @@ describe('interpreter', function() {
         expect(warnings).to.eql([
           {
             type: 'INVALID_ARGUMENTS',
-            message: 'date(year, month, day) expects <month> and <day> to be numbers',
+            message: 'parameter \'month\' expects a value of type \'number\', got \'null\'',
             position: { from: 0, to: 19 },
             details: {
-              template: 'date(year, month, day) expects <month> and <day> to be numbers',
-              values: {}
+              template: 'parameter \'{{{name}}}\' expects a value of type \'{{{expectedType}}}\', got {value}',
+              values: {
+                name: 'month',
+                expectedType: 'number',
+                value: null
+              }
+            }
+          }
+        ]);
+      });
+
+
+      it('INVALID_ARGUMENTS on missing date component', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('date(2017, 12)');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.eql([
+          {
+            type: 'INVALID_ARGUMENTS',
+            message: 'parameter \'day\' expects a value of type \'number\', got \'null\'',
+            position: { from: 0, to: 14 },
+            details: {
+              template: 'parameter \'{{{name}}}\' expects a value of type \'{{{expectedType}}}\', got {value}',
+              values: {
+                name: 'day',
+                expectedType: 'number',
+                value: null
+              }
+            }
+          }
+        ]);
+      });
+
+
+      it('INVALID_ARGUMENTS on union type mismatch', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('date and time(date("2012-12-25"), "x")');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.eql([
+          {
+            type: 'INVALID_ARGUMENTS',
+            message: 'parameter \'time\' expects a value of type \'time\', got \'"x"\'',
+            position: { from: 0, to: 38 },
+            details: {
+              template: 'parameter \'{{{name}}}\' expects a value of type \'{{{expectedType}}}\', got {value}',
+              values: {
+                name: 'time',
+                expectedType: 'time',
+                value: 'x'
+              }
             }
           }
         ]);
@@ -2244,11 +2304,15 @@ describe('interpreter', function() {
         expect(warnings).to.eql([
           {
             type: 'INVALID_ARGUMENTS',
-            message: 'time(hour, minute, second) expects <minute> and <second> to be numbers',
+            message: 'parameter \'minute\' expects a value of type \'number\', got \'null\'',
             position: { from: 0, to: 17 },
             details: {
-              template: 'time(hour, minute, second) expects <minute> and <second> to be numbers',
-              values: {}
+              template: 'parameter \'{{{name}}}\' expects a value of type \'{{{expectedType}}}\', got {value}',
+              values: {
+                name: 'minute',
+                expectedType: 'number',
+                value: null
+              }
             }
           }
         ]);
@@ -2269,11 +2333,15 @@ describe('interpreter', function() {
         expect(warnings).to.eql([
           {
             type: 'INVALID_ARGUMENTS',
-            message: 'time(hour, minute, second, offset) expects <offset> to be a duration',
+            message: 'parameter \'offset\' expects a value of type \'duration\', got \'5\'',
             position: { from: 0, to: 17 },
             details: {
-              template: 'time(hour, minute, second, offset) expects <offset> to be a duration',
-              values: {}
+              template: 'parameter \'{{{name}}}\' expects a value of type \'{{{expectedType}}}\', got {value}',
+              values: {
+                name: 'offset',
+                expectedType: 'duration',
+                value: 5
+              }
             }
           }
         ]);
@@ -2349,15 +2417,15 @@ describe('interpreter', function() {
         [ 'context([ { key: "a", value: 1 }, { key: "a", value: 2 } ])', "context(entries) expects unique keys, got '\"a\"'", { key: 'a' } ],
         [ 'context put({}, 1, 1)', "context put expects a string key, got '1'", { key: 1 } ],
         [ 'date("nope")', "'date(\"nope\")' is not a valid date", { from: 'nope' } ],
-        [ 'date(null)', "'date(null)' is not a valid date", { from: null } ],
-        [ 'date("2010-10-10", 5)', 'date(from) does not accept <month> or <day> arguments', {} ],
+        [ 'date(null)', "parameter 'from' expects a value of type 'string|date|date time', got 'null'", { name: 'from', expectedType: 'string|date|date time', value: null } ],
+        [ 'date("2010-10-10", 5)', 'parameter \'year\' expects a value of type \'number\', got \'"2010-10-10"\'', { name: 'year', expectedType: 'number', value: '2010-10-10' } ],
         [ 'time("nope")', "'time(\"nope\")' is not a valid time", { from: 'nope' } ],
-        [ 'time(null)', "'time(null)' is not a valid time", { from: null } ],
-        [ 'time("10:00:00", 5)', 'time(from) does not accept <hour>, <minute>, <second> or <offset> arguments', {} ],
+        [ 'time(null)', "parameter 'from' expects a value of type 'string|time|date|date time', got 'null'", { name: 'from', expectedType: 'string|time|date|date time', value: null } ],
+        [ 'time("10:00:00", 5)', 'parameter \'hour\' expects a value of type \'number\', got \'"10:00:00"\'', { name: 'hour', expectedType: 'number', value: '10:00:00' } ],
         [ 'duration("1Y")', "'duration(\"1Y\")' is not a valid duration", { from: '1Y' } ],
         [ 'duration("P999999999M")', "'duration(\"P999999999M\")' is not a valid duration", { from: 'P999999999M' } ],
         [ 'date and time("2017-13-10T11:22:33")', "'date and time(\"2017-13-10T11:22:33\")' is not a valid date time", { from: '2017-13-10T11:22:33' } ],
-        [ 'date and time(null)', "'date and time(null)' is not a valid date time", { from: null } ]
+        [ 'date and time(null)', "parameter 'from' expects a value of type 'string', got 'null'", { name: 'from', expectedType: 'string', value: null } ]
       ].forEach(([ expression, message, values ]) => {
 
         it(`INVALID_ARGUMENTS for <${ expression }>`, function() {
@@ -2594,7 +2662,7 @@ describe('interpreter', function() {
         [ 'range', '[1..5]', '[1..5]', 'range' ],
         [ 'boolean', 'true', 'true', 'boolean' ],
         [ 'context', '{ a: 1 }', '{a: 1}', 'context' ],
-        [ 'function', 'not', 'function', 'literal' ]
+        [ 'function', 'not', 'function(negand)', 'function' ]
       ].forEach(([ label, member, rendered, type ]) => {
 
         it(`INVALID_ARGUMENTS for <string join> with ${ label } member`, function() {
@@ -2674,7 +2742,7 @@ describe('interpreter', function() {
           [ 'date time', '@"2020-01-01T12:00:00" + 1', {}, "Can't add '1' to 'date and time(\"2020-01-01T12:00:00\")'" ],
           [ 'duration', 'duration("P1D") + 1', {}, "Can't add '1' to 'duration(\"P1D\")'" ],
           [ 'range', '[1..5] + 1', {}, "Can't add '1' to '[1..5]'" ],
-          [ 'function', 'not + 1', {}, "Can't add '1' to 'function'" ]
+          [ 'function', 'not + 1', {}, "Can't add '1' to 'function(negand)'" ]
         ].forEach(([ label, expression, context, message ]) => {
 
           it(`standalone ${ label }`, function() {
@@ -2725,7 +2793,7 @@ describe('interpreter', function() {
 
           expect(warnings[0]).to.deep.include({
             type: 'NO_CONTEXT_ENTRY_FOUND',
-            message: 'Key \'x\' not found in \'{s: "x", f: function, … 2 more}\''
+            message: 'Key \'x\' not found in \'{s: "x", f: function(negand), … 2 more}\''
           });
         });
 

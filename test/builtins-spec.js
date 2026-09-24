@@ -92,6 +92,22 @@ function describeBuiltins(name, evaluate) {
 
       expr('string(time(10, 30, 0, duration("PT5H")))', '10:30:00+05:00');
 
+      // overload dispatch: positional and named arguments
+      // bind to the matching signature
+      expr('date(year: 2012, month: 12, day: 25) = date("2012-12-25")', true);
+      expr('date(from: date and time("2012-12-25T11:00:00Z")) = date("2012-12-25")', true);
+      expr(`
+        date and time("2012-12-24T23:59:00") =
+        date and time(date: date("2012-12-24"), time: time("23:59:00"))
+      `, true);
+      expr(`
+        date and time("2012-12-24T23:59:00") =
+        date and time(from: "2012-12-24T23:59:00")
+      `, true);
+      expr('time(hour: 10, minute: 30, second: 0) = time("10:30:00")', true);
+      expr('time(hour: 10, minute: 30, second: 0, offset: duration("PT5H")) = time("10:30:00+05:00")', true);
+      expr('time(from: time("10:30:00+05:00")) = time(10, 30, 0, duration("PT5H"))', true);
+
       // sub-minute offsets (Temporal only supports minute precision)
       expr('string(time(10, 30, 15, duration("PT5H30M15S")))', '10:30:15+05:30:15');
       expr('time(10, 30, 15, duration("PT5H30M15S")).time offset = duration("PT5H30M15S")', true);

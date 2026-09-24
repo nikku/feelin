@@ -5,12 +5,10 @@ import {
   isString,
   isNumber,
   getType,
-  typeCast,
   isDate,
   isTime,
   isDateTime,
-  isDuration,
-  isNil
+  isDuration
 } from './types.js';
 
 import {
@@ -20,9 +18,13 @@ import {
 } from './range.js';
 
 import {
+  FALSE,
+  FeelFunction,
+  createArgTester,
   invalidArguments,
   isInvocationFailure,
-  parseParameterNames
+  parseParameterNames,
+  type FunctionSignature
 } from './function.js';
 
 import {
@@ -199,36 +201,13 @@ const builtins = {
     return toString(from);
   }, [ 'any' ], [ 'from' ]),
 
-  // date(from) => date string
-  // date(from) => date and time
   // date(year, month, day)
-  'date': fn(function(year, month, day, from) {
-
-    if (!from && !isNumber(year)) {
-      from = year;
-      year = null;
-    }
+  // date(from) => date string, date or date and time
+  'date': overloads(function(year, month, day) {
 
     let d;
 
-    if (isString(from)) {
-      d = parseDate(from);
-    } else if (isDate(from)) {
-      d = from;
-    } else if (isDateTime(from)) {
-      d = dateOf(from);
-    }
-
     if (isNumber(year)) {
-
-      const error =
-        guard(from == null, 'date(year, month, day) does not accept a <from> argument') ||
-        guard(isNumber(month) && isNumber(day), 'date(year, month, day) expects <month> and <day> to be numbers');
-
-      if (error) {
-        return error;
-      }
-
       d = dateFrom(year, month, day);
 
       if (!d) {
@@ -238,43 +217,34 @@ const builtins = {
           day
         });
       }
+    } else if (isString(year)) {
+      d = parseDate(year);
+    } else if (isDate(year)) {
+      d = year;
+    } else if (isDateTime(year)) {
+      d = dateOf(year);
     }
 
     if (d) {
-
-      // <from> form: extra component arguments are a usage error
-      const extraError =
-        guard(!isNil(year) || (isNil(month) && isNil(day)), 'date(from) does not accept <month> or <day> arguments');
-
-      if (extraError) {
-        return extraError;
-      }
-
       return d;
     }
 
-    return invalidArguments('\'date({{from}})\' is not a valid date', { from });
-  }, [ 'any?', 'number?', 'number?', 'any?' ], [ 'year', 'month', 'day', 'from' ]),
+    return invalidArguments('\'date({{from}})\' is not a valid date', { from: year });
+  }, [
+    { args: [ 'number', 'number', 'number' ], params: [ 'year', 'month', 'day' ] },
+    { args: [ 'string|date|date time' ], params: [ 'from' ] }
+  ]),
 
-  // date and time(from) => date time string
   // date and time(date, time)
-  'date and time': fn(function(d, time, from) {
-
-    const dateArg = d;
+  // date and time(from) => date time string
+  'date and time': overloads(function(date, time) {
 
     let dt;
 
-    if ((isDate(d) || isDateTime(d)) && isTime(time)) {
-      dt = combine(d, time);
-    }
-
-    if (isString(d)) {
-      from = d;
-      d = null;
-    }
-
-    if (isString(from)) {
-      dt = parseDateTime(from);
+    if (isString(date)) {
+      dt = parseDateTime(date);
+    } else {
+      dt = combine(date, time);
     }
 
     if (dt) {
@@ -282,49 +252,20 @@ const builtins = {
     }
 
     return invalidArguments('\'date and time({{from}})\' is not a valid date time', {
-      from: isString(from) ? from : dateArg
+      from: date
     });
-  }, [ 'any?', 'time?', 'string?' ], [ 'date', 'time', 'from' ]),
+  }, [
+    { args: [ 'date|date time', 'time' ], params: [ 'date', 'time' ] },
+    { args: [ 'string' ], params: [ 'from' ] }
+  ]),
 
-  // time(from) => time string
-  // time(from) => time, date and time
-  // time(hour, minute, second, offset?) => ...
-  'time': fn(function(hour, minute, second, offset, from) {
+  // time(hour, minute, second, offset?)
+  // time(from) => time string, time, date or date and time
+  'time': overloads(function(hour, minute, second, offset) {
 
     let t;
 
-    if (isString(hour) || isDate(hour) || isDateTime(hour) || isTime(hour)) {
-      from = hour;
-      hour = null;
-    }
-
-    if (isString(from) && from) {
-      t = parseTime(from);
-    }
-
-    if (isTime(from)) {
-      t = from;
-    }
-
-    if (isDateTime(from)) {
-      t = timeOf(from);
-    }
-
-    // a date converts to its midnight (UTC) time
-    if (isDate(from)) {
-      t = timeOfDate(from);
-    }
-
     if (isNumber(hour)) {
-
-      const error =
-        guard(isNumber(minute) && isNumber(second), 'time(hour, minute, second) expects <minute> and <second> to be numbers') ||
-        guard(offset == null || isDuration(offset), 'time(hour, minute, second, offset) expects <offset> to be a duration');
-
-      if (error) {
-        return error;
-      }
-
       t = timeFrom(hour, minute, second, offset);
 
       if (!t) {
@@ -334,23 +275,27 @@ const builtins = {
           second
         });
       }
+    } else if (isString(hour)) {
+      t = parseTime(hour);
+    } else if (isTime(hour)) {
+      t = hour;
+    } else if (isDateTime(hour)) {
+      t = timeOf(hour);
+    } else if (isDate(hour)) {
+
+      // a date converts to its midnight (UTC) time
+      t = timeOfDate(hour);
     }
 
     if (t) {
-
-      // <from> form: extra component arguments are a usage error
-      const extraError =
-        guard(!isNil(hour) || (isNil(minute) && isNil(second) && isNil(offset)), 'time(from) does not accept <hour>, <minute>, <second> or <offset> arguments');
-
-      if (extraError) {
-        return extraError;
-      }
-
       return t;
     }
 
-    return invalidArguments('\'time({{from}})\' is not a valid time', { from: from ?? hour });
-  }, [ 'any?', 'number?', 'number?', 'any?', 'any?' ], [ 'hour', 'minute', 'second', 'offset', 'from' ]),
+    return invalidArguments('\'time({{from}})\' is not a valid time', { from: hour });
+  }, [
+    { args: [ 'number', 'number', 'number', 'duration?' ], params: [ 'hour', 'minute', 'second', 'offset' ] },
+    { args: [ 'string|time|date|date time' ], params: [ 'from' ] }
+  ]),
 
   'duration': fn(function(from) {
 
@@ -1077,8 +1022,6 @@ function matches(a, b) {
   return a === b;
 }
 
-const FALSE = {};
-
 const DURATION_START_PATTERN = /^-?P/;
 
 const TIME_START_PATTERN = /^\d{1,2}:\d{1,2}:\d{1,2}/;
@@ -1090,149 +1033,17 @@ const SUPPORTED_FLAGS_PATTERN = /[smix]/g;
 const EXTENDED_FLAG_PATTERN = /x/;
 
 /**
- * Create a tester for a single argument definition.
- *
- * Definitions:
- *
- * - `<type>` — a required argument of the type
- * - `<type>?` — an optional argument (may be nil/undefined)
- * - `list` — a list, with implicit conversion `obj => [ obj ]`
- * - `list<<type>>` — a list whose members must all be of the type
- *   (nil members pass)
- *
- * The tester returns the (converted) argument, or {@link FALSE} if
- * the argument does not match.
- *
- * @param {string} arg
- *
- * @return {Function}
- */
-function createArgTester(arg) {
-  const optional = arg.endsWith('?');
-
-  const type = optional ? arg.substring(0, arg.length - 1) : arg;
-
-  // list<memberType>: validate members, too
-  const memberMatch = /^list<(\w+)>$/.exec(type);
-
-  if (memberMatch) {
-    const memberType = memberMatch[1];
-
-    return function(obj) {
-
-      const arr = Array.isArray(obj);
-
-      if (!arr) {
-
-        // implicit conversion obj => [ obj ]
-        if (typeof obj === 'undefined' || obj === null) {
-          return optional ? obj : FALSE;
-        }
-
-        obj = [ obj ];
-      }
-
-      const invalid = obj.find(member => !isNil(member) && getType(member) !== memberType);
-
-      return invalid === undefined ? obj : FALSE;
-    };
-  }
-
-  return function(obj) {
-
-    const arr = Array.isArray(obj);
-
-    if (type === 'list') {
-      if (arr || optional && typeof obj === 'undefined') {
-        return obj;
-      } else if (typeof obj === 'undefined') {
-
-        // reject a missing required list argument
-        return FALSE;
-      } else {
-
-        // implicit conversion obj => [ obj ]
-        return obj === null ? FALSE : [ obj ];
-      }
-    }
-
-    if (type !== 'any' && arr && obj.length === 1) {
-
-      // implicit conversion [ obj ] => obj
-      obj = obj[0];
-    }
-
-    const objType = getType(obj);
-
-    if (type === 'any' || type === objType) {
-      return optional ? obj : typeof obj !== 'undefined' ? obj : FALSE;
-    }
-
-    if (objType === 'nil') {
-      return (optional ? obj : FALSE);
-    }
-
-    return typeCast(obj, type) || FALSE;
-  };
-}
-
-/**
- * Create a validator for the given argument definitions.
- *
- * Returns a function mapping raw arguments to converted arguments,
- * or the index of the first argument that failed validation.
- *
- * @param {string[]} argDefinitions
- *
- * @return {Function}
- */
-function createArgsValidator(argDefinitions) {
-
-  const tests = argDefinitions.map(createArgTester);
-
-  return function(args) {
-
-    const result = [];
-
-    // validate provided args; pad and validate missing trailing args
-    // (without mutating the caller's array)
-    const length = Math.max(args.length, argDefinitions.length);
-
-    for (let index = 0; index < length; index++) {
-
-      const test = tests[index];
-
-      const conversion = test ? test(args[index]) : args[index];
-
-      if (conversion === FALSE) {
-        return index;
-      }
-
-      result.push(conversion);
-    }
-
-    return result;
-
-  };
-}
-
-/**
  * @param {Function} fnDefinition
  * @param {string} type
  * @param {string[]} [parameterNames]
  *
- * @return {Function}
- */
-/**
- * @param {Function} fnDefinition
- * @param {string} type
- * @param {string[]} [parameterNames]
- *
- * @return {Function}
+ * @return {FeelFunction}
  */
 function listFn(fnDefinition, type, parameterNames = null) {
 
   const tester = createArgTester(type);
+
+  parameterNames = parameterNames || parseParameterNames(fnDefinition);
 
   const wrappedFn = function(...args) {
 
@@ -1254,7 +1065,7 @@ function listFn(fnDefinition, type, parameterNames = null) {
       const expectedType = type.replace(/\?$/, '');
 
       return invalidArguments('parameter \'{{{name}}}\' expects members of type \'{{{expectedType}}}\', got {value}', {
-        name: (wrappedFn.$args[0] || 'list').replace(/^\.\.\./, ''),
+        name: (parameterNames[0] || 'list').replace(/^\.\.\./, ''),
         expectedType,
         value: args[invalidIndex]
       });
@@ -1263,80 +1074,45 @@ function listFn(fnDefinition, type, parameterNames = null) {
     return fnDefinition(...args);
   };
 
-  wrappedFn.$args = parameterNames || parseParameterNames(fnDefinition);
-
-  return wrappedFn;
+  return new FeelFunction(wrappedFn, parameterNames);
 }
 
 /**
- * Return an {@link invalidArguments} signal unless the condition holds,
- * so builtins can express argument validation as a flat guard chain
- * (`guard(...) || guard(...)`), short-circuiting on the first failure.
+ * Create a builtin as a {@link FeelFunction} with a single validation
+ * signature, compiled once at construction (module load) time. The
+ * interpreter invokes it directly, without re-wrapping.
  *
- * @param {boolean} condition
- * @param {string} template
- * @param {Record<string, unknown>} [values]
- *
- * @return {import('./function.js').InvocationFailure | null}
- */
-function guard(condition, template, values = {}) {
-  return condition ? null : invalidArguments(template, values);
-}
-
-/**
  * @param {Function} fnDefinition
  * @param {string[]} argDefinitions
  * @param {string[]} [parameterNames]
  *
- * @return {Function}
+ * @return {FeelFunction}
  */
 function fn(fnDefinition, argDefinitions, parameterNames = null) {
-  const checkArgs = createArgsValidator(argDefinitions);
-
   parameterNames = parameterNames || parseParameterNames(fnDefinition);
 
-  const wrappedFn = function(...args) {
+  return new FeelFunction(fnDefinition, parameterNames, [
+    { args: argDefinitions, params: parameterNames }
+  ]);
+}
 
-    const convertedArgs = checkArgs(args);
+/**
+ * Create a builtin as a {@link FeelFunction} with overload signatures
+ * (see {@link FunctionSignature}): the implementation receives the
+ * arguments of whichever signature matches the invocation.
+ *
+ * @param {Function} fnDefinition
+ * @param {FunctionSignature[]} signatures
+ *
+ * @return {FeelFunction}
+ */
+function overloads(fnDefinition, signatures: FunctionSignature[]) {
 
-    // argument validation failed: surface the offending argument
-    // instead of silently evaluating to null
-    if (typeof convertedArgs === 'number') {
+  // union of all signature parameter names, first-seen order; used for
+  // function inspection and mismatch messages
+  const parameterNames = [ ...new Set(signatures.flatMap(s => s.params)) ];
 
-      const index = convertedArgs;
-      const name = parameterNames[index] || String(index);
-      const argDefinition = argDefinitions[index];
-      const expectedType = argDefinition.replace(/\?$/, '');
-
-      // list<memberType>: surface the offending member, not the whole list
-      const memberMatch = /^list<(\w+)>$/.exec(expectedType);
-
-      if (memberMatch) {
-        const memberType = memberMatch[1];
-        const list = Array.isArray(args[index]) ? args[index] : [ args[index] ];
-        const invalidMember = list.find(member => !isNil(member) && getType(member) !== memberType);
-
-        return invalidArguments('parameter \'{{{name}}}\' expects a list of \'{{{expectedType}}}\' members, but member {value} is of type \'{{{valueType}}}\'', {
-          name,
-          expectedType: memberType,
-          value: invalidMember,
-          valueType: getType(invalidMember)
-        });
-      }
-
-      return invalidArguments('parameter \'{{{name}}}\' expects a value of type \'{{{expectedType}}}\', got {value}', {
-        name,
-        expectedType,
-        value: args[index]
-      });
-    }
-
-    return fnDefinition(...convertedArgs);
-  };
-
-  wrappedFn.$args = parameterNames;
-
-  return wrappedFn;
+  return new FeelFunction(fnDefinition, parameterNames, signatures);
 }
 
 function sum(list) {

@@ -241,6 +241,15 @@ const builtins = {
     }
 
     if (d) {
+
+      // <from> form: extra component arguments are a usage error
+      const extraError =
+        guard(!isNil(year) || (isNil(month) && isNil(day)), 'date(from) does not accept <month> or <day> arguments');
+
+      if (extraError) {
+        return extraError;
+      }
+
       return d;
     }
 
@@ -328,6 +337,15 @@ const builtins = {
     }
 
     if (t) {
+
+      // <from> form: extra component arguments are a usage error
+      const extraError =
+        guard(!isNil(hour) || (isNil(minute) && isNil(second) && isNil(offset)), 'time(from) does not accept <hour>, <minute>, <second> or <offset> arguments');
+
+      if (extraError) {
+        return extraError;
+      }
+
       return t;
     }
 

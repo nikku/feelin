@@ -24,6 +24,7 @@ import {
   invalidArguments,
   isInvocationFailure,
   parseParameterNames,
+  withFunctionName,
   type FunctionSignature
 } from './function.js';
 
@@ -185,13 +186,13 @@ const builtins = {
     const number = +from;
 
     if (isNaN(number)) {
-      return invalidArguments('number(from) expects a numeric string, got {from}', {
+      return invalidArguments('parameter \'from\' expects a numeric string, got {from}', {
         from: original
       });
     }
 
     return number;
-  }, [ 'string', 'string?', 'string?' ], [ 'from', 'grouping separator', 'decimal separator' ]),
+  }, [ 'string', 'string?', 'string?' ], [ 'from', 'grouping separator', 'decimal separator' ], 'number'),
 
   'string': fn(function(from) {
     if (from === null) {
@@ -199,7 +200,7 @@ const builtins = {
     }
 
     return toString(from);
-  }, [ 'any' ], [ 'from' ]),
+  }, [ 'any' ], [ 'from' ], 'string'),
 
   // date(year, month, day)
   // date(from) => date string, date or date and time
@@ -211,7 +212,7 @@ const builtins = {
       d = dateFrom(year, month, day);
 
       if (!d) {
-        return invalidArguments('\'date({{year}}, {{month}}, {{day}})\' is not a valid date', {
+        return invalidArguments('{{year}}, {{month}}, {{day}} is not a valid date', {
           year,
           month,
           day
@@ -233,7 +234,7 @@ const builtins = {
   }, [
     { args: [ 'number', 'number', 'number' ], params: [ 'year', 'month', 'day' ] },
     { args: [ 'string|date|date time' ], params: [ 'from' ] }
-  ]),
+  ], 'date'),
 
   // date and time(date, time)
   // date and time(from) => date time string
@@ -257,7 +258,7 @@ const builtins = {
   }, [
     { args: [ 'date|date time', 'time' ], params: [ 'date', 'time' ] },
     { args: [ 'string' ], params: [ 'from' ] }
-  ]),
+  ], 'date and time'),
 
   // time(hour, minute, second, offset?)
   // time(from) => time string, time, date or date and time
@@ -295,7 +296,7 @@ const builtins = {
   }, [
     { args: [ 'number', 'number', 'number', 'duration?' ], params: [ 'hour', 'minute', 'second', 'offset' ] },
     { args: [ 'string|time|date|date time' ], params: [ 'from' ] }
-  ]),
+  ], 'time'),
 
   'duration': fn(function(from) {
 
@@ -306,11 +307,11 @@ const builtins = {
     }
 
     return d;
-  }, [ 'string' ], [ 'from' ]),
+  }, [ 'string' ], [ 'from' ], 'duration'),
 
   'years and months duration': fn(function(from, to) {
     return yearsAndMonthsDuration(from, to);
-  }, [ 'date', 'date' ], [ 'from', 'to' ]),
+  }, [ 'date', 'date' ], [ 'from', 'to' ], 'years and months duration'),
 
   '@': fn(function(string) {
 
@@ -333,24 +334,24 @@ const builtins = {
     }
 
     if (!t) {
-      return invalidArguments('\'@"{{{string}}}"\' is not a valid temporal literal', { string });
+      return invalidArguments('"{{{string}}}" is not a valid temporal literal', { string });
     }
 
     return t;
-  }, [ 'string' ]),
+  }, [ 'string' ], null, '@'),
 
   'now': fn(function() {
     return now();
-  }, [], []),
+  }, [], [], 'now'),
 
   'today': fn(function() {
     return today();
-  }, [], []),
+  }, [], [], 'today'),
 
   // 10.3.4.2 Boolean function
   'not': fn(function(negand) {
     return isType(negand, 'boolean') ? !negand : null;
-  }, [ 'any' ], [ 'negand' ]),
+  }, [ 'any' ], [ 'negand' ], 'not'),
 
   // 10.3.4.3 String functions
   'substring': fn(function(string, start, length) {
@@ -364,19 +365,19 @@ const builtins = {
         ? arr.slice(_start, _start + length)
         : arr.slice(_start)
     ).join('');
-  }, [ 'string', 'number', 'number?' ], [ 'string', 'start position', 'length' ]),
+  }, [ 'string', 'number', 'number?' ], [ 'string', 'start position', 'length' ], 'substring'),
 
   'string length': fn(function(string) {
     return countSymbols(string);
-  }, [ 'string' ], [ 'string' ]),
+  }, [ 'string' ], [ 'string' ], 'string length'),
 
   'upper case': fn(function(string) {
     return string.toUpperCase();
-  }, [ 'string' ], [ 'string' ]),
+  }, [ 'string' ], [ 'string' ], 'upper case'),
 
   'lower case': fn(function(string) {
     return string.toLowerCase();
-  }, [ 'string' ], [ 'string' ]),
+  }, [ 'string' ], [ 'string' ], 'lower case'),
 
   'substring before': fn(function(string, match) {
 
@@ -387,7 +388,7 @@ const builtins = {
     }
 
     return string.substring(0, index);
-  }, [ 'string', 'string' ], [ 'string', 'match' ]),
+  }, [ 'string', 'string' ], [ 'string', 'match' ], 'substring before'),
 
   'substring after': fn(function(string, match) {
 
@@ -398,65 +399,65 @@ const builtins = {
     }
 
     return string.substring(index + match.length);
-  }, [ 'string', 'string' ], [ 'string', 'match' ]),
+  }, [ 'string', 'string' ], [ 'string', 'match' ], 'substring after'),
 
   'replace': fn(function(input, pattern, replacement, flags) {
     const regexp = createRegexp(pattern, flags || '', 'g');
 
     if (!regexp) {
-      return invalidArguments('replace(input, pattern, replacement) expects a valid pattern, got {pattern}', {
+      return invalidArguments('{pattern} is not a valid pattern', {
         pattern
       });
     }
 
     return input.replace(regexp, replacement.replace(/\$0/g, '$$&'));
-  }, [ 'string', 'string', 'string', 'string?' ], [ 'input', 'pattern', 'replacement', 'flags' ]),
+  }, [ 'string', 'string', 'string', 'string?' ], [ 'input', 'pattern', 'replacement', 'flags' ], 'replace'),
 
   'contains': fn(function(string, match) {
     return string.includes(match);
-  }, [ 'string', 'string' ], [ 'string', 'match' ]),
+  }, [ 'string', 'string' ], [ 'string', 'match' ], 'contains'),
 
   'matches': fn(function(input, pattern, flags) {
     const regexp = createRegexp(pattern, flags || '', '');
 
     if (!regexp) {
-      return invalidArguments('matches(input, pattern) expects a valid pattern, got {pattern}', {
+      return invalidArguments('{pattern} is not a valid pattern', {
         pattern
       });
     }
 
     return regexp.test(input);
-  }, [ 'string', 'string', 'string?' ], [ 'input', 'pattern', 'flags' ]),
+  }, [ 'string', 'string', 'string?' ], [ 'input', 'pattern', 'flags' ], 'matches'),
 
   'starts with': fn(function(string, match) {
     return string.startsWith(match);
-  }, [ 'string', 'string' ], [ 'string', 'match' ]),
+  }, [ 'string', 'string' ], [ 'string', 'match' ], 'starts with'),
 
   'ends with': fn(function(string, match) {
     return string.endsWith(match);
-  }, [ 'string', 'string' ], [ 'string', 'match' ]),
+  }, [ 'string', 'string' ], [ 'string', 'match' ], 'ends with'),
 
   'split': fn(function(string, delimiter) {
     const regexp = createRegexp(delimiter, '', '');
 
     if (!regexp) {
-      return invalidArguments('split(string, delimiter) expects a valid pattern, got {delimiter}', {
+      return invalidArguments('{delimiter} is not a valid pattern', {
         delimiter
       });
     }
 
     return string.split(regexp);
-  }, [ 'string', 'string' ], [ 'string', 'delimiter' ]),
+  }, [ 'string', 'string' ], [ 'string', 'delimiter' ], 'split'),
 
   'string join': fn(function(list, delimiter) {
     return list.filter(l => l !== null).join(delimiter || '');
-  }, [ 'list<string>', 'string?' ], [ 'list', 'delimiter' ]),
+  }, [ 'list<string>', 'string?' ], [ 'list', 'delimiter' ], 'string join'),
 
   // 10.3.4.4 List functions
 
   'list contains': fn(function(list, element) {
     return list.some(el => matches(el, element));
-  }, [ 'list', 'any?' ], [ 'list', 'element' ]),
+  }, [ 'list', 'any?' ], [ 'list', 'element' ], 'list contains'),
 
   // list replace(list, position, newItem)
   // list replace(list, match, newItem)
@@ -465,35 +466,35 @@ const builtins = {
     const matcher = position || match;
 
     if (![ 'number', 'function' ].includes(getType(matcher))) {
-      return invalidArguments('list replace expects a numeric position or a match function, got {matcher}', {
+      return invalidArguments('{matcher} is not a valid position or match function', {
         matcher
       });
     }
 
     return listReplace(list, position || match, newItem);
-  }, [ 'list', 'any?', 'any', 'function?' ], [ 'list', 'position', 'newItem', 'match' ]),
+  }, [ 'list', 'any?', 'any', 'function?' ], [ 'list', 'position', 'newItem', 'match' ], 'list replace'),
 
   'count': fn(function(list) {
     return list.length;
-  }, [ 'list' ], [ 'list' ]),
+  }, [ 'list' ], [ 'list' ], 'count'),
 
   'min': listFn(function(...list) {
     return list.reduce((min, el) => min === null ? el : Math.min(min, el), null);
-  }, 'number', [ '...list' ]),
+  }, 'number', [ '...list' ], 'min'),
 
   'max': listFn(function(...list) {
     return list.reduce((max, el) => max === null ? el : Math.max(max, el), null);
-  }, 'number', [ '...list' ]),
+  }, 'number', [ '...list' ], 'max'),
 
   'sum': listFn(function(...list) {
     return sum(list);
-  }, 'number', [ '...list' ]),
+  }, 'number', [ '...list' ], 'sum'),
 
   'mean': listFn(function(...list) {
     const s = sum(list);
 
     return s === null ? s : s / list.length;
-  }, 'number', [ '...list' ]),
+  }, 'number', [ '...list' ], 'mean'),
 
   'all': listFn(function(...list) {
 
@@ -512,7 +513,7 @@ const builtins = {
 
     return nonBool ? null : true;
 
-  }, 'any?', [ '...list' ]),
+  }, 'any?', [ '...list' ], 'all'),
 
   'any': listFn(function(...list) {
 
@@ -530,7 +531,7 @@ const builtins = {
     }
 
     return nonBool ? null : false;
-  }, 'any?', [ '...list' ]),
+  }, 'any?', [ '...list' ], 'any'),
 
   'sublist': fn(function(list, start, length) {
 
@@ -542,11 +543,11 @@ const builtins = {
         : list.slice(_start)
     );
 
-  }, [ 'list', 'number', 'number?' ], [ 'list', 'start', 'length' ]),
+  }, [ 'list', 'number', 'number?' ], [ 'list', 'start', 'length' ], 'sublist'),
 
   'append': fn(function(list, ...items) {
     return list.concat(items);
-  }, [ 'list', 'any?' ], [ 'list', '...item' ]),
+  }, [ 'list', 'any?' ], [ 'list', '...item' ], 'append'),
 
   'concatenate': fn(function(...list) {
 
@@ -564,7 +565,7 @@ const builtins = {
 
     return result;
 
-  }, [ 'any' ], [ '...list' ]),
+  }, [ 'any' ], [ '...list' ], 'concatenate'),
 
   'insert before': fn(function(list, position, newItem) {
 
@@ -593,7 +594,7 @@ const builtins = {
     }
 
     return result;
-  }, [ 'list', 'number', 'any?' ], [ 'list', 'position', 'newItem' ]),
+  }, [ 'list', 'number', 'any?' ], [ 'list', 'position', 'newItem' ], 'insert before'),
 
   'remove': fn(function(list, position) {
 
@@ -618,11 +619,11 @@ const builtins = {
     }
 
     return result;
-  }, [ 'list', 'number' ], [ 'list', 'position' ]),
+  }, [ 'list', 'number' ], [ 'list', 'position' ], 'remove'),
 
   'reverse': fn(function(list) {
     return list.slice().reverse();
-  }, [ 'list' ], [ 'list' ]),
+  }, [ 'list' ], [ 'list' ], 'reverse'),
 
   'index of': fn(function(list, match) {
 
@@ -634,21 +635,21 @@ const builtins = {
 
       return result;
     }, []);
-  }, [ 'list', 'any' ], [ 'list', 'match' ]),
+  }, [ 'list', 'any' ], [ 'list', 'match' ], 'index of'),
 
   'union': listFn(function(...lists) {
 
     return distinctLists(lists);
 
-  }, 'list', [ '...list' ]),
+  }, 'list', [ '...list' ], 'union'),
 
   'distinct values': fn(function(list) {
     return distinctLists([ list ]);
-  }, [ 'list' ], [ 'list' ]),
+  }, [ 'list' ], [ 'list' ], 'distinct values'),
 
   'flatten': fn(function(list) {
     return flatten(list);
-  }, [ 'list' ], [ 'list' ]),
+  }, [ 'list' ], [ 'list' ], 'flatten'),
 
   'product': listFn(function(...list) {
 
@@ -659,7 +660,7 @@ const builtins = {
     return list.reduce((result, n) => {
       return result * n;
     }, 1);
-  }, 'number', [ '...list' ]),
+  }, 'number', [ '...list' ], 'product'),
 
   'median': listFn(function(...list) {
 
@@ -668,7 +669,7 @@ const builtins = {
     }
 
     return median(list);
-  }, 'number', [ '...list' ]),
+  }, 'number', [ '...list' ], 'median'),
 
   'stddev': listFn(function(...list) {
 
@@ -677,18 +678,18 @@ const builtins = {
     }
 
     return stddev(list);
-  }, 'number', [ '...list' ]),
+  }, 'number', [ '...list' ], 'stddev'),
 
   'mode': listFn(function(...list) {
     return mode(list);
-  }, 'number', [ '...list' ]),
+  }, 'number', [ '...list' ], 'mode'),
 
 
   // 10.3.4.5 Numeric functions
   'decimal': fn(function(n, scale) {
     if (n === null || scale === null) return null;
     return offsetted(bankersRound, n, scale);
-  }, [ 'number', 'number' ], [ 'n', 'scale' ]),
+  }, [ 'number', 'number' ], [ 'n', 'scale' ], 'decimal'),
 
   'floor': fn(function(n, scale = 0) {
 
@@ -699,7 +700,7 @@ const builtins = {
     const adjust = 10 ** scale;
 
     return Math.floor(n * adjust) / adjust;
-  }, [ 'number', 'number?' ], [ 'n', 'scale' ]),
+  }, [ 'number', 'number?' ], [ 'n', 'scale' ], 'floor'),
 
   'ceiling': fn(function(n, scale = 0) {
 
@@ -710,7 +711,7 @@ const builtins = {
     const adjust = 10 ** scale;
 
     return Math.ceil(n * adjust) / adjust;
-  }, [ 'number', 'number?' ], [ 'n', 'scale' ]),
+  }, [ 'number', 'number?' ], [ 'n', 'scale' ], 'ceiling'),
 
   'abs': fn(function(n) {
 
@@ -726,20 +727,20 @@ const builtins = {
       return null;
     }
 
-    return invalidArguments('abs(n) expects a number or duration, got {n}', {
+    return invalidArguments('{n} is not a number or duration', {
       n
     });
-  }, [ 'any' ], [ 'n' ]),
+  }, [ 'any' ], [ 'n' ], 'abs'),
 
   'round up': fn(function(n, scale) {
     if (n === null || scale === null) return null;
     return n > 0 ? offsetted(Math.ceil, n, scale) : offsetted(Math.floor, n, scale);
-  }, [ 'number', 'number' ], [ 'n', 'scale' ]),
+  }, [ 'number', 'number' ], [ 'n', 'scale' ], 'round up'),
 
   'round down': fn(function(n, scale) {
     if (n === null || scale === null) return null;
     return n > 0 ? offsetted(Math.floor, n, scale) : offsetted(Math.ceil, n, scale);
-  }, [ 'number', 'number' ], [ 'n', 'scale' ]),
+  }, [ 'number', 'number' ], [ 'n', 'scale' ], 'round down'),
 
   'round half up': fn(function(n, scale) {
     if (n === null || scale === null) return null;
@@ -748,7 +749,7 @@ const builtins = {
       return offsetted(n > 0 ? Math.ceil : Math.floor, n, scale);
     }
     return offsetted(Math.round, n, scale);
-  }, [ 'number', 'number' ], [ 'n', 'scale' ]),
+  }, [ 'number', 'number' ], [ 'n', 'scale' ], 'round half up'),
 
   'round half down': fn(function(n, scale) {
     if (n === null || scale === null) return null;
@@ -757,12 +758,12 @@ const builtins = {
       return offsetted(n > 0 ? Math.floor : Math.ceil, n, scale);
     }
     return offsetted(Math.round, n, scale);
-  }, [ 'number', 'number' ], [ 'n', 'scale' ]),
+  }, [ 'number', 'number' ], [ 'n', 'scale' ], 'round half down'),
 
   'modulo': fn(function(dividend, divisor) {
 
     if (!divisor) {
-      return invalidArguments('modulo(dividend, divisor) does not accept {divisor} as a divisor', {
+      return invalidArguments('{divisor} is not a valid divisor', {
         divisor
       });
     }
@@ -774,40 +775,40 @@ const builtins = {
     // need to round here as using this custom modulo
     // variant is prone to rounding errors
     return Math.round((dividend % divisor + divisor) % divisor * adjust) / adjust;
-  }, [ 'number', 'number' ], [ 'dividend', 'divisor' ]),
+  }, [ 'number', 'number' ], [ 'dividend', 'divisor' ], 'modulo'),
 
   'sqrt': fn(function(number) {
 
     if (number < 0) {
-      return invalidArguments('sqrt(number) expects a non-negative number, got {number}', {
+      return invalidArguments('{number} is negative', {
         number
       });
     }
 
     return Math.sqrt(number);
-  }, [ 'number' ], [ 'number' ]),
+  }, [ 'number' ], [ 'number' ], 'sqrt'),
 
   'log': fn(function(number) {
     if (number <= 0) {
-      return invalidArguments('log(number) expects a positive number, got {number}', {
+      return invalidArguments('{number} is not positive', {
         number
       });
     }
 
     return Math.log(number);
-  }, [ 'number' ], [ 'number' ]),
+  }, [ 'number' ], [ 'number' ], 'log'),
 
   'exp': fn(function(number) {
     return Math.exp(number);
-  }, [ 'number' ], [ 'number' ]),
+  }, [ 'number' ], [ 'number' ], 'exp'),
 
   'odd': fn(function(number) {
     return Math.abs(number) % 2 === 1;
-  }, [ 'number' ], [ 'number' ]),
+  }, [ 'number' ], [ 'number' ], 'odd'),
 
   'even': fn(function(number) {
     return Math.abs(number) % 2 === 0;
-  }, [ 'number' ], [ 'number' ]),
+  }, [ 'number' ], [ 'number' ], 'even'),
 
 
   // 10.3.4.6 Date and time functions
@@ -819,84 +820,84 @@ const builtins = {
     }
 
     return equals(value1, value2, true);
-  }, [ 'any?', 'any?' ], [ 'value1', 'value2' ]),
+  }, [ 'any?', 'any?' ], [ 'value1', 'value2' ], 'is'),
 
   // 10.3.4.7 Range Functions
 
   'before': fn(function(a, b) {
     return before(a, b);
-  }, [ 'any', 'any' ], [ 'a', 'b' ]),
+  }, [ 'any', 'any' ], [ 'a', 'b' ], 'before'),
 
   'after': fn(function(a, b) {
     return before(b, a);
-  }, [ 'any', 'any' ], [ 'a', 'b' ]),
+  }, [ 'any', 'any' ], [ 'a', 'b' ], 'after'),
 
   'meets': fn(function(range1, range2) {
     return meets(range1, range2);
-  }, [ 'range', 'range' ], [ 'range1', 'range2' ]),
+  }, [ 'range', 'range' ], [ 'range1', 'range2' ], 'meets'),
 
   'met by': fn(function(range1, range2) {
     return meets(range2, range1);
-  }, [ 'range', 'range' ], [ 'range1', 'range2' ]),
+  }, [ 'range', 'range' ], [ 'range1', 'range2' ], 'met by'),
 
   'overlaps': fn(function(range1, range2) {
     return !before(range1, range2) && !before(range2, range1);
-  }, [ 'range', 'range' ], [ 'range1', 'range2' ]),
+  }, [ 'range', 'range' ], [ 'range1', 'range2' ], 'overlaps'),
 
   'overlaps before': fn(function() {
     throw notImplemented('overlaps before');
-  }, [ 'any?' ]),
+  }, [ 'any?' ], null, 'overlaps before'),
 
   'overlaps after': fn(function() {
     throw notImplemented('overlaps after');
-  }, [ 'any?' ]),
+  }, [ 'any?' ], null, 'overlaps after'),
 
   'finishes': fn(function() {
     throw notImplemented('finishes');
-  }, [ 'any?' ]),
+  }, [ 'any?' ], null, 'finishes'),
 
   'finished by': fn(function() {
     throw notImplemented('finished by');
-  }, [ 'any?' ]),
+  }, [ 'any?' ], null, 'finished by'),
 
   'includes': fn(function(range, value) {
     return includesRange(range, value);
-  }, [ 'range', 'any' ], [ 'range', 'value' ]),
+  }, [ 'range', 'any' ], [ 'range', 'value' ], 'includes'),
 
   'during': fn(function() {
     throw notImplemented('during');
-  }, [ 'any?' ]),
+  }, [ 'any?' ], null, 'during'),
 
   'starts': fn(function() {
     throw notImplemented('starts');
-  }, [ 'any?' ]),
+  }, [ 'any?' ], null, 'starts'),
 
   'started by': fn(function() {
     throw notImplemented('started by');
-  }, [ 'any?' ]),
+  }, [ 'any?' ], null, 'started by'),
 
   'coincides': fn(function() {
     throw notImplemented('coincides');
-  }, [ 'any?' ]),
+  }, [ 'any?' ], null, 'coincides'),
 
 
   // 10.3.4.8 Temporal built-in functions
 
   'day of year': fn(function(date) {
     return date.value.dayOfYear;
-  }, [ 'date time' ], [ 'date' ]),
+  }, [ 'date time' ], [ 'date' ], 'day of year'),
 
   'day of week': fn(function(date) {
     return WEEKDAY_NAMES[date.value.dayOfWeek - 1];
-  }, [ 'date time' ], [ 'date' ]),
+  }, [ 'date time' ], [ 'date' ], 'day of week'),
 
   'month of year': fn(function(date) {
     return MONTH_NAMES[date.value.month - 1];
-  }, [ 'date time' ], [ 'date' ]),
+  }, [ 'date time' ], [ 'date' ], 'month of year'),
 
   'week of year': fn(function(date) {
     return date.value.weekOfYear;
-  }, [ 'date time' ], [ 'date' ]),
+  }, [ 'date time' ], [ 'date' ], 'week of year'),
 
 
   // 10.3.4.9 Sort
@@ -911,7 +912,7 @@ const builtins = {
       : (a, b) => precedes.invoke([ a, b ]) ? -1 : 1;
 
     return Array.from(list).sort(compare);
-  }, [ 'list', 'function' ], [ 'list', 'precedes' ]),
+  }, [ 'list', 'function' ], [ 'list', 'precedes' ], 'sort'),
 
 
   // 10.3.4.10 Context function
@@ -919,7 +920,7 @@ const builtins = {
   'get value': fn(function(m, key) {
     const value = getFromContext(key, m);
     return value != undefined ? value : null;
-  }, [ 'context', 'string' ], [ 'm', 'key' ]),
+  }, [ 'context', 'string' ], [ 'm', 'key' ], 'get value'),
 
   'get entries': fn(function(m) {
 
@@ -932,7 +933,7 @@ const builtins = {
     }
 
     return Object.entries(m).map(([ key, value ]) => ({ key, value }));
-  }, [ 'context' ], [ 'm' ]),
+  }, [ 'context' ], [ 'm' ], 'get entries'),
 
   'context': listFn(function(...entries) {
 
@@ -941,7 +942,7 @@ const builtins = {
     for (const entry of entries) {
 
       if (![ 'key', 'value' ].every(e => e in entry)) {
-        return invalidArguments('context(entries) expects each entry to have a key and value, got {entry}', {
+        return invalidArguments('entry {entry} does not have a key and value', {
           entry
         });
       }
@@ -949,11 +950,11 @@ const builtins = {
       const key = entry.key;
 
       if (key === null) {
-        return invalidArguments('context(entries) does not accept a null key');
+        return invalidArguments('null key is not allowed');
       }
 
       if (has(context, key)) {
-        return invalidArguments('context(entries) expects unique keys, got {key}', {
+        return invalidArguments('duplicate key {key}', {
           key
         });
       }
@@ -962,20 +963,20 @@ const builtins = {
     }
 
     return context;
-  }, 'context', [ '...entries' ]),
+  }, 'context', [ '...entries' ], 'context'),
 
   'context merge': listFn(function(...contexts) {
     return Object.assign({}, ...contexts);
-  }, 'context', [ '...contexts' ]),
+  }, 'context', [ '...contexts' ], 'context merge'),
 
   'context put': fn(function(context, keys, value, key) {
 
     if (typeof keys === 'undefined' && typeof key === 'undefined') {
-      return invalidArguments('context put(context, value) expects a key or keys');
+      return invalidArguments('key or keys is required');
     }
 
     return contextPut(context, keys || [ key ], value);
-  }, [ 'context', 'list?', 'any', 'string?' ], [ 'context', 'keys', 'value', 'key' ])
+  }, [ 'context', 'list?', 'any', 'string?' ], [ 'context', 'keys', 'value', 'key' ], 'context put')
 
 };
 
@@ -993,13 +994,13 @@ function contextPut(context, keys, value) {
   const [ key, ...remainingKeys ] = keys;
 
   if (getType(key) !== 'string') {
-    return invalidArguments('context put expects a string key, got {key}', {
+    return invalidArguments('{key} is not a string key', {
       key
     });
   }
 
   if (getType(context) === 'nil') {
-    return invalidArguments('context put expects an existing context, got {context}', {
+    return invalidArguments('{context} is not a valid context', {
       context
     });
   }
@@ -1036,10 +1037,11 @@ const EXTENDED_FLAG_PATTERN = /x/;
  * @param {Function} fnDefinition
  * @param {string} type
  * @param {string[]} [parameterNames]
+ * @param {string} [name]
  *
  * @return {FeelFunction}
  */
-function listFn(fnDefinition, type, parameterNames = null) {
+function listFn(fnDefinition, type, parameterNames = null, name = null) {
 
   const tester = createArgTester(type);
 
@@ -1064,17 +1066,28 @@ function listFn(fnDefinition, type, parameterNames = null) {
 
       const expectedType = type.replace(/\?$/, '');
 
-      return invalidArguments('parameter \'{{{name}}}\' expects members of type \'{{{expectedType}}}\', got {value}', {
+      return invalidArguments('function \'{{{displayName}}}\' — parameter \'{{{name}}}\' expects members of type \'{{{expectedType}}}\', but member {value} is of type \'{{{valueType}}}\'', {
+        displayName: name || parameterNames[0] || 'list',
         name: (parameterNames[0] || 'list').replace(/^\.\.\./, ''),
         expectedType,
-        value: args[invalidIndex]
+        value: args[invalidIndex],
+        valueType: getType(args[invalidIndex])
       });
     }
 
-    return fnDefinition(...args);
+    const result = fnDefinition(...args);
+
+    if (isInvocationFailure(result) && name) {
+      return invalidArguments(`function '${name}' — {message}`, {
+        message: result.template,
+        ...result.values
+      });
+    }
+
+    return result;
   };
 
-  return new FeelFunction(wrappedFn, parameterNames);
+  return new FeelFunction(wrappedFn, parameterNames, null, name);
 }
 
 /**
@@ -1085,15 +1098,18 @@ function listFn(fnDefinition, type, parameterNames = null) {
  * @param {Function} fnDefinition
  * @param {string[]} argDefinitions
  * @param {string[]} [parameterNames]
+ * @param {string} [name]
  *
  * @return {FeelFunction}
  */
-function fn(fnDefinition, argDefinitions, parameterNames = null) {
+function fn(fnDefinition, argDefinitions, parameterNames = null, name = null) {
   parameterNames = parameterNames || parseParameterNames(fnDefinition);
 
-  return new FeelFunction(fnDefinition, parameterNames, [
+  const wrappedFn = name ? withFunctionName(name, fnDefinition) : fnDefinition;
+
+  return new FeelFunction(wrappedFn, parameterNames, [
     { args: argDefinitions, params: parameterNames }
-  ]);
+  ], name);
 }
 
 /**
@@ -1103,16 +1119,19 @@ function fn(fnDefinition, argDefinitions, parameterNames = null) {
  *
  * @param {Function} fnDefinition
  * @param {FunctionSignature[]} signatures
+ * @param {string} [name]
  *
  * @return {FeelFunction}
  */
-function overloads(fnDefinition, signatures: FunctionSignature[]) {
+function overloads(fnDefinition, signatures: FunctionSignature[], name = null) {
 
   // union of all signature parameter names, first-seen order; used for
   // function inspection and mismatch messages
   const parameterNames = [ ...new Set(signatures.flatMap(s => s.params)) ];
 
-  return new FeelFunction(fnDefinition, parameterNames, signatures);
+  const wrappedFn = name ? withFunctionName(name, fnDefinition) : fnDefinition;
+
+  return new FeelFunction(wrappedFn, parameterNames, signatures, name);
 }
 
 function sum(list) {

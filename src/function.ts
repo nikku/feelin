@@ -49,13 +49,39 @@ export function invalidArguments(
 /**
  * Create an {@link InvocationFailure} for an invocation whose arguments do
  * not match the target's parameters (wrong count or unknown names).
+ *
+ * The message includes the function name and the expected signatures, so
+ * the user can see what was expected vs. what was provided.
  */
-export function parameterMismatch(target: unknown, params: unknown) {
+export function parameterMismatch(target: FeelFunction, params: unknown) {
+  const name = target.displayName;
+  const signatures = target.signatures.map(signatureDisplay).join(' or ');
+  const display = displayParams(params);
+
   return new InvocationFailure(
     'FUNCTION_INVOCATION_FAILURE',
-    'Cannot invoke {target} with parameters {params}',
-    { target, params }
+    'function \'{{{name}}}\' expects {{{signatures}}}, got {{{display}}}',
+    { name, signatures, display }
   );
+}
+
+/**
+ * Wrap a builtin implementation so that semantic validation failures
+ * (invalidArguments returns) are prefixed with the function name.
+ */
+export function withFunctionName(name: string, fn: (...args) => any) {
+  return function(...args) {
+    const result = fn(...args);
+
+    if (isInvocationFailure(result)) {
+      return invalidArguments(`function '${name}' — {{{message}}}`, {
+        message: result.template,
+        ...result.values
+      });
+    }
+
+    return result;
+  };
 }
 
 /**
@@ -107,6 +133,14 @@ export class FeelFunction {
   parameterNames: string[];
 
   /**
+   * Human-readable function name, used in warning messages. For builtins
+   * this is the FEEL function name (e.g. `'date'`, `'sum'`); for
+   * user-provided JS functions it is derived from the function's
+   * parameter names (e.g. `'function(a, b)'`).
+   */
+  displayName: string;
+
+  /**
    * Overload signatures, compiled once at construction time. Absent
    * (user-provided JS functions) a single untyped signature derived
    * from {@link FeelFunction#parameterNames} applies: positional
@@ -118,10 +152,12 @@ export class FeelFunction {
   private _compiled: CompiledSignature[];
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(fn: (...args) => any, parameterNames: string[], signatures: FunctionSignature[] = null) {
+  constructor(fn: (...args) => any, parameterNames: string[], signatures: FunctionSignature[] = null, name: string = null) {
 
     this.fn = fn;
     this.parameterNames = parameterNames;
+
+    this.displayName = name || `function(${(parameterNames || []).join(', ')})`;
 
     this.signatures = signatures || [ defaultSignature(parameterNames || []) ];
     this._compiled = this.signatures.map(compileSignature);
@@ -215,7 +251,7 @@ export class FeelFunction {
     const converted = signature.validate(params);
 
     if (typeof converted === 'number') {
-      return argumentValidationFailure(signature, params, converted);
+      return argumentValidationFailure(this, signature, params, converted);
     }
 
     return this.fn.call(null, ...converted);
@@ -420,14 +456,57 @@ function compileSignature(signature: FunctionSignature): CompiledSignature {
 }
 
 /**
+ * Render a signature for display in warning messages.
+ */
+function signatureDisplay(signature: FunctionSignature): string {
+  const parts = signature.params.map((name, i) => {
+    const arg = signature.args[i];
+    const type = arg.replace(/\?$/, '');
+    const prefix = name.startsWith('...') ? '...' : '';
+    return `${prefix}${name}: ${type}`;
+  });
+  return `(${parts.join(', ')})`;
+}
+
+/**
+ * Render the provided arguments for display in a parameter mismatch
+ * message. Unlike the inspected rendering (used in warning messages),
+ * this shows the raw arguments without truncation.
+ *
+ * FEEL values are enclosed in single ticks to denote "what is
+ * following is FEEL value(s)". This applies to:
+ * - single values: '1', '"hello"', 'true'
+ * - argument lists: '1,2,3'
+ * - named arguments: 'year: 1, month: 2'
+ *
+ * Type names (number, string, date) and function names are NOT
+ * enclosed in single ticks.
+ */
+function displayParams(params: unknown): string {
+  if (isArray(params)) {
+    return `'${ params.map(p => typeof p === 'object' ? JSON.stringify(p) : String(p)).join(',') }'`;
+  }
+
+  if (params && typeof params === 'object') {
+    return `'${ Object.entries(params).map(([ key, value ]) => `${ key }: ${ value }`).join(', ') }'`;
+  }
+
+  return `'${ String(params) }'`;
+}
+
+/**
  * Create the {@link invalidArguments} signal for the argument at
  * `index` failing validation against the signature's definitions.
+ *
+ * The message includes the function name and the specific parameter,
+ * so the user can see what was expected vs. what was provided.
  */
-function argumentValidationFailure(signature: CompiledSignature, args, index: number) {
+function argumentValidationFailure(fn: FeelFunction, signature: CompiledSignature, args, index: number) {
 
   const name = signature.params[index] || String(index);
   const argDefinition = signature.args[index];
   const expectedType = argDefinition.replace(/\?$/, '');
+  const displayName = fn.displayName;
 
   // list<memberType>: surface the offending member, not the whole list
   const memberMatch = /^list<(\w+)>$/.exec(expectedType);
@@ -437,7 +516,8 @@ function argumentValidationFailure(signature: CompiledSignature, args, index: nu
     const list = Array.isArray(args[index]) ? args[index] : [ args[index] ];
     const invalidMember = list.find(member => !isNil(member) && getType(member) !== memberType);
 
-    return invalidArguments('parameter \'{{{name}}}\' expects a list of \'{{{expectedType}}}\' members, but member {value} is of type \'{{{valueType}}}\'', {
+    return invalidArguments('function \'{{{displayName}}}\' — parameter \'{{{name}}}\' expects members of type \'{{{expectedType}}}\', but member {value} is of type \'{{{valueType}}}\'', {
+      displayName,
       name,
       expectedType: memberType,
       value: invalidMember,
@@ -445,12 +525,14 @@ function argumentValidationFailure(signature: CompiledSignature, args, index: nu
     });
   }
 
-  return invalidArguments('parameter \'{{{name}}}\' expects a value of type \'{{{expectedType}}}\', got {value}', {
+  return invalidArguments('function \'{{{displayName}}}\' — parameter \'{{{name}}}\' expects type \'{{{expectedType}}}\', got {value} (type \'{{{valueType}}}\')', {
+    displayName,
     name,
     expectedType,
 
     // a missing argument surfaces as FEEL null
-    value: typeof args[index] === 'undefined' ? null : args[index]
+    value: typeof args[index] === 'undefined' ? null : args[index],
+    valueType: getType(typeof args[index] === 'undefined' ? null : args[index])
   });
 }
 
@@ -491,10 +573,11 @@ export function parseParameterNames(fn) {
  *
  * @param {Function} fn
  * @param {string[]} [parameterNames]
+ * @param {string} [name]
  *
  * @return {FeelFunction}
  */
-export function wrapFunction(fn, parameterNames = null) {
+export function wrapFunction(fn, parameterNames = null, name: string = null) {
 
   if (!fn) {
     return null;
@@ -505,12 +588,12 @@ export function wrapFunction(fn, parameterNames = null) {
   }
 
   if (isRange(fn)) {
-    return new FeelFunction((value) => fn.includes(value), [ 'value' ]);
+    return new FeelFunction((value) => fn.includes(value), [ 'value' ], null, name);
   }
 
   if (typeof fn !== 'function') {
     return null;
   }
 
-  return new FeelFunction(fn, parameterNames || parseParameterNames(fn));
+  return new FeelFunction(fn, parameterNames || parseParameterNames(fn), null, name);
 }

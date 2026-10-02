@@ -876,7 +876,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
 
     // fold constant constructor invocations, e.g. date("2026-12-12")
     if (args.length !== 1 && isConstant(args[0]) && isConstant(args[2])) {
-      const wrappedFn = wrapFunction(args[0].constantValue);
+      const wrappedFn = wrapFunction(args[0].constantValue, null, node.input);
 
       if (wrappedFn) {
         const result = wrappedFn.invoke(args[2].constantValue);
@@ -902,9 +902,10 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
 
         if (!wrappedFn) {
           interpreterContext.addWarning(node, 'NO_FUNCTION_FOUND', {
-            template: 'Cannot invoke {target}',
+            template: 'cannot invoke {target} (type \'{{{type}}}\') — not a function',
             values: {
-              target
+              target,
+              type: getType(target)
             }
           });
 
@@ -927,7 +928,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
 
     // fold constant @"..." literals: parse once at build time
     if (isConstant(arg)) {
-      const wrappedFn = wrapFunction(getBuiltin('@', null));
+      const wrappedFn = wrapFunction(getBuiltin('@', null), null, '@');
 
       if (wrappedFn) {
         const value = wrappedFn.invoke([ arg.constantValue ]);
@@ -940,13 +941,13 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
     }
 
     // builtins are fixed; resolve and wrap '@' once at build time
-    const wrappedFn = wrapFunction(getBuiltin('@', null));
+    const wrappedFn = wrapFunction(getBuiltin('@', null), null, '@');
 
     return tag((context) => {
 
       if (!wrappedFn) {
         interpreterContext.addWarning(node, 'NO_FUNCTION_FOUND', {
-          template: "Cannot invoke '@'",
+          template: "cannot invoke '@' — not a function",
           values: {}
         });
 
@@ -965,9 +966,10 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
 
     if (!wrappedFn) {
       interpreterContext.addWarning(node, 'NO_FUNCTION_FOUND', {
-        template: 'Cannot invoke {target}',
+        template: 'cannot invoke {target} (type \'{{{type}}}\') — not a function',
         values: {
-          target
+          target,
+          type: getType(target)
         }
       });
 

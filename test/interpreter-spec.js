@@ -2012,7 +2012,7 @@ describe('interpreter', function() {
         expect(warnings).to.eql([
           {
             type: 'NO_FUNCTION_FOUND',
-            message: "Cannot invoke '5'",
+            message: "cannot invoke '5' (type 'number') — not a function",
             position: { from: 0, to: 3 },
             details: {
               template: 'Cannot invoke {target}',
@@ -2040,7 +2040,7 @@ describe('interpreter', function() {
 
         expect(warnings[0]).to.deep.include({
           type: 'FUNCTION_INVOCATION_FAILURE',
-          message: "Cannot invoke 'function(negand)' with parameters '[1, 2]'",
+          message: "function 'not' expects (negand: any), got \"1,2\"",
           position: { from: 0, to: 9 }
         });
 
@@ -2063,7 +2063,7 @@ describe('interpreter', function() {
 
         expect(warnings[0]).to.deep.include({
           type: 'FUNCTION_INVOCATION_FAILURE',
-          message: "Cannot invoke 'function(negand)' with parameters '{foo: 1}'",
+          message: "function 'not' expects (negand: any), got \"foo: 1\"",
           position: { from: 0, to: 11 }
         });
 
@@ -2086,7 +2086,7 @@ describe('interpreter', function() {
 
         expect(warnings[0]).to.deep.include({
           type: 'FUNCTION_INVOCATION_FAILURE',
-          message: "Cannot invoke 'function(year, month, day, from)' with parameters '[1, 2, … 4 more]'",
+          message: "function 'date' expects (year: number, month: number, day: number) or (from: string|date|date time), got \"1,2,3,4,5,6\"",
           position: { from: 0, to: 22 }
         });
 
@@ -2109,7 +2109,7 @@ describe('interpreter', function() {
 
         expect(warnings[0]).to.deep.include({
           type: 'FUNCTION_INVOCATION_FAILURE',
-          message: "Cannot invoke 'function(year, month, day, from)' with parameters '{foo: 1}'",
+          message: "function 'date' expects (year: number, month: number, day: number) or (from: string|date|date time), got \"foo: 1\"",
           position: { from: 0, to: 12 }
         });
 
@@ -2132,7 +2132,7 @@ describe('interpreter', function() {
 
         expect(warnings[0]).to.deep.include({
           type: 'FUNCTION_INVOCATION_FAILURE',
-          message: "Cannot invoke 'function(year, month, day, from)' with parameters '[2016, 1, … 2 more]'",
+          message: "function 'date' expects (year: number, month: number, day: number) or (from: string|date|date time), got \"2016,1,15,100\"",
           position: { from: 0, to: 22 }
         });
 
@@ -2154,14 +2154,16 @@ describe('interpreter', function() {
         expect(warnings).to.eql([
           {
             type: 'INVALID_ARGUMENTS',
-            message: 'parameter \'month\' expects a value of type \'number\', got \'null\'',
+            message: 'function \'date(year, month, day)\' — parameter \'month\' expects type \'number\', got \'null\' (type \'nil\')',
             position: { from: 0, to: 19 },
             details: {
-              template: 'parameter \'{{{name}}}\' expects a value of type \'{{{expectedType}}}\', got {value}',
+              template: 'function \'{{{displayName}}}\' — parameter \'{{{name}}}\' expects type \'{{{expectedType}}}\', got {value} (type \'{{{valueType}}}\')',
               values: {
+                displayName: 'date(year, month, day)',
                 name: 'month',
                 expectedType: 'number',
-                value: null
+                value: null,
+                valueType: 'nil'
               }
             }
           }
@@ -2183,14 +2185,16 @@ describe('interpreter', function() {
         expect(warnings).to.eql([
           {
             type: 'INVALID_ARGUMENTS',
-            message: 'parameter \'day\' expects a value of type \'number\', got \'null\'',
+            message: 'function \'date(year, month, day)\' — parameter \'day\' expects type \'number\', got \'null\' (type \'nil\')',
             position: { from: 0, to: 14 },
             details: {
-              template: 'parameter \'{{{name}}}\' expects a value of type \'{{{expectedType}}}\', got {value}',
+              template: 'function \'{{{displayName}}}\' — parameter \'{{{name}}}\' expects type \'{{{expectedType}}}\', got {value} (type \'{{{valueType}}}\')',
               values: {
+                displayName: 'date(year, month, day)',
                 name: 'day',
                 expectedType: 'number',
-                value: null
+                value: null,
+                valueType: 'nil'
               }
             }
           }
@@ -2212,14 +2216,16 @@ describe('interpreter', function() {
         expect(warnings).to.eql([
           {
             type: 'INVALID_ARGUMENTS',
-            message: 'parameter \'time\' expects a value of type \'time\', got \'"x"\'',
+            message: 'function \'date and time(date, time)\' — parameter \'time\' expects type \'time\', got \'"x"\' (type \'string\')',
             position: { from: 0, to: 38 },
             details: {
-              template: 'parameter \'{{{name}}}\' expects a value of type \'{{{expectedType}}}\', got {value}',
+              template: 'function \'{{{displayName}}}\' — parameter \'{{{name}}}\' expects type \'{{{expectedType}}}\', got {value} (type \'{{{valueType}}}\')',
               values: {
+                displayName: 'date and time',
                 name: 'time',
                 expectedType: 'time',
-                value: 'x'
+                value: 'x',
+                valueType: 'string'
               }
             }
           }
@@ -2245,7 +2251,7 @@ describe('interpreter', function() {
 
         expect(warnings[0]).to.deep.include({
           type: 'INVALID_ARGUMENTS',
-          message: "'date(-10, 10, 10)' is not a valid date"
+          message: "function 'date(year, month, day)' — -10, 10, 10 is not a valid date"
         });
 
         // when
@@ -2256,7 +2262,7 @@ describe('interpreter', function() {
 
         expect(overflow.warnings[0]).to.deep.include({
           type: 'INVALID_ARGUMENTS',
-          message: "'date(10000, 1, 1)' is not a valid date"
+          message: "10000, 1, 1 is not a valid date"
         });
       });
 
@@ -2275,10 +2281,10 @@ describe('interpreter', function() {
         expect(warnings).to.eql([
           {
             type: 'INVALID_ARGUMENTS',
-            message: "'date(2017, 13, 31)' is not a valid date",
+            message: "function 'date(year, month, day)' — 2017, 13, 31 is not a valid date",
             position: { from: 0, to: 18 },
             details: {
-              template: "'date({{year}}, {{month}}, {{day}})' is not a valid date",
+              template: "'{{year}}, {{month}}, {{day}} is not a valid date",
               values: {
                 year: 2017,
                 month: 13,
@@ -2304,14 +2310,16 @@ describe('interpreter', function() {
         expect(warnings).to.eql([
           {
             type: 'INVALID_ARGUMENTS',
-            message: 'parameter \'minute\' expects a value of type \'number\', got \'null\'',
+            message: 'function \'time(hour, minute, second, offset)\' — parameter \'minute\' expects type \'number\', got \'null\' (type \'nil\')',
             position: { from: 0, to: 17 },
             details: {
-              template: 'parameter \'{{{name}}}\' expects a value of type \'{{{expectedType}}}\', got {value}',
+              template: 'function \'{{{displayName}}}\' — parameter \'{{{name}}}\' expects type \'{{{expectedType}}}\', got {value} (type \'{{{valueType}}}\')',
               values: {
+                displayName: 'time(hour, minute, second, offset)',
                 name: 'minute',
                 expectedType: 'number',
-                value: null
+                value: null,
+                valueType: 'nil'
               }
             }
           }
@@ -2333,14 +2341,16 @@ describe('interpreter', function() {
         expect(warnings).to.eql([
           {
             type: 'INVALID_ARGUMENTS',
-            message: 'parameter \'offset\' expects a value of type \'duration\', got \'5\'',
+            message: 'function \'time(hour, minute, second, offset)\' — parameter \'offset\' expects type \'duration\', got \'5\' (type \'number\')',
             position: { from: 0, to: 17 },
             details: {
-              template: 'parameter \'{{{name}}}\' expects a value of type \'{{{expectedType}}}\', got {value}',
+              template: 'function \'{{{displayName}}}\' — parameter \'{{{name}}}\' expects type \'{{{expectedType}}}\', got {value} (type \'{{{valueType}}}\')',
               values: {
+                displayName: 'time(hour, minute, second, offset)',
                 name: 'offset',
                 expectedType: 'duration',
-                value: 5
+                value: 5,
+                valueType: 'number'
               }
             }
           }
@@ -2362,10 +2372,10 @@ describe('interpreter', function() {
         expect(warnings).to.eql([
           {
             type: 'INVALID_ARGUMENTS',
-            message: "'time(25, 0, 0)' is not a valid time",
+            message: "function 'time(hour, minute, second, offset)' — 25, 0, 0 is not a valid time",
             position: { from: 0, to: 14 },
             details: {
-              template: "'time({{hour}}, {{minute}}, {{second}})' is not a valid time",
+              template: "'{{hour}}, {{minute}}, {{second}} is not a valid time",
               values: {
                 hour: 25,
                 minute: 0,
@@ -2403,29 +2413,29 @@ describe('interpreter', function() {
 
 
       [
-        [ 'sqrt(-3)', "sqrt(number) expects a non-negative number, got '-3'", { number: -3 } ],
-        [ 'log(0)', "log(number) expects a positive number, got '0'", { number: 0 } ],
-        [ 'modulo(10, 0)', "modulo(dividend, divisor) does not accept '0' as a divisor", { divisor: 0 } ],
-        [ 'replace("a", "[", "x")', "replace(input, pattern, replacement) expects a valid pattern, got '\"[\"'", { pattern: '[' } ],
-        [ 'matches("a", "[")', "matches(input, pattern) expects a valid pattern, got '\"[\"'", { pattern: '[' } ],
-        [ 'split("a", "[")', "split(string, delimiter) expects a valid pattern, got '\"[\"'", { delimiter: '[' } ],
-        [ 'number("abc")', 'number(from) expects a numeric string, got \'"abc"\'', { from: 'abc' } ],
-        [ 'string join([1, 2])', "parameter 'list' expects a list of 'string' members, but member '1' is of type 'number'", { name: 'list', expectedType: 'string', value: 1, valueType: 'number' } ],
-        [ 'list replace([1, 2], "x", 9)', "list replace expects a numeric position or a match function, got '\"x\"'", { matcher: 'x' } ],
-        [ 'abs("x")', "abs(n) expects a number or duration, got '\"x\"'", { n: 'x' } ],
-        [ 'context([ { key: null, value: 1 } ])', 'context(entries) does not accept a null key', {} ],
-        [ 'context([ { key: "a", value: 1 }, { key: "a", value: 2 } ])', "context(entries) expects unique keys, got '\"a\"'", { key: 'a' } ],
-        [ 'context put({}, 1, 1)', "context put expects a string key, got '1'", { key: 1 } ],
-        [ 'date("nope")', "'date(\"nope\")' is not a valid date", { from: 'nope' } ],
-        [ 'date(null)', "parameter 'from' expects a value of type 'string|date|date time', got 'null'", { name: 'from', expectedType: 'string|date|date time', value: null } ],
-        [ 'date("2010-10-10", 5)', 'parameter \'year\' expects a value of type \'number\', got \'"2010-10-10"\'', { name: 'year', expectedType: 'number', value: '2010-10-10' } ],
-        [ 'time("nope")', "'time(\"nope\")' is not a valid time", { from: 'nope' } ],
-        [ 'time(null)', "parameter 'from' expects a value of type 'string|time|date|date time', got 'null'", { name: 'from', expectedType: 'string|time|date|date time', value: null } ],
-        [ 'time("10:00:00", 5)', 'parameter \'hour\' expects a value of type \'number\', got \'"10:00:00"\'', { name: 'hour', expectedType: 'number', value: '10:00:00' } ],
-        [ 'duration("1Y")', "'duration(\"1Y\")' is not a valid duration", { from: '1Y' } ],
-        [ 'duration("P999999999M")', "'duration(\"P999999999M\")' is not a valid duration", { from: 'P999999999M' } ],
-        [ 'date and time("2017-13-10T11:22:33")', "'date and time(\"2017-13-10T11:22:33\")' is not a valid date time", { from: '2017-13-10T11:22:33' } ],
-        [ 'date and time(null)', "parameter 'from' expects a value of type 'string', got 'null'", { name: 'from', expectedType: 'string', value: null } ]
+        [ 'sqrt(-3)', "function 'sqrt' — '-3' is negative", { number: -3 } ],
+        [ 'log(0)', "function 'log' — '0' is not positive", { number: 0 } ],
+        [ 'modulo(10, 0)', "function 'modulo' — '0' is not a valid divisor", { divisor: 0 } ],
+        [ 'replace("a", "[", "x")', "function 'replace' — '\"[\"' is not a valid pattern", { pattern: '[' } ],
+        [ 'matches("a", "[")', "function 'matches' — '\"[\"' is not a valid pattern", { pattern: '[' } ],
+        [ 'split("a", "[")', "function 'split' — '\"[\"' is not a valid pattern", { delimiter: '[' } ],
+        [ 'number("abc")', 'function \'number\' — \'"abc"\' is not a numeric string', { from: 'abc' } ],
+        [ 'string join([1, 2])', "function 'string join' — parameter 'list' expects members of type 'string', but member '1' is of type 'number'", { name: 'list', expectedType: 'string', value: 1, valueType: 'number' } ],
+        [ 'list replace([1, 2], "x", 9)', "function 'list replace' — '\"x\"' is not a valid position or match function", { matcher: 'x' } ],
+        [ 'abs("x")', 'function \'abs\' — \'"x"\' is not a number or duration', { n: 'x' } ],
+        [ 'context([ { key: null, value: 1 } ])', "function 'context' — \"null key is not allowed\"", {} ],
+        [ 'context([ { key: \"a\", value: 1 }, { key: \"a\", value: 2 } ])', "function 'context' — \"duplicate key \\\"a\\\"\"", { key: 'a' } ],
+        [ 'context put({}, 1, 1)', "function 'context put' — '1' is not a string key", { key: 1 } ],
+        [ 'date("nope")', "function 'date' — \"nope\" is not a valid date", { from: 'nope' } ],
+        [ 'date(null)', "function 'date' — parameter 'from' expects type 'string|date|date time', got 'null' (type 'nil')", { name: 'from', expectedType: 'string|date|date time', value: null } ],
+        [ 'date("2010-10-10", 5)', 'function \'date\' — parameter \'year\' expects type \'number\', got \'"2010-10-10"\' (type \'string\')', { name: 'year', expectedType: 'number', value: '2010-10-10' } ],
+        [ 'time("nope")', "function 'time' — \"nope\" is not a valid time", { from: 'nope' } ],
+        [ 'time(null)', "function 'time' — parameter 'from' expects type 'string|time|date|date time', got 'null' (type 'nil')", { name: 'from', expectedType: 'string|time|date|date time', value: null } ],
+        [ 'time("10:00:00", 5)', 'function \'time\' — parameter \'hour\' expects type \'number\', got \'"10:00:00"\' (type \'string\')', { name: 'hour', expectedType: 'number', value: '10:00:00' } ],
+        [ 'duration("1Y")', "function 'duration' — \"1Y\" is not a valid duration", { from: '1Y' } ],
+        [ 'duration("P999999999M")', "function 'duration' — \"P999999999M\" is not a valid duration", { from: 'P999999999M' } ],
+        [ 'date and time("2017-13-10T11:22:33")', "function 'date and time' — \"2017-13-10T11:22:33\" is not a valid date time", { from: '2017-13-10T11:22:33' } ],
+        [ 'date and time(null)', "function 'date and time' — parameter 'from' expects type 'string', got 'null' (type 'nil')", { name: 'from', expectedType: 'string', value: null } ]
       ].forEach(([ expression, message, values ]) => {
 
         it(`INVALID_ARGUMENTS for <${ expression }>`, function() {
@@ -2467,13 +2477,15 @@ describe('interpreter', function() {
 
         expect(warnings[0]).to.deep.include({
           type: 'INVALID_ARGUMENTS',
-          message: 'parameter \'list\' expects members of type \'number\', got \'"x"\'',
+          message: 'function \'sum(...list)\' — parameter \'list\' expects members of type \'number\', but member \'"x"\' is of type \'string\'',
           details: {
-            template: 'parameter \'{{{name}}}\' expects members of type \'{{{expectedType}}}\', got {value}',
+            template: 'function \'{{{displayName}}}\' — parameter \'{{{name}}}\' expects members of type \'{{{expectedType}}}\', but member {value} is of type \'{{{valueType}}}\'',
             values: {
+              displayName: 'sum',
               name: 'list',
               expectedType: 'number',
-              value: 'x'
+              value: 'x',
+              valueType: 'string'
             }
           }
         });
@@ -2495,7 +2507,7 @@ describe('interpreter', function() {
 
         expect(warnings[0]).to.deep.include({
           type: 'INVALID_ARGUMENTS',
-          message: 'parameter \'list\' expects members of type \'number\', got \'null\''
+          message: 'function \'min(...list)\' — parameter \'list\' expects members of type \'number\', but member \'null\' is of type \'nil\''
         });
       });
 
@@ -2515,13 +2527,15 @@ describe('interpreter', function() {
 
         expect(warnings[0]).to.deep.include({
           type: 'INVALID_ARGUMENTS',
-          message: 'parameter \'delimiter\' expects a value of type \'string\', got \'35\'',
+          message: 'function \'string join(list, delimiter)\' — parameter \'delimiter\' expects type \'string\', got \'35\' (type \'number\')',
           details: {
-            template: 'parameter \'{{{name}}}\' expects a value of type \'{{{expectedType}}}\', got {value}',
+            template: 'function \'{{{displayName}}}\' — parameter \'{{{name}}}\' expects type \'{{{expectedType}}}\', got {value} (type \'{{{valueType}}}\')',
             values: {
+              displayName: 'string join',
               name: 'delimiter',
               expectedType: 'string',
-              value: 35
+              value: 35,
+              valueType: 'number'
             }
           }
         });
@@ -2543,9 +2557,9 @@ describe('interpreter', function() {
 
         expect(warnings[0]).to.deep.include({
           type: 'INVALID_ARGUMENTS',
-          message: "parameter 'list' expects a list of 'string' members, but member '[35]' is of type 'list'",
+          message: "function 'string join' — parameter 'list' expects members of type 'string', but member '[35]' is of type 'list'",
           details: {
-            template: 'parameter \'{{{name}}}\' expects a list of \'{{{expectedType}}}\' members, but member {value} is of type \'{{{valueType}}}\'',
+            template: 'function \'{{{displayName}}}\' — parameter \'{{{name}}}\' expects members of type \'{{{expectedType}}}\', but member {value} is of type \'{{{valueType}}}\'',
             values: {
               name: 'list',
               expectedType: 'string',
@@ -2576,7 +2590,7 @@ describe('interpreter', function() {
         for (const warning of warnings) {
           expect(warning).to.deep.include({
             type: 'INVALID_ARGUMENTS',
-            message: "parameter 'list' expects a list of 'string' members, but member '35' is of type 'number'"
+            message: "function 'string join' — parameter 'list' expects members of type 'string', but member '35' is of type 'number'"
           });
         }
       });
@@ -2631,7 +2645,7 @@ describe('interpreter', function() {
 
         expect(warnings[0]).to.deep.include({
           type: 'INVALID_ARGUMENTS',
-          message: `'date("${'a'.repeat(20)}…")' is not a valid date`
+          message: `function 'date' — "${'a'.repeat(20)}…" is not a valid date`
         });
       });
 
@@ -2680,7 +2694,7 @@ describe('interpreter', function() {
 
           expect(warnings[0].type).to.eql('INVALID_ARGUMENTS');
           expect(warnings[0].message).to.eql(
-            `parameter 'list' expects a list of 'string' members, but member '${ rendered }' is of type '${ type }'`
+            `function 'string join' — parameter 'list' expects members of type 'string', but member ${ rendered } is of type '${ type }'`
           );
         });
 
@@ -2723,7 +2737,7 @@ describe('interpreter', function() {
 
         expect(warnings[0]).to.deep.include({
           type: 'NO_FUNCTION_FOUND',
-          message: "Cannot invoke '{a: 1}'"
+          message: "cannot invoke '{a: 1}' (type 'literal') — not a function"
         });
       });
 

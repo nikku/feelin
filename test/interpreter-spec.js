@@ -368,6 +368,64 @@ describe('interpreter', function() {
           a: function() external { anything: "goes" }
         }
       `, { a: null });
+
+
+      describe('typed parameters', function() {
+
+        // conforming arguments
+        expr('{ f: function(a: number) a, r: f(10) }.r', 10);
+        expr('(function(a: string, b: number) a + string(b))("x", 1)', 'x1');
+        expr('(function(a: string, b: number) a + string(b))(b: 1, a: "x")', 'x1');
+        expr('(function(a: Any) a)("x")', 'x');
+        expr('(function(a: date and time) a.year)(@"2018-12-08T10:30:11")', 2018);
+        expr('(function(a: list<number>) a)([1, 2])', [ 1, 2 ]);
+        expr('(function(a: context<x: number>) a.x)({ x: 1, y: "y" })', 1);
+        expr('(function(a: function<number>->number) a(1))(function(x) x + 1)', 2);
+
+        // non-conforming arguments fail the invocation
+        expr('{ f: function(a: number) a, r: f("foo") }.r', null);
+        expr('(function(a: string, b: number) a)("x", "y")', null);
+        expr('(function(a: string, b: number) a)(b: "y", a: "x")', null);
+        expr('(function(a: Null) a)(1)', null);
+        expr('(function(a: date) a)(@"10:30:11")', null);
+        expr('(function(a: list<number>) a)([1, "a"])', null);
+        expr('(function(a: context<x: number>) a)({ x: "a" })', null);
+        expr('(function(a: context<x: number>) a)({ y: 1 })', null);
+        expr('(function(a: function<number>->number) a)(1)', null);
+
+        // null conforms to every type
+        expr('{ f: function(a: number) a, r: f(null) }.r', null);
+        expr('(function(a: number, b: string) b)(null, "b")', 'b');
+        expr('(function(a: number) a = null)(null)', true);
+
+        // to singleton list
+        expr('(function(a: list<number>) a)(1)', [ 1 ]);
+        expr('(function(a: list<list<number>>) a)([1, 2])', [ [ 1, 2 ] ]);
+        expr('(function(a: list<number>) a)("a")', null);
+
+        // from singleton list
+        expr('(function(a: number) a)([1])', 1);
+        expr('(function(a: number) a = null)([null])', true);
+        expr('(function(a: Any) a)([1])', [ 1 ]);
+        expr('(function(a: number) a)([1, 2])', null);
+        expr('(function(a: number) a)(["a"])', null);
+
+        // from date to date and time
+        expr('(function(a: date and time) string(a))(date("2018-12-08"))', '2018-12-08T00:00:00Z');
+
+        // types referring to unknown names are checked as far as known
+        expr('(function(a: tPerson) a)("x")', 'x');
+        expr('(function(a: list<tPerson>) a)(["x", 1])', [ 'x', 1 ]);
+        expr('(function(a: list<tPerson>) a)("x")', [ 'x' ]);
+        expr('(function(a: context<x: tPerson>) a)({ x: 1 })', { x: 1 });
+        expr('(function(a: context<x: tPerson>) a)([{ x: 1 }])', { x: 1 });
+        expr('(function(a: context<x: tPerson>) a)(1)', null);
+
+        // untyped parameters accept anything
+        expr('(function(a, b: number) a)("x", 1)', 'x');
+
+      });
+
     });
 
 
@@ -1771,6 +1829,29 @@ describe('interpreter', function() {
       });
 
 
+      it('INVALID_ARGUMENTS on parameter type mis-match', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('(function(a: number, b: list< string >) a)(1, 2)');
+
+        // then
+        expect(value).to.be.null;
+
+        expect(warnings).to.have.length(1);
+
+        expect(warnings[0]).to.deep.include({
+          type: 'INVALID_ARGUMENTS',
+          message: "Parameter 'b' of type 'list< string >' does not accept '2'",
+          position: { from: 0, to: 48 }
+        });
+
+        expect(warnings[0].details.values).to.have.keys('value');
+      });
+
+
       it('NO_VARIABLE_FOUND', function() {
 
         // when
@@ -2351,6 +2432,21 @@ describe('interpreter', function() {
 
 
     describe('should not indicate warning', function() {
+
+      it('for unknown parameter type', function() {
+
+        // when
+        const {
+          value,
+          warnings
+        } = evaluate('(function(a: tPerson, b: list<tPerson>) [ a, b ])("x", "y")');
+
+        // then
+        expect(value).to.eql([ 'x', [ 'y' ] ]);
+
+        expect(warnings).to.be.empty;
+      });
+
 
       it('for out of bounds access', function() {
 

@@ -11,7 +11,8 @@ import {
   isDuration,
   isNumber,
   isContext,
-  isBoolean
+  isBoolean,
+  isNil
 } from './types.js';
 
 import {
@@ -20,6 +21,7 @@ import {
 } from './range.js';
 
 import {
+  invalidArguments,
   isInvocationFailure,
   wrapFunction
 } from './function.js';
@@ -38,7 +40,10 @@ import {
   addDuration,
   subtractTemporals,
   addDurations,
-  toFeel
+  toFeel,
+  isDate,
+  combine,
+  timeOfDate
 } from './temporal.js';
 
 
@@ -535,12 +540,25 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
 
   case 'FormalParameters': return args;
 
-  case 'FormalParameter': return args[0];
+  case 'FormalParameter': {
+
+    const [ name, type = null ] = args;
+
+    const input = node.input;
+
+    return {
+      name,
+      type,
+      typeName: type && normalizeTypeName(input.slice(input.indexOf(':') + 1))
+    };
+  }
 
   case 'ParameterName': return args.join(' ');
 
   case 'FunctionDefinition': return (context) => {
-    const parameterNames = args[2];
+    const parameters = args[2];
+
+    const parameterNames = parameters.map(parameter => parameter.name);
 
     const external = args[4] === 'external';
 
@@ -557,13 +575,21 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
 
     return wrapFunction((...args) => {
 
-      const fnContext = parameterNames.reduce((context, name, idx) => {
+      const fnContext = { ...context };
+
+      for (let idx = 0; idx < parameters.length; idx++) {
+
+        const parameter = parameters[idx];
 
         // support positional parameters
-        context[name] = args[idx];
+        const value = bindArgument(args[idx], parameter);
 
-        return context;
-      }, { ...context });
+        if (isInvocationFailure(value)) {
+          return value;
+        }
+
+        fnContext[parameter.name] = value;
+      }
 
       return fnBody(fnContext);
     }, parameterNames);
@@ -793,7 +819,7 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
 
     const value = args[0](context);
 
-    return matchesType(value, args[3], context);
+    return matchesType(value, args[3], context) === true;
   }, 'test');
 
   case 'every': return tag((context) => {
@@ -1469,8 +1495,11 @@ function isTypeDescriptor(obj) : boolean {
  * matched structurally; named types delegate to {@link getType}, and an
  * unknown name falls back to a JavaScript constructor resolved from the
  * evaluation context.
+ *
+ * Returns `null` if the result depends on an unknown name that does not
+ * resolve to a constructor. Names are not resolved without a context.
  */
-function matchesType(value, descriptor, context) : boolean {
+function matchesType(value, descriptor, context) : boolean | null {
 
   if (!isTypeDescriptor(descriptor)) {
     return false;
@@ -1484,23 +1513,98 @@ function matchesType(value, descriptor, context) : boolean {
       return check(value);
     }
 
-    const target = descriptor.resolve ? descriptor.resolve(context) : null;
+    const target = context && descriptor.resolve ? descriptor.resolve(context) : null;
 
-    return typeof target === 'function' && value instanceof target;
+    return typeof target === 'function' ? value instanceof target : null;
   }
   case 'list':
-    return getType(value) === 'list' && value.every(
-      element => matchesType(element, descriptor.element, context)
+    return getType(value) === 'list' && matchesAll(
+      value, element => matchesType(element, descriptor.element, context)
     );
   case 'context':
-    return getType(value) === 'context' && descriptor.entries.every(
-      ({ name, type }) => has(value, name) && matchesType(value[name], type, context)
+    return getType(value) === 'context' && matchesAll(
+      descriptor.entries, ({ name, type }) => has(value, name) && matchesType(value[name], type, context)
     );
   case 'function':
     return getType(value) === 'function';
   }
 
   return false;
+}
+
+/**
+ * Three-valued `every`: `false` if any item does not match, else `null` if
+ * any match is unknown, else `true`.
+ */
+function matchesAll<T>(items: T[], matches: (item: T) => boolean | null) : boolean | null {
+
+  let result = true;
+
+  for (const item of items) {
+
+    const match = matches(item);
+
+    if (match === false) {
+      return false;
+    }
+
+    if (match === null) {
+      result = null;
+    }
+  }
+
+  return result;
+}
+
+
+// typed function parameters ////////////////////////////////////////
+
+/**
+ * Bind an argument to a function parameter, checking it against the
+ * declared type and applying the DMN implicit conversions (to singleton
+ * list, from singleton list, from date to date and time).
+ *
+ * `null` conforms to every type. Types that refer to unknown names, such
+ * as DMN item definitions, are checked only as far as they are known.
+ *
+ * @return the value to bind, or an invocation failure
+ */
+function bindArgument(value, parameter) {
+
+  const { type } = parameter;
+
+  if (!type || isNil(value)) {
+    return value;
+  }
+
+  // conforms or cannot be decided
+  if (matchesType(value, type, null) !== false) {
+    return value;
+  }
+
+  // to singleton list
+  if (type.kind === 'list' && matchesType(value, type.element, null) !== false) {
+    return [ value ];
+  }
+
+  // from singleton list
+  if (isArray(value) && value.length === 1) {
+
+    const [ element ] = value;
+
+    if (isNil(element) || matchesType(element, type, null) !== false) {
+      return element;
+    }
+  }
+
+  // from date to date and time, at UTC midnight
+  if (isDate(value) && type.kind === 'name' && type.name === 'date and time') {
+    return combine(value, timeOfDate(value));
+  }
+
+  return invalidArguments(`Parameter '${ parameter.name }' of type '${ parameter.typeName }' does not accept {value}`, {
+    value
+  });
 }
 
 function parseString(str: string) {

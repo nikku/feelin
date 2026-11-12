@@ -175,7 +175,6 @@ function skipTest(suiteName, testId) {
     '0082-feel-coercion-test-01.xml#invoke_001',
     '0082-feel-coercion-test-01.xml#invoke_002',
     '0082-feel-coercion-test-01.xml#invoke_004',
-    '0082-feel-coercion-test-01.xml#fd_002',
     '0082-feel-coercion-test-01.xml#literal_002',
     '0082-feel-coercion-test-01.xml#literal_004',
     '0082-feel-coercion-test-01.xml#literal_006',

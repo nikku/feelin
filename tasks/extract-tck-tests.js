@@ -170,6 +170,11 @@ function parseModelFile(file) {
         }
 
         stack.current.text += `${ contextEntry.name || '""'}: ${ contextEntry.text }`;
+
+        // the decision is a context with a result entry (no variable)
+        if (!contextEntry.name && stack.current.expression) {
+          stack.current.contextResult = true;
+        }
       }
 
       if (el.name === 'dmn:decision') {

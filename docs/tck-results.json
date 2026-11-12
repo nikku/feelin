@@ -1,6 +1,6 @@
 {
-  "passes": 1901,
-  "pending": 102,
+  "passes": 1902,
+  "pending": 101,
   "failures": 50,
   "tests": 2053,
   "failedTests": [
@@ -95,7 +95,6 @@
     "tck - 0082-feel-coercion-test-01.xml - invoke_001 - bkm_001{name: \"foo\"} === null",
     "tck - 0082-feel-coercion-test-01.xml - invoke_002 - bkm_001{name: \"foo\", age: 10} === null",
     "tck - 0082-feel-coercion-test-01.xml - invoke_004 - bkm_005\"foo\" === null",
-    "tck - 0082-feel-coercion-test-01.xml - fd_001 - { fn: function(arg: number) arg, \"\": fn(10) } === 10",
     "tck - 0082-feel-coercion-test-01.xml - fd_002 - { fn: function(arg: number) arg, \"\": fn(\"foo\") } === null",
     "tck - 0082-feel-coercion-test-01.xml - literal_002 - \"foo\" === null",
     "tck - 0082-feel-coercion-test-01.xml - literal_004 - \"foo\" === null",

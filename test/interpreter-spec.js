@@ -813,6 +813,17 @@ describe('interpreter', function() {
       expr('{a: "x"} instance of context<a: number>', false);
       expr('{a: 1} instance of context<a: number, b: string>', false);
 
+      // nested null conforms to any type
+      expr('[1, null] instance of list<number>', true);
+      expr('[null] instance of list<string>', true);
+      expr('[[null]] instance of list<list<number>>', true);
+      expr('[null, "a"] instance of list<number>', false);
+      expr('{a: null} instance of context<a: string>', true);
+      expr('{a: {b: null}} instance of context<a: context<b: number>>', true);
+      expr('{a: [null]} instance of context<a: list<number>>', true);
+      expr('{} instance of context<a: string>', false);
+      expr('[null] instance of list<Any>', true);
+
       // function
       expr('(function(x) x) instance of function<number>->number', true);
       expr('5 instance of function<number>->number', false);

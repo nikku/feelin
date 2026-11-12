@@ -1469,6 +1469,9 @@ function isTypeDescriptor(obj) : boolean {
  * matched structurally; named types delegate to {@link getType}, and an
  * unknown name falls back to a JavaScript constructor resolved from the
  * evaluation context.
+ *
+ * A top-level `null` is an instance of `Null` only, but a `null` list
+ * element or context entry value conforms to any type.
  */
 function matchesType(value, descriptor, context) : boolean {
 
@@ -1490,17 +1493,25 @@ function matchesType(value, descriptor, context) : boolean {
   }
   case 'list':
     return getType(value) === 'list' && value.every(
-      element => matchesType(element, descriptor.element, context)
+      element => conformsToType(element, descriptor.element, context)
     );
   case 'context':
     return getType(value) === 'context' && descriptor.entries.every(
-      ({ name, type }) => has(value, name) && matchesType(value[name], type, context)
+      ({ name, type }) => has(value, name) && conformsToType(value[name], type, context)
     );
   case 'function':
     return getType(value) === 'function';
   }
 
   return false;
+}
+
+/**
+ * Whether a value nested in a composite type (a list element or a context
+ * entry value) conforms to the given type: `null` conforms to any type.
+ */
+function conformsToType(value, descriptor, context) : boolean {
+  return getType(value) === 'nil' || matchesType(value, descriptor, context);
 }
 
 function parseString(str: string) {

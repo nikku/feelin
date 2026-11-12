@@ -149,7 +149,6 @@ function skipTest(suiteName, testId) {
     '0070-feel-instance-of-test-01.xml#list_018',
     '0070-feel-instance-of-test-01.xml#context_013',
     '0070-feel-instance-of-test-01.xml#context_014',
-    '0070-feel-instance-of-test-01.xml#context_019',
 
     // misc cohersion
     '0082-feel-coercion-test-01.xml#decision_001',

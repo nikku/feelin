@@ -50,7 +50,7 @@ describe('tck', function() {
             const b = tryEval(expectedValue);
 
             if (c !== NOT_IMPLEMENTED) {
-              a = tryEval(expression.text, fixContext(suite.testName, decision)(c));
+              a = resultOf(expression, tryEval(expression.text, fixContext(suite.testName, decision)(c)));
             } else {
               console.error(`Failed to evaluate context: ${context}`);
 
@@ -111,6 +111,19 @@ function tryEval(expr, context = {}) {
   }
 }
 
+/**
+ * A boxed context with a result entry (no variable) evaluates to that
+ * entry, which the extractor emits under the `""` key.
+ */
+function resultOf(expression, value) {
+
+  if (!expression.contextResult || value === NOT_IMPLEMENTED || value instanceof Error || !value) {
+    return value;
+  }
+
+  return value[''] ?? null;
+}
+
 function skipSuite(suiteName) {
   const only = process.env.TEST_ONLY;
 
@@ -162,8 +175,6 @@ function skipTest(suiteName, testId) {
     '0082-feel-coercion-test-01.xml#invoke_001',
     '0082-feel-coercion-test-01.xml#invoke_002',
     '0082-feel-coercion-test-01.xml#invoke_004',
-    '0082-feel-coercion-test-01.xml#fd_001',
-    '0082-feel-coercion-test-01.xml#fd_002',
     '0082-feel-coercion-test-01.xml#literal_002',
     '0082-feel-coercion-test-01.xml#literal_004',
     '0082-feel-coercion-test-01.xml#literal_006',

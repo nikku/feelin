@@ -6,6 +6,8 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+* `FEAT`: check arguments against parameter types in function definitions, applying the DMN implicit conversions
+
 ## 8.2.2
 
 * `DEPS`: update to `@lezer/common@1.5.5`

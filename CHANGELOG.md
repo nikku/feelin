@@ -6,6 +6,8 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+* `DEPS`: update to `temporal-polyfill@1.0.8`
+
 ## 8.2.1
 
 * `FIX`: let correct nested `null` to conform to any type in `instance of` ([#183](https://github.com/nikku/feelin/pull/183))

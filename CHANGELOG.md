@@ -6,6 +6,7 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+* `DEPS`: update to `@lezer/common@1.5.5`
 * `DEPS`: update to `temporal-polyfill@1.0.8`
 
 ## 8.2.1

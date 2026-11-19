@@ -6,6 +6,10 @@ All notable changes to [feelin](https://github.com/nikku/feelin) are documented 
 
 ___Note:__ Yet to be released changes appear here._
 
+## 8.2.1
+
+* `FIX`: let correct nested `null` to conform to any type in `instance of` ([#183](https://github.com/nikku/feelin/pull/183))
+
 ## 8.2.0
 
 * `PERF`: improve expression evaluation and built-in performance ([#177](https://github.com/nikku/feelin/pull/177))

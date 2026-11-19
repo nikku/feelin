@@ -13,8 +13,8 @@
     "./package.json": "./package.json"
   },
   "devDependencies": {
-    "@rollup/plugin-terser": "^1.0.0",
-    "@rollup/plugin-typescript": "^12.3.0",
+    "@rollup/plugin-terser": "^1.0.2",
+    "@rollup/plugin-typescript": "^12.3.1",
     "@types/mocha": "^10.0.10",
     "chai": "^6.2.2",
     "chokidar-cli": "^3.0.0",
@@ -23,7 +23,7 @@
     "fast-glob": "^3.3.3",
     "mocha": "^12.0.0",
     "npm-run-all2": "^9.0.3",
-    "rollup": "^4.63.1",
+    "rollup": "^4.68.2",
     "saxen": "^11.1.1",
     "source-map-support": "^0.5.21",
     "strip-indent": "^4.1.1",

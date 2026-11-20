@@ -1,5 +1,7 @@
 import { Tree, SyntaxNodeRef, SyntaxNode } from '@lezer/common';
 
+import { normalizeContextKey } from 'lezer-feel';
+
 import { builtins } from './builtins.js';
 
 import { has } from 'min-dash';
@@ -179,12 +181,7 @@ class Interpreter {
           args: [],
           node: {
             name,
-
-            // materialize the node text only when actually inspected
-            // (operator dispatch, literals, error messages)
-            get input() {
-              return input.slice(from, to);
-            },
+            input: input.slice(from, to),
             position: {
               from,
               to
@@ -1296,8 +1293,24 @@ function evalNode(node: Node, args: any[], interpreterContext: InterpreterContex
   }
 }
 
+/**
+ * Built-ins by normalized name. The set of built-ins is fixed, so their
+ * names are normalized once, not on every lookup of a name that is not
+ * a built-in (i.e. any user variable).
+ */
+const normalizedBuiltins = new Map(
+  Object.entries(builtins).map(
+    ([ key, value ]) => [ normalizeContextKey(key), value ]
+  )
+);
+
 function getBuiltin(name, _context) {
-  return getFromContext(name, builtins);
+
+  if (has(builtins, name)) {
+    return builtins[name];
+  }
+
+  return normalizedBuiltins.get(normalizeContextKey(name));
 }
 
 function extractValue(context, prop, _target) {
